@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="deps">
+      <UniqueIdentifier>{F1A1957C-DDD8-960D-86C5-7C1072DB120F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\glad">
+      <UniqueIdentifier>{9853FA65-04BE-AEDC-4DFC-5F82B9A58C31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\mingw">
+      <UniqueIdentifier>{A2ECAF25-8EA4-F172-F7AB-CACEE3828C63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\vs2008">
+      <UniqueIdentifier>{F3093FF1-5FBF-B7E6-E8B3-B1BD5468AEEA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="examples">
+      <UniqueIdentifier>{84D830B1-70A5-8BBC-99BE-796485EAC04A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GLFW">
+      <UniqueIdentifier>{6888C969-54EB-580E-FD70-91C4E9B22491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{78756B10-E489-93C1-AD0B-372119DF8FF2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="deps\getopt.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\glad\gl.h">
+      <Filter>deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\glad\khrplatform.h">
+      <Filter>deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\glad\vk_platform.h">
+      <Filter>deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\glad\vulkan.h">
+      <Filter>deps\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\linmath.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\mingw\_mingw_dxhelper.h">
+      <Filter>deps\mingw</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\mingw\dinput.h">
+      <Filter>deps\mingw</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\mingw\xinput.h">
+      <Filter>deps\mingw</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\nuklear.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\nuklear_glfw_gl2.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\stb_image_write.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\tinycthread.h">
+      <Filter>deps</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\vs2008\stdint.h">
+      <Filter>deps\vs2008</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GLFW\glfw3.h">
+      <Filter>include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GLFW\glfw3native.h">
+      <Filter>include\GLFW</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cocoa_joystick.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cocoa_platform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\egl_context.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\glx_context.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\internal.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\linux_joystick.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mappings.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nsgl_context.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\null_joystick.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\null_platform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\osmesa_context.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\posix_thread.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\posix_time.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wgl_context.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win32_joystick.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win32_platform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wl_platform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\x11_platform.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\xkb_unicode.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="deps\getopt.c">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\glad_gl.c">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\glad_vulkan.c">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\tinycthread.c">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\boing.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\gears.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\heightmap.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\offscreen.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\particles.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\sharing.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\splitview.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\triangle-opengl.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\wave.c">
+      <Filter>examples</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cocoa_time.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\context.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\egl_context.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glx_context.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\init.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\linux_joystick.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\monitor.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\null_init.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\null_joystick.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\null_monitor.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\null_window.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\osmesa_context.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix_thread.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix_time.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vulkan.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wgl_context.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_init.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_joystick.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_monitor.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_thread.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_time.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32_window.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\window.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wl_init.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wl_monitor.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wl_window.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\x11_init.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\x11_monitor.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\x11_window.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\xkb_unicode.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\clipboard.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\cursor.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\empty.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\events.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gamma.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\glfwinfo.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\icon.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\iconify.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\inputlag.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\joysticks.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\monitors.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\msaa.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\opacity.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\reopen.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\tearing.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\threads.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\timeout.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\title.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\triangle-vulkan.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\windows.c">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
