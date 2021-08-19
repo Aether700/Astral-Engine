@@ -9,11 +9,23 @@
 
 namespace AstralEngine
 {
-	bool Input::IsKeyPressed(int keycode)
+	bool Input::IsKeyDown(int keycode)
 	{
 		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
 		int status = glfwGetKey(window, keycode);
 		return status == GLFW_PRESS || status == GLFW_REPEAT;
+	}
+
+	bool Input::IsKeyDown(KeyCode key)
+	{
+		return IsKeyDown((int)key);
+	}
+
+	bool Input::IsKeyPressed(int keycode)
+	{
+		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
+		int status = glfwGetKey(window, keycode);
+		return status == GLFW_PRESS;
 	}
 
 	bool Input::IsKeyPressed(KeyCode key)

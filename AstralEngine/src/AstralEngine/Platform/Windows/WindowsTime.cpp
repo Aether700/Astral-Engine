@@ -9,6 +9,11 @@ namespace AstralEngine
 
 	WindowsTime::WindowsTime() : m_currFrameTime(0.0f), m_lastFrameTime(0.0f) { }
 
+	float WindowsTime::GetTimeImpl()
+	{
+		return (float)glfwGetTime();
+	}
+
 	float WindowsTime::DeltaTimeImpl()
 	{
 		return m_currFrameTime;
@@ -16,7 +21,7 @@ namespace AstralEngine
 
 	void WindowsTime::UpdateTimeImpl() 
 	{
-		float temp = (float) glfwGetTime();
+		float temp = GetTimeImpl();
 		m_currFrameTime = temp - m_lastFrameTime;
 		m_lastFrameTime = temp;
 	}

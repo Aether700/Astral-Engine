@@ -61,10 +61,10 @@ namespace AstralEngine
 			AE_CORE_ASSERT(Contains(e), "Storage does not contain provided Entity");
 	
 			//take last component and move it to the index to remove then remove the last element to be more efficient
-			auto last = std::move(m_components[m_components.GetCount() - 1]);
+			auto& last = std::move(m_components[m_components.GetCount() - 1]);
 			m_components[GetIndex(e)] = std::move(last);
 			ADoublyLinkedList<Component>& list = m_components[m_components.GetCount() - 1];
-			m_components.Remove(m_components.GetCount() - 1);
+			m_components.RemoveAt(m_components.GetCount() - 1);
 			ASparseSet<Entity>::Remove(e);
 
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>) 
@@ -359,7 +359,7 @@ namespace AstralEngine
 			m_components[GetIndex(e)] = std::move(last);
 			ADoublyLinkedList<AKeyElementPair<unsigned int, AReference<CallbackComponent>>>& list
 				= m_components[m_components.GetCount() - 1];
-			m_components.Remove(m_components.GetCount() - 1);
+			m_components.RemoveAt(m_components.GetCount() - 1);
 			ASparseSet<Entity>::Remove(e);
 
 			for (auto& pair : list)

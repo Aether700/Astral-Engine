@@ -101,7 +101,7 @@ namespace AstralEngine
 
 	void Scene::DestroyAEntity(AEntity e)
 	{
-		m_registry.DeleteEntity(e);
+		m_entitiesToDestroy.Add(e);
 	}
 
 	void Scene::OnUpdate()
@@ -157,6 +157,9 @@ namespace AstralEngine
 
 		//update Scripts
 		CallOnUpdate();
+
+		//destroy all entities enqueued for destruction this frame
+		DestroyEntitiesToDestroy();
 	}
 
 	void Scene::OnViewportResize(unsigned int width, unsigned int height)
@@ -201,4 +204,12 @@ namespace AstralEngine
 		}
 	}
 
+	void Scene::DestroyEntitiesToDestroy()
+	{
+		for (AEntity& e : m_entitiesToDestroy)
+		{
+			m_registry.DeleteEntity(e);
+		}
+		m_entitiesToDestroy.Clear();
+	}
 }

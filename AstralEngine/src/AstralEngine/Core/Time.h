@@ -9,6 +9,12 @@ namespace AstralEngine
 	public:
 		virtual ~Time() { }
 
+		static float GetTime() 
+		{
+			return s_instance->GetTimeImpl();
+		}
+
+
 		static void UpdateTime() 
 		{
 			return s_instance->UpdateTimeImpl();
@@ -33,6 +39,8 @@ namespace AstralEngine
 		}
 		
 		virtual void UpdateTimeImpl() = 0;
+
+		virtual float GetTimeImpl() = 0;
 
 	private:
 		static AReference<Time> s_instance;

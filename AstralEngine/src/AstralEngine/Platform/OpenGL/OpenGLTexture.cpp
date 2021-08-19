@@ -5,7 +5,7 @@
 
 namespace AstralEngine
 {
-	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned height) 
+	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height) 
 		: m_internalFormat(GL_RGBA8), m_dataFormat(GL_RGBA), m_width(width), m_height(height) 
 	{
 		AE_PROFILE_FUNCTION();

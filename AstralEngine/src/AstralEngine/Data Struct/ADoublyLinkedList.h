@@ -21,6 +21,15 @@ namespace AstralEngine
 		using AIterator = ADoublyLinkedListIterator<T>;
 		using AConstIterator = ADoublyLinkedListConstIterator<T>;
 
+		ADoublyLinkedList() : m_count(0)
+		{
+			AE_PROFILE_FUNCTION();
+
+			m_dummy = new Node();
+			m_head = m_dummy;
+		}
+
+
 		ADoublyLinkedList(const std::initializer_list<T>& list) : m_count(0)
 		{
 			AE_PROFILE_FUNCTION();
@@ -34,14 +43,6 @@ namespace AstralEngine
 			}
 		}
 
-		ADoublyLinkedList() : m_count(0)
-		{
-			AE_PROFILE_FUNCTION();
-
-			m_dummy = new Node();
-			m_head = m_dummy;
-		}
-		
 		ADoublyLinkedList(const ADoublyLinkedList<T>& other) : m_count(other.m_count)
 		{
 			AE_PROFILE_FUNCTION();
@@ -55,7 +56,8 @@ namespace AstralEngine
 			}
 		}
 
-		ADoublyLinkedList(ADoublyLinkedList<T>&& other) noexcept : m_count(other.m_count), m_dummy(other.m_dummy), m_head(other.m_head)
+		ADoublyLinkedList(ADoublyLinkedList<T>&& other) noexcept 
+			: m_count(other.m_count), m_dummy(other.m_dummy), m_head(other.m_head)
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -119,7 +121,8 @@ namespace AstralEngine
 			return newNode->element;
 		}
 
-		void Add(T&& element)
+		//moves the element into the list
+		void MoveAdd(T&& element)
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -278,7 +281,7 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void Remove(size_t index) override
+		virtual void RemoveAt(size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 

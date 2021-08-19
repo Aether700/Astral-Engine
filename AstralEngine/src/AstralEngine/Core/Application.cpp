@@ -20,6 +20,7 @@ namespace AstralEngine
 		m_window = AWindow::Create(windowTitle, width, height);
 
 		Renderer::Init();
+		Random::Init();
 
 		m_window->SetEventCallback(ADelegate<void(AEvent&)>(FunctionWraper<&Application::OnEvent>(), this));
 	}

@@ -42,6 +42,7 @@ namespace AstralEngine
 		const Vector2Int operator*(int k) const;
 		const Vector2Int operator/(int k) const;
 		const int operator[](unsigned int index) const;
+		int& operator[](unsigned int index);
 
 		Vector2Int& Vector2Int::operator=(const Vector2Int& v);
 

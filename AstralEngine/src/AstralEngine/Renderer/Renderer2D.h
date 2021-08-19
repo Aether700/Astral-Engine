@@ -48,9 +48,13 @@ namespace AstralEngine
 			float tileFactor = 1.0f, const Vector4& tintColor = {1, 1, 1, 1});
 		static void DrawQuad(const Vector3& position, const Vector2& size, AReference<Texture2D> texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
+		static void DrawQuad(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static void DrawQuad(const Mat4& transform, const Vector4& color);
 		static void DrawQuad(const Mat4& transform, AReference<Texture2D> texture, 
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
+		static void DrawQuad(const Mat4& transform, AReference<SubTexture2D> subTexture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static void DrawRotatedQuad(const Vector2& position, float rotation, const Vector2& size, const Vector4& color);
@@ -65,6 +69,8 @@ namespace AstralEngine
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 		static void DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
+		static void DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, 
+			AReference<SubTexture2D> subTexture, float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 	private:
 		static void StartBatch();
@@ -72,8 +78,13 @@ namespace AstralEngine
 		static void CheckBatchCapacity();
 		static int GetTextureIndex(const AReference<Texture2D>& texture);
 
+		
 		static void UploadSimpleQuad(const Vector3& position, const Vector2& size, float textureIndex,
 			float tileFactor, const Vector4& tintColor);
+
+		static void UploadSimpleQuad(const Vector3& position, const Vector2& size, float textureIndex,
+			float tileFactor, const Vector4& tintColor, const Vector2* textureCoords);
+
 
 		static const unsigned int s_maxQuads = 10000;
 		static const unsigned int s_maxVertices = s_maxQuads * 4;

@@ -33,7 +33,7 @@ namespace AstralEngine
 		{
 			m_insertIndex--;
 		}
-		m_layers.Remove(index);
+		m_layers.RemoveAt(index);
 		l->OnDetach();
 	}
 

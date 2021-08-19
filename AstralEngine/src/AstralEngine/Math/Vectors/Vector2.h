@@ -51,6 +51,7 @@ namespace AstralEngine
 		const Vector2 operator*(float k) const;
 		const Vector2 operator/(float k) const;
 		const float operator[](unsigned int index) const;
+		float& operator[](unsigned int index);
 
 		Vector2& operator=(const Vector2& v);
 

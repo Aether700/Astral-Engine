@@ -1,7 +1,6 @@
 #pragma once
 #include "AstralEngine/Core/Core.h"
 #include "AstralEngine/Core/Keycodes.h"
-#include "AstralEngine/Core/AWindow.h"
 #include "Math/AMath.h"
 #include "Data Struct/ADynArr.h"
 #include "Data Struct/ADelegate.h"
@@ -14,6 +13,215 @@
 
 namespace AstralEngine
 {
+
+	//forward declarations
+
+	class FontAtlas;
+	class Font;
+
+	struct TabBar;
+	struct UIWindow;
+
+	//stores data for a single draw command (1 cmd != 1 draw call)
+	class DrawCmdData
+	{
+	public:
+		DrawCmdData() : m_rotation(0.0f), m_tileFactor(1.0f), m_color(1, 1, 1, 1) { }
+
+		DrawCmdData(const Vector2& position, const Vector2& size, const Vector4& color) 
+			: m_position(position), m_rotation(0.0f), m_tileFactor(1.0f), m_color(color), m_size(size) { }
+		DrawCmdData(const Vector3& position, const Vector2& size, const Vector4& color)
+			: m_position(position), m_rotation(0.0f), m_tileFactor(1.0f), m_color(color), m_size(size) { }
+
+		DrawCmdData(const Vector2& position, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }) 
+			: m_position(position), m_rotation(0.0f), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_texture(texture) { }
+		DrawCmdData(const Vector3& position, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+			: m_position(position), m_rotation(0.0f), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_texture(texture) { }
+
+		DrawCmdData(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+			: m_position(position), m_rotation(0.0f), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_subTexture(subTexture) { }
+
+		
+		DrawCmdData(const Vector2& position, float rotation, const Vector2& size, const Vector4& color)
+			: m_position(position), m_rotation(rotation), m_tileFactor(1.0f), m_color(color), m_size(size) { }
+		DrawCmdData(const Vector3& position, float rotation, const Vector2& size, const Vector4& color)
+			: m_position(position), m_rotation(rotation), m_tileFactor(1.0f), m_color(color), m_size(size) { }
+
+	
+		DrawCmdData(const Vector2& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+			: m_position(position), m_rotation(rotation), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_texture(texture) { }
+		DrawCmdData(const Vector3& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+			: m_position(position), m_rotation(rotation), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_texture(texture) { }
+		DrawCmdData(const Vector3& position, float rotation, const Vector2& size, AReference<SubTexture2D> subTexture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+			: m_position(position), m_rotation(rotation), m_tileFactor(tileFactor), m_color(tintColor),
+			m_size(size), m_subTexture(subTexture) { }
+
+		//calls the appropriate Draw Command from Renderer2D according to what data this draw command contains
+		void Draw() const;
+
+		bool operator==(const DrawCmdData& other) const
+		{
+			return m_position == other.m_position && m_rotation == other.m_rotation 
+				&& m_size == other.m_size && m_texture == other.m_texture 
+				&& m_tileFactor == other.m_tileFactor && m_color == other.m_color;
+		}
+
+		bool operator!=(const DrawCmdData& other) const
+		{
+			return !(*this == other);
+		}
+
+	private:
+		Vector3 m_position;
+		float m_rotation;
+		Vector2 m_size; 
+		AReference<Texture2D> m_texture;
+		AReference<Texture2D> m_subTexture;
+		float m_tileFactor;
+		Vector4 m_color; //also acts at tint color
+	};
+
+	//keeps a list of all the DrawCmdData objects and submits them to the renderer when the time comes
+	class DrawList
+	{
+	public:
+		DrawList() { }
+
+		void AddCmd(const DrawCmdData& cmd) { m_data.Add(cmd); }
+
+		void AddCmd(const Vector2& position, const Vector2& size, const Vector4& color)
+		{
+			DrawCmdData cmd = DrawCmdData(position, size, color);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector2& position, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, size, texture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector3& position, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, size, texture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, size, subTexture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector2& position, float rotation, const Vector2& size, const Vector4& color)
+		{
+			DrawCmdData cmd = DrawCmdData(position, rotation, size, color);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector3 & position, float rotation, const Vector2 & size, const Vector4 & color)
+		{
+			DrawCmdData cmd = DrawCmdData(position, rotation, size, color);
+			AddCmd(cmd);
+		}
+
+
+		void AddCmd(const Vector2& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, rotation, size, texture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector3& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, rotation, size, texture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		void AddCmd(const Vector3& position, float rotation, const Vector2& size, AReference<SubTexture2D> subTexture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 })
+		{
+			DrawCmdData cmd = DrawCmdData(position, rotation, size, subTexture, tileFactor, tintColor);
+			AddCmd(cmd);
+		}
+
+		//submits all draw commands in the list to be rendered
+		void DrawAll() const
+		{
+			for (const DrawCmdData& cmd : m_data)
+			{
+				cmd.Draw();
+			}
+		}
+
+		void Clear() { m_data.Clear(); }
+
+	private:
+		ADynArr<DrawCmdData> m_data;
+	};
+
+
+	//enum operators so the bitwise operators work on enum classes
+	template<class T>
+	inline constexpr T operator|(T lhs, T rhs)
+	{
+		return (T)((int)lhs | (int)rhs);
+	}
+
+	template<class T>
+	constexpr T operator&(T lhs, T rhs)
+	{
+		return (T)((int)lhs & (int)rhs);
+	}
+
+	template<class T>
+	constexpr T operator~(T lhs)
+	{
+		return (T)(~(int)lhs);
+	}
+
+	//keeps track of when to set variables
+	//do not combine with binary operators, use as a simple enum not as flags/binary mask
+	enum class UICondition
+	{
+		None = 0, //same as always  
+		Always = 1 << 0,   
+		
+		//only once per runtime
+		Once = 1 << 1,   
+
+		//if has no entry in .ini file only
+		FirstUseEver = 1 << 2,   
+		
+		//as is appearing after being hidden/inactive or the first time
+		Appearing = 1 << 3    
+	};
+
+	union IntPtr
+	{
+		int i;
+		void* ptr;
+	};
+
+	bool operator==(const IntPtr& lhs, const IntPtr& rhs);
+	bool operator!=(const IntPtr& lhs, const IntPtr& rhs);
+
 	enum class NavInput
 	{
 		// Gamepad Mapping
@@ -89,21 +297,37 @@ namespace AstralEngine
 		Font* dstFont; //dist font?
 
 		FontConfig();
+
+		bool operator==(const FontConfig& other) const
+		{
+			return fontData == other.fontData && fontDataSize == other.fontDataSize 
+				&& fontNum == other.fontNum;
+		}
+
+		bool operator!=(const FontConfig& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	struct Glyph
 	{
 		unsigned int codepoint = 31;
 		unsigned int visible = 1; //flag to allow early out when rendering
-		float AdvanceX;		  //distance to next character
-		float X0, Y0, X1, Y1; //corners of glyph
-		float U0, V0, U1, V1; //texture coord
+		float advanceX;		  //distance to next character
+		Vector2 minCoord, maxCoord; //corners of glyph
+		Vector2 minTexCoord, maxTexCoord; //texture coord
+
+		bool operator==(const Glyph& other) const
+		{
+			return codepoint == other.codepoint && visible == other.visible && advanceX == other.advanceX;
+		}
+
+		bool operator!=(const Glyph& other) const
+		{
+			return !(*this == other);
+		}
 	};
-
-	class FontAtlas;
-
-	//will not be used?
-	struct DrawList;
 
 	class Font
 	{
@@ -167,7 +391,7 @@ namespace AstralEngine
 		unsigned char m_used4KPagesMap[(UNICODE_CODEPOINT_MAX + 1) / 4096 / 8];
 	};
 
-	enum FontAtlasFlags
+	enum class FontAtlasFlags
 	{
 		None = 0,
 		NoPowerOfTwoHeight = 1 << 0,   // Don't round the height to next power of two
@@ -221,12 +445,17 @@ namespace AstralEngine
 		//4 byte per pixel
 		void GetTexDataAsRGBA32(unsigned char** outPixels, int* outWidth, int* outHeight, int* outBytesPerPixel = nullptr);
 
+		const AReference<Texture2D>& GetTexture() const { return m_texture; }
+
 		bool IsBuilt() const { return m_fonts.GetCount() > 0 && m_texture != nullptr; }
 		void SetTexture(AReference<Texture2D> texture) { m_texture = texture; }
 
 		int AddCustomRectRegular(int width, int height);
 		int AddCustomRectFontGlyph(Font* f, unsigned short id, int width, int height,
 			float advanceX, const Vector2& offset = Vector2::Zero());
+
+		void Lock() { m_locked = true; }
+		void Unlock() { m_locked = false; }
 
 	private:
 		//helpers to retrieve list of common Unicode ranges (2 value per range, values are inclusive, zero-terminated list)
@@ -256,7 +485,261 @@ namespace AstralEngine
 
 	};
 
-	enum UIConfigFlags
+	//helper to keep track of rectangles in the UI display
+	struct UIRectangle
+	{
+		//uses screen coords
+		Vector2 minVec;    // Upper-left
+		Vector2 maxVec;    // Lower-right
+
+		UIRectangle() : minVec(0.0f, 0.0f), maxVec(0.0f, 0.0f) { }
+		UIRectangle(const Vector2& min, const Vector2& max) : minVec(min), maxVec(max) { }
+		UIRectangle(const Vector4& v) : minVec(v.x, v.y), maxVec(v.z, v.w) { }
+		UIRectangle(float x1, float y1, float x2, float y2) : minVec(x1, y1), maxVec(x2, y2) { }
+
+		Vector2 GetCenter() const { return Vector2((minVec.x + maxVec.x) * 0.5f, (minVec.y + maxVec.y) * 0.5f); }
+
+		Vector2 GetSize() const { return Vector2(maxVec.x - minVec.x, maxVec.y - minVec.y); }
+
+		float GetWidth() const { return maxVec.x - minVec.x; }
+
+		float GetHeight() const { return maxVec.y - minVec.y; }
+
+		Vector2 GetTopLeftVertex() const { return minVec; }
+
+		Vector2 GetTopRVertex() const { return Vector2(maxVec.x, minVec.y); }
+
+		Vector2 GetBottomLeftVertex() const { return Vector2(minVec.x, maxVec.y); }
+
+		Vector2 GetBottomRightVertex() const { return maxVec; }
+
+		bool Contains(const Vector2& p) const
+		{
+			return p.x >= minVec.x && p.x < maxVec.x
+				&& p.y >= minVec.y && p.y < maxVec.y;
+		}
+
+		bool Contains(const UIRectangle& r) const
+		{
+			return r.minVec.x >= minVec.x && r.maxVec.x <= maxVec.x
+				&& r.minVec.y >= minVec.y && r.maxVec.y <= maxVec.y;
+		}
+
+		//if r1 contains r2, r1 & r2 do not overlap, if r1 overlaps r2, r2 does not overlap r1
+		bool Overlaps(const UIRectangle& r) const
+		{
+			return r.minVec.y <  maxVec.y&& r.maxVec.y >  maxVec.y
+				&& r.maxVec.x <  maxVec.x&& r.maxVec.x >  minVec.x;
+		}
+
+		//increases size of rectangle so that the diagonal formed by two opposing corners of the rectangle 
+		//is at least the length of the provided vector
+		void Add(const Vector2& p)
+		{
+			if (minVec.x > p.x)
+			{
+				minVec.x = p.x;
+			}
+
+			if (minVec.y > p.y)
+			{
+				minVec.y = p.y;
+			}
+
+			if (maxVec.x < p.x)
+			{
+				maxVec.x = p.x;
+			}
+
+			if (maxVec.y < p.y)
+			{
+				maxVec.y = p.y;
+			}
+		}
+
+		//increases size of rectangle so that the diagonal formed by two opposing corners of the rectangle 
+		//is at least the length of the same diagonal for the provided rectangle
+		void Add(const UIRectangle& r)
+		{
+			if (minVec.x > r.minVec.x)
+			{
+				minVec.x = r.minVec.x;
+			}
+
+			if (minVec.y > r.minVec.y)
+			{
+				minVec.y = r.minVec.y;
+			}
+
+			if (maxVec.x < r.maxVec.x)
+			{
+				maxVec.x = r.maxVec.x;
+			}
+
+			if (maxVec.y < r.maxVec.y)
+			{
+				maxVec.y = r.maxVec.y;
+			}
+		}
+
+		//expands each vertices of the rectangle by the amount provided
+		void Expand(const float amount)
+		{
+			minVec.x -= amount;
+			minVec.y -= amount;
+			maxVec.x += amount;
+			maxVec.y += amount;
+		}
+
+		//expands each vertices of the rectangle by the amount of the x and y direction of the 
+		//vector provided by their respective dimension
+		void Expand(const Vector2& amount)
+		{
+			minVec.x -= amount.x;
+			minVec.y -= amount.y;
+			maxVec.x += amount.x;
+			maxVec.y += amount.y;
+		}
+
+		void Translate(const Vector2& d)
+		{
+			minVec.x += d.x;
+			minVec.y += d.y;
+			maxVec.x += d.x;
+			maxVec.y += d.y;
+		}
+
+		void TranslateX(float dx)
+		{
+			minVec.x += dx;
+			maxVec.x += dx;
+		}
+
+		void TranslateY(float dy)
+		{
+			minVec.y += dy;
+			maxVec.y += dy;
+		}
+
+		//may lead to an inverted rectangle, which is fine for Contains/Overlaps test but not for display.
+		void ClipWith(const UIRectangle& r)
+		{
+			minVec = Vector2::Max(minVec, r.minVec);
+			maxVec = Vector2::Min(maxVec, r.maxVec);
+		}
+
+		//ensure both points are fully clipped with no inversion.
+		void ClipWithFull(const UIRectangle& r)
+		{
+			minVec = Vector2::Clamp(minVec, r.minVec, r.maxVec);
+			maxVec = Vector2::Clamp(maxVec, r.minVec, r.maxVec);
+		}
+
+		void Floor()
+		{
+			minVec.x = Math::Floor(minVec.x);
+			minVec.y = Math::Floor(minVec.y);
+			maxVec.x = Math::Floor(maxVec.x);
+			maxVec.y = Math::Floor(maxVec.y);
+		}
+
+		bool IsInverted() const
+		{
+			return minVec.x > maxVec.x || minVec.y > maxVec.y;
+		}
+
+		Vector4 ToVec4() const
+		{
+			return Vector4(minVec.x, minVec.y, maxVec.x, maxVec.y);
+		}
+
+		bool operator==(const UIRectangle& other) const
+		{
+			return minVec == other.minVec && maxVec == other.maxVec;
+		}
+
+		bool operator!=(const UIRectangle& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	enum class ViewportFlags
+	{
+		None = 0,
+		NoDecoration = 1 << 0,
+		NoTaskBarIcon = 1 << 1,
+		NoFocusOnCreate = 1 << 2,
+		NoFocusOnClick = 1 << 3,
+		NoInputs = 1 << 4,   //make mouse pass through so we can drag this window while peaking behind it.
+		NoRendererClear = 1 << 5,   //renderer doesn't need to clear the framebuffer ahead (because we will fill it entirely).
+		TopMost = 1 << 6,   //display on top
+		Minimized = 1 << 7,
+		NoAutoMerge = 1 << 8,
+		CanHostOtherWindows = 1 << 9
+	};
+
+
+	class Viewport
+	{
+	public:
+		Viewport() : id(0), flags(ViewportFlags::None), parentID(0) { }
+		~Viewport();
+
+		Vector2 GetCenter() { return Vector2(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f); }
+		Vector2 GetWorkPos() { return Vector2(pos.x + workOffsetMin.x, pos.y + workOffsetMin.y); }
+
+		Vector2 GetWorkSize()
+		{
+			return Vector2(size.x - workOffsetMin.x + workOffsetMax.x, size.y - workOffsetMin.y + workOffsetMax.y);
+		}
+
+		unsigned int id;
+		ViewportFlags flags;
+		Vector2 pos;
+		Vector2 size;
+		Vector2 workOffsetMin;
+		Vector2 workOffsetMax;
+		float dpiScale;
+		unsigned int parentID;
+	};
+
+
+	//for internal use only, the fields declared here are only for the engine's use
+	struct ViewportPrivate : public Viewport
+	{
+		int index;
+		int lastFrameActive;
+		int lastFrontMostStampCount;
+		unsigned int lastNameHash;
+		Vector2 lastPos;
+		float alpha; // Window opacity (when dragging dockable windows/viewports we make them transparent)
+		float lastAlpha;
+		short platformMonitor;
+		bool platformWindowCreated;
+		UIWindow* window; // Set when the viewport is owned by a window 
+		Vector2 lastPlatformPos;
+		Vector2 lastPlatformSize;
+		Vector2 lastRendererSize;
+		Vector2 currWorkOffsetMin; // Work area top-left offset being increased during the frame
+		Vector2 currWorkOffsetMax; // Work area bottom-right offset being decreased during the frame
+
+		ViewportPrivate() : index(-1), lastFrameActive(-1), lastFrontMostStampCount(-1),
+			lastNameHash(0), alpha(1.0f), lastAlpha(1.0f), platformMonitor(-1),
+			platformWindowCreated(false), window(nullptr), lastPlatformPos(FLT_MAX, FLT_MAX),
+			lastPlatformSize(FLT_MAX, FLT_MAX), lastRendererSize(FLT_MAX, FLT_MAX) { }
+
+		UIRectangle GetMainRect() const { return UIRectangle(pos.x, pos.y, pos.x + size.x, pos.y + size.y); }
+
+		UIRectangle GetWorkRect() const
+		{
+			return UIRectangle(pos.x + workOffsetMin.x, pos.y + workOffsetMin.y,
+				pos.x + size.x + workOffsetMax.x, pos.y + size.y + workOffsetMax.y);
+		}
+	};
+
+
+	enum class UIConfigFlags
 	{
 		//Base
 		None					= 0,
@@ -279,7 +762,7 @@ namespace AstralEngine
 		IsTouchScreen	= 1 << 11,
 	};
 
-	enum UIBackEndFlags
+	enum class UIBackEndFlags
 	{
 		None					= 0,
 		HasGamepad				= 1 << 0,
@@ -293,8 +776,37 @@ namespace AstralEngine
 		RendererHasViewports	= 1 << 3,
 	};
 
-	class UIIO
+	struct WindowSettings
 	{
+		unsigned int id;
+		
+		//position is relative to viewport
+		Vector2Short pos;            
+		Vector2Short size;
+		Vector2Short viewportPos;
+		unsigned int viewportID;
+
+		//id of last known DockNode or 0 if none.
+		unsigned int dockID;         
+		
+		// ID of window class if specified (needed?)
+		unsigned int classID;       
+
+		short dockOrder;
+		bool collapsed;
+		bool wantApply;
+
+		WindowSettings() 
+			: id(0), viewportID(0), dockID(0), classID(0), dockOrder(-1), 
+			collapsed(false), wantApply(false) { }
+		
+		//should remove?
+		char* GetName() { return (char*)(this + 1); }
+	};
+
+	struct UIIO
+	{
+		friend class UIContext;
 	public:
 
 		UIIO();
@@ -311,96 +823,53 @@ namespace AstralEngine
 		// Clear the text input buffer manually
 		void ClearInputCharacters();                     
 
-	private:
-		UIConfigFlags m_configFlags;
-		UIBackEndFlags m_backEndFlags;
-		Vector2 m_displaySize;
-		float m_savingRate; //min time to wait before wait to save positions/sizes in sec
-		const char* m_saveFileName; //file to which we write/read size and positions of windows
-		const char* m_logFileName;
-		float m_mouseDoubleClickTime;
-		float m_mouseDoubleClickMaxDist;
-		float m_mouseDragThreshold;
-		float m_keyRepeatDelay;
-		float m_keyRepeatRate;
-		void* m_userData;
+		UIConfigFlags configFlags;
+		UIBackEndFlags backEndFlags;
+		Vector2 displaySize;
+		float savingRate; //min time to wait before wait to save positions/sizes in sec
+		const char* saveFileName; //file to which we write/read size and positions of windows
+		const char* logFileName;
+		float mouseDoubleClickTime;
+		float mouseDoubleClickMaxDist;
+		float mouseDragThreshold;
+		float keyRepeatDelay;
+		float keyRepeatRate;
+		void* userData;
 
-		FontAtlas** m_fonts;
-		float m_fontGlobalScale;
-		bool m_allowUserScaleFont;
-		Font* m_defaultFont;
-		Vector2 m_displayFramebufferScale;
+		FontAtlas* fonts;
+		float fontGlobalScale;
+		bool allowUserScaleFont;
+		Font* defaultFont;
+		Vector2 displayFramebufferScale;
 
 		//Docking options (when enabled)
 
-		bool m_configDockingNoSplit;
-		bool m_configDockingWithShift;
-		bool m_configDockingAlwaysTabBar;
-		bool m_configDockingTransparentPayload;
+		bool configDockingNoSplit;
+		bool configDockingWithShift;
+		bool configDockingAlwaysTabBar;
+		bool configDockingTransparentPayload;
 
 		//viewport options (when enabled)
-		bool m_configViewportNoAutoMerge;
-		bool m_configViewportNoTaskBarIcon;
-		bool m_configViewportNoDecoration;
-		bool m_configViewportNoDefaultParent;
+		bool configViewportNoAutoMerge;
+		bool configViewportNoTaskBarIcon;
+		bool configViewportNoDecoration;
+		bool configViewportNoDefaultParent;
 
 		//misc options
 
-		bool m_drawMouseCursor; //draw the mouse cursor if true
-		bool m_configMacOSXBehavior;
-		bool m_configInputTextCursorBlink;
-		bool m_configWindowsResizeFromEdges;
-		bool m_configWindowsMoveFromTitleBarOnly;
-		bool m_configWindowsMemoryCompactTimer;
+		bool drawMouseCursor; //draw the mouse cursor if true
+		bool configMacOSXBehavior;
+		bool configInputTextCursorBlink;
+		bool configWindowsResizeFromEdges;
+		bool configWindowsMoveFromTitleBarOnly;
+		bool configWindowsMemoryCompactTimer;
 
-		Vector2 m_mousePos;
-		bool m_mouseDown[5];
-		float m_mouseWheel;
-		float m_mouseWheelH;
-		unsigned int m_mouseHoveredViewport;
-		float m_gamepadInputs[(int)NavInput::Count];
-
-
-	};
-
-	enum ViewportFlags
-	{
-		None = 0,
-		NoDecoration = 1 << 0,   
-		NoTaskBarIcon = 1 << 1,  
-		NoFocusOnCreate = 1 << 2,
-		NoFocusOnClick = 1 << 3,   
-		NoInputs = 1 << 4,   //make mouse pass through so we can drag this window while peaking behind it.
-		NoRendererClear = 1 << 5,   //renderer doesn't need to clear the framebuffer ahead (because we will fill it entirely).
-		TopMost = 1 << 6,   //display on top
-		Minimized = 1 << 7,   
-		NoAutoMerge = 1 << 8,   
-		CanHostOtherWindows = 1 << 9
-	};
-
-	class Viewport
-	{
-	public:
-		Viewport() : m_id(0), m_flags(ViewportFlags::None), m_parentID(0) { }
-		~Viewport();
-
-		Vector2 GetCenter() { return Vector2(m_pos.x + m_size.x * 0.5f, m_pos.y + m_size.y * 0.5f); }
-		Vector2 GetWorkPos() { return Vector2(m_pos.x + m_workOffsetMin.x, m_pos.y + m_workOffsetMin.y); }
-
-		Vector2 GetWorkSize() 
-		{ 
-			return Vector2(m_size.x - m_workOffsetMin.x + m_workOffsetMax.x, m_size.y - m_workOffsetMin.y + m_workOffsetMax.y); 
-		}
-
-	protected:
-		unsigned int m_id;
-		ViewportFlags m_flags;
-		Vector2 m_pos;
-		Vector2 m_size;
-		Vector2 m_workOffsetMin;
-		Vector2 m_workOffsetMax;
-		float m_dpiScale;
-		unsigned int m_parentID;
+		Vector2 mousePos;
+		bool mouseDown[5];
+		float mouseWheel;
+		float mouseWheelH;
+		unsigned int mouseHoveredViewport;
+		float gamepadInputs[(int)NavInput::Count];
 	};
 
 	enum class Direction
@@ -412,6 +881,14 @@ namespace AstralEngine
 		Down,
 		Count
 	};
+
+	enum class NavLayer
+	{
+		Main = 0,    // Main scrolling layer
+		Menu = 1,    // Menu layer (access with Alt/Menu)
+		Count
+	};
+
 
 	// Enumeration of where the color for the style goes
 	enum class UIStyleColor
@@ -469,8 +946,776 @@ namespace AstralEngine
 		Count
 	};
 
+	enum class UIColumnFlags
+	{
+		None = 0,
+		NoBorder = 1 << 0,   //disable column dividers
+		NoResize = 1 << 1,
+		NoPreserveWidths = 1 << 2,
+		NoForceWithinWindow = 1 << 3,
+		GrowParentContentsSize = 1 << 4    //dear ImGui wants to remove, remove?
+	};
+
+	struct UIColumnData
+	{
+		/*column start offset, normalized
+		  0.0 (far left) -> 1.0 (far right)
+		*/
+		float offsetNorm;
+		float offsetNormBeforeResize;
+		UIColumnFlags flags;
+		UIRectangle clipRect;
+
+		UIColumnData() : offsetNorm(0.0f), offsetNormBeforeResize(0.0f), flags(UIColumnFlags::None) { }
+
+		bool operator==(const UIColumnData& other) const
+		{
+			return offsetNorm == other.offsetNorm && offsetNormBeforeResize == other.offsetNormBeforeResize 
+				&& flags == other.flags && clipRect == other.clipRect;
+		}
+
+		bool operator!=(const UIColumnData& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+
+	//column measurements
+	struct UIMenuColumns
+	{
+		float spacing;
+		float width, nextWidth;
+		float pos[3], nextWidths[3];
+
+		UIMenuColumns();
+		void Update(int count, float spacing, bool clear);
+		float DeclColumns(float w0, float w1, float w2);
+		float CalcExtraSpace(float avail_w) const;
+	};
+
+
+	struct UIColumn
+	{
+		unsigned int id;
+		UIColumnFlags flags;
+		bool isFirstFrame;
+		bool isBeingResized;
+		int curr;
+		int count;
+		float offsetMinX, offsetMaxX;
+		float lineMinY, lineMaxY;
+		float hostCursorPosY;
+		float hostCursorMaxPosX;
+		UIRectangle hostInitialClipRect;
+		UIRectangle hostBackupClipRect;
+		UIRectangle hostWorkRect;
+		ADynArr<UIColumnData> columns;
+
+		UIColumn() { Clear(); }
+		
+		void Clear()
+		{
+			id = 0;
+			flags = UIColumnFlags::None;
+			isFirstFrame = false;
+			isBeingResized = false;
+			curr = 0;
+			count = 1;
+			offsetMinX = offsetMaxX = 0.0f;
+			lineMinY = lineMaxY = 0.0f;
+			hostCursorPosY = 0.0f;
+			hostCursorMaxPosX = 0.0f;
+			columns.Clear();
+		}
+
+		bool operator==(const UIColumn& other) const
+		{
+			return id == other.id;
+		}
+
+		bool operator!=(const UIColumn& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	//enum fixed to 0/1 so can be used as index
+	enum class UILayoutType
+	{
+		Horizontal = 0,
+		Vertical = 1
+	};
+
+	//Transient per-window flags, reset at the beginning of the frame. For child window, inherited from parent on first Begin()
+	enum class ItemFlags
+	{
+		None = 0,
+		NoTabStop = 1 << 0,
+		ButtonRepeat = 1 << 1, // Button() will return true multiple times based on io.KeyRepeatDelay and io.KeyRepeatRate settings.
+		Disabled = 1 << 2, // Disable interactions but doesn't affect visuals yet. (fix visuals?)
+		NoNav = 1 << 3,
+		NoNavDefaultFocus = 1 << 4,
+		SelectableDontClosePopup = 1 << 5, // MenuItem/Selectable() automatically closes current Popup window
+
+										   //Represent a mixed/indeterminate value, generally multi-selection where values differ. 
+		//Currently only supported by Checkbox() (later should support all sorts of widgets) (fix for multiple support?)
+		MixedValue = 1 << 6,
+		Default = 0
+	};
+
+
+	//storage for LastItem data
+	enum class ItemStatusFlags
+	{
+		None = 0,
+		HoveredRect = 1 << 0,
+		HasDisplayRect = 1 << 1,
+		Edited = 1 << 2,
+		ToggledSelection = 1 << 3,
+		ToggledOpen = 1 << 4,
+		HasDeactivated = 1 << 5,
+		Deactivated = 1 << 6
+	};
+
+	//stacked storage data for BeginGroup()/EndGroup()
+	struct UIGroupData
+	{
+		Vector2 backupCursorPos;
+		Vector2 backupCursorMaxPos;
+		float backupIndent;
+		float backupGroupOffset;
+		Vector2 backupCurrLineSize;
+		float backupCurrLineTextBaseOffset;
+		unsigned int backupActiveIDIsAlive;
+		bool backupActiveIDPreviousFrameIsAlive;
+		bool emitItem;
+
+		bool operator==(const UIGroupData& other) const
+		{
+			return backupCursorPos == other.backupCursorPos && backupIndent == other.backupIndent 
+				&& emitItem == other.emitItem;
+		}
+
+		bool operator!=(const UIGroupData& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	//flags for BeginUI() (change name?)
+	enum class UIWindowFlags
+	{
+		None = 0,
+		NoTitleBar = 1 << 0,  
+		NoResize = 1 << 1,   
+		NoMove = 1 << 2,   
+		NoScrollbar = 1 << 3, //disable the ui scrollbar(s) mouse wheel still work
+		NoScrollWithMouse = 1 << 4,   
+		NoCollapse = 1 << 5,   
+		AlwaysAutoResize = 1 << 6,  
+		NoBackground = 1 << 7,   
+		
+		//never load/save settings in .ini file
+		NoSavedSettings = 1 << 8,
+		NoMouseInputs = 1 << 9,   //hovering still works even with flag enabled
+		MenuBar = 1 << 10, 
+		HorizontalScrollbar = 1 << 11,  
+		NoFocusOnAppearing = 1 << 12,  
+		NoBringToFrontOnFocus = 1 << 13,  
+	
+		//show the scrollbar (vertical or horizontal) even if the content fits in the window without need for scrolling
+		AlwaysVerticalScrollbar = 1 << 14,
+		AlwaysHorizontalScrollbar = 1 << 15,  
+
+		AlwaysUseWindowPadding = 1 << 16,  
+		
+		//disables gamepad/keyboard navigation inside the window
+		NoNavInputs = 1 << 18,  
+		
+		//window does not take focus when being navigated by gamepad/keyboard
+		NoNavFocus = 1 << 19,  
+
+		/*append '*' to title without changing the ID. When used in a tab/docking context, 
+		  tab is selected on closure and closure is deferred by one frame to allow 
+		  code to cancel the closure and display a popup without flickering
+		*/
+		UnsavedDocument = 1 << 20,
+
+		//only affects this window
+		NoDocking = 1 << 21,  
+
+		NoNav = NoNavInputs | NoNavFocus,
+		NoDecoration = NoTitleBar | NoResize | NoScrollbar | NoCollapse,
+		NoInputs = NoMouseInputs | NoNavInputs | NoNavFocus,
+
+		//for internal use (should not be used by user)
+		
+		//allow gamepad/keyboard navigation to cross over parent border to this child 
+		//only use on child that have no scrolling
+		NavFlattened = 1 << 23, 
+		ChildWindow = 1 << 24, 
+		Tooltip = 1 << 25, 
+		Popup = 1 << 26,
+		Modal = 1 << 27,
+		ChildMenu = 1 << 28,
+		DockNodeHost = 1 << 29 
+	};
+
+	struct UIWindowTempData
+	{
+
+		//layout data
+		Vector2 cursorPos;
+		Vector2 cursorPosPrevLine;
+		Vector2 cursorStartPos;
+		Vector2 cursorMaxPos; //used to calculate size of content
+		Vector2 currLineSize;
+		Vector2 prevLineSize;
+		float currLineTextBaseOffset;
+		float prevLineTextBaseOffset;
+		float indent;
+		float columnOffset;
+		float groupOffset;
+
+		//last item status
+		unsigned int lastItemID;
+		ItemStatusFlags lastItemStatusFlags;
+		UIRectangle lastItemRectangle;
+		UIRectangle lastItemDisplayRectangle;
+
+
+		//navigation
+		NavLayer navLayerCurr;
+		int navLayerCurrMask;
+		int navLayerActiveMask;
+		int navLayerActiveMaskNext;
+		unsigned int navFocusScopeIDCurr;
+		bool navHideHighlightOneFrame;
+		bool navHasScroll;
+
+		//misc
+		bool menuBarAppending; //dear ImGui wants to remove it, remove it?
+		Vector2 menuBarOffset;
+		UIMenuColumns menuColumns;
+		int treeDepth;
+		uint32_t treeJumpToParentOnPopMask;
+		ADynArr<UIWindow*> childWindows;
+		ADynArr<IntPtr>* stateStorage;
+		UIColumn* currColumns;
+		UILayoutType layoutType;
+		UILayoutType parentLayoutType;
+		int focusCounterRegular;
+		int focusCounterTabStop;
+
+		/*local parameters stacks
+		  We store the current settings outside of the vectors to increase memory
+		  locality and reduce cache misses.
+		*/
+		ItemFlags itemFlags;
+		float itemWidth;
+		float textWrapPos;
+		ADynArr<ItemFlags> itemFlagsStack;
+		ADynArr<float> itemWidthStack;
+		ADynArr<float> textWrapPosStack;
+		ADynArr<UIGroupData> groupStack;
+		short stackSizeBackup[6]; //stores size of various stacks (used when asserting)
+
+		UIWindowTempData() : cursorPos(Vector2::Zero()), cursorPosPrevLine(Vector2::Zero()), cursorStartPos(Vector2::Zero()),
+			cursorMaxPos(Vector2::Zero()), currLineSize(Vector2::Zero()), prevLineSize(Vector2::Zero()),
+			currLineTextBaseOffset(0.0f), prevLineTextBaseOffset(0.0f), indent(0.0f),
+			columnOffset(0.0f), groupOffset(0.0f), lastItemID(0),
+			lastItemStatusFlags(ItemStatusFlags::None),
+
+			navLayerActiveMask(0x00), navLayerActiveMaskNext(0x00),
+			navLayerCurr(NavLayer::Main), navLayerCurrMask(1 << (int)NavLayer::Main),
+			navFocusScopeIDCurr(0), navHideHighlightOneFrame(false),
+			navHasScroll(false),
+
+			menuBarAppending(false), menuBarOffset(Vector2::Zero()),
+			treeDepth(0), treeJumpToParentOnPopMask(0x00),
+			stateStorage(nullptr), currColumns(nullptr),
+			layoutType(UILayoutType::Vertical), parentLayoutType(UILayoutType::Vertical),
+			focusCounterRegular(-1), focusCounterTabStop(-1),
+
+			itemFlags(ItemFlags::Default),
+			itemWidth(0.0f),
+			textWrapPos(-1.0f)
+		{
+			memset(stackSizeBackup, 0, sizeof(stackSizeBackup));
+		}
+	};
+
+	enum class TabItemFlags
+	{
+		None = 0,
+		UnsavedDocument = 1 << 0, //append '*' to title without affecting the ID
+		SetSelected = 1 << 1, //set curr tab as selected through code when calling BeginTabItem()
+		NoCloseWithMiddleMouseButton = 1 << 2, //disable behavior of closing tabs with middle mouse button
+		NoPushId = 1 << 3, //don't call PushID(tab->ID)/PopID() on BeginTabItem()/EndTabItem()
+		NoTooltip = 1 << 4
+	};
+
+
+	struct TabItem
+	{
+		unsigned int id;
+		TabItemFlags flags;
+		UIWindow* window;  //when TabItem is part of a DockNode's TabBar, we hold on to a window.
+		int lastFrameVisible;
+		int lastFrameSelected; //this allows us to infer an ordered list of the last activated tabs with little maintenance
+		int nameOffset;
+		float offset;
+		float width;
+		float contentWidth;
+
+		TabItem() : id(0), flags(TabItemFlags::None), lastFrameVisible(-1),
+			lastFrameSelected(-1), nameOffset(-1), offset(0.0f), width(0.0f), contentWidth(0.0f) { }
+
+		bool operator==(const TabItem& other) const
+		{
+			return id == other.id && window == other.window;
+		}
+
+		bool operator!=(const TabItem& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	struct StringBuilder
+	{
+		//buffer is null terminated
+		ADynArr<char> buffer;
+		static char EmptyString[1]; //stores the null char
+
+		StringBuilder() { }
+
+		inline char operator[](int i) const
+		{
+			AE_CORE_ASSERT(buffer.GetData() != nullptr, "");
+			return buffer.GetData()[i];
+		}
+
+		const char* begin() const
+		{
+			if (!buffer.IsEmpty())
+			{
+				return &buffer.GetData()[0];
+			}
+
+			return EmptyString;
+		}
+
+		const char* end() const
+		{
+			if (!buffer.IsEmpty())
+			{
+				return &buffer.GetData()[buffer.GetCount() - 1];
+			}
+
+			return EmptyString;
+		}
+
+		size_t GetCount() const
+		{
+			if (buffer.IsEmpty())
+			{
+				return 0;
+			}
+			return buffer.GetCount() - 1;
+		}
+
+		bool IsEmpty() const
+		{
+			return buffer.GetCount() <= 1;
+		}
+		void Clear()
+		{
+			buffer.Clear();
+		}
+
+		void Reserve(size_t count)
+		{
+			buffer.Reserve(count);
+		}
+
+		const char* c_str() const
+		{
+			if (IsEmpty())
+			{
+				return EmptyString;
+			}
+			return buffer.GetData();
+		}
+
+		void Append(const char* str, const char* str_end = nullptr);
+		void Appendf(const char* fmt, ...);
+		void Appendfv(const char* fmt, va_list args);
+	};
+
+
+	enum class TabBarFlags
+	{
+		None = 0,
+		Reorderable = 1 << 0, //allow manually dragging tabs to re-order them + New tabs are appended at the end of list
+		AutoSelectNewTabs = 1 << 1, //automatically select new tabs when they appear
+		TabListPopupButton = 1 << 2, //disable buttons to open the tab list popup
+		NoCloseWithMiddleMouseButton = 1 << 3,
+		NoTabListScrollingButtons = 1 << 4,
+		NoTooltip = 1 << 5,
+		FittingPolicyResizeDown = 1 << 6, //resize tabs when they don't fit
+		FittingPolicyScroll = 1 << 7, //add scroll buttons when tabs don't fit
+		FittingPolicyMask = FittingPolicyResizeDown | FittingPolicyScroll,
+		FittingPolicyDefault = FittingPolicyResizeDown
+	};
+
+	enum class DockNodeState
+	{
+		Unknown,
+		HostWindowHiddenBecauseSingleWindow,
+		HostWindowHiddenBecauseWindowsAreResizing,
+		HostWindowVisible
+	};
+
+	// X/Y enums are fixed to 0/1 so they may be used as index
+	enum class Axis
+	{
+		None = -1,
+		X = 0,
+		Y = 1
+	};
+
+	//indicates the authority source (dock node vs window) of a field
+	enum class DockDataAuthority
+	{
+		Auto,
+		DockNode,
+		Window
+	};
+
+	enum class DockRequestType
+	{
+		None = 0,
+		Dock,
+		Undock,
+		Split//same as Dock but no payload
+	};
+
+	enum class DockNodeFlags
+	{
+		None = 0,
+		KeepAliveOnly = 1 << 0,
+		NoDockingInCentralNode = 1 << 2,
+		PassthruCentralNode = 1 << 3,
+		NoSplit = 1 << 4,
+		NoResize = 1 << 5,
+		AutoHideTabBar = 1 << 6
+	};
+
+	struct DockNode
+	{
+		unsigned int id;
+		DockNodeFlags sharedFlags;
+		DockNodeFlags localFlags;
+		DockNode* parentNode;
+		DockNode* childNodes[2];
+		ADynArr<UIWindow*>  windows;
+		TabBar* tabBar;
+		Vector2 pos;
+		Vector2 size;
+		Vector2 sizeRef;
+		Axis splitAxis;
+
+		DockNodeState state;
+		UIWindow* hostWindow;
+		UIWindow* visibleWindow;
+		DockNode* centralNode;
+		DockNode* onlyNodeWithWindows;
+		int lastFrameAlive;
+		int lastFrameActive;
+		int lastFrameFocused;
+		unsigned int lastFocusedNodeID;
+		unsigned int selectedTabID;
+		unsigned int wantCloseTabID;
+		DockDataAuthority authorityForPos = DockDataAuthority::Window;
+		DockDataAuthority authorityForSize = DockDataAuthority::Window;
+		DockDataAuthority authorityForViewport = DockDataAuthority::Window;
+		bool isVisible = true;
+		bool isFocused = true;
+		bool hasCloseButton = true;
+		bool hasWindowMenuButton = true;
+		bool enableCloseButton = true;
+		bool wantCloseAll = true; //set when closing all tabs at once.
+		bool wantLockSizeOnce = true;
+		bool wantMouseMove = true;
+		bool wantHiddenTabBarUpdate = true;
+		bool wantHiddenTabBarToggle = true;
+		bool markedForPosSizeWrite = true;
+
+		DockNode(unsigned int id);
+		~DockNode();
+		bool IsRootNode() const { return parentNode == nullptr; }
+		bool IsDockSpace() const { return (int)(localFlags & (DockNodeFlags)(int)DockNodePrivateFlags::DockSpace) != 0; }
+		bool IsFloatingNode() const {
+			return parentNode == nullptr &&
+				(int)(localFlags & (DockNodeFlags)(int)DockNodePrivateFlags::DockSpace) == 0;
+		}
+		bool IsCentralNode() const { return (int)(localFlags & (DockNodeFlags)(int)DockNodePrivateFlags::CentralNode) != 0; }
+		bool IsHiddenTabBar() const { return (int)(localFlags & (DockNodeFlags)(int)DockNodePrivateFlags::HiddenTabBar) != 0; }
+		bool IsNoTabBar() const { return (int)(localFlags & (DockNodeFlags)(int)DockNodePrivateFlags::NoTabBar) != 0; }
+		bool IsSplitNode() const { return childNodes[0] != nullptr; }
+		bool IsLeafNode() const { return childNodes[0] == nullptr; }
+		bool IsEmpty() const { return childNodes[0] == nullptr && windows.GetCount() == 0; }
+		DockNodeFlags GetMergedFlags() const { return (DockNodeFlags)(sharedFlags | localFlags); }
+		UIRectangle GetRect() const { return UIRectangle(pos.x, pos.y, pos.x + size.x, pos.y + size.y); }
+
+	private:
+		//extends DockNodeFlags
+		enum class DockNodePrivateFlags
+		{
+			DockSpace = 1 << 10,
+			CentralNode = 1 << 11,
+			NoTabBar = 1 << 12,
+			HiddenTabBar = 1 << 13,
+			NoWindowMenuButton = 1 << 14,
+			NoCloseButton = 1 << 15,
+			NoDocking = 1 << 16,
+			NoDockingSplitMe = 1 << 17,
+			NoDockingSplitOther = 1 << 18,  //prevent this node from splitting another window/node.
+			NoDockingOverMe = 1 << 19,  //prevent another window/node to be docked over this node.
+			NoDockingOverOther = 1 << 20,  //prevent this node to be docked over another window/node.
+			NoResizeX = 1 << 21,
+			NoResizeY = 1 << 22,
+			SharedFlagsInheritMask_ = ~0,
+			NoResizeFlagsMask = (int)DockNodeFlags::NoResize | NoResizeX | NoResizeY,
+			LocalFlagsMask = (int)DockNodeFlags::NoSplit | NoResizeFlagsMask | (int)DockNodeFlags::AutoHideTabBar | DockSpace
+			| CentralNode | NoTabBar | HiddenTabBar | NoWindowMenuButton | NoCloseButton | NoDocking,
+
+			//~ is bitwise !
+			LocalFlagsTransferMask = LocalFlagsMask & ~DockSpace,
+			SavedFlagsMask = NoResizeFlagsMask | DockSpace | CentralNode | NoTabBar
+			| HiddenTabBar | NoWindowMenuButton | NoCloseButton | NoDocking
+		};
+
+	};
+
+	enum class  UIDirection
+	{
+		None = -1,
+		Left = 0,
+		Right = 1,
+		Up = 2,
+		Down = 3,
+		Count
+	};
+
+	//contains the data of window inside of the 
+	//actual window on the platform
+	struct UIWindow
+	{
+		char* name;
+		unsigned int id;
+		UIWindowFlags flags;
+		ViewportPrivate* viewport;
+		unsigned int viewportID;
+		Vector2 viewportPos;
+		Vector2 pos;
+		Vector2 size; //current size (even if collapsed)
+		Vector2 sizeFull; //size when not collapsed
+		Vector2 contentSize;
+		Vector2 contentSizeExplicit; //needed?
+		Vector2 windowPadding;
+		float windowRounding; //needed?
+		float windowBorderSize;
+		int nameBufferLength; //can be larger than strlen(name)
+		unsigned int moveID;
+		unsigned int childID;
+		Vector2 scroll;
+		Vector2 scrollMax;
+		Vector2 scrollTarget;
+		Vector2 scrollTargetCenterRatio;
+		Vector2 scrollbarSize;
+		bool scrollbarXVisible, scrollbarYVisible;
+		bool viewportOwned;
+		bool active;
+		bool wasActive;
+		bool writeAccessed; //true when a widget accesses the current window
+		bool collapsed;
+		bool wantCollapseToggle;
+
+		//used when items are clipped and don't need to be rendered (needed? do we modify original window for that?)
+		bool skipItems;
+		bool appearing;
+		bool hidden;
+		bool isFallbackWindow; //set on the debug default window (needed?)
+		bool hasCloseButton;
+
+		//current border is being held for resize
+		signed char resizeBorderHeld;
+
+		short beginCount; //number of Begin during current frame (needed?)
+		short beginOrderWithinParent;
+		short beginOrderWithinContext;
+		unsigned int popupID;
+		signed char autoFitFramesX, autoFitFramesY;
+		signed char autoFitChildAxises;
+		bool autoFitOnlyGrows;
+		UIDirection autoPosLastDirection;
+
+		//hides and skips the rendering of the window for the next N frames without allowing items to be submitted (needed?)
+		int hideWindowSkipItems;
+
+		//same as above but allow items to be submitted for size measuring (needed?)
+		int hideWindowDontSkipItems;
+
+		UICondition setWindowPosAllowedFlags; //represents the allowed flags for the setWindowPos function
+		UICondition setWindowSizeAllowedFlags;
+		UICondition setWindowCollapsedAllowedFlags;
+		UICondition setWindowDockAllowedFlags;
+		Vector2 setWindowPosVal;
+		Vector2 setWindowPosPivot;
+
+		ADynArr<unsigned int> idStack;
+		UIWindowTempData tempData;
+
+		UIRectangle outerRectClipped;
+		UIRectangle innerRectangle;
+		UIRectangle innerClippedRectangle;
+		UIRectangle workRectangle;
+		UIRectangle clipRectangle;
+		UIRectangle contentRegionRectangle;
+		Vector2Short hitTestHoleSize, hitTestHoleOffset;
+
+		int lastFrameActive;
+		int lastFrameJustFocused;
+		float lastTimeActive;
+		float itemWidthDefault;
+		ADynArr<IntPtr> stateStorage;
+		ADynArr<UIColumn> columnStorage;
+		float fontWindowScale;
+		float fontDpiScale;
+		int settingsOffset;
+
+		UIWindow* parentWindow;
+		UIWindow* rootWindow;
+		UIWindow* rootWindowDockStop;
+		UIWindow* rootWindowForTitleBarHighlight;
+		UIWindow* rootWindowForNav;
+
+		UIWindow* navLastChildWindow;
+		unsigned int navLastIDs[(unsigned long long)NavLayer::Count];
+		UIRectangle navRectangleRelative[(unsigned long long)NavLayer::Count];
+
+		bool memoryCompacted;
+
+		//docking
+		DockNode* dockNode;
+		DockNode* dockNodeAsHost;
+		unsigned int dockID;
+		ItemStatusFlags dockTabItemStatusFlags;
+		UIRectangle dockTabItemRectangle;
+		short dockOrder;
+		bool dockIsActive : 1; //set to 1 by default?
+		bool dockTabIsVisible : 1; //set to 1 by default?
+		bool dockTabWantClose : 1; //set to 1 by default?
+
+	public:
+		UIWindow(UIContext* context, const char* name);
+		~UIWindow();
+
+		unsigned int GetID(const char* str, const char* str_end = nullptr);
+		unsigned int GetID(const void* ptr);
+		unsigned int GetID(int n);
+		unsigned int GetIDNoKeepAlive(const char* str, const char* str_end = nullptr);
+		unsigned int GetIDNoKeepAlive(const void* ptr);
+		unsigned int GetIDNoKeepAlive(int n);
+		unsigned int GetIDFromRectangle(const UIRectangle& r_abs);
+
+		// We don't use g.FontSize because the window may be != g.CurrentWidow.
+		UIRectangle Rect() const { return UIRectangle(pos.x, pos.y, pos.x + size.x, pos.y + size.y); }
+
+		float CalcFontSize() const;
+		UIRectangle TitleBarRect() const { return UIRectangle(pos, Vector2(pos.x + sizeFull.x, pos.y + TitleBarHeight())); }
+
+		float TitleBarHeight() const;
+		float MenuBarHeight() const;
+
+		UIRectangle MenuBarRect() const
+		{
+			float y1 = pos.y + TitleBarHeight();
+			return UIRectangle(pos.x, y1, pos.x + sizeFull.x, y1 + MenuBarHeight());
+		}
+	};
+
+
+	// Storage for a tab bar (sizeof() 92~96 bytes)
+	struct TabBar
+	{
+		ADynArr<TabItem> tabs;
+		unsigned int id;                     // Zero for tab-bars used by docking
+		unsigned int selectedTabID;          // Selected tab/window
+		unsigned int nextSelectedTabID;
+		unsigned int visibleTabID;           // Can occasionally be != SelectedTabId (e.g. when previewing contents for CTRL+TAB preview)
+		int currFrameVisible;
+		int prevFrameVisible;
+		UIRectangle barRect;
+		float lastTabContentHeight;   // Record the height of contents submitted below the tab bar
+		float offsetMax;              // Distance from BarRect.Min.x, locked during layout
+		float offsetMaxIdeal;         // Ideal offset if all tabs were visible and not clipped
+		float offsetNextTab;          // Distance from BarRect.Min.x, incremented with each BeginTabItem() call, not used if ImGuiTabBarFlags_Reorderable if set.
+		float scrollingAnim;
+		float scrollingTarget;
+		float scrollingTargetDistToVisibility;
+		float scrollingSpeed;
+		TabBarFlags flags;
+		unsigned int reorderRequestTabId;
+		char reorderRequestDir;
+		bool wantLayout;
+		bool visibleTabWasSubmitted;
+		short lastTabItemIdx;         // For BeginTabItem()/EndTabItem()
+		Vector2 framePadding;           // style.FramePadding locked at the time of BeginTabBar()
+		StringBuilder tabsNames;              // For non-docking tab bar we re-append names in a contiguous buffer.
+
+		TabBar();
+
+		int GetTabOrder(const TabItem* tab) const
+		{
+			for (int i = 0; i < tabs.GetCount(); i++)
+			{
+				if (tab == &tabs[i])
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		const char* GetTabName(const TabItem* tab) const
+		{
+			if (tab->window != nullptr)
+			{
+				return tab->window->name;
+			}
+
+			AE_CORE_ASSERT(tab->nameOffset != -1 && tab->nameOffset < tabsNames.buffer.GetCount(), "");
+			return tabsNames.buffer.GetData() + tab->nameOffset;
+		}
+
+		bool operator==(const TabBar& other) const
+		{
+			return id == other.id;
+		}
+
+		bool operator!=(const TabBar& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+
 	//flags for editing/picking colors
-	enum ColorEditFlags
+	enum class ColorEditFlags
 	{
 		None = 0,
 		NoAlpha = 1 << 1,
@@ -507,7 +1752,6 @@ namespace AstralEngine
 		PickerMask = PickerHueWheel | PickerHueBar,
 		InputMask = InputRGB | InputHSV
 	};
-
 
 	struct UIStyle
 	{
@@ -567,12 +1811,24 @@ namespace AstralEngine
 	{
 		UIStyleColor color;
 		Vector4 backupVal;
+
+		bool operator==(const UIColorMod& other) const
+		{
+			return color == other.color && backupVal == other.backupVal;
+		}
+
+		bool operator!=(const UIColorMod& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
-	enum UIStyleVar
+	enum class UIStyleVar
 	{
+		None = -1,
+
 		// Enum name ------- // Member in structure 
-		Alpha,               // float     Alpha
+		Alpha = 0,           // float     Alpha
 		WindowPadding,       // Vector2   WindowPadding
 		WindowRounding,      // float     WindowRounding
 		WindowBorderSize,    // float     WindowBorderSize
@@ -603,232 +1859,49 @@ namespace AstralEngine
 		UIStyleVar   varIdx;
 		union { int backupInt[2]; float backupFloat[2]; };
 
-		UIStyleMod(UIStyleVar idx, int v) { varIdx = idx; backupInt[0] = v; }
-		UIStyleMod(UIStyleVar idx, float v) { varIdx = idx; backupFloat[0] = v; }
-		UIStyleMod(UIStyleVar idx, Vector2 v) { varIdx = idx; backupFloat[0] = v.x; backupFloat[1] = v.y; }
+		UIStyleMod() : varIdx(UIStyleVar::None) { }
+		UIStyleMod(UIStyleVar idx, int v) : varIdx(idx) { backupInt[0] = v; }
+		UIStyleMod(UIStyleVar idx, float v) : varIdx(idx) { backupFloat[0] = v; }
+		UIStyleMod(UIStyleVar idx, Vector2 v) : varIdx(idx) { backupFloat[0] = v.x; backupFloat[1] = v.y; }
+
+		bool operator==(const UIStyleMod& other) const
+		{
+			return varIdx == other.varIdx;
+		}
+
+		bool operator!=(const UIStyleMod& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	// Storage for current popup stack
 	struct UIPopupData
 	{
 		//fields are set in another callback when the popup is created
-		unsigned int popupId;        
-		AReference<AWindow> window;      
-		AReference<AWindow> sourceWindow;
+		unsigned int popupID;        
+		UIWindow* window;      
+		UIWindow* sourceWindow;
 		int openFrameCount; 
-		unsigned int openParentId; 
+		unsigned int openParentID; 
 		Vector2 openPopupPos;   
 		Vector2 openMousePos;   
 
-		UIPopupData() : popupId(0), window(nullptr), sourceWindow(nullptr), openFrameCount(-1), openParentId(0) { }
-	};
+		UIPopupData() : popupID(0), window(nullptr), sourceWindow(nullptr), openFrameCount(-1), openParentID(0) { }
 
-	//helper to keep track of rectangles in the UI display
-	struct UIRectangle
-	{
-		//uses screen coords
-		Vector2 minVec;    // Upper-left
-		Vector2 maxVec;    // Lower-right
-
-		UIRectangle() : minVec(0.0f, 0.0f), maxVec(0.0f, 0.0f) { }
-		UIRectangle(const Vector2& min, const Vector2& max) : minVec(min), maxVec(max) { }
-		UIRectangle(const Vector4& v) : minVec(v.x, v.y), maxVec(v.z, v.w) { }
-		UIRectangle(float x1, float y1, float x2, float y2) : minVec(x1, y1), maxVec(x2, y2) { }
-
-		Vector2 GetCenter() const { return Vector2((minVec.x + maxVec.x) * 0.5f, (minVec.y + maxVec.y) * 0.5f); }
-		
-		Vector2 GetSize() const { return Vector2(maxVec.x - minVec.x, maxVec.y - minVec.y); }
-		
-		float GetWidth() const { return maxVec.x - minVec.x; }
-		
-		float GetHeight() const { return maxVec.y - minVec.y; }
-		
-		Vector2 GetTopLeftVertex() const { return minVec; }
-		
-		Vector2 GetTopRVertex() const { return Vector2(maxVec.x, minVec.y); }
-		
-		Vector2 GetBottomLeftVertex() const { return Vector2(minVec.x, maxVec.y); }
-		
-		Vector2 GetBottomRightVertex() const { return maxVec; }
-
-		bool Contains(const Vector2& p) const 
-		{ 
-			return p.x >= minVec.x && p.x < maxVec.x 
-				&& p.y >= minVec.y && p.y < maxVec.y; 
-		}
-		
-		bool Contains(const UIRectangle& r) const 
-		{ 
-			return r.minVec.x >= minVec.x && r.maxVec.x <= maxVec.x 
-				&& r.minVec.y >= minVec.y && r.maxVec.y <= maxVec.y; 
-		}
-		
-		//if r1 contains r2, r1 & r2 do not overlap, if r1 overlaps r2, r2 does not overlap r1
-		bool Overlaps(const UIRectangle& r) const 
-		{ 
-			return r.minVec.y <  maxVec.y && r.maxVec.y >  maxVec.y 
-				&& r.maxVec.x <  maxVec.x && r.maxVec.x >  minVec.x; 
-		}
-		
-		//increases size of rectangle so that the diagonal formed by two opposing corners of the rectangle 
-		//is at least the length of the provided vector
-		void Add(const Vector2& p) 
-		{ 
-			if (minVec.x > p.x)
-			{
-				minVec.x = p.x;
-			}     
-			
-			if (minVec.y > p.y)
-			{
-				minVec.y = p.y;
-			}
-			
-			if (maxVec.x < p.x)
-			{
-				maxVec.x = p.x;
-			}
-			
-			if (maxVec.y < p.y)
-			{
-				maxVec.y = p.y;
-			}
-		}
-		
-		//increases size of rectangle so that the diagonal formed by two opposing corners of the rectangle 
-		//is at least the length of the same diagonal for the provided rectangle
-		void Add(const UIRectangle& r) 
-		{ 
-			if (minVec.x > r.minVec.x)
-			{
-				minVec.x = r.minVec.x;
-			}
-			
-			if (minVec.y > r.minVec.y)
-			{
-				minVec.y = r.minVec.y;
-			}
-			
-			if (maxVec.x < r.maxVec.x)
-			{
-				maxVec.x = r.maxVec.x;
-			}
-			
-			if (maxVec.y < r.maxVec.y)
-			{
-				maxVec.y = r.maxVec.y;
-			}
-		}
-		
-		//expands each vertices of the rectangle by the amount provided
-		void Expand(const float amount) 
-		{ 
-			minVec.x -= amount; 
-			minVec.y -= amount;  
-			maxVec.x += amount;   
-			maxVec.y += amount; 
-		}
-		
-		//expands each vertices of the rectangle by the amount of the x and y direction of the 
-		//vector provided by their respective dimension
-		void Expand(const Vector2& amount) 
-		{ 
-			minVec.x -= amount.x; 
-			minVec.y -= amount.y; 
-			maxVec.x += amount.x; 
-			maxVec.y += amount.y; 
+		bool operator==(const UIPopupData& other) const
+		{
+			return popupID == other.popupID;
 		}
 
-		void Translate(const Vector2& d) 
-		{ 
-			minVec.x += d.x; 
-			minVec.y += d.y; 
-			maxVec.x += d.x; 
-			maxVec.y += d.y; 
+		bool operator!=(const UIPopupData& other) const
+		{
+			return !(*this == other);
 		}
-		
-		void TranslateX(float dx) 
-		{ 
-			minVec.x += dx; 
-			maxVec.x += dx;
-		}
-
-		void TranslateY(float dy) 
-		{ 
-			minVec.y += dy; 
-			maxVec.y += dy; 
-		}
-
-		//may lead to an inverted rectangle, which is fine for Contains/Overlaps test but not for display.
-		void ClipWith(const UIRectangle& r) 
-		{ 
-			minVec = Vector2::Max(minVec, r.minVec);
-			maxVec = Vector2::Min(maxVec, r.maxVec); 
-		}                   
-		
-		//ensure both points are fully clipped with no inversion.
-		void ClipWithFull(const UIRectangle& r) 
-		{ 
-			minVec = Vector2::Clamp(minVec, r.minVec, r.maxVec); 
-			maxVec = Vector2::Clamp(maxVec, r.minVec, r.maxVec);
-		} 
-
-		void Floor() 
-		{ 
-			minVec.x = Math::Floor(minVec.x); 
-			minVec.y = Math::Floor(minVec.y); 
-			maxVec.x = Math::Floor(maxVec.x); 
-			maxVec.y = Math::Floor(maxVec.y); 
-		}
-
-		bool IsInverted() const 
-		{ 
-			return minVec.x > maxVec.x || minVec.y > maxVec.y; 
-		}
-
-		Vector4 ToVec4() const 
-		{ 
-			return Vector4(minVec.x, minVec.y, maxVec.x, maxVec.y); 
-		}
-	};
-
-	//for internal use only, the fields declared here are only for the engine's use
-	struct ViewportPrivate : public Viewport
-	{
-		int index;
-		int lastFrameActive;
-		int lastFrontMostStampCount;
-		unsigned int lastNameHash;
-		Vector2 lastPos;
-		float alpha; // Window opacity (when dragging dockable windows/viewports we make them transparent)
-		float lastAlpha;
-		short platformMonitor;
-		bool platformWindowCreated;
-		AReference<AWindow> window; // Set when the viewport is owned by a window 
-		Vector2 lastPlatformPos;
-		Vector2 lastPlatformSize;
-		Vector2 lastRendererSize;
-		Vector2 currWorkOffsetMin; // Work area top-left offset being increased during the frame
-		Vector2 currWorkOffsetMax; // Work area bottom-right offset being decreased during the frame
-
-		ViewportPrivate() : index(-1), lastFrameActive(-1), lastFrontMostStampCount(-1), 
-			lastNameHash(0), alpha(1.0f), lastAlpha(1.0f), platformMonitor(-1), 
-			platformWindowCreated(false), window(nullptr), lastPlatformPos(FLT_MAX, FLT_MAX), 
-			lastPlatformSize(FLT_MAX, FLT_MAX), lastRendererSize(FLT_MAX, FLT_MAX) { }
-
-		UIRectangle GetMainRect() const { return UIRectangle(m_pos.x, m_pos.y, m_pos.x + m_size.x, m_pos.y + m_size.y); }
-		UIRectangle GetWorkRect() const { return UIRectangle(m_pos.x + m_workOffsetMin.x, m_pos.y + m_workOffsetMin.y, m_pos.x + m_size.x + m_workOffsetMax.x, m_pos.y + m_size.y + m_workOffsetMax.y); }
-	};
-
-	enum class NavLayer
-	{
-		Main = 0,    // Main scrolling layer
-		Menu = 1,    // Menu layer (access with Alt/Menu)
-		Count
 	};
 
 	//used to navigate sibling menus through parent from a child menu
-	enum NavMoveFlags
+	enum class NavMoveFlags
 	{
 		None = 0,
 		LoopX = 1 << 0,   //on failed request, restart from opposite side
@@ -853,19 +1926,9 @@ namespace AstralEngine
 		ForwardActive
 	};
 
-	enum class  UIDirection
-	{
-		None = -1,
-		Left = 0,
-		Right = 1,
-		Up = 2,
-		Down = 3,
-		Count
-	};
-
 	struct NavMoveResult
 	{
-		AReference<AWindow> window; //best candidate window
+		UIWindow* window; //best candidate window
 		unsigned int id; //best candidate ID
 		unsigned int focusScopeId; //best candidate focus scope ID
 		float distBox; //best candidate box distance to current NavId
@@ -887,7 +1950,7 @@ namespace AstralEngine
 		}
 	};
 
-	enum DragDropFlags
+	enum class DragDropFlags
 	{
 		None = 0,
 		// BeginDragDropSource() flags ///////////////////////////////
@@ -959,173 +2022,6 @@ namespace AstralEngine
 		bool IsDelivery() const { return delivery; }
 	};
 
-	enum TabItemFlags
-	{
-		None = 0,
-		UnsavedDocument = 1 << 0, //append '*' to title without affecting the ID
-		SetSelected = 1 << 1, //set curr tab as selected through code when calling BeginTabItem()
-		NoCloseWithMiddleMouseButton = 1 << 2, //disable behavior of closing tabs with middle mouse button
-		NoPushId = 1 << 3, //don't call PushID(tab->ID)/PopID() on BeginTabItem()/EndTabItem()
-		NoTooltip = 1 << 4 
-	};
-
-	struct TabItem
-	{
-		unsigned int id;
-		TabItemFlags flags;
-		AReference<AWindow> window;  //when TabItem is part of a DockNode's TabBar, we hold on to a window.
-		int lastFrameVisible;
-		int lastFrameSelected; //this allows us to infer an ordered list of the last activated tabs with little maintenance
-		int nameOffset;
-		float offset;
-		float width;
-		float contentWidth;
-
-		TabItem() : id(0), flags(TabItemFlags::None), lastFrameVisible(-1), 
-			lastFrameSelected(-1), nameOffset(-1), offset(0.0f), width(0.0f), contentWidth(0.0f) { }
-	
-	};
-
-	enum TabBarFlags
-	{
-		None = 0,
-		Reorderable = 1 << 0, //allow manually dragging tabs to re-order them + New tabs are appended at the end of list
-		AutoSelectNewTabs = 1 << 1, //automatically select new tabs when they appear
-		TabListPopupButton = 1 << 2, //disable buttons to open the tab list popup
-		NoCloseWithMiddleMouseButton = 1 << 3,
-		NoTabListScrollingButtons = 1 << 4,
-		NoTooltip = 1 << 5,
-		FittingPolicyResizeDown = 1 << 6, //resize tabs when they don't fit
-		FittingPolicyScroll = 1 << 7, //add scroll buttons when tabs don't fit
-		FittingPolicyMask = FittingPolicyResizeDown | FittingPolicyScroll,
-		FittingPolicyDefault = FittingPolicyResizeDown
-	};
-
-	struct StringBuilder
-	{
-		//buffer is null terminated
-		ADynArr<char> buffer;
-		static char EmptyString[1]; //stores the null char
-
-		StringBuilder() { }
-		
-		inline char operator[](int i) const 
-		{ 
-			AE_CORE_ASSERT(buffer.GetData() != nullptr, ""); 
-			return buffer.GetData()[i]; 
-		}
-		
-		const char* begin() const 
-		{ 
-			if(!buffer.IsEmpty())
-			{
-				return &buffer.GetData()[0];
-			}
-
-			return EmptyString; 
-		}
-		
-		const char* end() const 
-		{ 
-			if (!buffer.IsEmpty())
-			{
-				return &buffer.GetData()[buffer.GetCount() - 1];
-			}
-
-			return EmptyString;
-		}
-
-		size_t GetCount() const 
-		{
-			if (buffer.IsEmpty())
-			{
-				return 0;
-			}
-			return buffer.GetCount() - 1;
-		}
-
-		bool IsEmpty() const 
-		{ 
-			return buffer.GetCount() <= 1; 
-		}
-		void Clear() 
-		{ 
-			buffer.Clear(); 
-		}
-		
-		void Reserve(size_t count) 
-		{ 
-			buffer.Reserve(count); 
-		}
-		
-		const char* c_str() const 
-		{ 
-			if (IsEmpty())
-			{
-				return EmptyString;
-			}
-			return buffer.GetData();
-		}
-
-		void Append(const char* str, const char* str_end = nullptr);
-		void Appendf(const char* fmt, ...);
-		void Appendfv(const char* fmt, va_list args);
-	};
-
-	// Storage for a tab bar (sizeof() 92~96 bytes)
-	struct TabBar
-	{
-		ADynArr<TabItem> tabs;
-		unsigned int id;                     // Zero for tab-bars used by docking
-		unsigned int selectedTabId;          // Selected tab/window
-		unsigned int nextSelectedTabId;
-		unsigned int visibleTabId;           // Can occasionally be != SelectedTabId (e.g. when previewing contents for CTRL+TAB preview)
-		int currFrameVisible;
-		int prevFrameVisible;
-		UIRectangle barRect;
-		float lastTabContentHeight;   // Record the height of contents submitted below the tab bar
-		float offsetMax;              // Distance from BarRect.Min.x, locked during layout
-		float offsetMaxIdeal;         // Ideal offset if all tabs were visible and not clipped
-		float offsetNextTab;          // Distance from BarRect.Min.x, incremented with each BeginTabItem() call, not used if ImGuiTabBarFlags_Reorderable if set.
-		float scrollingAnim;
-		float scrollingTarget;
-		float scrollingTargetDistToVisibility;
-		float scrollingSpeed;
-		TabBarFlags flags;
-		unsigned int reorderRequestTabId;
-		char reorderRequestDir;
-		bool wantLayout;
-		bool visibleTabWasSubmitted;
-		short lastTabItemIdx;         // For BeginTabItem()/EndTabItem()
-		Vector2 framePadding;           // style.FramePadding locked at the time of BeginTabBar()
-		StringBuilder tabsNames;              // For non-docking tab bar we re-append names in a contiguous buffer.
-
-		TabBar();
-
-		int GetTabOrder(const TabItem* tab) const 
-		{ 
-			for (int i = 0; i < tabs.GetCount(); i++)
-			{
-				if (tab == &tabs[i])
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-		
-		const char* GetTabName(const TabItem* tab) const
-		{
-			if (tab->window != nullptr)
-			{
-				return tab->window->GetTitle().c_str();
-			}
-
-			AE_CORE_ASSERT(tab->nameOffset != -1 && tab->nameOffset < tabsNames.buffer.GetCount(), "");
-			return tabsNames.buffer.GetData() + tab->nameOffset;
-		}
-	};
-
 	union StorageData
 	{
 		int num;
@@ -1176,14 +2072,14 @@ namespace AstralEngine
 
 		bool Contains(const T* ptr) const
 		{
-			return ptr >= buffer.GetData() && ptr < buffer.GetData() + (buffer.GetCount() * sizeof(T);
+			return ptr >= buffer.GetData() && ptr < buffer.GetData() + (buffer.GetCount() * sizeof(T));
 		}
 
 		void Clear() 
 		{
 			for (auto& pair : map)
 			{
-				delete &buffer[pair.GetElement()];
+				delete &buffer[pair.GetElement().num];
 			}
 
 			map.Clear(); 
@@ -1244,6 +2140,16 @@ namespace AstralEngine
 	{
 		int index;
 		float width;
+
+		bool operator==(const ShrinkWidthItem& other) const
+		{
+			return index == other.index && width == other.width;
+		}
+
+		bool operator!=(const ShrinkWidthItem& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	class UndoRecord
@@ -1255,7 +2161,6 @@ namespace AstralEngine
 		int charStorage;
 	};
 
-
 	class UndoState
 	{
 		friend struct InputTextState;
@@ -1265,7 +2170,6 @@ namespace AstralEngine
 		short m_undoPoint, m_redoPoint;
 		int m_undoCharPoint, m_redoCharPoint;
 	};
-
 
 	struct TextEditState
 	{
@@ -1291,7 +2195,7 @@ namespace AstralEngine
 
 	};
 
-	enum InputTextFlags
+	enum class InputTextFlags
 	{
 		None = 0,
 		CharsDecimal = 1 << 0,   
@@ -1345,7 +2249,6 @@ namespace AstralEngine
 		void InsertChars(int pos, const char* text, const char* textEnd = nullptr);
 		bool HasSelection() const { return selectionStart != selectionEnd; }
 	};
-
 
 	struct InputTextState
 	{
@@ -1428,150 +2331,31 @@ namespace AstralEngine
 		}
 	};
 
-	enum class DockRequestType
-	{
-		None = 0,
-		Dock,
-		Undock,
-		Split//same as Dock but no payload
-	};
-
-	enum DockNodeFlags
-	{
-		None = 0,
-		KeepAliveOnly = 1 << 0,
-		NoDockingInCentralNode = 1 << 2,
-		PassthruCentralNode = 1 << 3,   
-		NoSplit = 1 << 4, 
-		NoResize = 1 << 5,
-		AutoHideTabBar = 1 << 6
-	};
-
-	// X/Y enums are fixed to 0/1 so they may be used as index
-	enum class Axis
-	{
-		None = -1,
-		X = 0,
-		Y = 1
-	};
-
-	enum class DockNodeState
-	{
-		Unknown,
-		HostWindowHiddenBecauseSingleWindow,
-		HostWindowHiddenBecauseWindowsAreResizing,
-		HostWindowVisible
-	};
-
-	//indicates the authority source (dock node vs window) of a field
-	enum class DockDataAuthority
-	{
-		Auto,
-		DockNode,
-		Window
-	};
-
-	struct DockNode
-	{
-		unsigned int id;
-		DockNodeFlags sharedFlags; 
-		DockNodeFlags localFlags; 
-		DockNode* parentNode;
-		DockNode* childNodes[2];
-		ADynArr<AReference<AWindow>>  windows;
-		TabBar* tabBar;
-		Vector2 pos;   
-		Vector2 size;  
-		Vector2 sizeRef;
-		Axis splitAxis; 
-
-		DockNodeState state;
-		AReference<AWindow> hostWindow;
-		AReference<AWindow> visibleWindow;
-		DockNode* centralNode;
-		DockNode* onlyNodeWithWindows;
-		int lastFrameAlive;  
-		int lastFrameActive; 
-		int lastFrameFocused;
-		unsigned int lastFocusedNodeID;
-		unsigned int selectedTabID;    
-		unsigned int wantCloseTabID;   
-		DockDataAuthority authorityForPos = DockDataAuthority::Window;
-		DockDataAuthority authorityForSize = DockDataAuthority::Window;
-		DockDataAuthority authorityForViewport = DockDataAuthority::Window;
-		bool isVisible = true; 
-		bool isFocused = true;
-		bool hasCloseButton = true;
-		bool hasWindowMenuButton = true;
-		bool enableCloseButton = true;
-		bool wantCloseAll = true; //set when closing all tabs at once.
-		bool wantLockSizeOnce = true;
-		bool wantMouseMove = true; 
-		bool wantHiddenTabBarUpdate = true;
-		bool wantHiddenTabBarToggle = true;
-		bool markedForPosSizeWrite = true; 
-
-		DockNode(unsigned int id);
-		~DockNode();
-		bool IsRootNode() const { return parentNode == nullptr; }
-		bool IsDockSpace() const { return (localFlags & DockNodePrivateFlags::DockSpace) != 0; }
-		bool IsFloatingNode() const { return parentNode == nullptr && (localFlags & DockNodePrivateFlags::DockSpace) == 0; }
-		bool IsCentralNode() const { return (localFlags & DockNodePrivateFlags::CentralNode) != 0; }
-		bool IsHiddenTabBar() const { return (localFlags & DockNodePrivateFlags::HiddenTabBar) != 0; } 
-		bool IsNoTabBar() const { return (localFlags & DockNodePrivateFlags::NoTabBar) != 0; }
-		bool IsSplitNode() const { return childNodes[0] != nullptr; }
-		bool IsLeafNode() const { return childNodes[0] == nullptr; }
-		bool IsEmpty() const { return childNodes[0] == nullptr && windows.GetCount() == 0; }
-		DockNodeFlags GetMergedFlags() const { return (DockNodeFlags)(sharedFlags | localFlags); }
-		UIRectangle GetRect() const { return UIRectangle(pos.x, pos.y, pos.x + size.x, pos.y + size.y); }
-
-	private:
-		//extends DockNodeFlags
-		enum DockNodePrivateFlags
-		{
-			DockSpace = 1 << 10,
-			CentralNode = 1 << 11,
-			NoTabBar = 1 << 12,
-			HiddenTabBar = 1 << 13,
-			NoWindowMenuButton = 1 << 14,
-			NoCloseButton = 1 << 15,
-			NoDocking = 1 << 16,
-			NoDockingSplitMe = 1 << 17,
-			NoDockingSplitOther = 1 << 18,  //prevent this node from splitting another window/node.
-			NoDockingOverMe = 1 << 19,  //prevent another window/node to be docked over this node.
-			NoDockingOverOther = 1 << 20,  //prevent this node to be docked over another window/node.
-			NoResizeX = 1 << 21,
-			NoResizeY = 1 << 22,
-			SharedFlagsInheritMask_ = ~0,
-			NoResizeFlagsMask = NoResize | NoResizeX | NoResizeY,
-			LocalFlagsMask = NoSplit | NoResizeFlagsMask | AutoHideTabBar | DockSpace 
-				| CentralNode | NoTabBar | HiddenTabBar | NoWindowMenuButton | NoCloseButton | NoDocking,
-			
-			//~ is bitwise !
-			LocalFlagsTransferMask = LocalFlagsMask & ~DockSpace,
-			SavedFlagsMask = NoResizeFlagsMask | DockSpace | CentralNode | NoTabBar 
-				| HiddenTabBar | NoWindowMenuButton | NoCloseButton | NoDocking
-		};
-
-	};
-
-
 	struct DockRequest
 	{
 		DockRequestType    type;
-		AReference<AWindow> dockTargetWindow;   // Destination/Target Window to dock into (may be a loose window or a DockNode, might be NULL in which case DockTargetNode cannot be NULL)
+		UIWindow* dockTargetWindow;   // Destination/Target Window to dock into (may be a loose window or a DockNode, might be NULL in which case DockTargetNode cannot be NULL)
 		DockNode* dockTargetNode;     // Destination/Target Node to dock into
-		AReference<AWindow> dockPayload;        // Source/Payload window to dock (may be a loose window or a DockNode), [Optional]
+		UIWindow* dockPayload;        // Source/Payload window to dock (may be a loose window or a DockNode), [Optional]
 		UIDirection dockSplitDir;
 		float dockSplitRatio;
 		bool dockSplitOuter;
-		AReference<AWindow> undockTargetWindow;
+		UIWindow* undockTargetWindow;
 		DockNode* undockTargetNode;
 
 		DockRequest() : type(DockRequestType::None), dockTargetWindow(nullptr), dockPayload(nullptr), 
 			undockTargetWindow(nullptr), dockTargetNode(nullptr), undockTargetNode(nullptr), 
 			dockSplitDir(UIDirection::None), dockSplitRatio(0.5f), dockSplitOuter(false) { }
 		
+		bool operator==(const DockRequest& other) const
+		{
+			return type == other.type && dockTargetWindow == other.dockTargetWindow && dockTargetNode == other.dockTargetNode;
+		}
+
+		bool operator!=(const DockRequest& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	//persistent settings data stored in SettingsNodes
@@ -1591,6 +2375,16 @@ namespace AstralEngine
 		DockNodeSettings() : id(0), parentNodeID(0), parentWindowID(0), 
 			selectedWindowID(0), splitAxis((signed char)Axis::None), 
 			depth(0), flags(DockNodeFlags::None) { }
+
+		bool operator==(const DockNodeSettings& other) const
+		{
+			return id == other.id && parentNodeID == other.parentNodeID && parentWindowID == other.parentWindowID;
+		}
+
+		bool operator!=(const DockNodeSettings& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	struct DockContext
@@ -1615,17 +2409,100 @@ namespace AstralEngine
 		void* userData;
 
 		SettingsHandler() { memset(this, 0, sizeof(*this)); }
+
+		bool operator==(const SettingsHandler& other) const
+		{
+			return typeName == other.typeName && typeHash == other.typeHash;
+		}
+
+		bool operator!=(const SettingsHandler& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	//builds and iterate a contiguous stream of variable-sized structures.
+	//stores the chunk size first, and align the final size on 4 bytes boundaries 
+	//(this what the '(X + 3) & ~3' statement is for)
+	template<typename T>
+	struct ChunkStream
+	{
+		ADynArr<char>  buffer;
+
+		void Clear() { buffer.Clear(); }
+		bool IsEmpty() const { return buffer.IsEmpty() == 0; }
+		size_t GetCount() const { return buffer.GetCount(); }
+
+		T* AllocateChunk(size_t size) 
+		{ 
+			size_t headerSize = 4;
+			//makes sure size has the lower bits (1 & 2) set to 0 ex: ...100
+			size = ((headerSize + size) + 3u) & ~3u;
+			int offset = buffer.GetCount();
+			buffer.Reserve(offset + size);
+			((int*)(void*)(buffer.GetData() + offset))[0] = (int)size;
+			return (T*)(void*)(buffer.GetData() + offset + (int)headerSize);
+		}
+		
+		T* begin() 
+		{ 
+			size_t headerSize = 4; 
+			if (buffer.GetData() == nullptr)
+			{
+				return nullptr;
+			}
+			return (T*)(void*)(buffer.GetData() + headerSize);
+		}
+
+		T* NextChunk(T* ptr) 
+		{ 
+			size_t headerSize = 4;
+			AE_CORE_ASSERT(ptr >= begin() && ptr < end(), "invalid ptr provided");
+			ptr = (T*)(void*)((char*)(void*)ptr + ChunkSize(ptr));
+			if (ptr == (T*)(void*)((char*)end() + headerSize))
+			{
+				return nullptr;
+			}
+			AE_CORE_ASSERT(ptr < end(), "invalid ptr provided"); 
+			return ptr; 
+		}
+		
+		size_t ChunkSize(const T* ptr) 
+		{ 
+			return ((const int*)ptr)[-1]; 
+		}
+
+		T* end() 
+		{ 
+			return (T*)(void*)(buffer.GetData() + buffer.GetCount()); 
+		}
+		
+		int OffsetFromPtr(const T* ptr) 
+		{ 
+			AE_CORE_ASSERT(ptr >= begin() && ptr < end(), "Invalid ptr provided"); 
+			const long long offset = (const char*)ptr - buffer.GetData();
+			return (int)offset;
+		}
+		
+		T* PtrFromOffset(int offset) 
+		{ 
+			AE_CORE_ASSERT(offset >= 4 && offset < buffer.GetCount(), "Invalid offset provided");
+			return (T*)(void*)(buffer.GetData() + offset);
+		}
+
+	};
+
+	enum class LogType
+	{
+		None = 0,
+		TTY,
+		File,
+		Buffer,
+		Clipboard
 	};
 
 	struct UIContext
 	{
-	private:
-		union IntPtr
-		{
-			int i;
-			void* ptr;
-		};
-
 	public:
 
 		bool initialized;
@@ -1641,19 +2518,19 @@ namespace AstralEngine
 		float fontSize;
 		float fontBaseSize;
 		
-		ADynArr<AReference<AWindow>> windows;
-		ADynArr<AReference<AWindow>> windowFocusOrder;
-		ADynArr<AReference<AWindow>> windowTempSortBuffer; //used when reordering windows to keep parents before children
-		ADynArr<AReference<AWindow>> currWindowStack;
+		ADynArr<UIWindow*> windows;
+		ADynArr<UIWindow*> windowFocusOrder;
+		ADynArr<UIWindow*> windowTempSortBuffer; //used when reordering windows to keep parents before children
+		ADynArr<UIWindow*> currWindowStack;
 		AUnorderedMap<unsigned int, StorageData> windowsByID;
 		int windowsActiveCount;
 
 		//window state
-		AReference<AWindow> currentWindow;
-		AReference<AWindow> hoveredWindow;
-		AReference<AWindow> hoveredWindowUnderMovingWindow;
-		AReference<AWindow> movingWindow;
-		AReference<AWindow> wheelingWindow;
+		UIWindow* currentWindow;
+		UIWindow* hoveredWindow;
+		UIWindow* hoveredWindowUnderMovingWindow;
+		UIWindow* movingWindow;
+		UIWindow* wheelingWindow;
 		
 		Vector2 wheelingWindowRefMousePos;
 		float wheelingWindowTimer;
@@ -1677,13 +2554,13 @@ namespace AstralEngine
 		unsigned int activeIDUsingNavInputMask;
 		unsigned int activeIDUsingKeyInputMask;
 		Vector2  activeIDClickOffset;
-		AReference<AWindow> activeIDWindow;
+		UIWindow* activeIDWindow;
 		InputSource activeIDSource;
 		int activeIDMouseButton;
 		unsigned int activeIDPreviousFrame;
 		bool activeIDPreviousFrameIsAlive;
 		bool activeIDPreviousFrameHasBeenEditedBefore;
-		AReference<AWindow> activeIDPreviousFrameWindow;
+		UIWindow* activeIDPreviousFrameWindow;
 		unsigned int lastActiveID;
 		float lastActiveTimer;
 
@@ -1695,7 +2572,7 @@ namespace AstralEngine
 		ADynArr<UIPopupData> beginPopupStack;
 
 		//viewports
-		ADynArr<ViewportPrivate*> viewports;
+		ADynArr<ViewportPrivate*> privateViewports;
 		float currDPIScale;
 		ViewportPrivate* currViewport;
 		ViewportPrivate* mouseViewport;
@@ -1703,7 +2580,7 @@ namespace AstralEngine
 		int viewportsFrontMostStampCount;
 
 		//gamepad/keyboard navigation
-		AReference<AWindow> navWindow;
+		UIWindow* navWindow;
 		unsigned int navID;
 		unsigned int navFocusedScopeID;
 		unsigned int navActivateID;
@@ -1739,13 +2616,13 @@ namespace AstralEngine
 		NavMoveResult navMoveResultLocal;
 		NavMoveResult navMoveResultLocalVisibleSet;
 		NavMoveResult navMoveResultOther;
-		AReference<AWindow> navWrapRequestWindow;
+		UIWindow* navWrapRequestWindow;
 		NavMoveFlags navWrapRequestFlags;
 
 		//navigation windowing
-		AReference<AWindow> navWindowingTarget;
-		AReference<AWindow> navWindowingTargetAnim;
-		AReference<AWindow> navWindowingListWindow;
+		UIWindow* navWindowingTarget;
+		UIWindow* navWindowingTargetAnim;
+		UIWindow* navWindowingListWindow;
 		float navWindowingTimer;
 		float navWindowingHighlightAlpha;
 		bool navWindowingToggleLayer;
@@ -1806,13 +2683,100 @@ namespace AstralEngine
 		float settingsDirtyTimer;
 		StringBuilder settingsInitialData;
 		ADynArr<SettingsHandler> settingsHandler;
-		not done
+		ChunkStream<WindowSettings> settingsWindows;
+
+		//capture/logging
+		bool logEnabled;
+		LogType logType;
+		FILE* logFile; //switch to std::ofstream?
+		StringBuilder logBuffer;
+		float logLinePosY;
+		bool logLineFirstItem;
+		int logDepthRef;
+		int logDepthToExpand;
+		int logDepthToExpandDefault;
+
+		//debug tool
+		bool debugItemPickerActive;
+		unsigned int debugItemPickerBreakID;
+
+		//misc
+		float framerateSecPerFrame[120];
+		int framerateSecPerFrameIndex;
+		float framerateSecPerFrameAccum;
+		int wantCaptureMouseNextFrame;
+		int wantCaptureKeyboardNextFrame;
+		int wantTextInputNextFrame;
+		char tempBuffer[1024 * 3 + 1];
+		size_t frameCount;
+
+		UIContext(FontAtlas* sharedFontAtlas)
+			: initialized(false), configFlagsCurrFrame(UIConfigFlags::None), configFlagsLastFrame(UIConfigFlags::None),
+			fontAtlasOwnedByContext(sharedFontAtlas != nullptr ? false : true), font(nullptr),
+			fontSize(0.0f), fontBaseSize(0.0f), windowsActiveCount(0), wheelingWindowTimer(0.0f),
+			hoveredID(0), hoveredIDAllowOverlap(false), hoveredIDPrevFrame(0),
+			hoveredIDTimer(0.0f), hoveredIDNotActiveTimer(0.0f), activeID(0),
+			activeIDIsAlive(0), activeIDTimer(0.0f), activeIDWasJustActivated(false),
+			activeIDAllowOverlap(false), activeIDHasBeenPressedBefore(false), activeIDHasBeenEditedBefore(false),
+			activeIDHasBeenEditedThisFrame(false), activeIDUsingNavDirMask(0x00), activeIDUsingNavInputMask(0x00),
+			activeIDUsingKeyInputMask(0x00), activeIDClickOffset(-1, -1), activeIDSource(InputSource::None),
+			activeIDMouseButton(0), activeIDPreviousFrame(0),
+			activeIDPreviousFrameIsAlive(false), activeIDPreviousFrameHasBeenEditedBefore(false),
+			lastActiveID(0), lastActiveTimer(0.0f), currDPIScale(0.0f),
+			currViewport(nullptr), mouseViewport(nullptr), mouseLastHoveredViewport(nullptr),
+			viewportsFrontMostStampCount(0), navWindow(nullptr),
+			navID(0), navFocusedScopeID(0), navActivateID(0), navActivateDownID(0), navActivatePressedID(0), navInputID(0),
+			navJustTabbedID(0), navJustMovedToID(0), navJustMovedToFocusedScopeID(0), navNextActivateID(0),
+			navInputSource(InputSource::None), navScoringCount(0), navLayer(NavLayer::Main), navIDTabCounter(INT_MAX),
+			navIDIsAlive(false), navMousePosDirty(false), navDisableHighlight(true), navDisableMouseHover(false),
+			navAnyRequest(false), navInitRequest(false), navInitRequestFromMove(false),
+			navInitResultID(0), navMoveFromClampedRefRect(false),
+			navMoveRequest(false), navMoveRequestFlags(NavMoveFlags::None),
+			navMoveRequestForward(NavForward::None), navMoveDir(UIDirection::None),
+			navMoveDirLast(UIDirection::None), navMoveClipDir(UIDirection::None),
+			navWrapRequestWindow(nullptr), navWrapRequestFlags(NavMoveFlags::None),
+			navWindowingTarget(nullptr), navWindowingTargetAnim(nullptr), navWindowingListWindow(nullptr),
+			navWindowingTimer(0.0f), navWindowingHighlightAlpha(0.0f), navWindowingToggleLayer(false),
+			dragDropActive(false), dragDropWithinSource(false), dragDropWithinTarget(false),
+			dragDropSourceFlags(DragDropFlags::None), dragDropSourceFrameCount(-1), dragDropMouseButton(-1),
+			dragDropTargetID(0), dragDropAcceptFlags(DragDropFlags::None),
+			dragDropAcceptIDCurrRectSurface(0.0f), dragDropAcceptIDPrev(0), dragDropAcceptIDCurr(0),
+			dragDropAcceptFrameCount(-1), dragDropHoldJustPressedID(0), currTabBar(nullptr),
+			tempInputID(0), colorEditOptions(ColorEditFlags::OptionsDefault),
+			colorEditLastHue(0.0f), colorEditLastSaturation(0.0f),
+			dragCurrAccumDirty(false), dragCurrAccum(0.0f),
+			dragSpeedDefaultRatio(1.0f / 100.0f), scrollBarClickDeltaToGrabCenter(0.0f),
+			tooltipOverrideCount(0), platformImePos(FLT_MAX, FLT_MAX), platformImeLastPos(FLT_MAX, FLT_MAX),
+			platformImePosViewport(0), settingsLoaded(false), settingsDirtyTimer(0.0f),
+			logEnabled(false), logType(LogType::None), logFile(NULL),
+			logLinePosY(FLT_MAX), logLineFirstItem(false),
+			logDepthRef(0), logDepthToExpand(2), logDepthToExpandDefault(2),
+			debugItemPickerActive(false), debugItemPickerBreakID(0),
+			framerateSecPerFrameIndex(0), framerateSecPerFrameAccum(0.0f),
+			wantCaptureMouseNextFrame(-1), wantCaptureKeyboardNextFrame(-1), wantTextInputNextFrame(-1)
+			{
+				io.fonts = sharedFontAtlas != nullptr ? sharedFontAtlas : new FontAtlas();
+				colorEditLastColor[0] = FLT_MAX;
+				colorEditLastColor[1] = FLT_MAX;
+				colorEditLastColor[2] = FLT_MAX;
+				memset(dragDropPayloadLocalBuffer, 0, sizeof(dragDropPayloadLocalBuffer));
+				memset(tempBuffer, 0, sizeof(tempBuffer));
+				memset(framerateSecPerFrame, 0, sizeof(framerateSecPerFrame));
+			}
 
 	};
 
-	bool CreateContext(FontAtlas* atlas = nullptr)
-	{
+	UIContext* CreateContext(FontAtlas* sharedFontAtlas = nullptr);
+	
+	//set to nullptr to destroy current context
+	void DestroyContext(UIContext* context = nullptr);
+	UIContext* GetCurrentContext();
+	void SetCurrentContext(UIContext* context);
+	void Initialize(UIContext* context);
 
-	}
+	bool Begin(const char* name, bool* pOpen = nullptr, UIWindowFlags flags = UIWindowFlags::None);
+	void End();
 
+	//needed?
+	unsigned int HashStr(const char* str, size_t num = 0, size_t seed = 0);
 }

@@ -172,6 +172,24 @@ namespace AstralEngine
 		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor);
 	}
 
+	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
+		float tileFactor, const Vector4& tintColor)
+	{
+		AE_PROFILE_FUNCTION();
+
+		CheckBatchCapacity();
+		int textureIndex = GetTextureIndex(subTexture->GetTexture());
+
+		const Vector2 textureCoordinates[] = {
+			{ subTexture->GetMin().x, subTexture->GetMin().y },
+			{ subTexture->GetMax().x, subTexture->GetMin().y },
+			{ subTexture->GetMax().x, subTexture->GetMax().y },
+			{ subTexture->GetMin().x, subTexture->GetMax().y }
+		};
+
+		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, textureCoordinates);
+	}
+
 	void Renderer2D::DrawQuad(const Mat4& transform, const Vector4& color)
 	{
 		CheckBatchCapacity();
@@ -231,6 +249,37 @@ namespace AstralEngine
 		s_stats.numVertices += 4;
 	}
 
+	void Renderer2D::DrawQuad(const Mat4& transform, AReference<SubTexture2D> subTexture, float tileFactor, const Vector4& tintColor)
+	{
+		CheckBatchCapacity();
+
+		const Vector2 texCoord[] = {
+			{ subTexture->GetMin().x, subTexture->GetMin().y },
+			{ subTexture->GetMax().x, subTexture->GetMin().y },
+			{ subTexture->GetMax().x, subTexture->GetMax().y },
+			{ subTexture->GetMin().x, subTexture->GetMax().y }
+		};
+
+		float textureIndex = GetTextureIndex(subTexture->GetTexture());
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			s_data.quadVertexPtr->position = transform * s_data.quadPositions[i];
+			s_data.quadVertexPtr->color = tintColor;
+			s_data.quadVertexPtr->texCoord = texCoord[i];
+			s_data.quadVertexPtr->textureIndex = textureIndex;
+			s_data.quadVertexPtr->tillingFactor = tileFactor;
+			s_data.quadVertexPtr++;
+		}
+
+		s_data.quadIndexCount += 6;
+
+		s_stats.numIndices += 6;
+		s_stats.numVertices += 4;
+	}
+
+
+
 	void Renderer2D::DrawRotatedQuad(const Vector2& position, float rotation, const Vector2& size, const Vector4& color)
 	{
 		DrawRotatedQuad((Vector3)position, rotation, size, color);
@@ -284,6 +333,20 @@ namespace AstralEngine
 
 		DrawQuad(transform, texture, tileFactor, tintColor);
 	}
+
+	void Renderer2D::DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, 
+		AReference<SubTexture2D> texture, float tileFactor, const Vector4& tintColor)
+	{
+		AE_PROFILE_FUNCTION();
+
+		Mat4 transform = Mat4::Identity();
+		transform.Translate(position);
+		transform.Rotate(rotation, Vector3{ 0.0f, 0.0f, 1.0f });
+		transform.Scale(size);
+
+		DrawQuad(transform, texture, tileFactor, tintColor);
+	}
+
 
 	void Renderer2D::StartBatch()
 	{
@@ -355,12 +418,21 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 
-		const Vector2 texCoord[] = {
+
+		Vector2 texCoord[] = {
 			{ 0.0f, 0.0f },
 			{ 1.0f, 0.0f },
 			{ 1.0f, 1.0f },
 			{ 0.0f, 1.0f }
 		};
+
+		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, texCoord);
+	}
+
+	void Renderer2D::UploadSimpleQuad(const Vector3& position, const Vector2& size, float textureIndex,
+		float tileFactor, const Vector4& tintColor, const Vector2* textureCoords)
+	{
+		AE_PROFILE_FUNCTION();
 
 		const Vector3 positions[] = {
 			{ position.x - (size.x / 2.0f), position.y - (size.y / 2.0f), position.z },
@@ -373,7 +445,7 @@ namespace AstralEngine
 		{
 			s_data.quadVertexPtr->position = positions[i];
 			s_data.quadVertexPtr->color = tintColor;
-			s_data.quadVertexPtr->texCoord = texCoord[i];
+			s_data.quadVertexPtr->texCoord = textureCoords[i];
 			s_data.quadVertexPtr->textureIndex = textureIndex;
 			s_data.quadVertexPtr->tillingFactor = tileFactor;
 			s_data.quadVertexPtr++;
@@ -381,4 +453,5 @@ namespace AstralEngine
 		
 		s_data.quadIndexCount += 6;
 	}
+
 }

@@ -38,9 +38,15 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			size_t page = Page(e);
-			//use GetIndex to get actual index of T in packed
-			return page < m_sparse.GetCount() && m_sparse[page] != nullptr
-				&& (GetIndex(e) < m_packed.GetCount() && m_packed[GetIndex(e)] == e);
+			if (!(page < m_sparse.GetCount()) || m_sparse[page] == nullptr)
+			{
+				return false;
+			}
+			
+			//use m_sparse[page][offset] to get actual index of e in the packed array
+			size_t offset = Offset(e);
+			return (size_t)m_sparse[page][offset] < m_packed.GetCount() 
+				&& m_packed[(size_t)m_sparse[page][offset]] == e;
 		}
 
 		void Clear()
@@ -87,10 +93,11 @@ namespace AstralEngine
 			  so that removing the element is more efficient
 			  (will also need to move the element in the sparse set)
 			*/
+
 			m_packed[m_toInt(m_sparse[page][offset])] = T(m_packed[m_packed.GetCount() - 1]);
 			m_sparse[Page(m_packed[m_packed.GetCount() - 1])][Offset(m_packed[m_packed.GetCount() - 1])] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
-			m_packed.Remove(m_packed.GetCount() - 1);
+			m_packed.RemoveAt(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const T e) const

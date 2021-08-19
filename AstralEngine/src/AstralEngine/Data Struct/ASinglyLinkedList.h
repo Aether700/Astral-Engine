@@ -123,7 +123,7 @@ namespace AstralEngine
 			m_count--;
 		}
 
-		virtual void Remove(size_t index) override
+		virtual void RemoveAt(size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 			if(index == 0)
@@ -157,6 +157,7 @@ namespace AstralEngine
 				ptr = ptr->next;
 				delete ptr2;
 			}
+			m_head = m_dummy;
 			m_count = 0;
 		}
 
@@ -220,12 +221,12 @@ namespace AstralEngine
 	{
 		friend class ASinglyLinkedList<T>;
 
+	protected:
 		using Node = typename ASinglyLinkedList<T>::Node;
 
 	public:
-		ASinglyLinkedListIterator(Node* node) : m_currNode(node) { }
-
-		ASinglyLinkedListIterator(const ASinglyLinkedListIterator<T>& other) : m_currNode(other.m_currNode) { }
+		ASinglyLinkedListIterator(const ASinglyLinkedListIterator<T>& other) 
+			: m_currNode(other.m_currNode) { }
 
 		virtual ~ASinglyLinkedListIterator() { }
 
@@ -272,18 +273,19 @@ namespace AstralEngine
 		}
 
 	private:
+		ASinglyLinkedListIterator(Node* node) : m_currNode(node) { }
+
+
 		Node* m_currNode;
 	};
 
 	template<typename T>
 	class ASinglyLinkedListConstIterator : public ASinglyLinkedListIterator<T>
 	{
-		ASinglyLinkedListConstIterator(ASinglyLinkedList::Node* node)
-			: ASinglyLinkedListConstIterator<T>(node) { }
-
+	public:
 		ASinglyLinkedListConstIterator(const ASinglyLinkedListConstIterator<T>& other)
 			: ASinglyLinkedListIterator<T>(other) { }
-
+		
 		ADoublyLinkedListConstIterator<T>& operator++()
 		{
 			ASinglyLinkedListIterator<T>::operator++();
@@ -318,6 +320,11 @@ namespace AstralEngine
 		{
 			return ASinglyLinkedListIterator<T>::operator*();
 		}
+
+	private:
+		ASinglyLinkedListConstIterator(Node* node)
+			: ASinglyLinkedListConstIterator<T>(node) { }
+
 	};
 
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "Vectors/Vector2.h"
 
 namespace AstralEngine
 {
@@ -15,6 +16,47 @@ namespace AstralEngine
 		static float Min(float f1, float f2);
 		static float Max(float f1, float f2);
 		static float Floor(float f);
+
+		/*linearly interpolates from a to b using t (t must be between 0 and 1)
+			if t >= 0, returns a
+			if t >= 1, returns b
+			if t = 0.5, returns the midpoint of a and b
+		*/
+		static float Lerp(float a, float b, float t);
+
+		static Vector2 Floor(Vector2 v);
 		static float Ceiling(float f);
+		static float PerlinNoise(float x, float y);
+		static float PerlinNoise(Vector2 pos);
+
+	};
+
+	/* Basic rudementary Random class to get random ints and floats
+	*/
+	class Random
+	{
+	public:
+		/*	Initializes the Random class by setting the seed of the c
+			function rand to the current time allowing pseudo random number generation
+
+			Needs to be used at the start of the program to set the seed. Do not use more than once.
+			only use when starting your program
+		*/
+		static void Init();
+
+		/*	returns a random integer between 0 and RAND_MAX
+			(a maximum value defined by c libraries which is at least 32767).
+			Note that RAND_MAX is not cannot be returned
+
+			returns: a random integer between 0 and RAND_MAX (RAND_MAX not included)
+		*/
+		static int GetInt();
+
+		/* returns a random float number between 0 and 1 (one not included)
+
+			returns: a random float number between 0 and 1 (one not included)
+		*/
+		static float GetFloat();
+
 	};
 }

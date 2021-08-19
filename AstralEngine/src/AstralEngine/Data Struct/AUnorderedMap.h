@@ -1,32 +1,27 @@
 #pragma once
 #include "AstralEngine/Core/Core.h"
 #include "AstralEngine/Math/AMath.h"
-#include "ADoublyLinkedList.h"
+#include "ASinglyLinkedList.h"
 #include "AKeyElementPair.h"
 #include <functional>
 
-#define MAX_LOAD_FACTOR 10
+#define UNORDERED_MAP_MAX_LOAD_FACTOR 10
 
 namespace AstralEngine
 {
-	static int DefaultCompress(long hash, size_t size)
-	{
-		return (7l * hash + 31l) % size;
-	}
-
 	template<typename K, typename T>
 	class AUnorderedMap;
 
 	template<typename K, typename T>
 	class AUnorderedMapIterator
 	{
+		friend class AUnorderedMap<K, T>;
+		
+		using Bucket = ASinglyLinkedList<AKeyElementPair<K, T>>;
+		using BucketAIterator = ASinglyLinkedListIterator<AKeyElementPair<K, T>>;
 	public:
-		AUnorderedMapIterator(ADoublyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-			size_t currBucket, ADoublyLinkedListIterator<AKeyElementPair<K, T>> currIt, size_t maxCount)
-			: m_bucketArr(bucketArr), m_currBucket(currBucket), m_currIt(currIt), m_maxCount(maxCount) { }
-
-		AUnorderedMapIterator(const AUnorderedMapIterator<K, T>& other) 
-			: m_bucketArr(other.m_bucketArr), m_currBucket(other.m_currBucket), 
+		AUnorderedMapIterator(const AUnorderedMapIterator<K, T>& other)
+			: m_bucketArr(other.m_bucketArr), m_currBucket(other.m_currBucket),
 			m_currIt(other.m_currIt), m_maxCount(other.m_maxCount) { }
 
 		virtual ~AUnorderedMapIterator() { }
@@ -60,33 +55,6 @@ namespace AstralEngine
 			return it;
 		}
 
-		AUnorderedMapIterator<K, T>& operator--()
-		{
-			AE_PROFILE_FUNCTION();
-			m_currIt--;
-			if (m_currIt == m_bucketArr[m_currBucket].rend())
-			{
-				for (size_t i = m_currBucket - 1; i >= 0; i++)
-				{
-					if (m_bucketArr[i].GetCount() != 0)
-					{
-						m_currBucket = i;
-						m_currIt = m_bucketArr[m_currBucket].rbegin();
-						break;
-					}
-				}
-			}
-			return *this;
-		}
-
-		AUnorderedMapIterator<K, T> operator--(int)
-		{
-			AE_PROFILE_FUNCTION();
-			AUnorderedMapIterator<K, T> it = *this;
-			this->operator--();
-			return it;
-		}
-
 		bool operator==(const AUnorderedMapIterator<K, T>& other) const
 		{
 			return m_currIt == other.m_currIt;
@@ -103,20 +71,21 @@ namespace AstralEngine
 		}
 
 	private:
-		ADoublyLinkedList<AKeyElementPair<K, T>>* m_bucketArr;
+		AUnorderedMapIterator(Bucket* bucketArr,
+			size_t currBucket, BucketAIterator& currIt, size_t maxCount)
+			: m_bucketArr(bucketArr), m_currBucket(currBucket), m_currIt(currIt), m_maxCount(maxCount) { }
+
+		Bucket* m_bucketArr;
 		size_t m_currBucket;
 		size_t m_maxCount;
-		ADoublyLinkedListIterator<AKeyElementPair<K, T>> m_currIt;
+		BucketAIterator m_currIt;
 	};
 
 	template<typename K, typename T>
 	class AUnorderedMapConstIterator : public AUnorderedMapIterator<K, T>
 	{
+		friend class AUnorderedMap<K, T>;
 	public:
-		AUnorderedMapConstIterator(ADoublyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-			size_t currBucket, ADoublyLinkedListIterator<AKeyElementPair<K, T>> currIt)
-			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt) { }
-
 		AUnorderedMapConstIterator(const AUnorderedMapConstIterator<K, T>& other)
 			: AUnorderedMapIterator<K, T>(other) { }
 
@@ -162,6 +131,11 @@ namespace AstralEngine
 			return AUnorderedMapIterator<K, T>::operator*();
 		}
 
+	private:
+		AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
+			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt)
+			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt) { }
+
 	};
 
 	template<typename K, typename T>
@@ -173,28 +147,28 @@ namespace AstralEngine
 
 		AUnorderedMap(size_t bucketCount = 5, std::function<bool(const K&, const K&)> equalsFunc
 			= &AUnorderedMap<K, T>::DefaultEquals, std::function<int(long, size_t)> compressFunc
-			= &DefaultCompress)
+			= &AUnorderedMap<K, T>::DefaultCompress)
 			: m_bucketCount(bucketCount), m_equalsFunc(equalsFunc), m_compressFunc(compressFunc)
 		{
-			m_bucketArr = new ADoublyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
+			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
 
 		AUnorderedMap(std::function<bool(const K&, const K&)> equalsFunc) : m_bucketCount(5),
-			m_equalsFunc(equalsFunc), m_compressFunc(&DefaultCompress)
+			m_equalsFunc(equalsFunc), m_compressFunc(&AUnorderedMap<K, T>::DefaultCompress)
 		{
-			m_bucketArr = new ADoublyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
+			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
 
 		AUnorderedMap(std::function<int(long, size_t)> compressFunc) : m_bucketCount(5),
 			m_equalsFunc(&AUnorderedMap<K, T>::DefaultEquals), m_compressFunc(compressFunc)
 		{
-			m_bucketArr = new ADoublyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
+			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
 
 		AUnorderedMap(const AUnorderedMap<K, T>& other) : m_bucketCount(other.m_bucketCount), m_count(other.m_count),
 			m_equalsFunc(other.m_equalsFunc), m_compressFunc(other.m_compressFunc)
 		{
-			m_bucketArr = new ADoublyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
+			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 			for (size_t i = 0; i < m_bucketCount; i++)
 			{
 				m_bucketArr[i] = other.m_bucketArr[i];
@@ -280,9 +254,9 @@ namespace AstralEngine
 		void Clear()
 		{
 			AE_PROFILE_FUNCTION();
-			for (ADynArr<AKeyElementPair<K, T>> pairArr : m_bucketArr)
+			for (size_t i = 0; i < m_bucketCount; i++)
 			{
-				pairArr.Clear();
+				m_bucketArr[i].Clear();
 			}
 		}
 
@@ -324,7 +298,7 @@ namespace AstralEngine
 			size_t bucketIndex;
 			for (size_t i = 0; i < m_bucketCount; i++)
 			{
-				if (m_bucketArr[i].GetCount() != 0)
+				if (!m_bucketArr[i].IsEmpty())
 				{
 					bucketIndex = i;
 					break;
@@ -339,41 +313,13 @@ namespace AstralEngine
 			size_t bucketIndex;
 			for (size_t i = m_bucketCount - 1; i >= 0; i--)
 			{
-				if (m_bucketArr[i].GetCount() != 0)
+				if (!m_bucketArr[i].IsEmpty())
 				{
 					bucketIndex = i;
 					break;
 				}
 			}
 			return AUnorderedMapIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].end(), m_bucketCount);
-		}
-
-		AUnorderedMap<K, T>::AIterator rbegin()
-		{
-			size_t bucketIndex;
-			for (size_t i = m_bucketCount - 1; i >= 0; i--)
-			{
-				if (m_bucketArr[i].GetCount() != 0)
-				{
-					bucketIndex = i;
-					break;
-				}
-			}
-			return AUnorderedMapIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].rbegin(), m_bucketCount);
-		}
-
-		AUnorderedMap<K, T>::AIterator rend()
-		{
-			size_t bucketIndex;
-			for (size_t i = 0; i < m_bucketCount; i++)
-			{
-				if (m_bucketArr[i].GetCount() != 0)
-				{
-					bucketIndex = i;
-					break;
-				}
-			}
-			return AUnorderedMapIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].rend(), m_bucketCount);
 		}
 
 		AUnorderedMap<K, T>::AConstIterator begin() const
@@ -489,6 +435,11 @@ namespace AstralEngine
 			return e1 == e2;
 		}
 
+		static int DefaultCompress(long hash, size_t size)
+		{
+			return (7l * hash + 31l) % size;
+		}
+
 		int GetBucketIndex(const K& key) const
 		{
 			AE_PROFILE_FUNCTION();
@@ -505,7 +456,7 @@ namespace AstralEngine
 		{
 			int loadFactor = m_count / m_bucketCount;
 
-			if (loadFactor >= MAX_LOAD_FACTOR)
+			if (loadFactor >= UNORDERED_MAP_MAX_LOAD_FACTOR)
 			{
 				Rehash();
 				return true;
@@ -524,8 +475,8 @@ namespace AstralEngine
 			}
 
 			size_t oldBucketCount = m_bucketCount;
-			ADoublyLinkedList<AKeyElementPair<K, T>>* oldBuckets = m_bucketArr;
-			m_bucketArr = new ADoublyLinkedList<AKeyElementPair<K, T>>[numBuckets];
+			ASinglyLinkedList<AKeyElementPair<K, T>>* oldBuckets = m_bucketArr;
+			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[numBuckets];
 			m_count = 0;
 			m_bucketCount = numBuckets;
 
@@ -541,10 +492,10 @@ namespace AstralEngine
 		}
 
 
-		std::function<bool(const K&, const K&)> m_equalsFunc;
-		std::function<int(long, size_t)> m_compressFunc;
+		ADelegate<bool(const K&, const K&)> m_equalsFunc;
+		ADelegate<int(long, size_t)> m_compressFunc;
 		std::hash<K> m_hash;
-		ADoublyLinkedList<AKeyElementPair<K, T>>* m_bucketArr;
+		ASinglyLinkedList<AKeyElementPair<K, T>>* m_bucketArr;
 		size_t m_bucketCount;
 		size_t m_count;
 	};

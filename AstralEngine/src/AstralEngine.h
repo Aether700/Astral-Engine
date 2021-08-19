@@ -33,6 +33,9 @@
 #include "AstralEngine/Data Struct/AWeakRef.h"
 #include "AstralEngine/Data Struct/ADelegate.h"
 
+// Algorithms ///////////////////////////////////////////////////////////
+#include "AstralEngine/Algorithms/Algorithms.h"
+
 // Renderer /////////////////////////////////////////////////////////////
 #include "AstralEngine/Renderer/GraphicsContext.h"
 #include "AstralEngine/Renderer/VertexBuffer.h"

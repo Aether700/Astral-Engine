@@ -10,6 +10,7 @@ namespace AstralEngine
 
 	protected:
 
+		virtual float GetTimeImpl() override;
 		virtual float DeltaTimeImpl() override;
 		virtual void UpdateTimeImpl() override;
 

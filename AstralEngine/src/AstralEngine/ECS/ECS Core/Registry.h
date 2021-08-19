@@ -35,7 +35,7 @@ namespace AstralEngine
 
 			Entity e = { m_destroyedPos[0] };
 			m_entities[ToIntegral(m_destroyedPos[0])] = e;
-			m_destroyedPos.Remove(0);
+			m_destroyedPos.RemoveAt(0);
 			return e;
 		}
 
@@ -396,8 +396,8 @@ namespace AstralEngine
 
 			void Remove(Registry<Entity>& owner, const Entity& e)
 			{
-				auto& list = Storage<Entity, Component>::Remove(e);
 				m_destroy(owner, e);
+				auto& list = Storage<Entity, Component>::Remove(e);
 			}
 
 			template<typename Comp>
@@ -457,8 +457,8 @@ namespace AstralEngine
 			template<typename Component>
 			void CheckValidityOnComponentDestroyed(Registry<Entity>& owner, const Entity e)
 			{
-				//if we still have the destroyed component we just return and don't do anything
-				if (owner.HasComponent<Component>(e))
+				//if the entity has more than one component of the type provided we simply skip it
+				if (owner.Assure<Component>().GetList(e).GetCount() > 1)
 				{
 					return;
 				}
@@ -519,7 +519,7 @@ namespace AstralEngine
 
 			  this function will be called when a component is destroyed (the entity is passed as argument)
 
-			  if the component is to be excluded is will be called when the excluded component is created to see
+			  if the component is to be excluded this function will be called when the excluded component is created to see
 			  if the entity is now invalid
 			*/
 			void DiscardIf(Registry<Entity>& owner, const Entity e)
@@ -538,7 +538,8 @@ namespace AstralEngine
 					if (std::get<0>(pools).Contains(e) && std::get<0>(pools).GetIndex(e) < current)
 					{
 						const auto pos = --current;
-						(std::get<PoolHandler<Owned>&>(pools).Swap(std::get<PoolHandler<Owned>&>(pools).GetData()[pos], e), ...);
+						(std::get<PoolHandler<Owned>&>(pools).Swap(
+							std::get<PoolHandler<Owned>&>(pools).GetData()[pos], e), ...);
 					}
 				}
 			}

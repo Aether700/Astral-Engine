@@ -41,6 +41,7 @@ namespace AstralEngine
 		const Vector3Int operator*(int k) const;
 		const Vector3Int operator/(int k) const;
 		const int operator[](unsigned int index) const;
+		int& operator[](unsigned int index);
 
 		Vector3Int& operator=(const Vector3Int& v);
 

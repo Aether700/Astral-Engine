@@ -8,6 +8,8 @@ namespace AstralEngine
 	class Input
 	{
 	public:
+		static bool IsKeyDown(int keycode);
+		static bool IsKeyDown(KeyCode key);
 		static bool IsKeyPressed(int keycode);
 		static bool IsKeyPressed(KeyCode key);
 		static bool IsMouseButtonPressed(int mouseButton);

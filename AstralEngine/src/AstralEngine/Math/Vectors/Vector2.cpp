@@ -79,6 +79,20 @@ namespace AstralEngine
 		AE_CORE_ERROR("Invalid Index");
 	}
 
+	float& Vector2::operator[](unsigned int index) 
+	{
+		switch (index)
+		{
+		case 0:
+			return x;
+
+		case 1:
+			return y;
+		}
+
+		AE_CORE_ERROR("Invalid Index");
+	}
+
 	const Vector2 operator*(float k, const Vector2& v) { return v * k; }
 
 	Vector2& Vector2::operator=(const Vector2& v)

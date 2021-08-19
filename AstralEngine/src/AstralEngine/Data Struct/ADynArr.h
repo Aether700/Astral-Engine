@@ -309,11 +309,11 @@ namespace AstralEngine
 			size_t index = Find(element);
 			if (index != -1)
 			{
-				Remove(index);
+				RemoveAt(index);
 			}
 		}
 
-		virtual void Remove(size_t index) override
+		virtual void RemoveAt(size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 			

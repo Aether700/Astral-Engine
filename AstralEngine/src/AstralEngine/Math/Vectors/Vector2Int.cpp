@@ -58,6 +58,20 @@ namespace AstralEngine
 		AE_CORE_ERROR("Invalid Index");
 	}
 
+	int& Vector2Int::operator[](unsigned int index)
+	{
+		switch (index)
+		{
+		case 0:
+			return x;
+
+		case 1:
+			return y;
+		}
+
+		AE_CORE_ERROR("Invalid Index");
+	}
+
 	Vector2Int& Vector2Int::operator=(const Vector2Int& v)
 	{
 		x = v.x;

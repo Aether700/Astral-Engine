@@ -22,8 +22,10 @@ namespace AstralEngine
 
 		void CallOnStart();
 		void CallOnUpdate();
+		void DestroyEntitiesToDestroy();
 
 		Registry<BaseEntity> m_registry;
+		ADynArr<AEntity> m_entitiesToDestroy;
 		unsigned int m_viewportWidth;
 		unsigned int m_viewportHeight;
 	};
