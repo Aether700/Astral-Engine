@@ -5,6 +5,8 @@
 #include "IndexBuffer.h"
 #include "RenderCommand.h"
 #include "ECS/Components.h"
+#include "UI/UICore.h"
+#include "Core/Application.h"
 
 namespace AstralEngine
 {
@@ -17,6 +19,7 @@ namespace AstralEngine
 		Vector2 texCoord;
 		float textureIndex;
 		float tillingFactor;
+		float ignoresCamPos = 0.0f;
 	};
 
 	struct Renderer2DData
@@ -52,7 +55,8 @@ namespace AstralEngine
 			{ ADataType::Float4, "a_color" },
 			{ ADataType::Float2, "a_texCoord" },
 			{ ADataType::Float, "a_texIndex" },
-			{ ADataType::Float, "a_tilingFactor" }
+			{ ADataType::Float, "a_tilingFactor" },
+			{ ADataType::Float, "a_ignoreCamPos" }
 		};
 
 		s_data.vertexBuffer->SetLayout(layout);
@@ -143,27 +147,27 @@ namespace AstralEngine
 		return s_data.textureSlots[0];
 	}
 
-	void Renderer2D::DrawQuad(const Vector2& position, const Vector2& size, const Vector4& color)
+	void Renderer2D::DrawQuad(const Vector2& position, const Vector2& size, const Vector4& color, bool ignoresCamPos)
 	{
-		DrawQuad((Vector3)position, size, color);
+		DrawQuad((Vector3)position, size, color, ignoresCamPos);
 	}
 	
-	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, const Vector4& color)
+	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, const Vector4& color, bool ignoreCamPos)
 	{
 		AE_PROFILE_FUNCTION();
 
 		CheckBatchCapacity();
-		UploadSimpleQuad(position, size, 0, 1.0f, color);
+		UploadSimpleQuad(position, size, 0, 1.0f, color, ignoreCamPos);
 	}
 
 	void Renderer2D::DrawQuad(const Vector2& position, const Vector2& size, AReference<Texture2D> texture,
-		float tileFactor, const Vector4& tintColor)
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
-		DrawQuad((Vector3)position, size, texture, tileFactor, tintColor);
+		DrawQuad((Vector3)position, size, texture, tileFactor, tintColor, ignoresCamPos);
 	}
 
 	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, AReference<Texture2D> texture,
-		float tileFactor, const Vector4& tintColor)
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
 		AE_PROFILE_FUNCTION();
 
@@ -173,7 +177,7 @@ namespace AstralEngine
 	}
 
 	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
-		float tileFactor, const Vector4& tintColor)
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
 		AE_PROFILE_FUNCTION();
 
@@ -187,10 +191,10 @@ namespace AstralEngine
 			{ subTexture->GetMin().x, subTexture->GetMax().y }
 		};
 
-		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, textureCoordinates);
+		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, textureCoordinates, ignoresCamPos);
 	}
 
-	void Renderer2D::DrawQuad(const Mat4& transform, const Vector4& color)
+	void Renderer2D::DrawQuad(const Mat4& transform, const Vector4& color, bool ignoresCamPos)
 	{
 		CheckBatchCapacity();
 		
@@ -211,6 +215,7 @@ namespace AstralEngine
 			s_data.quadVertexPtr->texCoord = texCoord[i];
 			s_data.quadVertexPtr->textureIndex = textureIndex;
 			s_data.quadVertexPtr->tillingFactor = tileFactor;
+			s_data.quadVertexPtr->ignoresCamPos = ignoresCamPos ? 1.0f : 0.0f;
 			s_data.quadVertexPtr++;
 		}
 
@@ -220,7 +225,8 @@ namespace AstralEngine
 		s_stats.numVertices += 4;
 	}
 
-	void Renderer2D::DrawQuad(const Mat4& transform, AReference<Texture2D> texture, float tileFactor, const Vector4& tintColor)
+	void Renderer2D::DrawQuad(const Mat4& transform, AReference<Texture2D> texture, 
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
 		CheckBatchCapacity();
 
@@ -240,6 +246,7 @@ namespace AstralEngine
 			s_data.quadVertexPtr->texCoord = texCoord[i];
 			s_data.quadVertexPtr->textureIndex = textureIndex;
 			s_data.quadVertexPtr->tillingFactor = tileFactor;
+			s_data.quadVertexPtr->ignoresCamPos = ignoresCamPos ? 1.0f : 0.0f;
 			s_data.quadVertexPtr++;
 		}
 
@@ -249,7 +256,8 @@ namespace AstralEngine
 		s_stats.numVertices += 4;
 	}
 
-	void Renderer2D::DrawQuad(const Mat4& transform, AReference<SubTexture2D> subTexture, float tileFactor, const Vector4& tintColor)
+	void Renderer2D::DrawQuad(const Mat4& transform, AReference<SubTexture2D> subTexture, 
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
 		CheckBatchCapacity();
 
@@ -269,6 +277,7 @@ namespace AstralEngine
 			s_data.quadVertexPtr->texCoord = texCoord[i];
 			s_data.quadVertexPtr->textureIndex = textureIndex;
 			s_data.quadVertexPtr->tillingFactor = tileFactor;
+			s_data.quadVertexPtr->ignoresCamPos = ignoresCamPos ? 1.0f : 0.0f;
 			s_data.quadVertexPtr++;
 		}
 
@@ -348,6 +357,12 @@ namespace AstralEngine
 	}
 
 
+	void Renderer2D::DrawUIElement(const UIElement& uiElement)
+	{
+		DrawQuad(uiElement.GetWorldPos(), Vector2(uiElement.GetWorldWidth(), 
+			uiElement.GetWorldHeight()), Vector4(1, 0, 1, 1), true);
+	}
+
 	void Renderer2D::StartBatch()
 	{
 		AE_PROFILE_FUNCTION();
@@ -414,7 +429,7 @@ namespace AstralEngine
 	}
 
 	void Renderer2D::UploadSimpleQuad(const Vector3& position, const Vector2& size, float textureIndex,
-		float tileFactor, const Vector4& tintColor)
+		float tileFactor, const Vector4& tintColor, bool ignoresCamPos)
 	{
 		AE_PROFILE_FUNCTION();
 
@@ -426,11 +441,11 @@ namespace AstralEngine
 			{ 0.0f, 1.0f }
 		};
 
-		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, texCoord);
+		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, texCoord, ignoresCamPos);
 	}
 
 	void Renderer2D::UploadSimpleQuad(const Vector3& position, const Vector2& size, float textureIndex,
-		float tileFactor, const Vector4& tintColor, const Vector2* textureCoords)
+		float tileFactor, const Vector4& tintColor, const Vector2* textureCoords, bool ignoresCamPos)
 	{
 		AE_PROFILE_FUNCTION();
 
@@ -448,6 +463,7 @@ namespace AstralEngine
 			s_data.quadVertexPtr->texCoord = textureCoords[i];
 			s_data.quadVertexPtr->textureIndex = textureIndex;
 			s_data.quadVertexPtr->tillingFactor = tileFactor;
+			s_data.quadVertexPtr->ignoresCamPos = ignoresCamPos ? 1.0f : 0.0f;
 			s_data.quadVertexPtr++;
 		}
 		

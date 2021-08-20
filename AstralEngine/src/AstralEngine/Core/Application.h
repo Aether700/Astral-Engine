@@ -22,8 +22,8 @@ namespace AstralEngine
 
 		inline AWindow* GetWindow() const { return m_window; }
 
-		static const Application* GetApp();
 
+		static const Application* GetApp();
 	private:
 
 		bool OnWindowCloseEvent(WindowCloseEvent& close);

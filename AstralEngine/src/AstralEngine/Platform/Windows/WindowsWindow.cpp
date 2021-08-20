@@ -87,7 +87,7 @@ namespace AstralEngine
 			{
 				WindowData* data = (WindowData*) glfwGetWindowUserPointer(win);
 				data->width = width;
-				data->width = height;
+				data->height = height;
 
 				WindowResizeEvent resizedEvent(width, height);
 				data->callback(resizedEvent);

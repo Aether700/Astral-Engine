@@ -99,6 +99,7 @@ namespace AstralEngine
 		return e;
 	}
 
+	//destroys an entity at the end of the frame
 	void Scene::DestroyAEntity(AEntity e)
 	{
 		m_entitiesToDestroy.Add(e);
@@ -109,7 +110,6 @@ namespace AstralEngine
 		//temp//////////////////////////////////////
 		//call start on scripts
 		{
-			//nsc => native script component
 			static bool start = false;
 
 			if (!start)
