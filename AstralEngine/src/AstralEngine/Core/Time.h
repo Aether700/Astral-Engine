@@ -20,22 +20,22 @@ namespace AstralEngine
 			return s_instance->UpdateTimeImpl();
 		}
 		
-		static float DeltaTime() 
+		static float GetDeltaTime() 
 		{
-			return s_instance->DeltaTimeImpl(); 
+			return s_instance->GetDeltaTimeImpl(); 
 		}
 
-		static float DeltaTimeMs() 
+		static float GetDeltaTimeMs() 
 		{
-			return s_instance->DeltaTimeMsImpl();
+			return s_instance->GetDeltaTimeMsImpl();
 		}
 
 	protected:
-		virtual float DeltaTimeImpl() = 0;
+		virtual float GetDeltaTimeImpl() = 0;
 		
-		virtual float DeltaTimeMsImpl() 
+		virtual float GetDeltaTimeMsImpl() 
 		{
-			return s_instance->DeltaTimeImpl() * 1000.0f; 
+			return s_instance->GetDeltaTimeImpl() * 1000.0f; 
 		}
 		
 		virtual void UpdateTimeImpl() = 0;

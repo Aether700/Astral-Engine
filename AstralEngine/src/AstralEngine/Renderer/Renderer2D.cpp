@@ -359,8 +359,14 @@ namespace AstralEngine
 
 	void Renderer2D::DrawUIElement(const UIElement& uiElement)
 	{
+		static int colorIndex = 0;
+		Vector4 colors[] = {
+			{1, 0, 0, 1},
+			{0, 0, 1, 1}
+		};
 		DrawQuad(uiElement.GetWorldPos(), Vector2(uiElement.GetWorldWidth(), 
-			uiElement.GetWorldHeight()), Vector4(1, 0, 1, 1), true);
+			uiElement.GetWorldHeight()), colors[colorIndex], true);
+		colorIndex = (colorIndex + 1) % (sizeof(colors) / sizeof(Vector4));
 	}
 
 	void Renderer2D::StartBatch()

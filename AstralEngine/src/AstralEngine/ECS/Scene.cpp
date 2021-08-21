@@ -38,31 +38,31 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 			if (Input::IsKeyPressed(KeyCode::A))
 			{
-				transform->position.x -= m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::D))
 			{
-				transform->position.x += m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 
 			if (Input::IsKeyPressed(KeyCode::W))
 			{
-				transform->position.y += m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::S))
 			{
-				transform->position.y -= m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::IsKeyPressed(KeyCode::Q))
 				{
-					transform->rotation.z += m_camRotSpeed * Time::DeltaTime();
+					transform->rotation.z += m_camRotSpeed * Time::GetDeltaTime();
 				}
 				else if (Input::IsKeyPressed(KeyCode::E))
 				{
-					transform->rotation.z -= m_camRotSpeed * Time::DeltaTime();
+					transform->rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
 				}
 			}
 		}
