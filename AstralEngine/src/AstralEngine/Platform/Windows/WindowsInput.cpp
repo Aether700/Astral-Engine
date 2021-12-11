@@ -11,7 +11,7 @@ namespace AstralEngine
 {
 	bool Input::IsKeyDown(int keycode)
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
 		int status = glfwGetKey(window, keycode);
 		return status == GLFW_PRESS || status == GLFW_REPEAT;
 	}
@@ -23,7 +23,7 @@ namespace AstralEngine
 
 	bool Input::IsKeyPressed(int keycode)
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
 		int status = glfwGetKey(window, keycode);
 		return status == GLFW_PRESS;
 	}
@@ -35,7 +35,7 @@ namespace AstralEngine
 
 	bool Input::IsMouseButtonPressed(int mouseButton)
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
 		int status = glfwGetMouseButton(window, mouseButton);
 		return status == GLFW_PRESS;
 	}
@@ -47,7 +47,7 @@ namespace AstralEngine
 
 	Vector2 Input::GetMousePosition() 
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetApp()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);
 

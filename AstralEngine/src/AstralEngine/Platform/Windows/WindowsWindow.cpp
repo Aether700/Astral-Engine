@@ -18,7 +18,8 @@ namespace AstralEngine
 		return new WindowsWindow(title, width, height);
 	}
 
-	WindowsWindow::WindowsWindow(const std::string& title, unsigned int width, unsigned int height) : m_data(title, width, height)
+	WindowsWindow::WindowsWindow(const std::string& title, unsigned int width, unsigned int height) 
+		: m_data(title, width, height)
 	{
 		Init();
 	}
@@ -87,7 +88,7 @@ namespace AstralEngine
 			{
 				WindowData* data = (WindowData*) glfwGetWindowUserPointer(win);
 				data->width = width;
-				data->width = height;
+				data->height = height;
 
 				WindowResizeEvent resizedEvent(width, height);
 				data->callback(resizedEvent);

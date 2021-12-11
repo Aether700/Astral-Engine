@@ -2,7 +2,7 @@
 #include "AstralEngine/Core/Time.h"
 #include "AstralEngine/Core/Input.h"
 #include "AstralEngine/Data Struct/AReference.h"
-#include "AstralEngine/Renderer/Renderer2D.h"
+#include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
 #include "Core/Application.h"
 #include "Scene.h"
@@ -38,31 +38,31 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 			if (Input::IsKeyPressed(KeyCode::A))
 			{
-				transform->position.x -= m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::D))
 			{
-				transform->position.x += m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 
 			if (Input::IsKeyPressed(KeyCode::W))
 			{
-				transform->position.y += m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::S))
 			{
-				transform->position.y -= m_camMoveSpeed * Time::DeltaTime() * m_zoomLevel;
+				transform->position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::IsKeyPressed(KeyCode::Q))
 				{
-					transform->rotation.z += m_camRotSpeed * Time::DeltaTime();
+					transform->rotation.z += m_camRotSpeed * Time::GetDeltaTime();
 				}
 				else if (Input::IsKeyPressed(KeyCode::E))
 				{
-					transform->rotation.z -= m_camRotSpeed * Time::DeltaTime();
+					transform->rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
 				}
 			}
 		}
@@ -86,7 +86,7 @@ namespace AstralEngine
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
-		AstralEngine::AWindow* window = AstralEngine::Application::GetApp()->GetWindow();
+		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		OnViewportResize(window->GetWidth(), window->GetHeight());
 	}
 
@@ -99,6 +99,7 @@ namespace AstralEngine
 		return e;
 	}
 
+	//destroys an entity at the end of the frame
 	void Scene::DestroyAEntity(AEntity e)
 	{
 		m_entitiesToDestroy.Add(e);
@@ -109,7 +110,6 @@ namespace AstralEngine
 		//temp//////////////////////////////////////
 		//call start on scripts
 		{
-			//nsc => native script component
 			static bool start = false;
 
 			if (!start)
@@ -140,7 +140,7 @@ namespace AstralEngine
 
 		if (mainCamera != nullptr)
 		{
-			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+			Renderer::BeginScene(*mainCamera, *cameraTransform);
 			auto group = m_registry.GetGroup<TransformComponent, SpriteRendererComponent>();
 
 			for (BaseEntity e : group)
@@ -149,10 +149,10 @@ namespace AstralEngine
 				TransformComponent& transform = std::get<TransformComponent&>(components);
 				SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
 
-				Renderer2D::DrawRotatedQuad(transform, sprite);
+				Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
 			}
 
-			Renderer2D::EndScene();
+			Renderer::EndScene();
 		}
 
 		//update Scripts

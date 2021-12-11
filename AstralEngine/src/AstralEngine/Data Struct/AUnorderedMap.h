@@ -148,19 +148,19 @@ namespace AstralEngine
 		AUnorderedMap(size_t bucketCount = 5, std::function<bool(const K&, const K&)> equalsFunc
 			= &AUnorderedMap<K, T>::DefaultEquals, std::function<int(long, size_t)> compressFunc
 			= &AUnorderedMap<K, T>::DefaultCompress)
-			: m_bucketCount(bucketCount), m_equalsFunc(equalsFunc), m_compressFunc(compressFunc)
+			: m_bucketCount(bucketCount), m_equalsFunc(equalsFunc), m_compressFunc(compressFunc), m_count(0)
 		{
 			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
 
 		AUnorderedMap(std::function<bool(const K&, const K&)> equalsFunc) : m_bucketCount(5),
-			m_equalsFunc(equalsFunc), m_compressFunc(&AUnorderedMap<K, T>::DefaultCompress)
+			m_equalsFunc(equalsFunc), m_compressFunc(&AUnorderedMap<K, T>::DefaultCompress), m_count(0)
 		{
 			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
 
 		AUnorderedMap(std::function<int(long, size_t)> compressFunc) : m_bucketCount(5),
-			m_equalsFunc(&AUnorderedMap<K, T>::DefaultEquals), m_compressFunc(compressFunc)
+			m_equalsFunc(&AUnorderedMap<K, T>::DefaultEquals), m_compressFunc(compressFunc), m_count(0)
 		{
 			m_bucketArr = new ASinglyLinkedList<AKeyElementPair<K, T>>[m_bucketCount];
 		}
@@ -265,7 +265,8 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 			size_t bucketIndex = GetBucketIndex(key);
 
-			for (AKeyElementPair<K, T> pair : m_bucketArr[bucketIndex])
+			//try to find existing key
+			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
 			{
 				if (m_equalsFunc(pair.GetKey(), key))
 				{
@@ -273,6 +274,7 @@ namespace AstralEngine
 				}
 			}
 
+			//if no existing key was created found create one and add it to the AUnorderedMap
 			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key);
 			m_bucketArr[bucketIndex].Add(pair);
 			m_count++;
@@ -282,6 +284,7 @@ namespace AstralEngine
 				bucketIndex = GetBucketIndex(key);
 			}
 
+			//find the newly added key and return it's element
 			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
 			{
 				if (pair.GetKey() == key)
@@ -290,7 +293,7 @@ namespace AstralEngine
 				}
 			}
 
-			AE_CORE_ERROR("Could not find new added key");
+			AE_CORE_ERROR("AUnorderedMap could not find new added key");
 		}
 
 		AUnorderedMap<K, T>::AIterator begin()

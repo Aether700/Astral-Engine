@@ -57,15 +57,9 @@ namespace AstralEngine
 		friend class AWeakRef;
 
 	public:
-		AReference()
-		{
-			m_block = nullptr;
-		}
+		AReference() : m_block(nullptr) { }
 
-		AReference(std::nullptr_t null)
-		{
-			m_block = nullptr;
-		}
+		AReference(std::nullptr_t) : m_block(nullptr) {	}
 
 		template<typename Derived>
 		AReference(const AReference<Derived>& other) : m_block(other.m_block)

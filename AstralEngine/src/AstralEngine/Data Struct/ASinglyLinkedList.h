@@ -220,6 +220,7 @@ namespace AstralEngine
 	class ASinglyLinkedListIterator
 	{
 		friend class ASinglyLinkedList<T>;
+		friend class ASinglyLinkedListConstIterator<T>;
 
 	protected:
 		using Node = typename ASinglyLinkedList<T>::Node;
@@ -282,17 +283,18 @@ namespace AstralEngine
 	template<typename T>
 	class ASinglyLinkedListConstIterator : public ASinglyLinkedListIterator<T>
 	{
+		friend class ASinglyLinkedList<T>;
 	public:
 		ASinglyLinkedListConstIterator(const ASinglyLinkedListConstIterator<T>& other)
 			: ASinglyLinkedListIterator<T>(other) { }
 		
-		ADoublyLinkedListConstIterator<T>& operator++()
+		ASinglyLinkedListIterator<T>& operator++()
 		{
 			ASinglyLinkedListIterator<T>::operator++();
 			return *this;
 		}
 
-		ASinglyLinkedListConstIterator<T>& operator+=(size_t i)
+		ASinglyLinkedListIterator<T>& operator+=(size_t i)
 		{
 			ASinglyLinkedListIterator<T>::operator+=(i);
 			return *this;
@@ -318,12 +320,12 @@ namespace AstralEngine
 
 		const T& operator*() const
 		{
-			return ASinglyLinkedListIterator<T>::operator*();
+			return const_cast<ASinglyLinkedListConstIterator<T>*>(this)->ASinglyLinkedListIterator<T>::operator*();
 		}
 
 	private:
 		ASinglyLinkedListConstIterator(Node* node)
-			: ASinglyLinkedListConstIterator<T>(node) { }
+			: ASinglyLinkedListIterator<T>(node) { }
 
 	};
 

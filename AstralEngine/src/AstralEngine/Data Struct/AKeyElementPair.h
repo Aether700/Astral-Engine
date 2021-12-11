@@ -12,7 +12,7 @@ namespace AstralEngine
 			m_element(other.m_element), m_equalsFunc(other.m_equalsFunc) { }
 
 		AKeyElementPair(const K& k, ADelegate<bool(const K&, const K&)> equals = DefaultEquals)
-			: m_equalsFunc(equals), m_key(k), m_element() { }
+			: m_equalsFunc(equals), m_key(k) { }
 
 		AKeyElementPair(const K& k, const T& e, ADelegate<bool(const K&, const K&)> equals = DefaultEquals)
 			: m_equalsFunc(equals), m_key(k), m_element(e) { }

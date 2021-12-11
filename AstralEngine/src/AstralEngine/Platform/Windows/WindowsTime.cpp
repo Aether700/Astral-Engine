@@ -14,7 +14,7 @@ namespace AstralEngine
 		return (float)glfwGetTime();
 	}
 
-	float WindowsTime::DeltaTimeImpl()
+	float WindowsTime::GetDeltaTimeImpl()
 	{
 		return m_currFrameTime;
 	}

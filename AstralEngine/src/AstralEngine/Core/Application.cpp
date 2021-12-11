@@ -3,6 +3,7 @@
 #include "AstralEngine/Renderer/Renderer.h"
 #include "Core.h"
 #include "Time.h"
+#include "AstralEngine/UI/UICore.h"
 
 #include <glad/glad.h>
 
@@ -18,6 +19,9 @@ namespace AstralEngine
 
 		s_instance = this;
 		m_window = AWindow::Create(windowTitle, width, height);
+		m_uiContext = new UIContext();
+
+		m_layerStack.AttachLayer(m_uiContext);
 
 		Renderer::Init();
 		Random::Init();
@@ -27,6 +31,7 @@ namespace AstralEngine
 
 	Application::~Application() 
 	{
+		//no need to delete the UIContext since the LayerStack will do it for us
 		AE_PROFILE_FUNCTION();
 		Renderer::Shutdown();
 		delete m_window;
@@ -54,25 +59,25 @@ namespace AstralEngine
 	void Application::AttachLayer(Layer* l) 
 	{
 		AE_PROFILE_FUNCTION();
-		m_layerStack.AttachLayer(l); 
+		GetApp()->m_layerStack.AttachLayer(l); 
 	}
 	
 	void Application::DetachLayer(Layer* l) 
 	{
 		AE_PROFILE_FUNCTION();
-		m_layerStack.DetachLayer(l); 
+		GetApp()->m_layerStack.DetachLayer(l);
 	}
 	
 	void Application::AttachOverlay(Layer* l) 
 	{
 		AE_PROFILE_FUNCTION();
-		m_layerStack.AttachOverlay(l); 
+		GetApp()->m_layerStack.AttachOverlay(l);
 	}
 	
 	void Application::DetachOverlay(Layer* l) 
 	{
 		AE_PROFILE_FUNCTION();
-		m_layerStack.DetachLayer(l); 
+		GetApp()->m_layerStack.DetachLayer(l);
 	}
 
 	void Application::Run()
@@ -96,7 +101,7 @@ namespace AstralEngine
 		}
 	}
 
-	const Application* Application::GetApp()
+	Application* Application::GetApp()
 	{
 		return s_instance;
 	}

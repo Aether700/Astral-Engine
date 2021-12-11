@@ -107,7 +107,7 @@ namespace AstralEngine
 		}
 
 		template<typename... Component>
-		bool HasComponent()
+		bool HasComponent() const
 		{
 			if constexpr (sizeof... (Component) == 1)
 			{

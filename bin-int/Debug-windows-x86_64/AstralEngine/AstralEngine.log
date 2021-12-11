@@ -1,0 +1,49 @@
+﻿  Renderer.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Mesh.h(52,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(113,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(121,34): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(281,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(311,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(340,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(367,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(459,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(467,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(475,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(483,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(508,33): warning C4150: deletion of pointer to incomplete type 'AstralEngine::DirectionalLight'; no destructor called
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.h(16): message : see declaration of 'AstralEngine::DirectionalLight'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(509,27): warning C4150: deletion of pointer to incomplete type 'AstralEngine::PointLight'; no destructor called
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.h(17): message : see declaration of 'AstralEngine::PointLight'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(460,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(459): message : while compiling class template member function 'bool AstralEngine::AUnorderedMap<AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::CheckLoadFactor(void)'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(282): message : see reference to function template instantiation 'bool AstralEngine::AUnorderedMap<AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::CheckLoadFactor(void)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(108): message : see reference to class template instantiation 'AstralEngine::AUnorderedMap<AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(449,47): warning C4244: 'argument': conversion from 'size_t' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(447): message : while compiling class template member function 'int AstralEngine::AUnorderedMap<AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::GetBucketIndex(const K &) const'
+          with
+          [
+              K=AstralEngine::RenderingPrimitive
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(266): message : see reference to function template instantiation 'int AstralEngine::AUnorderedMap<AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::GetBucketIndex(const K &) const' being compiled
+          with
+          [
+              K=AstralEngine::RenderingPrimitive
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(240,1): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1058): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
+          with
+          [
+              T=AstralEngine::DrawCommand
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1057): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
+          with
+          [
+              T=AstralEngine::DrawCommand
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<enum AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::operator[]': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
+  AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib

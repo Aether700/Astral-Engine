@@ -7,6 +7,18 @@ namespace AstralEngine
 {
 	RenderAPI::API RenderAPI::s_api = RenderAPI::API::OpenGL;
 
+	static unsigned int RenderingPrimitiveToOpenGLPrimitive(RenderingPrimitive primitive) 
+	{
+		switch (primitive) 
+		{
+		case RenderingPrimitive::Triangles:
+			return GL_TRIANGLES;
+		}
+
+		AE_CORE_ERROR("Unknown Rendering primitive provided");
+		return 0;
+	}
+
 	void OpenGLRenderAPI::Init()
 	{
 		glEnable(GL_BLEND);
@@ -38,5 +50,10 @@ namespace AstralEngine
 	void OpenGLRenderAPI::DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count)
 	{
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void OpenGLRenderAPI::DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, unsigned int count) 
+	{
+		glDrawElements(RenderingPrimitiveToOpenGLPrimitive(primitive), count, GL_UNSIGNED_INT, nullptr);
 	}
 }

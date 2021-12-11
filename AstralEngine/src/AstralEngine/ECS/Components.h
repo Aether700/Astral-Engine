@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "AstralEngine/Renderer/Renderer2D.h"
 #include "AstralEngine/Renderer/Texture.h"
 #include "AstralEngine/Math/AMath.h"
 #include "SceneCamera.h"
@@ -218,13 +219,32 @@ namespace AstralEngine
 		TransformComponent(Vector3 translation) 
 			: position(translation), scale(1.0f, 1.0f, 1.0f) { }
 
-		Mat4 GetTransform() const
-		{
-			Mat4 rotationMatrix = Mat4::Rotate(Mat4::Identity(), rotation.x, { 1, 0, 0 })
-				* Mat4::Rotate(Mat4::Identity(), rotation.y, { 0, 1, 0 })
-				* Mat4::Rotate(Mat4::Identity(), rotation.z, { 0, 0, 1 });
+		TransformComponent(Vector3 pos, Vector3 rotation, Vector3 scale)
+			: position(pos), rotation(rotation), scale(scale) { }
 
-			return Mat4::Translate(Mat4::Identity(), position) * rotationMatrix * Mat4::Scale(Mat4::Identity(), scale);
+
+		Mat4 GetTransformMatrix() const
+		{
+			Mat4 transformMatrix;
+			if (rotation == Vector3::Zero())
+			{
+				transformMatrix = Mat4::Translate(Mat4::Identity(), position) * Mat4::Scale(Mat4::Identity(), scale);
+			}
+			else
+			{
+				Mat4 rotationMatrix = Mat4::Rotate(Mat4::Identity(), rotation.x, { 1, 0, 0 })
+					* Mat4::Rotate(Mat4::Identity(), rotation.y, { 0, 1, 0 })
+					* Mat4::Rotate(Mat4::Identity(), rotation.z, { 0, 0, 1 });
+				transformMatrix = Mat4::Translate(Mat4::Identity(), position) 
+					* rotationMatrix * Mat4::Scale(Mat4::Identity(), scale);
+			}
+
+			if (m_parent != nullptr)
+			{
+				return m_parent->GetTransformMatrix() * transformMatrix;
+			}
+
+			return transformMatrix;
 		}
 
 		bool operator==(const TransformComponent& other) const
@@ -241,6 +261,9 @@ namespace AstralEngine
 		Vector3 position;
 		Vector3 rotation;
 		Vector3 scale;
+
+	private:
+		AReference<TransformComponent> m_parent;
 	};
 
 	struct CameraComponent : public ToggleableComponent

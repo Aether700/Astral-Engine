@@ -6,6 +6,8 @@
 
 namespace AstralEngine
 {
+	class UIContext;
+
 	class Application
 	{
 	public:
@@ -15,16 +17,18 @@ namespace AstralEngine
 		void Run();
 		void OnEvent(AEvent& e);
 
-		void AttachLayer(Layer* l);
-		void DetachLayer(Layer* l);
-		void AttachOverlay(Layer* l);
-		void DetachOverlay(Layer* l);
+		static void AttachLayer(Layer* l);
+		static void DetachLayer(Layer* l);
+		static void AttachOverlay(Layer* l);
+		static void DetachOverlay(Layer* l);
 
-		inline AWindow* GetWindow() const { return m_window; }
+		static AWindow* GetWindow() { return GetApp()->m_window; }
+		static UIContext* GetUIContext() { return GetApp()->m_uiContext; }
 
-		static const Application* GetApp();
+		static void Exit() { GetApp()->m_isRunning = false; }
 
 	private:
+		static Application* GetApp();
 
 		bool OnWindowCloseEvent(WindowCloseEvent& close);
 		bool OnWindowResizeEvent(WindowResizeEvent& resize);
@@ -32,6 +36,7 @@ namespace AstralEngine
 		bool m_isRunning;
 		LayerStack m_layerStack;
 		AWindow* m_window;
+		UIContext* m_uiContext;
 		bool m_minimized;
 
 		static Application* s_instance;
