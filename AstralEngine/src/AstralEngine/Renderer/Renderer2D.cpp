@@ -129,7 +129,7 @@ namespace AstralEngine
 	void Renderer2D::BeginScene(const RuntimeCamera& camera, const TransformComponent& transform)
 	{
 		AE_PROFILE_FUNCTION();
-		Mat4 viewProj = camera.GetProjection() * transform.GetTransform().Inverse();
+		Mat4 viewProj = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
 
 		s_data.shader->Bind();
 		s_data.shader->SetMat4("u_viewProjMatrix", viewProj);
@@ -357,16 +357,10 @@ namespace AstralEngine
 	}
 
 
-	void Renderer2D::DrawUIElement(const UIElement& uiElement)
+	void Renderer2D::DrawUIElement(const UIElement& element, const Vector4& color)
 	{
-		static int colorIndex = 0;
-		Vector4 colors[] = {
-			{1, 0, 0, 1},
-			{0, 0, 1, 1}
-		};
-		DrawQuad(uiElement.GetWorldPos(), Vector2(uiElement.GetWorldWidth(), 
-			uiElement.GetWorldHeight()), colors[colorIndex], true);
-		colorIndex = (colorIndex + 1) % (sizeof(colors) / sizeof(Vector4));
+		DrawQuad(element.GetWorldPos(), Vector2(element.GetWorldWidth(),
+			element.GetWorldHeight()), color, true);
 	}
 
 	void Renderer2D::StartBatch()

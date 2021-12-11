@@ -32,6 +32,17 @@ namespace AstralEngine
 
 	void RenderCommand::DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count)
 	{
-		s_api->DrawIndexed(indexBuffer, count);
+		DrawIndexed(RenderingPrimitive::Triangles, indexBuffer, count);
+	}
+
+	void RenderCommand::DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 
+		unsigned int count)
+	{
+		if (count == 0)
+		{
+			count = indexBuffer->GetCount();
+		}
+
+		s_api->DrawIndexed(primitive, indexBuffer, count);
 	}
 }

@@ -13,5 +13,7 @@ namespace AstralEngine
 
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer) override;
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count) override;
+		virtual void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 
+			unsigned int count) override;
 	};
 }

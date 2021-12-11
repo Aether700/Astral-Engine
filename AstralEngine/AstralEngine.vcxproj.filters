@@ -224,8 +224,11 @@
     <ClInclude Include="src\AstralEngine\Data Struct\AKeyElementPair.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AHeap.h" />
     <ClInclude Include="src\AstralEngine\ECS\SceneCamera.h" />
-    <ClInclude Include="src\AstralEngine\UI\UI Core\UIContext.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ASparseSet.h" />
+    <ClInclude Include="src\AstralEngine\Algorithms\Algorithms.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\AHashSet.h" />
+    <ClInclude Include="src\AstralEngine\UI\UICore.h" />
+    <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -330,5 +333,6 @@
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
+    <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
   </ItemGroup>
 </Project>

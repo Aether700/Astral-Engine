@@ -4,6 +4,11 @@
 
 namespace AstralEngine
 {
+	enum class RenderingPrimitive
+	{
+		Triangles
+	};
+
 	class RenderAPI
 	{
 	public:
@@ -20,6 +25,7 @@ namespace AstralEngine
 
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer) = 0;
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count) = 0;
+		virtual void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, unsigned int count) = 0;
 
 		inline static API GetAPI() { return s_api; }
 

@@ -403,6 +403,7 @@ namespace AstralEngine
 			template<typename Comp>
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e)
 			{	
+				m_destroy(owner, e);
 				if constexpr (std::is_same_v<AReference<CallbackComponent>, Component>)
 				{
 					AReference<CallbackComponent> comp = Storage<Entity, AReference<CallbackComponent>>::RemoveComponent<Comp>(e);
@@ -413,7 +414,6 @@ namespace AstralEngine
 					Storage<Entity, Component>::RemoveComponent(e);				
 				}
 
-				m_destroy(owner, e);
 			}
 
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e, const Component& comp)

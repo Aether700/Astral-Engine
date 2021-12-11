@@ -136,10 +136,12 @@
     <ClInclude Include="src\AstralEngine\AEvents\AppEvents.h" />
     <ClInclude Include="src\AstralEngine\AEvents\KeyEvents.h" />
     <ClInclude Include="src\AstralEngine\AEvents\MouseEvents.h" />
+    <ClInclude Include="src\AstralEngine\Algorithms\Algorithms.h" />
     <ClInclude Include="src\AstralEngine\Core\AWindow.h" />
     <ClInclude Include="src\AstralEngine\Core\Application.h" />
     <ClInclude Include="src\AstralEngine\Core\Core.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADoublyLinkedList.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\AHashSet.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AHeap.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AKeyElementPair.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\APriorityQueue.h" />
@@ -193,6 +195,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\Framebuffer.h" />
     <ClInclude Include="src\AstralEngine\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\AstralEngine\Renderer\IndexBuffer.h" />
+    <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
     <ClInclude Include="src\AstralEngine\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\AstralEngine\Renderer\OrthographicCameraController.h" />
     <ClInclude Include="src\AstralEngine\Renderer\RenderAPI.h" />
@@ -206,7 +209,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\VertexBuffer.h" />
     <ClInclude Include="src\aepch.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
-    <ClInclude Include="src\AstralEngine\UI\UI Core\UIContext.h" />
+    <ClInclude Include="src\AstralEngine\UI\UICore.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +252,7 @@
     <ClCompile Include="src\aepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -2,13 +2,52 @@
 #include <AstralEngine/EntryPoint.h>
 #include <iostream>
 
-//Scripts////////////////////////////////////////////////////////////////////////
+//temp
+#include "AstralEngine/UI/UICore.h"
+////////
 
+//Scripts////////////////////////////////////////////////////////////////////////
+class PerlinNoiseTest : public AstralEngine::NativeScript
+{
+public:
+	void OnCreate() override
+	{
+		GenerateTexture();
+		entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(m_texture);
+	}
+
+private:
+
+	void GenerateTexture()
+	{
+		unsigned char* data = (unsigned char*) malloc(sizeof(unsigned char) * size * size * 4);
+		
+		for (size_t y = 0; y < size; y++)
+		{
+			for (size_t x = 0; x < size; x++)
+			{
+				float c = AstralEngine::Math::PerlinNoise((((float)x / ((float)size))) * scale, 
+					(((float)y / ((float)size))) * scale);
+				unsigned char result = (unsigned char)(c * 255.0f);
+				data[(x + size * y) * 4] = result;
+				data[(x + size * y) * 4 + 1] = result;
+				data[(x + size * y) * 4 + 2] = result;
+				data[(x + size * y) * 4 + 3] = 255;
+			}
+		}
+
+		m_texture = AstralEngine::Texture2D::Create(size, size, data, size * size * 4);
+		delete data;
+	}
+
+	unsigned int size = 256;
+	float scale = 20.0f;
+	AstralEngine::AReference<AstralEngine::Texture2D> m_texture;
+};
 
 class TestComponent : public AstralEngine::NativeScript
 {
 public:
-	
 	void OnCreate() override
 	{
 		AE_INFO("Test component created");
@@ -36,8 +75,13 @@ public:
 
 		if (curr < delay)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
+	}
+
+	void OnDestroy()
+	{
+		AE_INFO("TestComponent Destroyed");
 	}
 
 	void OnEnable() override
@@ -97,7 +141,7 @@ public:
 		
 		if (curr < delay)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
 	}
 
@@ -142,7 +186,7 @@ public:
 
 		if (curr < delay)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
 	}
 
@@ -171,7 +215,7 @@ public:
 	{
 		if (curr < timer)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
 
 		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::B) && curr >= timer)
@@ -221,7 +265,7 @@ public:
 	{
 		if (curr < timer)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
 
 		if (curr >= timer)
@@ -265,8 +309,6 @@ private:
 	float curr;
 };
 
-
-
 class MultiComponent : public AstralEngine::NativeScript
 {
 public:
@@ -296,7 +338,7 @@ public:
 	{
 		if (curr < timer)
 		{
-			curr += AstralEngine::Time::DeltaTime();
+			curr += AstralEngine::Time::GetDeltaTime();
 		}
 
 		if (curr >= timer)
@@ -334,6 +376,25 @@ private:
 	float curr;
 };
 
+void OnButtonClicked()
+{
+	static int count = 0;
+
+	if (count == 5)
+	{
+		AE_INFO("next button click the application will close");
+		count++;
+	}
+	else if (count == 6)
+	{
+		AstralEngine::Application::Exit();
+	}
+	else
+	{
+		AE_INFO("Application detected the button click %d times", ++count);
+	}
+}
+
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -342,18 +403,29 @@ public:
 
 	void OnAttach() override
 	{
-		AstralEngine::AWindow* window = AstralEngine::Application::GetApp()->GetWindow();
+		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		unsigned int width = window->GetWidth(), height = window->GetHeight();
 		float aspectRatio = (float)width / (float)height;
 		m_cameraController = AstralEngine::AReference<AstralEngine::OrthographicCameraController>::Create(aspectRatio, true);
 		m_cameraController->SetZoomLevel(5.5f);
 
+		/*
+		AstralEngine::AReference<AstralEngine::UIWindow> uiWindow 
+			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200);
+		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200);
+
+		AstralEngine::AReference<AstralEngine::UIButton> button 
+			= AstralEngine::AReference<AstralEngine::UIButton>::Create("My Button", AstralEngine::Vector4(0.8f, 0, 0, 1));
+		uiWindow->AddElement((AstralEngine::AReference<AstralEngine::UIElement>)button);
+		button->SetParent(uiWindow);
+		button->AddListener(AstralEngine::ADelegate<void()>(&OnButtonClicked));
 		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
+		*/
 
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
-
+		
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(1, 0, 0, 1);
@@ -361,7 +433,6 @@ public:
 		
 		m_entity.EmplaceComponent<EntityController>();
 		m_entity.EmplaceComponent<TestComponent>();
-		
 		AstralEngine::AEntity spriteRemover = m_scene->CreateAEntity();
 		spriteRemover.EmplaceComponent<SpriteRemover>();
 
@@ -372,13 +443,37 @@ public:
 
 		m_scene->CreateAEntity().EmplaceComponent<MultiComponentController>();
 
+		AstralEngine::AEntity e = m_scene->CreateAEntity();
+		e.EmplaceComponent<PerlinNoiseTest>();
+		e.GetComponent<AstralEngine::TransformComponent>().scale.x = 5.0f;
+		e.GetComponent<AstralEngine::TransformComponent>().scale.y = 5.0f;
+		e.GetComponent<AstralEngine::TransformComponent>().position.y = 5.0f;
 	}
 
 	void OnUpdate() override
 	{
 		m_scene->OnUpdate();
 
-		AstralEngine::Renderer2D::ResetStats();
+		m_cameraController->OnUpdate();
+
+
+		/*
+		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		AstralEngine::RenderCommand::Clear();
+		AstralEngine::Renderer::BeginScene(m_cameraController->GetCamera());
+
+		AstralEngine::Application::GetUIContext()->TempUpdate();
+
+		/*
+		AstralEngine::Renderer2D::DrawQuad(AstralEngine::Mat4::Identity(), { 1, 1, 1, 1 });
+		AstralEngine::Renderer::DrawQuad(AstralEngine::Mat4::Identity());
+		//AstralEngine::Renderer2D::DrawUIWindow(m_uiWindow);
+
+
+		AstralEngine::Renderer::EndScene();
+		*/
+
+		AstralEngine::Renderer::ResetStats();
 	}
 
 	bool OnEvent(AstralEngine::AEvent& e) override
@@ -389,8 +484,17 @@ public:
 
 private:
 	AstralEngine::AReference<AstralEngine::OrthographicCameraController> m_cameraController;
+
+	//AstralEngine::UIWindow m_uiWindow = AstralEngine::UIWindow({ 300, 300 }, 200, 200);//, {1, 0, 0, 1});
+
+	bool m_wasHovered = false;
+
+	float m_timer = 0.2f;
+	float m_currTimer = 0.0f;
+
+	
 	AstralEngine::AReference<AstralEngine::Texture2D> m_texture;
-	//AstralEngine::AReference<AstralEngine::Framebuffer> m_framebuffer;
+	AstralEngine::AReference<AstralEngine::Framebuffer> m_framebuffer;
 	AstralEngine::AReference<AstralEngine::Scene> m_scene;
 	AstralEngine::AEntity m_entity;
 };

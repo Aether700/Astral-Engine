@@ -5,6 +5,11 @@
 
 namespace AstralEngine
 {
+	OpenGLIndexBuffer::OpenGLIndexBuffer() : m_count(0)
+	{
+		glCreateBuffers(1, &m_rendererID);
+	}
+
 	OpenGLIndexBuffer::OpenGLIndexBuffer(unsigned int* indices, unsigned int count) : m_count(count)
 	{
 		glCreateBuffers(1, &m_rendererID);
@@ -25,5 +30,12 @@ namespace AstralEngine
 	void OpenGLIndexBuffer::Unbind() const 
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+	void OpenGLIndexBuffer::SetData(unsigned int* data, unsigned int count)
+	{
+		m_count = count;
+		Bind();
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_count * sizeof(unsigned int), data, GL_DYNAMIC_DRAW);
 	}
 }

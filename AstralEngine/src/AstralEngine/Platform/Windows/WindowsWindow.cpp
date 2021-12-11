@@ -18,7 +18,8 @@ namespace AstralEngine
 		return new WindowsWindow(title, width, height);
 	}
 
-	WindowsWindow::WindowsWindow(const std::string& title, unsigned int width, unsigned int height) : m_data(title, width, height)
+	WindowsWindow::WindowsWindow(const std::string& title, unsigned int width, unsigned int height) 
+		: m_data(title, width, height)
 	{
 		Init();
 	}

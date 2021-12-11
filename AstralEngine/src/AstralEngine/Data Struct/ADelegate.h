@@ -25,6 +25,7 @@ namespace AstralEngine
 		using InternalFunc = Return(void*, Args...);
 
 	public:
+		ADelegate(std::nullptr_t) : m_func(nullptr), m_obj(nullptr) { }
 		ADelegate() : m_func(nullptr), m_obj(nullptr) { }
 
 		ADelegate(Func* function)

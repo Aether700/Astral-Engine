@@ -77,7 +77,7 @@ namespace AstralEngine
 			AReference<SubTexture2D> subTexture, float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		//UI
-		static void DrawUIElement(const UIElement& uiElement);
+		static void DrawUIElement(const UIElement& element, const Vector4& color);
 
 	private:
 		static void StartBatch();

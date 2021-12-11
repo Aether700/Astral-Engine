@@ -50,4 +50,53 @@ namespace AstralEngine
 		return nullptr;
 	}
 
+
+	//CubeMap /////////////////////////////////////////
+
+	AReference<CubeMap> CubeMap::Create(const std::array<std::string, 6>& faceTextures)
+	{
+		switch (RenderAPI::GetAPI())
+		{
+		case RenderAPI::API::None:
+			AE_CORE_ERROR("No RenderAPI is not yet supported");
+
+		case RenderAPI::API::OpenGL:
+			return AReference<OpenGLCubeMap>::Create(faceTextures);
+		}
+
+		AE_CORE_ERROR("Unknown RenderAPI");
+		return nullptr;
+	}
+
+	//will apply the same texture to every face
+	AReference<CubeMap> CubeMap::Create(const std::string& faceTexture)
+	{
+		switch (RenderAPI::GetAPI())
+		{
+		case RenderAPI::API::None:
+			AE_CORE_ERROR("No RenderAPI is not yet supported");
+
+		case RenderAPI::API::OpenGL:
+			return AReference<OpenGLTexture2D>::Create(faceTexture);
+		}
+
+		AE_CORE_ERROR("Unknown RenderAPI");
+		return nullptr;
+	}
+
+	//applies the texture data provided to all sides of the cube
+	AReference<CubeMap> CubeMap::Create(unsigned int size, void* data)
+	{
+		switch (RenderAPI::GetAPI())
+		{
+		case RenderAPI::API::None:
+			AE_CORE_ERROR("No RenderAPI is not yet supported");
+
+		case RenderAPI::API::OpenGL:
+			return AReference<OpenGLCubeMap>::Create(size, data);
+		}
+
+		AE_CORE_ERROR("Unknown RenderAPI");
+		return nullptr;
+	}
 }

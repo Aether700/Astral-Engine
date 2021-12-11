@@ -60,4 +60,27 @@ namespace AstralEngine
 		Vector2 m_max; //bottom right corner of the texture
 	};
 
+	class CubeMap : public Texture
+	{
+	public:
+		virtual ~CubeMap() { }
+
+		/*pass the texture used for each face where each texture
+		  is applied in this order
+
+		  index 0 -> right face (positive X)
+		  index 1 -> left face (negative X)
+		  index 2 -> top face (positive Y)
+		  index 3 -> bottom face (negative Y)
+		  index 4 -> front face (positive Z)
+		  index 5 -> back face (negative Z)
+		*/
+		static AReference<CubeMap> Create(const std::array<std::string, 6>& faceTextures);
+
+		//will apply the same texture to every face
+		static AReference<CubeMap> Create(const std::string& faceTexture);
+
+		//applies the texture data provided to all sides of the cube
+		static AReference<CubeMap> Create(unsigned int size, void* data);
+	};
 }

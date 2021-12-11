@@ -10,7 +10,7 @@ namespace AstralEngine
 		RuntimeCamera() : m_projectionMatrix(Mat4::Identity()) { }
 		RuntimeCamera(const Mat4& projection) : m_projectionMatrix(projection) { }
 
-		const Mat4& GetProjection() const { return m_projectionMatrix; }
+		const Mat4& GetProjectionMatrix() const { return m_projectionMatrix; }
 
 		bool operator==(const RuntimeCamera& other) const
 		{

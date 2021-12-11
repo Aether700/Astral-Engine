@@ -2,7 +2,7 @@
 #include "AstralEngine/Core/Time.h"
 #include "AstralEngine/Core/Input.h"
 #include "AstralEngine/Data Struct/AReference.h"
-#include "AstralEngine/Renderer/Renderer2D.h"
+#include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
 #include "Core/Application.h"
 #include "Scene.h"
@@ -86,7 +86,7 @@ namespace AstralEngine
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
-		AstralEngine::AWindow* window = AstralEngine::Application::GetApp()->GetWindow();
+		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		OnViewportResize(window->GetWidth(), window->GetHeight());
 	}
 
@@ -140,7 +140,7 @@ namespace AstralEngine
 
 		if (mainCamera != nullptr)
 		{
-			Renderer2D::BeginScene(*mainCamera, *cameraTransform);
+			Renderer::BeginScene(*mainCamera, *cameraTransform);
 			auto group = m_registry.GetGroup<TransformComponent, SpriteRendererComponent>();
 
 			for (BaseEntity e : group)
@@ -149,10 +149,10 @@ namespace AstralEngine
 				TransformComponent& transform = std::get<TransformComponent&>(components);
 				SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
 
-				Renderer2D::DrawRotatedQuad(transform, sprite);
+				Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
 			}
 
-			Renderer2D::EndScene();
+			Renderer::EndScene();
 		}
 
 		//update Scripts
