@@ -1,6 +1,3 @@
 *.ipch
 *.opendb
-*.db
-*.db-shm
-*.db-wal
-"To Do.txt"
+.vs/
