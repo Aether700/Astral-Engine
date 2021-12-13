@@ -38,31 +38,31 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 			if (Input::IsKeyPressed(KeyCode::A))
 			{
-				transform->position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				GetTransform().position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::D))
 			{
-				transform->position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				GetTransform().position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 
 			if (Input::IsKeyPressed(KeyCode::W))
 			{
-				transform->position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				GetTransform().position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::IsKeyPressed(KeyCode::S))
 			{
-				transform->position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				GetTransform().position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::IsKeyPressed(KeyCode::Q))
 				{
-					transform->rotation.z += m_camRotSpeed * Time::GetDeltaTime();
+					GetTransform().rotation.z += m_camRotSpeed * Time::GetDeltaTime();
 				}
 				else if (Input::IsKeyPressed(KeyCode::E))
 				{
-					transform->rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
+					GetTransform().rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
 				}
 			}
 		}
@@ -125,7 +125,7 @@ namespace AstralEngine
 		auto camView = m_registry.GetView<CameraComponent, TransformComponent>();
 		for (auto entity : camView)
 		{
-			auto [transform, camera] = camView.Get<TransformComponent, CameraComponent>(entity);
+			auto[transform, camera] = camView.Get<TransformComponent, CameraComponent>(entity);
 
 			if (camera.primary)
 			{
@@ -180,27 +180,21 @@ namespace AstralEngine
 
 	void Scene::CallOnStart()
 	{
-		auto view = m_registry.GetView<AReference<CallbackComponent>>();
+		auto view = m_registry.GetView<CallbackListComponent>();
 		for (BaseEntity e : view)
 		{
-			auto& list = m_registry.GetComponentList<AReference<CallbackComponent>>(e);
-			for (AKeyElementPair<unsigned int, AReference<CallbackComponent>>& pair : list)
-			{
-				pair.GetElement()->OnStart();
-			}
+			auto& list = view.Get<CallbackListComponent>(e);
+			list.CallOnStart();
 		}
 	}
 
 	void Scene::CallOnUpdate()
 	{
-		auto view = m_registry.GetView<AReference<CallbackComponent>>();
+		auto view = m_registry.GetView<CallbackListComponent>();
 		for (BaseEntity e : view)
 		{
-			auto& list = m_registry.GetComponentList<AReference<CallbackComponent>>(e);
-			for (AKeyElementPair<unsigned int, AReference<CallbackComponent>>& pair : list)
-			{
-				pair.GetElement()->FilteredUpdate();
-			}
+			auto& list = view.Get<CallbackListComponent>(e);
+			list.CallOnUpdate();
 		}
 	}
 

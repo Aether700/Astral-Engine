@@ -110,7 +110,7 @@ namespace AstralEngine
 			}
 			else
 			{
-				return std::forward_as_tuple(GetComponent<Component>()...);
+				return std::forward_as_tuple(GetComponent<Component>(e)...);
 			}
 		}
 
@@ -126,17 +126,8 @@ namespace AstralEngine
 			}
 			else
 			{
-				return std::forward_as_tuple(GetComponent<Component>(), ...);
+				return std::forward_as_tuple(GetComponent<Component>(e), ...);
 			}
-		}
-
-		//returns the list of components of the specified type linked to the entity provided
-		template<typename Component>
-		decltype(auto) GetComponentList(const Entity& e)
-		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
-			return Assure<Component>().GetList(e);
 		}
 
 		//clears the components passed
@@ -404,16 +395,7 @@ namespace AstralEngine
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e)
 			{	
 				m_destroy(owner, e);
-				if constexpr (std::is_same_v<AReference<CallbackComponent>, Component>)
-				{
-					AReference<CallbackComponent> comp = Storage<Entity, AReference<CallbackComponent>>::RemoveComponent<Comp>(e);
-					comp->OnDestroy();
-				}
-				else
-				{
-					Storage<Entity, Component>::RemoveComponent(e);				
-				}
-
+				Storage<Entity, Component>::Remove(e);				
 			}
 
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e, const Component& comp)
@@ -457,12 +439,6 @@ namespace AstralEngine
 			template<typename Component>
 			void CheckValidityOnComponentDestroyed(Registry<Entity>& owner, const Entity e)
 			{
-				//if the entity has more than one component of the type provided we simply skip it
-				if (owner.Assure<Component>().GetList(e).GetCount() > 1)
-				{
-					return;
-				}
-
 				//excluded component destroyed
 				if constexpr ((std::is_same_v<Component, Exclude> || ...))
 				{

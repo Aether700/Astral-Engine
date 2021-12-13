@@ -177,6 +177,50 @@ namespace AstralEngine
 		
 		virtual const T& operator[](size_t index) const override { return GetNode(index)->element; }
 
+		ASinglyLinkedList<T>& operator=(const ASinglyLinkedList<T>& other)
+		{
+			Clear();
+
+			for (T& element : other)
+			{
+				Add(element);
+			}
+			return *this;
+		}
+
+		ASinglyLinkedList<T>& operator=(ASinglyLinkedList<T>&& other)
+		{
+			Clear();
+			delete m_dummy;
+			m_dummy = other.m_dummy;
+			m_head = other.m_head;
+			m_count = other.m_count;
+			other.m_count = 0;
+			other.m_dummy = nullptr;
+			other.m_head = nullptr;
+			return *this;
+		}
+
+		bool operator==(const ASinglyLinkedList<T>& other) const
+		{
+			ASinglyLinkedList<T>::AConstIterator it = other.begin();
+			for (const T& element : *this)
+			{
+				if (it == other.end() || element != *it) 
+				{
+					return false;
+				}
+				it++;
+			}
+
+			return it == other.end();
+		}
+
+		bool operator!=(const ASinglyLinkedList<T>& other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 		struct Node
 		{

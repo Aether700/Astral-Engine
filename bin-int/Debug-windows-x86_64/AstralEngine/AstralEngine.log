@@ -1,4 +1,12 @@
-﻿  Renderer.cpp
+﻿  Application.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+  Scene.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  Renderer.cpp
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Mesh.h(52,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
@@ -33,17 +41,41 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
               K=AstralEngine::RenderingPrimitive
           ]
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(240,1): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1058): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
-          with
-          [
-              T=AstralEngine::DrawCommand
-          ]
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1057): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
           with
           [
               T=AstralEngine::DrawCommand
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<enum AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::operator[]': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1056): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
+          with
+          [
+              T=AstralEngine::DrawCommand
+          ]
+  Renderer2D.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(176,36): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(194,36): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(240,22): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(271,22): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(379,25): warning C4244: 'initializing': conversion from '__int64' to 'unsigned int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer2D.cpp(406,21): warning C4018: '<': signed/unsigned mismatch
+  UICore.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(113,62): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(114,64): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(180,17): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(186,47): warning C4244: '=': conversion from 'const float' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(199,18): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(205,48): warning C4244: '=': conversion from 'const float' to 'int', possible loss of data
+  Generating Code...
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<enum AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
   AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib

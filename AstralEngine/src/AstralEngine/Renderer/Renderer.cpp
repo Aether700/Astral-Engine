@@ -537,7 +537,6 @@ namespace AstralEngine
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const TransformComponent& transform)
 	{
-		//view is the identity
 		Mat4 viewProjectionMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
 
 		s_shader->Bind();

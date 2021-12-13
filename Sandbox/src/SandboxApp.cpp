@@ -111,22 +111,20 @@ public:
 
 	void OnStart() override
 	{
-		sprite = &GetComponent<AstralEngine::SpriteRendererComponent>();
-		test = &GetComponent<TestComponent>();
-
 		curr = 0.0f;
 		delay = 0.3f;
 	}
 
 	void OnUpdate() override
 	{
+		AstralEngine::SpriteRendererComponent& sprite = GetComponent<AstralEngine::SpriteRendererComponent>();
 		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::C))
 		{
-			sprite->SetColor(0, 1, 0, 1);
+			sprite.SetColor(0, 1, 0, 1);
 		}
 		else
 		{
-			sprite->SetColor(1, 0, 0, 1);
+			sprite.SetColor(1, 0, 0, 1);
 		}
 
 		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::X))
@@ -135,7 +133,8 @@ public:
 		}
 		else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::K) && curr >= delay)
 		{
-			test->SetEnable(!test->IsEnabled());
+			TestComponent& test = GetComponent<TestComponent>();
+			test.SetEnable(!test.IsEnabled());
 			curr = 0.0f;
 		}
 		
@@ -161,8 +160,6 @@ public:
 	}
 
 private:
-	AstralEngine::SpriteRendererComponent* sprite;
-	TestComponent* test;
 	float curr;
 	float delay;
 };
@@ -207,7 +204,7 @@ public:
 			AddSprite();
 		}
 
-		transform->position = { 5, 0, 0 };
+		GetTransform().position = { 5, 0, 0 };
 		curr = timer;
 	}
 
@@ -403,13 +400,13 @@ public:
 
 	void OnAttach() override
 	{
+		/*
 		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		unsigned int width = window->GetWidth(), height = window->GetHeight();
 		float aspectRatio = (float)width / (float)height;
 		m_cameraController = AstralEngine::AReference<AstralEngine::OrthographicCameraController>::Create(aspectRatio, true);
 		m_cameraController->SetZoomLevel(5.5f);
 
-		/*
 		AstralEngine::AReference<AstralEngine::UIWindow> uiWindow 
 			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200);
 		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200);
@@ -436,13 +433,7 @@ public:
 		AstralEngine::AEntity spriteRemover = m_scene->CreateAEntity();
 		spriteRemover.EmplaceComponent<SpriteRemover>();
 
-		AstralEngine::AEntity doubleSprite = m_scene->CreateAEntity();
 		
-		doubleSprite.GetComponent<AstralEngine::TransformComponent>().position.x = -5.0f;
-		doubleSprite.EmplaceComponent<SpriteStack>();
-
-		m_scene->CreateAEntity().EmplaceComponent<MultiComponentController>();
-
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
 		e.EmplaceComponent<PerlinNoiseTest>();
 		e.GetComponent<AstralEngine::TransformComponent>().scale.x = 5.0f;
@@ -454,10 +445,10 @@ public:
 	{
 		m_scene->OnUpdate();
 
+		/*
 		m_cameraController->OnUpdate();
 
 
-		/*
 		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		AstralEngine::RenderCommand::Clear();
 		AstralEngine::Renderer::BeginScene(m_cameraController->GetCamera());

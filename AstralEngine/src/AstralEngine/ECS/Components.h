@@ -48,7 +48,6 @@ namespace AstralEngine
 	class CallbackComponent : public ToggleableComponent
 	{
 	public:
-
 		CallbackComponent(bool enabled = true) : ToggleableComponent(enabled) { }
 		virtual ~CallbackComponent() { }
 
@@ -66,6 +65,15 @@ namespace AstralEngine
 			}
 		}
 
+		bool operator==(const CallbackComponent& other) const
+		{
+			return this == &other;
+		}
+
+		bool operator!=(const CallbackComponent& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	struct NameComponent
@@ -284,6 +292,52 @@ namespace AstralEngine
 		}
 	};
 
+	//add all callback components to this list so they can easily be retrieved and their callbacks can be accessed easily
+	class CallbackListComponent
+	{
+	public:
+		void AddCallback(CallbackComponent* callback)
+		{
+			m_callbacks.Add(callback);
+		}
+
+		void RemoveCallback(CallbackComponent* callback)
+		{
+			m_callbacks.Remove(callback);
+		}
+
+		void CallOnStart()
+		{
+			for (CallbackComponent* callback : m_callbacks) 
+			{
+				callback->OnStart();
+			}
+		}
+
+		void CallOnUpdate()
+		{
+			for (CallbackComponent* callback : m_callbacks)
+			{
+				callback->FilteredUpdate();
+			}
+		}
+
+		bool IsEmpty() const { return m_callbacks.IsEmpty(); }
+
+		bool operator==(const CallbackListComponent& other) const
+		{
+			return m_callbacks == other.m_callbacks;
+		}
+
+		bool operator!=(const CallbackListComponent& other) const
+		{
+			return !(*this == other);
+		}
+
+	private:
+		ASinglyLinkedList<CallbackComponent*> m_callbacks;
+	};
+
 	class NativeScript : public CallbackComponent
 	{
 		friend class AEntity;
@@ -303,9 +357,11 @@ namespace AstralEngine
 			return entity.GetComponent<Component...>();
 		}
 
-		const std::string& GetName() const { return m_nameComp->name; }
+		TransformComponent& GetTransform() { return GetComponent<TransformComponent>(); }
+		const TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
 
-		void SetName(const std::string& name) { m_nameComp->name = name; }
+		const std::string& GetName() const { return GetComponent<NameComponent>().name; }
+		void SetName(const std::string& name) { GetComponent<NameComponent>().name = name; }
 
 		static void Destroy(AEntity& e) { e.Destroy(); }
 
@@ -322,50 +378,13 @@ namespace AstralEngine
 
 	protected:
 		AEntity entity;
-		TransformComponent* transform;
 
 	private:
 		void SetEntity(AEntity& e)
 		{
 			entity = e;
-			transform = &entity.GetComponent<TransformComponent>();
-			m_nameComp = &entity.GetComponent<NameComponent>();
 			m_enabled = true;
-
-			////the OnCreate function is called by AEntity not by the SignalHandler (leave it so it can be called later)
-			//e.m_scene->AddCallbackOnCreate<AReference<NativeScript>>(function<&NativeScript::OnCreateCallback>, this);
-			//e.m_scene->AddCallbackOnUpdate<AReference<NativeScript>>(function<&NativeScript::OnUpdateCallback>, this);
-			//e.m_scene->AddCallbackOnDestroy<AReference<NativeScript>>(function<&NativeScript::OnDestroyCallback>, this);
 		}
-		
-		NameComponent* m_nameComp;
-
-		//callbacks used to pass to delegates to call the appropriated function 
-		//even if overwritten by child class, the arguments are to be used by the Register
-		void OnCreateCallback(Registry<BaseEntity>&, const BaseEntity id, const AReference<NativeScript>& script)
-		{
-			if (entity.GetID() == id && IsEnabled() && *this == *script)
-			{
-				OnCreate();
-			}
-		}
-
-		void OnUpdateCallback(Registry<BaseEntity>&, const BaseEntity id, const AReference<NativeScript>& script)
-		{
-			if (entity.GetID() == id && IsEnabled() && *this == *script)
-			{
-				OnUpdate();
-			}
-		}
-
-		void OnDestroyCallback(Registry<BaseEntity>&, const BaseEntity id, const AReference<NativeScript>& script)
-		{
-			if (entity.GetID() == id && IsEnabled() && *this == *script)
-			{
-				OnDestroy();
-			}
-		}
-
 	};
 
 }

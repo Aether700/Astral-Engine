@@ -19,16 +19,26 @@ namespace AstralEngine
 		{
 			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
 			{
-				AReference<Component> comp = AReference<Component>::Create(std::forward<Args>(args)...);
-				m_scene->m_registry.EmplaceComponent<AReference<CallbackComponent>>(*this, comp);
-				if constexpr (std::is_base_of_v<NativeScript, Component>)
+				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+				
+				if (HasComponent<CallbackListComponent>())
 				{
-					comp->SetEntity(*this);
+					GetComponent<CallbackListComponent>().AddCallback(&comp);
+				}
+				else
+				{
+					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					list.AddCallback(&comp);
 				}
 
-				comp->OnCreate();
+				if constexpr (std::is_base_of_v<NativeScript, Component>)
+				{
+					comp.SetEntity(*this);
+				}
 
-				return *comp.Get();
+				comp.OnCreate();
+
+				return comp;
 			}
 			else
 			{
@@ -40,19 +50,37 @@ namespace AstralEngine
 		void AddComponent(const Component& c)
 		{
 			m_scene->m_registry.Add(*this, c);
+			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
+			{
+				if (HasComponent<CallbackListComponent>())
+				{
+					GetComponent<CallbackListComponent>().AddCallback(&c);
+				}
+				else
+				{
+					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					list.AddCallback(&c);
+				}
+			}
 		}
 
 		template<typename Component>
 		void RemoveComponent()
 		{
-			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
+			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				m_scene->m_registry.RemoveComponent<Component>(*this);
+				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
+					"CallbackListComponent was not added to entity with a CallbackComponent");
+				CallbackListComponent* list;
+				list = &GetComponent<CallbackListComponent>(); 
+				list->RemoveCallback(&GetComponent<Component>());
+
+				if (list->IsEmpty()) 
+				{
+					RemoveComponent<CallbackListComponent>();
+				}
 			}
-			else
-			{
-				m_scene->m_registry.RemoveComponent<Component>(*this);
-			}
+			m_scene->m_registry.RemoveComponent<Component>(*this);
 		}
 
 		template<typename Component>
@@ -60,44 +88,24 @@ namespace AstralEngine
 		{
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				m_scene->m_registry.RemoveComponent<AReference<CallbackComponent>>(*this, comp);
+				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
+					"CallbackListComponent was not added to entity with a CallbackComponent");
+				CallbackListComponent* list;
+				list = GetComponent<CallbackListComponent>();
+				list->RemoveCallback(&comp);
+
+				if (list->IsEmpty())
+				{
+					RemoveComponent<CallbackListComponent>();
+				}
 			}
-			else
-			{
-				m_scene->m_registry.RemoveComponent<Component>(*this, comp);
-			}
+			m_scene->m_registry.RemoveComponent<Component>(*this, comp);
 		}
 
 		template<typename... Component>
 		decltype(auto) GetComponent()
 		{
-			//if we have at least one NativeScript
-			if constexpr ((std::is_base_of_v<CallbackComponent, Component> || ...))
-			{
-				if constexpr (sizeof...(Component) == 1)
-				{
-					ADoublyLinkedList<AKeyElementPair<unsigned int, AReference<CallbackComponent>>>& list
-						= m_scene->m_registry.GetComponentList<AReference<CallbackComponent>>(*this);
-
-					for (AKeyElementPair<unsigned int, AReference<CallbackComponent>>& pair : list)
-					{
-						if (IndexProvider<Component...>::GetIndex() == pair.GetKey()) 
-						{
-							return (*(Component*)pair.GetElement().Get(), ...);
-						}
-					}
-
-					AE_CORE_ERROR("CallbackComponent not found");
-				}
-				else
-				{
-					return std::forward_as_tuple(this->GetComponent<Component>()...);
-				}
-			}
-			else
-			{
-				return m_scene->m_registry.GetComponent<Component...>(*this);
-			}
+			return m_scene->m_registry.GetComponent<Component...>(*this);
 		}
 
 		template<typename... Component>
@@ -111,22 +119,7 @@ namespace AstralEngine
 		{
 			if constexpr (sizeof... (Component) == 1)
 			{
-				if constexpr (std::is_base_of_v<CallbackComponent, Component...>)
-				{
-					auto& list = m_scene->m_registry.GetComponentList<AReference<CallbackComponent>>(*this);
-					for (auto& pair : list)
-					{
-						if (pair.GetKey() == TypeInfo<Component...>::ID())
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				else
-				{
-					return (m_scene->m_registry.HasComponent<Component>(*this) && ...);
-				}				
+				return (m_scene->m_registry.HasComponent<Component>(*this) && ...);
 			}
 			else
 			{

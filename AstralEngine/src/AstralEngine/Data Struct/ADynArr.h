@@ -368,7 +368,6 @@ namespace AstralEngine
 				delete[] m_arr;
 				m_arr = temp;
 				m_maxCount = newMax;
-				//m_count = m_maxCount;
 			}
 		}
 
@@ -429,11 +428,13 @@ namespace AstralEngine
 
 		virtual T& operator[](size_t index) override 
 		{
+			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index]; 
 		}
 		
 		virtual const T& operator[](size_t index) const override
 		{
+			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index];
 		}
 

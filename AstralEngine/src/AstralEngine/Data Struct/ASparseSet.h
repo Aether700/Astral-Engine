@@ -18,6 +18,305 @@ namespace AstralEngine
 	template<typename...>
 	class ASparseSet;
 
+	//Similar ADynArr but the data does not have to be contiguous and can be spread 
+	//throughout the array with indices that are unassigned in the middle of the array
+	template<typename T>
+	class ResizableArr
+	{
+	public:
+		class AIterator;
+		class AConstIterator;
+
+		ResizableArr(size_t startSize = 5) 
+			: m_arr(new T[startSize]), m_count(0), m_maxCount(startSize) { }
+
+		~ResizableArr()
+		{
+			delete[] m_arr;
+		}
+
+		void Add(const T& element)
+		{
+			CheckSize();
+			m_arr[m_count] = element;
+			m_count++;
+		}
+
+		void Add(T& element)
+		{
+			CheckSize();
+			m_arr[m_count] = element;
+			m_count++;
+		}
+
+		// Returns the index of the largest valid index
+		size_t GetCount() const
+		{
+			return m_count;
+		}
+
+		T* GetData() { return m_arr; }
+
+		const T* GetData() const { return m_arr; }
+
+		size_t GetCapacity() const
+		{
+			return m_maxCount;
+		}
+
+		void RemoveAt(size_t index)
+		{
+			if (index == m_count - 1)
+			{
+				m_count--;
+				return;
+			}
+
+			for (size_t i = index; i < m_count; i++)
+			{
+				m_arr[i] = m_arr[i + 1];
+			}
+			m_count--;
+		}
+
+		T& operator[](size_t index)
+		{
+			if (index >= m_count)
+			{
+				Reserve(index + 2);
+				m_count = index + 1;
+			}
+			return m_arr[index];
+		}
+
+		const T& operator[](size_t index) const
+		{
+			return m_arr[index];
+		}
+
+		void Reserve(size_t count)
+		{
+			size_t currentCount = m_maxCount - m_count;
+			if (currentCount < count)
+			{
+				size_t newMax = m_maxCount + count - currentCount;
+				T* temp = new T[newMax];
+
+				for (size_t i = 0; i < m_count; i++)
+				{
+					temp[i] = std::move(m_arr[i]);
+				}
+
+				delete[] m_arr;
+				m_arr = temp;
+				m_maxCount = newMax;
+			}
+		}
+
+		ResizableArr<T>::AIterator begin()
+		{
+			return AIterator(0, m_arr);
+		}
+
+		ResizableArr<T>::AIterator end()
+		{
+			return AIterator(m_count, m_arr);
+		}
+
+		ResizableArr<T>::AIterator rbegin()
+		{
+			return AIterator(m_count - 1, m_arr);
+		}
+
+		ResizableArr<T>::AIterator rend()
+		{
+			return AIterator(-1, m_arr);
+		}
+
+		ResizableArr<T>::AConstIterator begin() const
+		{
+			return AConstIterator(0, m_arr);
+		}
+
+		ResizableArr<T>::AConstIterator end() const
+		{
+			return AConstIterator(m_count, m_arr);
+		}
+
+		ResizableArr<T>::AConstIterator rbegin() const
+		{
+			return AConstIterator(m_count - 1, m_arr);
+		}
+
+		ResizableArr<T>::AConstIterator rend() const
+		{
+			return AConstIterator(-1, m_arr);
+		}
+		
+		class AIterator
+		{
+			friend class ResizableArr<T>;
+		public:
+			AIterator(const AIterator& other) : m_pos(other.m_pos), m_arr(other.m_arr) { }
+
+			virtual ~AIterator() { }
+
+			AIterator& operator++()
+			{
+				m_pos++;
+				return *this;
+			}
+
+			AIterator& operator+=(size_t i)
+			{
+				m_pos += i;
+				return *this;
+			}
+
+			AIterator operator++(int)
+			{
+				AIterator copy = *this;
+				this->operator++();
+				return copy;
+			}
+
+			AIterator& operator--()
+			{
+				m_pos--;
+				return *this;
+			}
+
+			AIterator& operator-=(size_t i)
+			{
+				m_pos -= i;
+				return *this;
+			}
+
+			AIterator operator--(int)
+			{
+				AIterator copy = *this;
+				this->operator--();
+				return copy;
+			}
+
+			bool operator==(const AIterator& other) const
+			{
+				return m_pos == other.m_pos && m_arr == other.m_arr;
+			}
+
+			bool operator!=(const AIterator& other) const
+			{
+				return !(*this == other);
+			}
+
+			T& operator*() const
+			{
+				return m_arr[m_pos];
+			}
+
+		protected:
+			AIterator(size_t pos, T* arr) : m_pos(pos), m_arr(arr) { }
+
+
+		private:
+			size_t m_pos;
+			T* m_arr;
+		};
+
+		class AConstIterator : public AIterator
+		{
+			friend class ResizableArr<T>;
+		public:
+			AConstIterator(const AConstIterator& other) : AIterator(other) { }
+			
+			virtual AConstIterator& operator++()
+			{
+				AIterator::operator++();
+				return *this;
+			}
+
+			virtual AConstIterator& operator+=(size_t i)
+			{
+				AIterator::operator+=(i);
+				return *this;
+			}
+
+			virtual AConstIterator operator++(int)
+			{
+				AConstIterator it = *this;
+				this->operator++();
+				return it;
+			}
+
+			virtual AConstIterator& operator--()
+			{
+				AIterator::operator--();
+				return *this;
+			}
+
+			virtual AConstIterator& operator-=(size_t i)
+			{
+				AIterator::operator-=(i);
+				return *this;
+			}
+
+			virtual AConstIterator operator--(int)
+			{
+				AConstIterator it = *this;
+				this->operator--();
+				return it;
+			}
+
+			virtual bool operator==(const AConstIterator& other) const
+			{
+				return AIterator::operator==(other);
+			}
+
+			virtual bool operator!=(const AConstIterator& other) const
+			{
+				return !(*this == other);
+			}
+
+			const T& operator*() const
+			{
+				return AIterator::operator*();
+			}
+
+		private:
+			AConstIterator(size_t pos, T* arr) : AIterator(pos, arr) { }
+
+		};
+
+	private:
+		void CheckSize()
+		{
+			if (m_count >= m_maxCount)
+			{
+				Resize();
+			}
+		}
+
+		void Resize()
+		{
+			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + 1;
+			T* temp = new T[newMax];
+
+			for (size_t i = 0; i < m_count; i++)
+			{
+				temp[i] = std::move(m_arr[i]);
+			}
+
+			delete[] m_arr;
+			m_arr = temp;
+			m_maxCount = newMax;
+		}
+
+
+		T* m_arr;
+		size_t m_count;
+		size_t m_maxCount;
+	};
+
 	template<typename T>
 	class ASparseSet<T>
 	{
@@ -76,7 +375,7 @@ namespace AstralEngine
 		void Add(const T e)
 		{
 			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!Contains(e), "Cannot add the same T twice");
+			AE_CORE_ASSERT(!Contains(e), "Cannot add the same element twice");
 			Assure(Page(e))[Offset(e)] = (T)m_packed.GetCount();
 			m_packed.Add(e);
 		}
@@ -91,7 +390,7 @@ namespace AstralEngine
 
 			/*move last element to the position of the element to remove
 			  so that removing the element is more efficient
-			  (will also need to move the element in the sparse set)
+			  (also need to move the element in the sparse set)
 			*/
 
 			m_packed[m_toInt(m_sparse[page][offset])] = T(m_packed[m_packed.GetCount() - 1]);
@@ -141,13 +440,13 @@ namespace AstralEngine
 			if (m_sparse[pos] == nullptr)
 			{
 				//create a new page where every AUniqueRef is nullptr
-				m_sparse.Insert(AUniqueRef<T[]>::Create(ElementPerPage), pos);
+				m_sparse[pos] = AUniqueRef<T[]>::Create(ElementPerPage);
 			}
 
 			return m_sparse[pos];
 		}
 
-		ADynArr<PageType> m_sparse;
+		ResizableArr<PageType> m_sparse;
 		ADynArr<T> m_packed;
 		ToIntFunc m_toInt;
 	};
@@ -273,7 +572,7 @@ namespace AstralEngine
 			if (m_sparse[pos] == nullptr)
 			{
 				//create a new page where every AUniqueRef is nullptr
-				m_sparse.Insert(AUniqueRef<T[]>::Create(ElementPerPage), pos);
+				m_sparse[pos] = AUniqueRef<T[]>::Create(ElementPerPage);
 			}
 
 			return m_sparse[pos];
