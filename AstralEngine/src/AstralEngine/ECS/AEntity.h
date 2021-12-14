@@ -4,6 +4,8 @@
 
 namespace AstralEngine
 {
+	class TransformComponent;
+
 	class AEntity
 	{
 		friend class NativeScript;
@@ -126,6 +128,12 @@ namespace AstralEngine
 				return (HasComponent<Component>() && ...);
 			}
 		}
+
+		const std::string& GetName() const;
+		void SetName(const std::string& newName);
+
+		TransformComponent& GetTransform();
+		const TransformComponent& GetTransform() const;
 
 		//makes the entity invalid
 		void Destroy()

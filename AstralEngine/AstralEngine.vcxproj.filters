@@ -334,5 +334,6 @@
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
   </ItemGroup>
 </Project>

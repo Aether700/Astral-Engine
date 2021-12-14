@@ -48,24 +48,26 @@ namespace AstralEngine
 	class DrawCommand
 	{
 	public:
-		DrawCommand() : m_positionArr(nullptr), m_normalArr(nullptr), m_indicesArr(nullptr) { }
+		DrawCommand() : m_positionArr(nullptr), m_normalArr(nullptr), 
+			m_indicesArr(nullptr), m_textureCoords(nullptr) { }
 
 		DrawCommand(const Mat4& transform, const Material& mat,
 			const Vector3* vertices, const Vector3* normals, unsigned int numVertices, const unsigned int* indices,
 			unsigned int indexCount, AReference<Texture> texture, const Vector3* textureCoords,
 			float tileFactor, const Vector4& tintColor, bool ignoresCam) : m_transform(transform), m_mat(mat), 
-			m_numVertices(numVertices), m_indexCount(indexCount), m_texture(texture), 
-			m_textureCoords(textureCoords), m_tileFactor(tileFactor), m_tintColor(tintColor),
-			m_ignoresCam(ignoresCam)
+			m_numVertices(numVertices), m_indexCount(indexCount), m_texture(texture), m_tileFactor(tileFactor), 
+			m_tintColor(tintColor), m_ignoresCam(ignoresCam)
 		{
 			m_positionArr = new Vector3[numVertices];
 			m_normalArr = new Vector3[numVertices];
 			m_indicesArr = new unsigned int[indexCount];
+			m_textureCoords = new Vector3[numVertices];
 
 			for (unsigned int i = 0; i < numVertices; i++)
 			{
 				m_positionArr[i] = vertices[i];
 				m_normalArr[i] = normals[i];
+				m_textureCoords[i] = textureCoords[i];
 			}
 
 			for (unsigned int i = 0; i < indexCount; i++)
@@ -75,18 +77,19 @@ namespace AstralEngine
 		}
 
 		DrawCommand(const DrawCommand& other) : m_transform(other.m_transform), m_mat(other.m_mat),
-			m_numVertices(other.m_numVertices), m_indexCount(other.m_indexCount), m_texture(other.m_texture),
-			m_textureCoords(other.m_textureCoords), m_tileFactor(other.m_tileFactor), m_tintColor(other.m_tintColor),
-			m_ignoresCam(other.m_ignoresCam)
+			m_numVertices(other.m_numVertices), m_indexCount(other.m_indexCount), m_texture(other.m_texture), 
+			m_tileFactor(other.m_tileFactor), m_tintColor(other.m_tintColor), m_ignoresCam(other.m_ignoresCam)
 		{
 			m_positionArr = new Vector3[other.m_numVertices];
 			m_normalArr = new Vector3[other.m_numVertices];
 			m_indicesArr = new unsigned int[other.m_indexCount];
+			m_textureCoords = new Vector3[other.m_numVertices];
 
 			for (unsigned int i = 0; i < other.m_numVertices; i++)
 			{
 				m_positionArr[i] = other.m_positionArr[i];
 				m_normalArr[i] = other.m_normalArr[i];
+				m_textureCoords[i] = other.m_textureCoords[i];
 			}
 
 			for (unsigned int i = 0; i < other.m_indexCount; i++)
@@ -100,6 +103,7 @@ namespace AstralEngine
 			delete[] m_positionArr;
 			delete[] m_normalArr;
 			delete[] m_indicesArr;
+			delete[] m_textureCoords;
 		}
 
 		void SendToRenderingBatch()
@@ -149,25 +153,27 @@ namespace AstralEngine
 			delete[] m_positionArr;
 			delete[] m_normalArr;
 			delete[] m_indicesArr;
+			delete[] m_textureCoords;
 
 			m_transform = other.m_transform;
 			m_mat = other.m_mat;
 			m_numVertices = other.m_numVertices;
 			m_indexCount = other.m_indexCount;
 			m_texture = other.m_texture;
-			m_textureCoords = other.m_textureCoords; 
 			m_tileFactor = other.m_tileFactor; 
 			m_tintColor = other.m_tintColor;
 			m_ignoresCam = other.m_ignoresCam;
 
 			m_positionArr = new Vector3[other.m_numVertices];
 			m_normalArr = new Vector3[other.m_numVertices];
+			m_textureCoords = new Vector3[other.m_numVertices]; 
 			m_indicesArr = new unsigned int[other.m_indexCount];
 
 			for (unsigned int i = 0; i < other.m_numVertices; i++)
 			{
 				m_positionArr[i] = other.m_positionArr[i];
 				m_normalArr[i] = other.m_normalArr[i];
+				m_textureCoords[i] = other.m_textureCoords[i];
 			}
 
 			for (unsigned int i = 0; i < other.m_indexCount; i++)
@@ -187,7 +193,7 @@ namespace AstralEngine
 		unsigned int* m_indicesArr;
 		unsigned int m_indexCount;
 		AReference<Texture> m_texture;
-		const Vector3* m_textureCoords;
+		Vector3* m_textureCoords;
 		float m_tileFactor;
 		Vector4 m_tintColor;
 		bool m_ignoresCam;

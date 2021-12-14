@@ -357,11 +357,11 @@ namespace AstralEngine
 			return entity.GetComponent<Component...>();
 		}
 
-		TransformComponent& GetTransform() { return GetComponent<TransformComponent>(); }
-		const TransformComponent& GetTransform() const { return GetComponent<TransformComponent>(); }
+		TransformComponent& GetTransform() { return entity.GetTransform(); }
+		const TransformComponent& GetTransform() const { return entity.GetTransform(); }
 
-		const std::string& GetName() const { return GetComponent<NameComponent>().name; }
-		void SetName(const std::string& name) { GetComponent<NameComponent>().name = name; }
+		const std::string& GetName() const { return entity.GetName(); }
+		void SetName(const std::string& name) { entity.SetName(name); }
 
 		static void Destroy(AEntity& e) { e.Destroy(); }
 

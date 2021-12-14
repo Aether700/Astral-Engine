@@ -30,21 +30,22 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
               Component=AstralEngine::SpriteRendererComponent,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(19): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(21): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRendererComponent,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(45): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(47): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRendererComponent,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(428): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRendererComponent,int,int,int,int>(int,int,int,int)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(427): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRendererComponent,int,int,int,int>(int,int,int,int)' being compiled
           with
           [
               Component=AstralEngine::SpriteRendererComponent
           ]
+LIBCMTD.lib(initializers.obj) : warning LNK4098: defaultlib 'libcmt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
   Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe

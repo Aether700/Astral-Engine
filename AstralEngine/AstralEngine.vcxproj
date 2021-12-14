@@ -215,6 +215,7 @@
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp" />
     <ClCompile Include="src\AstralEngine\Core\LayerStack.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat3.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat4.cpp" />

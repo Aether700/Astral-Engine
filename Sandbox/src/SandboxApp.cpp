@@ -422,7 +422,6 @@ public:
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
-		
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(1, 0, 0, 1);
@@ -439,6 +438,12 @@ public:
 		e.GetComponent<AstralEngine::TransformComponent>().scale.x = 5.0f;
 		e.GetComponent<AstralEngine::TransformComponent>().scale.y = 5.0f;
 		e.GetComponent<AstralEngine::TransformComponent>().position.y = 5.0f;
+
+		AstralEngine::AEntity texturedQuad = m_scene->CreateAEntity();
+		texturedQuad.GetTransform().position.x = -5.0f;
+		AstralEngine::SpriteRendererComponent& spriteRenderer 
+			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
+		spriteRenderer.SetSprite(AstralEngine::Texture2D::Create("assets/textures/septicHanzo.PNG"));
 	}
 
 	void OnUpdate() override
@@ -467,11 +472,13 @@ public:
 		AstralEngine::Renderer::ResetStats();
 	}
 
+	/*
 	bool OnEvent(AstralEngine::AEvent& e) override
 	{
 		m_cameraController->OnEvent(e);
 		return false;
 	}
+	*/
 
 private:
 	AstralEngine::AReference<AstralEngine::OrthographicCameraController> m_cameraController;
