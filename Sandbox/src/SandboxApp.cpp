@@ -67,7 +67,7 @@ public:
 			AE_INFO("TestComponent::OnUpdate called");
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::P) && curr >= delay)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::P) && curr >= delay)
 		{
 			print = !print;
 			curr = 0.0f;
@@ -118,7 +118,7 @@ public:
 	void OnUpdate() override
 	{
 		AstralEngine::SpriteRendererComponent& sprite = GetComponent<AstralEngine::SpriteRendererComponent>();
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::C))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::C))
 		{
 			sprite.SetColor(0, 1, 0, 1);
 		}
@@ -127,11 +127,11 @@ public:
 			sprite.SetColor(1, 0, 0, 1);
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::X))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::X))
 		{
 			Destroy(entity);
 		}
-		else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::K) && curr >= delay)
+		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
 		{
 			TestComponent& test = GetComponent<TestComponent>();
 			test.SetEnable(!test.IsEnabled());
@@ -175,7 +175,7 @@ public:
 
 	void OnUpdate() override
 	{
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::T) && curr >= delay)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::T) && curr >= delay)
 		{
 			switcher->SetEnable(!switcher->IsEnabled());
 			curr = 0.0f;
@@ -215,7 +215,7 @@ public:
 			curr += AstralEngine::Time::GetDeltaTime();
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::B) && curr >= timer)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::B) && curr >= timer)
 		{
 			ToggleSprite();
 			curr = 0.0f;
@@ -267,12 +267,12 @@ public:
 
 		if (curr >= timer)
 		{
-			if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::UpArrow))
+			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
 			{
 				AddSprite();
 				curr = 0.0f;
 			}
-			else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::DownArrow))
+			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
 			{
 				RemoveSprite();
 				curr = 0.0f;
@@ -340,12 +340,12 @@ public:
 
 		if (curr >= timer)
 		{
-			if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::UpArrow))
+			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
 			{
 				CreateMulti();
 				curr = 0.0f;
 			}
-			else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::DownArrow))
+			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
 			{
 				DeleteMulti();
 				curr = 0.0f;
