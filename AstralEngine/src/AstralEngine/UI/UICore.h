@@ -26,13 +26,11 @@ namespace AstralEngine
 	*/
 	class UIContext : public Layer
 	{
+		friend class Scene;
 		using WindowList = ADynArr<AReference<UIWindow>>;
 	public:
 		
 		virtual void OnUpdate() override;
-		
-		//for testing purposes only
-		void TempUpdate();
 
 		virtual bool OnEvent(AEvent& e) override;
 
@@ -43,6 +41,8 @@ namespace AstralEngine
 			Vector2Int minResize = { 10, 10 });
 
 	private:
+
+		void RenderUI();
 
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& mousePressed);
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& mousePressed);
@@ -147,6 +147,7 @@ namespace AstralEngine
 				Draw();
 			}
 		}
+
 		void SetRenderingFunction(ADelegate<void(const UIElement*)> func) { m_renderFunc = func; }
 
 		bool IsHovered() const

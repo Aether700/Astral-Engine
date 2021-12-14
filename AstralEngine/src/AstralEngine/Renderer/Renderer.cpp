@@ -516,41 +516,38 @@ namespace AstralEngine
 		delete s_renderingBatches;
 	}
 
-	void Renderer::BeginScene(const OrthographicCamera& cam)
+	void Renderer::BeginScene()
 	{
-		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
+		BeginScene(Mat4::Identity(), Vector3::Zero());
+	}
 
+	void Renderer::BeginScene(const Mat4& viewProjMatrix, const Vector3& camPos)
+	{
 		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", cam.GetPosition());
+		s_shader->SetMat4("u_viewProjMatrix", viewProjMatrix);
+		s_shader->SetFloat3("u_camPos", camPos);
 
 		s_directionalLightIndex = 0;
 		s_pointLightIndex = 0;
+	}
+
+	void Renderer::BeginScene(const OrthographicCamera& cam)
+	{
+		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
+		BeginScene(viewProjectionMatrix, cam.GetPosition());
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
 	{
 		//view is the identity
 		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix();
-
-		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", Vector3::Zero());
-
-		s_directionalLightIndex = 0;
-		s_pointLightIndex = 0;
+		BeginScene(viewProjectionMatrix, Vector3::Zero());
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const TransformComponent& transform)
 	{
 		Mat4 viewProjectionMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
-
-		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", transform.position);
-
-		s_directionalLightIndex = 0;
-		s_pointLightIndex = 0;
+		BeginScene(viewProjectionMatrix, transform.position);
 	}
 
 	void Renderer::EndScene()
@@ -595,11 +592,14 @@ namespace AstralEngine
 			drawCmd.SendToRenderingBatch();
 		}
 
-		for (auto& pair : *s_renderingBatches)
+		if (!s_renderingBatches->IsEmpty())
 		{
-			if (!pair.GetElement().IsEmpty())
+			for (auto& pair : *s_renderingBatches)
 			{
-				pair.GetElement().Draw(pair.GetKey());
+				if (!pair.GetElement().IsEmpty())
+				{
+					pair.GetElement().Draw(pair.GetKey());
+				}
 			}
 		}
 	}

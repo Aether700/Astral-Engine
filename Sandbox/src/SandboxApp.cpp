@@ -6,7 +6,42 @@
 #include "AstralEngine/UI/UICore.h"
 ////////
 
+
 //Scripts////////////////////////////////////////////////////////////////////////
+class InputTest : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate()
+	{
+		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Right))
+		{
+			if (m_currTimerVal >= m_timer)
+			{
+				Destroy(entity);
+			}
+			else
+			{
+				m_currTimerVal += AstralEngine::Time::GetDeltaTime();
+				return;
+			}
+		}
+		else if (AstralEngine::Input::GetMouseButtonDown(AstralEngine::MouseButtonCode::Left))
+		{
+			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 0, 0, 1);
+			m_currTimerVal = 0.0f;
+		}
+		else
+		{
+			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 1, 1, 1);
+			m_currTimerVal = 0.0f;
+		}
+	}
+
+private:
+	float m_timer = 1.0f;
+	float m_currTimerVal = 0.0f;
+};
+
 class PerlinNoiseTest : public AstralEngine::NativeScript
 {
 public:
@@ -67,7 +102,7 @@ public:
 			AE_INFO("TestComponent::OnUpdate called");
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::P) && curr >= delay)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::P) && curr >= delay)
 		{
 			print = !print;
 			curr = 0.0f;
@@ -118,7 +153,7 @@ public:
 	void OnUpdate() override
 	{
 		AstralEngine::SpriteRendererComponent& sprite = GetComponent<AstralEngine::SpriteRendererComponent>();
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::C))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::C))
 		{
 			sprite.SetColor(0, 1, 0, 1);
 		}
@@ -127,11 +162,11 @@ public:
 			sprite.SetColor(1, 0, 0, 1);
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::X))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::X))
 		{
 			Destroy(entity);
 		}
-		else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::K) && curr >= delay)
+		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
 		{
 			TestComponent& test = GetComponent<TestComponent>();
 			test.SetEnable(!test.IsEnabled());
@@ -175,7 +210,7 @@ public:
 
 	void OnUpdate() override
 	{
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::T) && curr >= delay)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::T) && curr >= delay)
 		{
 			switcher->SetEnable(!switcher->IsEnabled());
 			curr = 0.0f;
@@ -215,7 +250,7 @@ public:
 			curr += AstralEngine::Time::GetDeltaTime();
 		}
 
-		if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::B) && curr >= timer)
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::B) && curr >= timer)
 		{
 			ToggleSprite();
 			curr = 0.0f;
@@ -267,12 +302,12 @@ public:
 
 		if (curr >= timer)
 		{
-			if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::UpArrow))
+			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
 			{
 				AddSprite();
 				curr = 0.0f;
 			}
-			else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::DownArrow))
+			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
 			{
 				RemoveSprite();
 				curr = 0.0f;
@@ -340,12 +375,12 @@ public:
 
 		if (curr >= timer)
 		{
-			if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::UpArrow))
+			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
 			{
 				CreateMulti();
 				curr = 0.0f;
 			}
-			else if (AstralEngine::Input::IsKeyPressed(AstralEngine::KeyCode::DownArrow))
+			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
 			{
 				DeleteMulti();
 				curr = 0.0f;
@@ -406,10 +441,13 @@ public:
 		float aspectRatio = (float)width / (float)height;
 		m_cameraController = AstralEngine::AReference<AstralEngine::OrthographicCameraController>::Create(aspectRatio, true);
 		m_cameraController->SetZoomLevel(5.5f);
+		*/
 
 		AstralEngine::AReference<AstralEngine::UIWindow> uiWindow 
-			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200);
-		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200);
+			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200, 
+				AstralEngine::UIWindowFlags::UIWindowFlagsNone, AstralEngine::Vector4(1, 1, 1, 1));
+		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200,
+			AstralEngine::UIWindowFlags::UIWindowFlagsNone, AstralEngine::Vector4(1, 1, 1, 1));
 
 		AstralEngine::AReference<AstralEngine::UIButton> button 
 			= AstralEngine::AReference<AstralEngine::UIButton>::Create("My Button", AstralEngine::Vector4(0.8f, 0, 0, 1));
@@ -417,7 +455,6 @@ public:
 		button->SetParent(uiWindow);
 		button->AddListener(AstralEngine::ADelegate<void()>(&OnButtonClicked));
 		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
-		*/
 
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
@@ -443,7 +480,8 @@ public:
 		texturedQuad.GetTransform().position.x = -5.0f;
 		AstralEngine::SpriteRendererComponent& spriteRenderer 
 			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
-		spriteRenderer.SetSprite(AstralEngine::Texture2D::Create("assets/textures/septicHanzo.PNG"));
+		spriteRenderer.SetSprite(m_texture);
+		texturedQuad.EmplaceComponent<InputTest>();
 	}
 
 	void OnUpdate() override

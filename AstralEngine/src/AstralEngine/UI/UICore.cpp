@@ -1,5 +1,6 @@
 #include "aepch.h"
 #include "UICore.h"
+#include "Renderer/Renderer.h"
 
 namespace AstralEngine
 {
@@ -16,22 +17,6 @@ namespace AstralEngine
 		else if (m_resizingWindow)
 		{
 			ResizeWindow();
-		}
-		
-		//AE_CORE_WARN("UIContext::OnUpdate needs to be modified so it can submit renderer commands instead of drawing directly");
-		/*
-		for (AReference<UIWindow>& window : m_windows)
-		{
-			window->DrawToScreen();
-		}
-		*/
-	}
-
-	void UIContext::TempUpdate()
-	{
-		for (AReference<UIWindow>& window : m_windows)
-		{
-			window->DrawToScreen();
 		}
 	}
 
@@ -72,6 +57,16 @@ namespace AstralEngine
 		AReference<UIWindow> newWindow = AReference<UIWindow>::Create(position, width, height, flags, backgroundColor, minResize);
 		Application::GetUIContext()->m_windows.Add(newWindow);
 		return newWindow;
+	}
+
+	void UIContext::RenderUI()
+	{
+		Renderer::BeginScene();
+		for (AReference<UIWindow>& window : m_windows)
+		{
+			window->DrawToScreen();
+		}
+		Renderer::EndScene();
 	}
 
 	bool UIContext::OnMouseButtonPressed(MouseButtonPressedEvent& mousePressed)

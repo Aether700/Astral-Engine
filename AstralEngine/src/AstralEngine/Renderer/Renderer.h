@@ -172,6 +172,8 @@ namespace AstralEngine
 		static void ResetStats();
 
 		//use to start renderering and stop rendering
+		static void BeginScene();
+		static void BeginScene(const Mat4& viewProjMatrix, const Vector3& camPos);
 		static void BeginScene(const OrthographicCamera& cam);
 		static void BeginScene(const RuntimeCamera& cam);
 		static void BeginScene(const RuntimeCamera& camera, const TransformComponent& transform);
@@ -180,6 +182,7 @@ namespace AstralEngine
 		//requests that all the light's shadow maps be recalculated for this frame
 		static void UpdateLights();
 
+		//turn on and off the shadows in the scene
 		static void UseShadows(bool value) { s_useShadows = value; }
 
 		static AReference<CubeMap> GetDefaultWhiteCubeMap();

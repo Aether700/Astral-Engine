@@ -197,6 +197,8 @@ namespace AstralEngine
 			return m_count;
 		}
 
+		bool IsEmpty() const { return m_count == 0; }
+
 		void Add(const K& key, const T& element)
 		{
 			AE_PROFILE_FUNCTION();

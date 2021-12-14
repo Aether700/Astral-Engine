@@ -4,7 +4,8 @@
 #include "AstralEngine/Data Struct/AReference.h"
 #include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
-#include "Core/Application.h"
+#include "AstralEngine/Core/Application.h"
+#include "AstralEngine/UI/UICore.h"
 #include "Scene.h"
 #include "AEntity.h"
 #include "Components.h"
@@ -36,31 +37,31 @@ namespace AstralEngine
 		void OnUpdate() override
 		{
 			AE_PROFILE_FUNCTION();
-			if (Input::IsKeyPressed(KeyCode::A))
+			if (Input::GetKey(KeyCode::A))
 			{
 				GetTransform().position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
-			else if (Input::IsKeyPressed(KeyCode::D))
+			else if (Input::GetKey(KeyCode::D))
 			{
 				GetTransform().position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 
-			if (Input::IsKeyPressed(KeyCode::W))
+			if (Input::GetKey(KeyCode::W))
 			{
 				GetTransform().position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
-			else if (Input::IsKeyPressed(KeyCode::S))
+			else if (Input::GetKey(KeyCode::S))
 			{
 				GetTransform().position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			
 			if (m_rotation)
 			{
-				if (Input::IsKeyPressed(KeyCode::Q))
+				if (Input::GetKey(KeyCode::Q))
 				{
 					GetTransform().rotation.z += m_camRotSpeed * Time::GetDeltaTime();
 				}
-				else if (Input::IsKeyPressed(KeyCode::E))
+				else if (Input::GetKey(KeyCode::E))
 				{
 					GetTransform().rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
 				}
@@ -154,6 +155,8 @@ namespace AstralEngine
 
 			Renderer::EndScene();
 		}
+
+		Application::GetUIContext()->RenderUI();
 
 		//update Scripts
 		CallOnUpdate();
