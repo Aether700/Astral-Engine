@@ -7,6 +7,40 @@
 ////////
 
 //Scripts////////////////////////////////////////////////////////////////////////
+class InputTest : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate()
+	{
+		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Right))
+		{
+			if (m_currTimerVal >= m_timer)
+			{
+				Destroy(entity);
+			}
+			else
+			{
+				m_currTimerVal += AstralEngine::Time::GetDeltaTime();
+				return;
+			}
+		}
+		else if (AstralEngine::Input::GetMouseButtonDown(AstralEngine::MouseButtonCode::Left))
+		{
+			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 0, 0, 1);
+			m_currTimerVal = 0.0f;
+		}
+		else
+		{
+			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 1, 1, 1);
+			m_currTimerVal = 0.0f;
+		}
+	}
+
+private:
+	float m_timer = 1.0f;
+	float m_currTimerVal = 0.0f;
+};
+
 class PerlinNoiseTest : public AstralEngine::NativeScript
 {
 public:
@@ -444,6 +478,7 @@ public:
 		AstralEngine::SpriteRendererComponent& spriteRenderer 
 			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
 		spriteRenderer.SetSprite(AstralEngine::Texture2D::Create("assets/textures/septicHanzo.PNG"));
+		texturedQuad.EmplaceComponent<InputTest>();
 	}
 
 	void OnUpdate() override
