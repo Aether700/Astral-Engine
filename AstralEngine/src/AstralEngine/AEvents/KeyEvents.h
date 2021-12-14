@@ -65,7 +65,6 @@ namespace AstralEngine
 		}
 
 		DEF_AEVENT_TYPE(KeyReleased);
-
 	};
 
 }

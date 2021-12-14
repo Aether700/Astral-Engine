@@ -1,6 +1,6 @@
 #pragma once
 #include "AstralEngine/Debug/Instrumentor.h"
-#include <stdio.h>
+#include <cstdlib>
 #include <windows.h>
 #include <fstream>
 #include <sstream>
