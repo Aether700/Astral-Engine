@@ -20,20 +20,20 @@ namespace AstralEngine
 	void OrthographicCameraController::OnUpdate()
 	{
 		AE_PROFILE_FUNCTION();
-		if (Input::IsKeyPressed(KeyCode::A))
+		if (Input::GetKey(KeyCode::A))
 		{
 			m_camPos.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 		}
-		else if (Input::IsKeyPressed(KeyCode::D))
+		else if (Input::GetKey(KeyCode::D))
 		{
 			m_camPos.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 		}
 
-		if (Input::IsKeyPressed(KeyCode::W))
+		if (Input::GetKey(KeyCode::W))
 		{
 			m_camPos.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 		}
-		else if (Input::IsKeyPressed(KeyCode::S))
+		else if (Input::GetKey(KeyCode::S))
 		{
 			m_camPos.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 		}
@@ -41,11 +41,11 @@ namespace AstralEngine
 
 		if (m_rotation)
 		{
-			if (Input::IsKeyPressed(KeyCode::Q))
+			if (Input::GetKey(KeyCode::Q))
 			{
 				m_camRot -= m_camRotSpeed * Time::GetDeltaTime();
 			}
-			else if (Input::IsKeyPressed(KeyCode::E))
+			else if (Input::GetKey(KeyCode::E))
 			{
 				m_camRot += m_camRotSpeed * Time::GetDeltaTime();
 			}

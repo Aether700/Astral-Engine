@@ -7,16 +7,26 @@ namespace AstralEngine
 {
 	class Input
 	{
+		friend class Application;
 	public:
-		static bool IsKeyDown(int keycode);
-		static bool IsKeyDown(KeyCode key);
-		static bool IsKeyPressed(int keycode);
-		static bool IsKeyPressed(KeyCode key);
-		static bool IsMouseButtonPressed(int mouseButton);
-		static bool IsMouseButtonPressed(MouseButtonCode mouseButton);
+		static bool GetKey(int keycode);
+		static bool GetKey(KeyCode key);
+		static bool GetKeyDown(int keycode);
+		static bool GetKeyDown(KeyCode key);
+		static bool GetMouseButton(int mouseButton);
+		static bool GetMouseButton(MouseButtonCode mouseButton);
+		static bool GetMouseButtonDown(int mouseButton);
+		static bool GetMouseButtonDown(MouseButtonCode mouseButton);
 		static Vector2 GetMousePosition();
 		static float GetMouseXPos();
 		static float GetMouseYPos();
+
+	private:
+		static void OnUpdate();
+		static bool OnKeyPressedEvent(KeyPressedEvent& keyPressed);
+		static bool OnKeyReleasedEvent(KeyReleasedEvent& keyReleased);
+		static bool OnMousePressedEvent(MouseButtonPressedEvent& mousePressed);
+		static bool OnMouseReleasedEvent(MouseButtonReleasedEvent& mouseReleased);
 	};
 
 }
