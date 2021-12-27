@@ -11,38 +11,37 @@ namespace AstralEngine
 	class ToggleableComponent
 	{
 		friend class NativeScript;
-
 	public:
-		ToggleableComponent(bool enabled = true) : m_enabled(enabled) { }
+		ToggleableComponent(bool enabled = true) : m_isActive(enabled) { }
 
 		virtual ~ToggleableComponent() { }
 
 		virtual void OnEnable() { }
 		virtual void OnDisable() { }
 
-		bool IsEnabled() const { return m_enabled; }
+		bool IsActive() const { return m_isActive; }
 
-		void SetEnable(bool val)
+		void SetActive(bool val)
 		{
-			if (val == m_enabled)
+			if (val == m_isActive)
 			{
 				return;
 			}
 
 			if (val)
 			{
-				m_enabled = true;
+				m_isActive = true;
 				OnEnable();
 			}
 			else
 			{
-				m_enabled = false;
+				m_isActive = false;
 				OnDisable();
 			}
 		}
 
 	private:
-		bool m_enabled;
+		bool m_isActive;
 	};
 
 	class CallbackComponent : public ToggleableComponent
@@ -59,7 +58,7 @@ namespace AstralEngine
 		//calls OnUpdate but only if the component is enabled
 		void FilteredUpdate()
 		{
-			if (IsEnabled())
+			if (IsActive())
 			{
 				OnUpdate();
 			}
@@ -76,44 +75,31 @@ namespace AstralEngine
 		}
 	};
 
-	struct NameComponent
+	class AEntityData : public ToggleableComponent
 	{
-		std::string name;
+	public:
+		AEntityData() : m_name("AEntity"), m_tag("Untagged") { }
 
-		NameComponent() : name("AEntity") { }
+		const std::string& GetName() const { return m_name; }
+		const std::string& GetTag() const { return m_tag; }
 
-		bool operator==(const NameComponent& other) const
+		void SetName(const std::string& name) { m_name = name; }
+		void SetTag(const std::string& tag) { m_tag = tag; }
+
+		bool operator==(const AEntityData& other) const
 		{
-			return name == other.name;
+			return m_name == other.m_name && m_tag == other.m_tag 
+				&& IsActive() == other.IsActive();
 		}
-
-		bool operator!=(const NameComponent& other) const
+		
+		bool operator!=(const AEntityData& other) const
 		{
 			return !(*this == other);
 		}
 
-		operator std::string() const
-		{
-			return name;
-		}
-	};
-
-	struct TagComponent
-	{
-		TagComponent() { }
-		TagComponent(const std::string& str) : tag(str) { }
-
-		bool operator==(const TagComponent& other) const
-		{
-			return tag == other.tag;
-		}
-
-		bool operator!=(const TagComponent& other) const
-		{
-			return !(*this == other);
-		}
-
-		std::string tag;
+	private:
+		std::string m_name;
+		std::string m_tag;
 	};
 
 	class SpriteRendererComponent : public ToggleableComponent
@@ -383,7 +369,7 @@ namespace AstralEngine
 		void SetEntity(AEntity& e)
 		{
 			entity = e;
-			m_enabled = true;
+			m_isActive = true;
 		}
 	};
 

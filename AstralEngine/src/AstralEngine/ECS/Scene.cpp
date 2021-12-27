@@ -94,8 +94,7 @@ namespace AstralEngine
 	{
 		AEntity e = AEntity(m_registry.CreateEntity(), this);
 		e.EmplaceComponent<TransformComponent>();
-		e.EmplaceComponent<NameComponent>();
-		e.EmplaceComponent<TagComponent>();
+		e.EmplaceComponent<AEntityData>();
 		return e;
 	}
 
@@ -141,15 +140,22 @@ namespace AstralEngine
 		if (mainCamera != nullptr)
 		{
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
-			auto group = m_registry.GetGroup<TransformComponent, SpriteRendererComponent>();
+			auto group = m_registry.GetGroup<TransformComponent, SpriteRendererComponent, AEntityData>();
 
 			for (BaseEntity e : group)
 			{
-				auto& components = group.Get<TransformComponent, SpriteRendererComponent>(e);
-				TransformComponent& transform = std::get<TransformComponent&>(components);
-				SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
+				auto& components = group.Get<TransformComponent, SpriteRendererComponent, AEntityData>(e);
+				AEntityData& data = std::get<AEntityData&>(components);
 
-				Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+				if (data.IsActive())
+				{
+					SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
+					if (sprite.IsActive())
+					{
+						TransformComponent& transform = std::get<TransformComponent&>(components);
+						Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+					}
+				}
 			}
 
 			Renderer::EndScene();

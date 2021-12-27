@@ -135,6 +135,9 @@ namespace AstralEngine
 		TransformComponent& GetTransform();
 		const TransformComponent& GetTransform() const;
 
+		bool IsActive() const;
+		void SetActive(bool val);
+
 		//makes the entity invalid
 		void Destroy()
 		{

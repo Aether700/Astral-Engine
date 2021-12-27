@@ -168,7 +168,7 @@ public:
 		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
 		{
 			TestComponent& test = GetComponent<TestComponent>();
-			test.SetEnable(!test.IsEnabled());
+			test.SetActive(!test.IsActive());
 			curr = 0.0f;
 		}
 		
@@ -211,7 +211,7 @@ public:
 	{
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::T) && curr >= delay)
 		{
-			switcher->SetEnable(!switcher->IsEnabled());
+			switcher->SetActive(!switcher->IsActive());
 			curr = 0.0f;
 		}
 
