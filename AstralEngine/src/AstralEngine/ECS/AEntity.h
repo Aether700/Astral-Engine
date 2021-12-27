@@ -4,7 +4,7 @@
 
 namespace AstralEngine
 {
-	class TransformComponent;
+	class Transform;
 
 	class AEntity
 	{
@@ -23,13 +23,13 @@ namespace AstralEngine
 			{
 				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
 				
-				if (HasComponent<CallbackListComponent>())
+				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackListComponent>().AddCallback(&comp);
+					GetComponent<CallbackList>().AddCallback(&comp);
 				}
 				else
 				{
-					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					CallbackList& list = EmplaceComponent<CallbackList>();
 					list.AddCallback(&comp);
 				}
 
@@ -71,15 +71,15 @@ namespace AstralEngine
 		{
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
+				AE_CORE_ASSERT(HasComponent<CallbackList>(),
 					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackListComponent* list;
-				list = &GetComponent<CallbackListComponent>(); 
+				CallbackList* list;
+				list = &GetComponent<CallbackList>();
 				list->RemoveCallback(&GetComponent<Component>());
 
 				if (list->IsEmpty()) 
 				{
-					RemoveComponent<CallbackListComponent>();
+					RemoveComponent<CallbackList>();
 				}
 			}
 			m_scene->m_registry.RemoveComponent<Component>(*this);
@@ -132,8 +132,11 @@ namespace AstralEngine
 		const std::string& GetName() const;
 		void SetName(const std::string& newName);
 
-		TransformComponent& GetTransform();
-		const TransformComponent& GetTransform() const;
+		Transform& GetTransform();
+		const Transform& GetTransform() const;
+
+		bool IsActive() const;
+		void SetActive(bool val);
 
 		//makes the entity invalid
 		void Destroy()

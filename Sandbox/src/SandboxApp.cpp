@@ -28,12 +28,12 @@ public:
 		}
 		else if (AstralEngine::Input::GetMouseButtonDown(AstralEngine::MouseButtonCode::Left))
 		{
-			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 0, 0, 1);
+			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 0, 0, 1);
 			m_currTimerVal = 0.0f;
 		}
 		else
 		{
-			GetComponent<AstralEngine::SpriteRendererComponent>().SetColor(1, 1, 1, 1);
+			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 1, 1, 1);
 			m_currTimerVal = 0.0f;
 		}
 	}
@@ -49,7 +49,7 @@ public:
 	void OnCreate() override
 	{
 		GenerateTexture();
-		entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(m_texture);
+		entity.EmplaceComponent<AstralEngine::SpriteRenderer>(m_texture);
 	}
 
 private:
@@ -153,7 +153,7 @@ public:
 
 	void OnUpdate() override
 	{
-		AstralEngine::SpriteRendererComponent& sprite = GetComponent<AstralEngine::SpriteRendererComponent>();
+		AstralEngine::SpriteRenderer& sprite = GetComponent<AstralEngine::SpriteRenderer>();
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::C))
 		{
 			sprite.SetColor(0, 1, 0, 1);
@@ -170,7 +170,7 @@ public:
 		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
 		{
 			TestComponent& test = GetComponent<TestComponent>();
-			test.SetEnable(!test.IsEnabled());
+			test.SetActive(!test.IsActive());
 			curr = 0.0f;
 		}
 		
@@ -213,7 +213,7 @@ public:
 	{
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::T) && curr >= delay)
 		{
-			switcher->SetEnable(!switcher->IsEnabled());
+			switcher->SetActive(!switcher->IsActive());
 			curr = 0.0f;
 		}
 
@@ -235,7 +235,7 @@ public:
 
 	void OnStart() override
 	{
-		if (!entity.HasComponent<AstralEngine::SpriteRendererComponent>())
+		if (!entity.HasComponent<AstralEngine::SpriteRenderer>())
 		{
 			AddSprite();
 		}
@@ -275,14 +275,14 @@ private:
 
 	void AddSprite()
 	{
-		AstralEngine::SpriteRendererComponent& sprite = entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
+		AstralEngine::SpriteRenderer& sprite = entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		sprite.SetColor(0, 1, 0, 1);
 		m_hasSprite = true;
 	}
 
 	void RemoveSprite()
 	{
-		entity.RemoveComponent<AstralEngine::SpriteRendererComponent>();
+		entity.RemoveComponent<AstralEngine::SpriteRenderer>();
 		m_hasSprite = false;
 	}
 
@@ -319,15 +319,15 @@ private:
 
 	void AddSprite()
 	{
-		entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
+		entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		AE_INFO("Added a sprite");
 	}
 
 	void RemoveSprite()
 	{
-		if (entity.HasComponent<AstralEngine::SpriteRendererComponent>())
+		if (entity.HasComponent<AstralEngine::SpriteRenderer>())
 		{
-			entity.RemoveComponent<AstralEngine::SpriteRendererComponent>();
+			entity.RemoveComponent<AstralEngine::SpriteRenderer>();
 			AE_INFO("Removed a sprite");
 		}
 		else
@@ -336,7 +336,7 @@ private:
 		}
 	}
 
-	AstralEngine::AStack<AstralEngine::SpriteRendererComponent> stack;
+	AstralEngine::AStack<AstralEngine::SpriteRenderer> stack;
 
 	float timer = 0.3f;
 	float curr;
@@ -486,8 +486,8 @@ public:
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
-
-		m_entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(1, 0, 0, 1);
+		
+		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
 		m_entity.EmplaceComponent<ColorSwitcher>();
 		
 		m_entity.EmplaceComponent<EntityController>();
@@ -497,19 +497,19 @@ public:
 
 		
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
-		auto& sprite = e.EmplaceComponent<AstralEngine::SpriteRendererComponent>(text->GetFont()->GetFontAtlas());
+		auto& sprite = e.EmplaceComponent<AstralEngine::SpriteRenderer>(text->GetFont()->GetFontAtlas());
 		e.GetTransform().scale.x = 5.0f;
 		e.GetTransform().scale.y = 5.0f;
 		e.GetTransform().position.y = 5.0f;
 		e.EmplaceComponent<DisableSprite>();
 
-		//e.GetComponent<AstralEngine::SpriteRendererComponent>().SetEnable(false);
+		//e.GetComponent<AstralEngine::SpriteRenderer>().SetEnable(false);
 
 		AstralEngine::AEntity texturedQuad = m_scene->CreateAEntity();
 		texturedQuad.GetTransform().position = e.GetTransform().position;
 		texturedQuad.GetTransform().position.z += -0.1f;
-		AstralEngine::SpriteRendererComponent& spriteRenderer 
-			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
+		AstralEngine::SpriteRenderer& spriteRenderer 
+			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		spriteRenderer.SetSprite(m_texture);
 		texturedQuad.EmplaceComponent<InputTest>();
 	}

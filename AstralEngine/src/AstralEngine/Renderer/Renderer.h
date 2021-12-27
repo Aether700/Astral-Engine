@@ -176,7 +176,7 @@ namespace AstralEngine
 		static void BeginScene(const Mat4& viewProjMatrix, const Vector3& camPos);
 		static void BeginScene(const OrthographicCamera& cam);
 		static void BeginScene(const RuntimeCamera& cam);
-		static void BeginScene(const RuntimeCamera& camera, const TransformComponent& transform);
+		static void BeginScene(const RuntimeCamera& camera, const Transform& transform);
 		static void EndScene();
 
 		//requests that all the light's shadow maps be recalculated for this frame
@@ -275,10 +275,10 @@ namespace AstralEngine
 			bool drawCubes = true);
 
 		//sprite
-		static void DrawSprite(const Mat4& transform, const SpriteRendererComponent& sprite, bool ignoresCam = false);
+		static void DrawSprite(const Mat4& transform, const SpriteRenderer& sprite, bool ignoresCam = false);
 
 		static void DrawSprite(const Vector3& position, float rotation, const Vector2& size,
-			const SpriteRendererComponent& sprite, bool ignoresCam = false);
+			const SpriteRenderer& sprite, bool ignoresCam = false);
 
 		//UI
 		static void DrawUIElement(const UIElement& element, const Vector4& color);

@@ -126,7 +126,7 @@ namespace AstralEngine
 		StartBatch();
 	}
 
-	void Renderer2D::BeginScene(const RuntimeCamera& camera, const TransformComponent& transform)
+	void Renderer2D::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
 		AE_PROFILE_FUNCTION();
 		Mat4 viewProj = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
@@ -307,7 +307,7 @@ namespace AstralEngine
 	}
 	
 	void Renderer2D::DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size,
-		const SpriteRendererComponent& sprite)
+		const SpriteRenderer& sprite)
 	{
 		if (sprite.GetSprite() == nullptr)
 		{
@@ -319,7 +319,7 @@ namespace AstralEngine
 		}
 	}
 
-	void Renderer2D::DrawRotatedQuad(const TransformComponent& transform, const SpriteRendererComponent& sprite)
+	void Renderer2D::DrawRotatedQuad(const Transform& transform, const SpriteRenderer& sprite)
 	{
 		DrawRotatedQuad(transform.position, transform.rotation.z, transform.scale, sprite);
 	}

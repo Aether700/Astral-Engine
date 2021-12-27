@@ -11,38 +11,37 @@ namespace AstralEngine
 	class ToggleableComponent
 	{
 		friend class NativeScript;
-
 	public:
-		ToggleableComponent(bool enabled = true) : m_enabled(enabled) { }
+		ToggleableComponent(bool enabled = true) : m_isActive(enabled) { }
 
 		virtual ~ToggleableComponent() { }
 
 		virtual void OnEnable() { }
 		virtual void OnDisable() { }
 
-		bool IsEnabled() const { return m_enabled; }
+		bool IsActive() const { return m_isActive; }
 
-		void SetEnable(bool val)
+		void SetActive(bool val)
 		{
-			if (val == m_enabled)
+			if (val == m_isActive)
 			{
 				return;
 			}
 
 			if (val)
 			{
-				m_enabled = true;
+				m_isActive = true;
 				OnEnable();
 			}
 			else
 			{
-				m_enabled = false;
+				m_isActive = false;
 				OnDisable();
 			}
 		}
 
 	private:
-		bool m_enabled;
+		bool m_isActive;
 	};
 
 	class CallbackComponent : public ToggleableComponent
@@ -59,7 +58,7 @@ namespace AstralEngine
 		//calls OnUpdate but only if the component is enabled
 		void FilteredUpdate()
 		{
-			if (IsEnabled())
+			if (IsActive())
 			{
 				OnUpdate();
 			}
@@ -76,55 +75,42 @@ namespace AstralEngine
 		}
 	};
 
-	struct NameComponent
+	class AEntityData : public ToggleableComponent
 	{
-		std::string name;
+	public:
+		AEntityData() : m_name("AEntity"), m_tag("Untagged") { }
 
-		NameComponent() : name("AEntity") { }
+		const std::string& GetName() const { return m_name; }
+		const std::string& GetTag() const { return m_tag; }
 
-		bool operator==(const NameComponent& other) const
+		void SetName(const std::string& name) { m_name = name; }
+		void SetTag(const std::string& tag) { m_tag = tag; }
+
+		bool operator==(const AEntityData& other) const
 		{
-			return name == other.name;
+			return m_name == other.m_name && m_tag == other.m_tag 
+				&& IsActive() == other.IsActive();
 		}
-
-		bool operator!=(const NameComponent& other) const
+		
+		bool operator!=(const AEntityData& other) const
 		{
 			return !(*this == other);
 		}
 
-		operator std::string() const
-		{
-			return name;
-		}
+	private:
+		std::string m_name;
+		std::string m_tag;
 	};
 
-	struct TagComponent
-	{
-		TagComponent() { }
-		TagComponent(const std::string& str) : tag(str) { }
-
-		bool operator==(const TagComponent& other) const
-		{
-			return tag == other.tag;
-		}
-
-		bool operator!=(const TagComponent& other) const
-		{
-			return !(*this == other);
-		}
-
-		std::string tag;
-	};
-
-	class SpriteRendererComponent : public ToggleableComponent
+	class SpriteRenderer : public ToggleableComponent
 	{
 	public:
 
-		SpriteRendererComponent() 
+		SpriteRenderer()
 			: m_color(1.0f, 1.0f, 1.0f, 1.0f), 
 			m_sprite(Renderer2D::GetDefaultTexture()) { }
 		
-		SpriteRendererComponent(float r, float g, float b, float a) 
+		SpriteRenderer(float r, float g, float b, float a)
 			: m_color(r, g, b, a), m_sprite(Renderer2D::GetDefaultTexture())
 		{
 			//make sure color provided is a valid color
@@ -134,7 +120,7 @@ namespace AstralEngine
 					   &&  a <= 1.0f && a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const Vector4& color) 
+		SpriteRenderer(const Vector4& color)
 			: m_color(color), m_sprite(Renderer2D::GetDefaultTexture())
 		{
 			//make sure color provided is a valid color
@@ -144,13 +130,13 @@ namespace AstralEngine
 				        && color.a <= 1.0f && color.a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const AReference<Texture2D>& sprite)
+		SpriteRenderer(const AReference<Texture2D>& sprite)
 			: m_color(1.0f, 1.0f, 1.0f, 1.0f), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
 		}
 
-		SpriteRendererComponent(float r, float g, float b, float a, const AReference<Texture2D>& sprite)
+		SpriteRenderer(float r, float g, float b, float a, const AReference<Texture2D>& sprite)
 			: m_color(r, g, b, a), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
@@ -161,7 +147,7 @@ namespace AstralEngine
 				&& a <= 1.0f && a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const Vector4& color, const AReference<Texture2D>& sprite)
+		SpriteRenderer(const Vector4& color, const AReference<Texture2D>& sprite)
 			: m_color(color), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
@@ -204,12 +190,12 @@ namespace AstralEngine
 			m_sprite = sprite;
 		}
 
-		bool operator==(const SpriteRendererComponent& other) const
+		bool operator==(const SpriteRenderer& other) const
 		{
 			return m_color == other.m_color && m_sprite == other.m_sprite;
 		}
 
-		bool operator!=(const SpriteRendererComponent& other) const
+		bool operator!=(const SpriteRenderer& other) const
 		{
 			return !(*this == other);
 		}
@@ -219,15 +205,15 @@ namespace AstralEngine
 		AReference<Texture2D> m_sprite;
 	};
 
-	class TransformComponent
+	class Transform
 	{
 	public:
 
-		TransformComponent() : scale(1.0f, 1.0f, 1.0f) { }
-		TransformComponent(Vector3 translation) 
+		Transform() : scale(1.0f, 1.0f, 1.0f) { }
+		Transform(Vector3 translation)
 			: position(translation), scale(1.0f, 1.0f, 1.0f) { }
 
-		TransformComponent(Vector3 pos, Vector3 rotation, Vector3 scale)
+		Transform(Vector3 pos, Vector3 rotation, Vector3 scale)
 			: position(pos), rotation(rotation), scale(scale) { }
 
 
@@ -255,13 +241,13 @@ namespace AstralEngine
 			return transformMatrix;
 		}
 
-		bool operator==(const TransformComponent& other) const
+		bool operator==(const Transform& other) const
 		{
 			return position == other.position
 				&& rotation == other.rotation && scale == other.scale;
 		}
 
-		bool operator!=(const TransformComponent& other) const
+		bool operator!=(const Transform& other) const
 		{
 			return !(*this == other);
 		}
@@ -271,7 +257,7 @@ namespace AstralEngine
 		Vector3 scale;
 
 	private:
-		AReference<TransformComponent> m_parent;
+		AReference<Transform> m_parent;
 	};
 
 	struct CameraComponent : public ToggleableComponent
@@ -293,7 +279,7 @@ namespace AstralEngine
 	};
 
 	//add all callback components to this list so they can easily be retrieved and their callbacks can be accessed easily
-	class CallbackListComponent
+	class CallbackList
 	{
 	public:
 		void AddCallback(CallbackComponent* callback)
@@ -324,12 +310,12 @@ namespace AstralEngine
 
 		bool IsEmpty() const { return m_callbacks.IsEmpty(); }
 
-		bool operator==(const CallbackListComponent& other) const
+		bool operator==(const CallbackList& other) const
 		{
 			return m_callbacks == other.m_callbacks;
 		}
 
-		bool operator!=(const CallbackListComponent& other) const
+		bool operator!=(const CallbackList& other) const
 		{
 			return !(*this == other);
 		}
@@ -357,8 +343,8 @@ namespace AstralEngine
 			return entity.GetComponent<Component...>();
 		}
 
-		TransformComponent& GetTransform() { return entity.GetTransform(); }
-		const TransformComponent& GetTransform() const { return entity.GetTransform(); }
+		Transform& GetTransform() { return entity.GetTransform(); }
+		const Transform& GetTransform() const { return entity.GetTransform(); }
 
 		const std::string& GetName() const { return entity.GetName(); }
 		void SetName(const std::string& name) { entity.SetName(name); }
@@ -383,7 +369,7 @@ namespace AstralEngine
 		void SetEntity(AEntity& e)
 		{
 			entity = e;
-			m_enabled = true;
+			m_isActive = true;
 		}
 	};
 

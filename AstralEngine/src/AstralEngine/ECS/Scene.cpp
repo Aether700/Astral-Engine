@@ -4,8 +4,7 @@
 #include "AstralEngine/Data Struct/AReference.h"
 #include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
-#include "AstralEngine/Core/Application.h"
-#include "AstralEngine/UI/UICore.h"
+#include "Core/Application.h"
 #include "Scene.h"
 #include "AEntity.h"
 #include "Components.h"
@@ -82,7 +81,7 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetComponent<TransformComponent>().position.z = -1.0f;
+		camera.GetComponent<Transform>().position.z = -1.0f;
 		camera.EmplaceComponent<CameraComponent>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
@@ -94,9 +93,8 @@ namespace AstralEngine
 	AEntity Scene::CreateAEntity()
 	{
 		AEntity e = AEntity(m_registry.CreateEntity(), this);
-		e.EmplaceComponent<TransformComponent>();
-		e.EmplaceComponent<NameComponent>();
-		e.EmplaceComponent<TagComponent>();
+		e.EmplaceComponent<Transform>();
+		e.EmplaceComponent<AEntityData>();
 		return e;
 	}
 
@@ -122,11 +120,11 @@ namespace AstralEngine
 		////////////////////////////////////////////
 
 		RuntimeCamera* mainCamera = nullptr;
-		TransformComponent* cameraTransform;
-		auto camView = m_registry.GetView<CameraComponent, TransformComponent>();
+		Transform* cameraTransform;
+		auto camView = m_registry.GetView<CameraComponent, Transform>();
 		for (auto entity : camView)
 		{
-			auto[transform, camera] = camView.Get<TransformComponent, CameraComponent>(entity);
+			auto[transform, camera] = camView.Get<Transform, CameraComponent>(entity);
 
 			if (camera.primary)
 			{
@@ -139,28 +137,29 @@ namespace AstralEngine
 		RenderCommand::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		RenderCommand::Clear();
 
-		
 		if (mainCamera != nullptr)
 		{
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
-			auto group = m_registry.GetGroup<TransformComponent, SpriteRendererComponent>();
+			auto group = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
 
 			for (BaseEntity e : group)
 			{
-				auto& components = group.Get<TransformComponent, SpriteRendererComponent>(e);
-				TransformComponent& transform = std::get<TransformComponent&>(components);
-				SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
+				auto& components = group.Get<Transform, SpriteRenderer, AEntityData>(e);
+				AEntityData& data = std::get<AEntityData&>(components);
 
-				if (sprite.IsEnabled())
+				if (data.IsActive())
 				{
-					Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+					SpriteRenderer& sprite = std::get<SpriteRenderer&>(components);
+					if (sprite.IsActive())
+					{
+						Transform& transform = std::get<Transform&>(components);
+						Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+					}
 				}
 			}
 
 			Renderer::EndScene();
 		}
-
-		Application::GetUIContext()->RenderUI();
 
 		//update Scripts
 		CallOnUpdate();
@@ -187,20 +186,20 @@ namespace AstralEngine
 
 	void Scene::CallOnStart()
 	{
-		auto view = m_registry.GetView<CallbackListComponent>();
+		auto view = m_registry.GetView<CallbackList>();
 		for (BaseEntity e : view)
 		{
-			auto& list = view.Get<CallbackListComponent>(e);
+			auto& list = view.Get<CallbackList>(e);
 			list.CallOnStart();
 		}
 	}
 
 	void Scene::CallOnUpdate()
 	{
-		auto view = m_registry.GetView<CallbackListComponent>();
+		auto view = m_registry.GetView<CallbackList>();
 		for (BaseEntity e : view)
 		{
-			auto& list = view.Get<CallbackListComponent>(e);
+			auto& list = view.Get<CallbackList>(e);
 			list.CallOnUpdate();
 		}
 	}
