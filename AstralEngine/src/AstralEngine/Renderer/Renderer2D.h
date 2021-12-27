@@ -8,8 +8,8 @@
 namespace AstralEngine
 {
 	class UIElement;
-	class SpriteRendererComponent;
-	class TransformComponent;
+	class SpriteRenderer;
+	class Transform;
 	class RuntimeCamera;
 
 	struct Renderer2DStatistics
@@ -38,7 +38,7 @@ namespace AstralEngine
 		static void ResetStats();
 
 		static void BeginScene(const OrthographicCamera& camera);
-		static void BeginScene(const RuntimeCamera& camera, const TransformComponent& transform);
+		static void BeginScene(const RuntimeCamera& camera, const Transform& transform);
 		static void EndScene();
 
 		static AReference<Texture2D> GetDefaultTexture();
@@ -65,9 +65,9 @@ namespace AstralEngine
 		static void DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, const Vector4& color);
 
 		static void DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, 
-			const SpriteRendererComponent& sprite);
+			const SpriteRenderer& sprite);
 
-		static void DrawRotatedQuad(const TransformComponent& transform, const SpriteRendererComponent& sprite);
+		static void DrawRotatedQuad(const Transform& transform, const SpriteRenderer& sprite);
 
 		static void DrawRotatedQuad(const Vector2& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });

@@ -102,15 +102,15 @@ namespace AstralEngine
 		std::string m_tag;
 	};
 
-	class SpriteRendererComponent : public ToggleableComponent
+	class SpriteRenderer : public ToggleableComponent
 	{
 	public:
 
-		SpriteRendererComponent() 
+		SpriteRenderer()
 			: m_color(1.0f, 1.0f, 1.0f, 1.0f), 
 			m_sprite(Renderer2D::GetDefaultTexture()) { }
 		
-		SpriteRendererComponent(float r, float g, float b, float a) 
+		SpriteRenderer(float r, float g, float b, float a)
 			: m_color(r, g, b, a), m_sprite(Renderer2D::GetDefaultTexture())
 		{
 			//make sure color provided is a valid color
@@ -120,7 +120,7 @@ namespace AstralEngine
 					   &&  a <= 1.0f && a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const Vector4& color) 
+		SpriteRenderer(const Vector4& color)
 			: m_color(color), m_sprite(Renderer2D::GetDefaultTexture())
 		{
 			//make sure color provided is a valid color
@@ -130,13 +130,13 @@ namespace AstralEngine
 				        && color.a <= 1.0f && color.a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const AReference<Texture2D>& sprite)
+		SpriteRenderer(const AReference<Texture2D>& sprite)
 			: m_color(1.0f, 1.0f, 1.0f, 1.0f), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
 		}
 
-		SpriteRendererComponent(float r, float g, float b, float a, const AReference<Texture2D>& sprite)
+		SpriteRenderer(float r, float g, float b, float a, const AReference<Texture2D>& sprite)
 			: m_color(r, g, b, a), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
@@ -147,7 +147,7 @@ namespace AstralEngine
 				&& a <= 1.0f && a >= 0.0f, "Invalid Color provided");
 		}
 
-		SpriteRendererComponent(const Vector4& color, const AReference<Texture2D>& sprite)
+		SpriteRenderer(const Vector4& color, const AReference<Texture2D>& sprite)
 			: m_color(color), m_sprite(sprite)
 		{
 			AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
@@ -190,12 +190,12 @@ namespace AstralEngine
 			m_sprite = sprite;
 		}
 
-		bool operator==(const SpriteRendererComponent& other) const
+		bool operator==(const SpriteRenderer& other) const
 		{
 			return m_color == other.m_color && m_sprite == other.m_sprite;
 		}
 
-		bool operator!=(const SpriteRendererComponent& other) const
+		bool operator!=(const SpriteRenderer& other) const
 		{
 			return !(*this == other);
 		}
@@ -205,15 +205,15 @@ namespace AstralEngine
 		AReference<Texture2D> m_sprite;
 	};
 
-	class TransformComponent
+	class Transform
 	{
 	public:
 
-		TransformComponent() : scale(1.0f, 1.0f, 1.0f) { }
-		TransformComponent(Vector3 translation) 
+		Transform() : scale(1.0f, 1.0f, 1.0f) { }
+		Transform(Vector3 translation)
 			: position(translation), scale(1.0f, 1.0f, 1.0f) { }
 
-		TransformComponent(Vector3 pos, Vector3 rotation, Vector3 scale)
+		Transform(Vector3 pos, Vector3 rotation, Vector3 scale)
 			: position(pos), rotation(rotation), scale(scale) { }
 
 
@@ -241,13 +241,13 @@ namespace AstralEngine
 			return transformMatrix;
 		}
 
-		bool operator==(const TransformComponent& other) const
+		bool operator==(const Transform& other) const
 		{
 			return position == other.position
 				&& rotation == other.rotation && scale == other.scale;
 		}
 
-		bool operator!=(const TransformComponent& other) const
+		bool operator!=(const Transform& other) const
 		{
 			return !(*this == other);
 		}
@@ -257,7 +257,7 @@ namespace AstralEngine
 		Vector3 scale;
 
 	private:
-		AReference<TransformComponent> m_parent;
+		AReference<Transform> m_parent;
 	};
 
 	struct CameraComponent : public ToggleableComponent
@@ -279,7 +279,7 @@ namespace AstralEngine
 	};
 
 	//add all callback components to this list so they can easily be retrieved and their callbacks can be accessed easily
-	class CallbackListComponent
+	class CallbackList
 	{
 	public:
 		void AddCallback(CallbackComponent* callback)
@@ -310,12 +310,12 @@ namespace AstralEngine
 
 		bool IsEmpty() const { return m_callbacks.IsEmpty(); }
 
-		bool operator==(const CallbackListComponent& other) const
+		bool operator==(const CallbackList& other) const
 		{
 			return m_callbacks == other.m_callbacks;
 		}
 
-		bool operator!=(const CallbackListComponent& other) const
+		bool operator!=(const CallbackList& other) const
 		{
 			return !(*this == other);
 		}
@@ -343,8 +343,8 @@ namespace AstralEngine
 			return entity.GetComponent<Component...>();
 		}
 
-		TransformComponent& GetTransform() { return entity.GetTransform(); }
-		const TransformComponent& GetTransform() const { return entity.GetTransform(); }
+		Transform& GetTransform() { return entity.GetTransform(); }
+		const Transform& GetTransform() const { return entity.GetTransform(); }
 
 		const std::string& GetName() const { return entity.GetName(); }
 		void SetName(const std::string& name) { entity.SetName(name); }

@@ -7,8 +7,8 @@ namespace AstralEngine
 	const std::string& AEntity::GetName() const { return GetComponent<AEntityData>().GetName(); }
 	void AEntity::SetName(const std::string& newName) { GetComponent<AEntityData>().SetName(newName); }
 
-	TransformComponent& AEntity::GetTransform() { return GetComponent<TransformComponent>(); }
-	const TransformComponent& AEntity::GetTransform() const { return GetComponent<TransformComponent>(); }
+	Transform& AEntity::GetTransform() { return GetComponent<Transform>(); }
+	const Transform& AEntity::GetTransform() const { return GetComponent<Transform>(); }
 
 	bool AEntity::IsActive() const	{ return GetComponent<AEntityData>().IsActive(); }
 	void AEntity::SetActive(bool val) { GetComponent<AEntityData>().SetActive(val); }

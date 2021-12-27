@@ -541,7 +541,7 @@ namespace AstralEngine
 		s_pointLightIndex = 0;
 	}
 
-	void Renderer::BeginScene(const RuntimeCamera& camera, const TransformComponent& transform)
+	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
 		Mat4 viewProjectionMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
 
@@ -680,7 +680,7 @@ namespace AstralEngine
 	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
 		const Material& mat, AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
 	{
-		TransformComponent t = TransformComponent(position, rotation, scale);
+		Transform t = Transform(position, rotation, scale);
 		DrawVoxel(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor);
 	}
 
@@ -688,7 +688,7 @@ namespace AstralEngine
 	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
 		AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
 	{
-		TransformComponent t = TransformComponent(position, rotation, scale);
+		Transform t = Transform(position, rotation, scale);
 		DrawVoxel(t.GetTransformMatrix(), texture, tileFactor, tintColor);
 	}
 
@@ -730,7 +730,7 @@ namespace AstralEngine
 		const Material& mat, AReference<Texture2D> texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
-		TransformComponent t = TransformComponent(position, rotation, scale);
+		Transform t = Transform(position, rotation, scale);
 		DrawQuad(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor, ignoresCam);
 	}
 
@@ -738,7 +738,7 @@ namespace AstralEngine
 		AReference<Texture2D> texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
-		TransformComponent t = TransformComponent(position, rotation, scale);
+		Transform t = Transform(position, rotation, scale);
 		DrawQuad(t.GetTransformMatrix(), texture, tileFactor, tintColor, ignoresCam);
 	}
 
@@ -790,7 +790,7 @@ namespace AstralEngine
 		unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
 		float tileFactor, const Vector4& tintColor)
 	{
-		TransformComponent t = TransformComponent(position, rotation, scale);
+		Transform t = Transform(position, rotation, scale);
 		DrawVertexData(renderTarget, t.GetTransformMatrix(), vertices, numVertices, normals,
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
@@ -849,13 +849,13 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::DrawSprite(const Mat4& transform, const SpriteRendererComponent& sprite, bool ignoresCam)
+	void Renderer::DrawSprite(const Mat4& transform, const SpriteRenderer& sprite, bool ignoresCam)
 	{
 		DrawQuad(transform, sprite.GetSprite(), 1.0f, sprite.GetColor(), ignoresCam);
 	}
 
 	void Renderer::DrawSprite(const Vector3& position, float rotation, const Vector2& size,
-		const SpriteRendererComponent& sprite, bool ignoresCam)
+		const SpriteRenderer& sprite, bool ignoresCam)
 	{
 		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor(), ignoresCam);
 	}
