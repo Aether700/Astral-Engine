@@ -5,6 +5,7 @@
 #include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
 #include "Core/Application.h"
+#include "UI/UICore.h"
 #include "Scene.h"
 #include "AEntity.h"
 #include "Components.h"
@@ -160,6 +161,8 @@ namespace AstralEngine
 
 			Renderer::EndScene();
 		}
+
+		Application::GetUIContext()->RenderUI();
 
 		//update Scripts
 		CallOnUpdate();

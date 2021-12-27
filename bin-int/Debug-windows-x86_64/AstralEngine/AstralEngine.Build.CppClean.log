@@ -18,6 +18,7 @@ c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-wi
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\utils.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\mat4.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\mat3.obj
+c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\scene.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\aentity.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\layerstack.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\application.obj
@@ -40,7 +41,6 @@ c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-wi
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\windowstime.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\windowsinput.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\openglvertexbuffer.obj
-c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\scene.obj
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin\debug-windows-x86_64\astralengine\astralengine.lib
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\astralengine.tlog\cl.command.1.tlog
 c:\users\hanac\desktop\astral engine\astral engine\astralengine\bin-int\debug-windows-x86_64\astralengine\astralengine.tlog\cl.read.1.tlog

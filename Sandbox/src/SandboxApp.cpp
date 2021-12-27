@@ -416,9 +416,9 @@ public:
 	{
 		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::T))
 		{
-			AstralEngine::SpriteRendererComponent& spriteRenderer 
-				= GetComponent<AstralEngine::SpriteRendererComponent>();
-			spriteRenderer.SetEnable(!spriteRenderer.IsEnabled());
+			AstralEngine::SpriteRenderer& spriteRenderer 
+				= GetComponent<AstralEngine::SpriteRenderer>();
+			spriteRenderer.SetActive(!spriteRenderer.IsActive());
 		}
 	}
 };
