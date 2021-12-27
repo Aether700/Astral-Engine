@@ -55,4 +55,6 @@ uniform sampler2D[8] u_texture;
 void main()
 {
 	color = texture(u_texture[int(v_texIndex)], v_texCoord.xy * v_tileFactor) * v_color; 
+	//float a = texture(u_texture[int(v_texIndex)], v_texCoord.xy * v_tileFactor).a;
+	//color = vec4(a, 0, 1, 1);
 }

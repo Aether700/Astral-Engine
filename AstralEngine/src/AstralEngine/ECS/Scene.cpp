@@ -139,6 +139,7 @@ namespace AstralEngine
 		RenderCommand::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		RenderCommand::Clear();
 
+		
 		if (mainCamera != nullptr)
 		{
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
@@ -150,7 +151,10 @@ namespace AstralEngine
 				TransformComponent& transform = std::get<TransformComponent&>(components);
 				SpriteRendererComponent& sprite = std::get<SpriteRendererComponent&>(components);
 
-				Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+				if (sprite.IsEnabled())
+				{
+					Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+				}
 			}
 
 			Renderer::EndScene();

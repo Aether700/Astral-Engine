@@ -44,7 +44,8 @@ namespace AstralEngine
 
 		K& GetKey() { return m_key; }
 		T& GetElement() { return m_element; }
-
+		const K& GetKey() const { return m_key; }
+		const T& GetElement() const { return m_element; }
 
 	private:
 		static bool DefaultEquals(const K& k1, const K& k2) { return k1 == k2; }

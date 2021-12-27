@@ -280,7 +280,7 @@ namespace AstralEngine
 	}
 
 	//returns texture index for the texture
-	int RenderingBatch::AddTexture2D(AReference<Texture2D> texture, RenderingPrimitive renderTarget)
+	int RenderingBatch::AddTexture2D(const AReference<Texture2D>& texture, RenderingPrimitive renderTarget)
 	{
 		int textureIndex = 0;
 		bool found = false;
@@ -339,7 +339,7 @@ namespace AstralEngine
 		return textureIndex;
 	}
 
-	void RenderingBatch::AddTexture2DShadowMap(AReference<Texture2D> shadowMap)
+	void RenderingBatch::AddTexture2DShadowMap(const AReference<Texture2D>& shadowMap)
 	{
 		int textureIndex = 0;
 		bool found = false;
@@ -366,7 +366,7 @@ namespace AstralEngine
 		}
 	}
 
-	void RenderingBatch::AddCubemapShadowMap(AReference<CubeMap> shadowMap)
+	void RenderingBatch::AddCubemapShadowMap(const AReference<CubeMap>& shadowMap)
 	{
 		int textureIndex = 0;
 		bool found = false;
@@ -582,8 +582,8 @@ namespace AstralEngine
 		s_updateLights = true;
 	}
 
-	AReference<CubeMap> Renderer::GetDefaultWhiteCubeMap() { return s_defaultWhiteCubeMap; }
-	AReference<Texture2D> Renderer::GetDefaultWhiteTexture() { return s_defaultWhiteTexture; }
+	const AReference<CubeMap>& Renderer::GetDefaultWhiteCubeMap() { return s_defaultWhiteCubeMap; }
+	const AReference<Texture2D>& Renderer::GetDefaultWhiteTexture() { return s_defaultWhiteTexture; }
 
 	void Renderer::FlushBatch()
 	{
@@ -714,20 +714,20 @@ namespace AstralEngine
 		DrawVoxel(position, rotation, scale, GetDefaultWhiteCubeMap(), 1, color);
 	}
 
-	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
 		UploadQuad(transform, mat, texture, tileFactor, tintColor, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
+	void Renderer::DrawQuad(const Mat4& transform, const AReference<Texture2D>& texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
 		UploadQuad(transform, s_defaultMaterial, texture, tileFactor, tintColor, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-		const Material& mat, AReference<Texture2D> texture, float tileFactor,
+		const Material& mat, const AReference<Texture2D>& texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
 		TransformComponent t = TransformComponent(position, rotation, scale);
@@ -735,7 +735,7 @@ namespace AstralEngine
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-		AReference<Texture2D> texture, float tileFactor,
+		const AReference<Texture2D>& texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
 		TransformComponent t = TransformComponent(position, rotation, scale);
@@ -764,22 +764,37 @@ namespace AstralEngine
 		DrawQuad(position, rotation, scale, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture,
-		float tilingFactor, const Vector4& color, bool ignoresCam)
+	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, 
+		const AReference<Texture2D>& texture, float tilingFactor, const Vector4& color, bool ignoresCam)
 	{
 		DrawQuad(position, Vector3(0, 0, rotation), Vector3(scale.x, scale.y, 1), 
 			texture, tilingFactor, color, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale,
+	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector3& scale,
 		const Vector4& color, bool ignoresCam)
 	{
 		DrawQuad(position, Vector3(0, 0, rotation), Vector3(scale.x, scale.y, 1), color, ignoresCam);
 	}
 
+	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector3& scale, 
+		const AReference<Texture2D>& texture, const Vector2* textureCoords, float tilingFactor, 
+		const Vector4& tintColor, bool ignoresCam)
+	{
+		TransformComponent t = TransformComponent(position, Vector3(0, 0, rotation), scale);
+		const Vector3 textureCoords3D[] = { 
+			Vector3(textureCoords[0].x, textureCoords[0].y, 0.0f),
+			Vector3(textureCoords[1].x, textureCoords[1].y, 0.0f),
+			Vector3(textureCoords[2].x, textureCoords[2].y, 0.0f),
+			Vector3(textureCoords[3].x, textureCoords[3].y, 0.0f)
+		};
+
+		UploadQuad(t.GetTransformMatrix(), s_defaultMaterial, texture, textureCoords3D, tilingFactor, tintColor, ignoresCam);
+	}
+
 	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Vector3* vertices,
-		unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture,
-		const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
+		unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, 
+		const AReference<Texture2D>& texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
 	{
 		UploadVertexData(renderTarget, transform, s_defaultMaterial, vertices, numVertices, normals,
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
@@ -787,7 +802,7 @@ namespace AstralEngine
 
 	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Vector3& rotation,
 		const Vector3& scale, const Vector3* vertices, unsigned int numVertices, const Vector3* normals, 
-		unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
+		unsigned int* indices, unsigned int indexCount, const AReference<Texture2D>& texture, const Vector3* textureCoords,
 		float tileFactor, const Vector4& tintColor)
 	{
 		TransformComponent t = TransformComponent(position, rotation, scale);
@@ -795,7 +810,7 @@ namespace AstralEngine
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
+	void Renderer::DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, const AReference<Texture2D>& texture,
 		float tileFactor, const Vector4& tintColor)
 	{
 		UploadMesh(transform, s_defaultMaterial, mesh, texture, tileFactor, tintColor);
@@ -1067,7 +1082,7 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::UploadQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+	void Renderer::UploadQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
 		const Vector3 textureCoords[] = {
@@ -1077,6 +1092,12 @@ namespace AstralEngine
 			{ 0.0f, 1.0f, 0.0f }
 		};
 
+		UploadQuad(transform, mat, texture, textureCoords, tileFactor, tintColor, ignoresCam);
+	}
+
+	void Renderer::UploadQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
+		const Vector3* textureCoords, float tileFactor, const Vector4& tintColor, bool ignoresCam)
+	{
 		Vector3 position[] = {
 			{ -0.5f, -0.5f,  0.0f },
 			{  0.5f, -0.5f,  0.0f },
@@ -1089,20 +1110,20 @@ namespace AstralEngine
 			2, 3, 0
 		};
 
-		Vector3 normals[] = { 
+		Vector3 normals[] = {
 			{ 0, 0, 1 },
 			{ 0, 0, 1 },
 			{ 0, 0, 1 },
-			{ 0, 0, 1 } 
+			{ 0, 0, 1 }
 		};
 
-		s_drawCommands.EmplaceBack(transform, mat, position, normals, sizeof(position) / sizeof(Vector3), indices, 
-			sizeof(indices) / sizeof(unsigned int), texture, textureCoords, tileFactor, tintColor, false);
+		s_drawCommands.EmplaceBack(transform, mat, position, normals, sizeof(position) / sizeof(Vector3), indices,
+			sizeof(indices) / sizeof(unsigned int), texture, textureCoords, tileFactor, tintColor, ignoresCam);
 	}
 
 	void Renderer::UploadVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Material& mat,
 		const Vector3* vertices, unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount,
-		AReference<Texture2D> texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
+		const AReference<Texture2D>& texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
 	{
 		s_drawCommands.EmplaceBack(transform, mat, vertices, normals, numVertices, indices,
 			indexCount, texture, textureCoords, tileFactor, tintColor, false);
@@ -1134,7 +1155,7 @@ namespace AstralEngine
 	}
 
 	void Renderer::UploadMesh(const Mat4& transform, const Material& mat, AReference<Mesh>& mesh,
-		AReference<Texture2D> texture, float tileFactor, const Vector4& tintColor)
+		const AReference<Texture2D>& texture, float tileFactor, const Vector4& tintColor)
 	{
 		s_drawCommands.EmplaceBack(transform, mat, mesh->GetPositions().GetData(), mesh->GetNormals().GetData(),
 			mesh->GetPositions().GetCount(), mesh->GetIndices().GetData(), mesh->GetIndices().GetCount(), texture,

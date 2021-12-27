@@ -46,6 +46,10 @@ namespace AstralEngine
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		
+		//Enable blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		AE_CORE_INFO("OpenGL Info:");
 		AE_CORE_INFO("   Vendor: %s", glGetString(GL_VENDOR));
 		AE_CORE_INFO("   Renderer: %s", glGetString(GL_RENDERER));

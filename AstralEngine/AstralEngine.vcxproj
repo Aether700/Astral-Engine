@@ -210,6 +210,7 @@
     <ClInclude Include="src\aepch.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
     <ClInclude Include="src\AstralEngine\UI\UICore.h" />
+    <ClInclude Include="src\AstralEngine\UI\UIText.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +255,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
+    <ClCompile Include="src\AstralEngine\UI\UIText.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>

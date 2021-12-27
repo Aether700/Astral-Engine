@@ -116,14 +116,14 @@ namespace AstralEngine
 			unsigned int numIndices, RenderingPrimitive renderTarget);
 
 		//returns texture index for the texture
-		int AddTexture2D(AReference<Texture2D> texture, RenderingPrimitive renderTarget);
+		int AddTexture2D(const AReference<Texture2D>& texture, RenderingPrimitive renderTarget);
 
 		//returns texture index for the texture
 		int AddCubemap(AReference<CubeMap> cubemap, RenderingPrimitive renderTarget);
 
-		void AddTexture2DShadowMap(AReference<Texture2D> shadowMap);
+		void AddTexture2DShadowMap(const AReference<Texture2D>& shadowMap);
 
-		void AddCubemapShadowMap(AReference<CubeMap> shadowMap);
+		void AddCubemapShadowMap(const AReference<CubeMap>& shadowMap);
 
 		void Draw(RenderingPrimitive renderTarget);
 
@@ -185,8 +185,8 @@ namespace AstralEngine
 		//turn on and off the shadows in the scene
 		static void UseShadows(bool value) { s_useShadows = value; }
 
-		static AReference<CubeMap> GetDefaultWhiteCubeMap();
-		static AReference<Texture2D> GetDefaultWhiteTexture();
+		static const AReference<CubeMap>& GetDefaultWhiteCubeMap();
+		static const AReference<Texture2D>& GetDefaultWhiteTexture();
 
 		//primitives
 
@@ -218,18 +218,18 @@ namespace AstralEngine
 			const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		//squares
-		static void DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+		static void DrawQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
+		static void DrawQuad(const Mat4& transform, const AReference<Texture2D>& texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
 		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-			const Material& mat, AReference<Texture2D> texture, float tileFactor = 1.0f,
+			const Material& mat, const AReference<Texture2D>& texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
 		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-			AReference<Texture2D> texture, float tileFactor = 1.0f,
+			const AReference<Texture2D>& texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
 		static void DrawQuad(const Mat4& transform, const Material& mat, 
@@ -243,23 +243,28 @@ namespace AstralEngine
 		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
 			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture, 
-			float tilingFactor = 1, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale, 
+			const AReference<Texture2D>& texture, float tilingFactor = 1, const Vector4& color = { 1, 1, 1, 1 }, 
+			bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale,
+		static void DrawQuad(const Vector3& position, float rotation, const Vector3& scale,
 			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+
+		static void DrawQuad(const Vector3& position, float rotation, const Vector3& scale, 
+			const AReference<Texture2D>& texture, const Vector2* textureCoords, float tilingFactor = 1, 
+			const Vector4& tintColor = { 1, 1, 1, 1 },	bool ignoresCam = false);
 
 		//draw generic Vertex Data
 		static void DrawVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Vector3* vertices,
 			unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, 
-			AReference<Texture2D> texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor);
+			const AReference<Texture2D>& texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor);
 
 		static void DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Vector3& rotation,
 			const Vector3& scale, const Vector3* vertices, unsigned int numVertices, const Vector3* normals, 
-			unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
+			unsigned int* indices, unsigned int indexCount, const AReference<Texture2D>& texture, const Vector3* textureCoords,
 			float tileFactor, const Vector4& tintColor);
 
-		static void DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
+		static void DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, const AReference<Texture2D>& texture,
 			float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		//lighting functions
@@ -293,17 +298,19 @@ namespace AstralEngine
 			float tileFactor, const Vector4& tintColor);
 
 		//uploads a quad or filled in square into the renderer
-		static void UploadQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+		static void UploadQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
 			float tileFactor, const Vector4& tintColor, bool ignoresCam);
+		static void UploadQuad(const Mat4& transform, const Material& mat, const AReference<Texture2D>& texture,
+			const Vector3* textureCoords, float tileFactor, const Vector4& tintColor, bool ignoresCam);
 
 		//helper function which allows to pass any vertex data with a 2D texture
 		static void UploadVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Material& mat,
 			const Vector3* vertices, unsigned int numVertices, const Vector3* normals, unsigned int* indices,
-			unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords, 
+			unsigned int indexCount, const AReference<Texture2D>& texture, const Vector3* textureCoords,
 			float tileFactor, const Vector4& tintColor);
 
 		static void UploadMesh(const Mat4& transform, const Material& mat, AReference<Mesh>& mesh,
-			AReference<Texture2D> texture, float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
+			const AReference<Texture2D>& texture, float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static RendererStatistics s_stats;
 

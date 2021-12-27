@@ -70,11 +70,12 @@ namespace AstralEngine
 			return *m_currIt;
 		}
 
-	private:
+	protected:
 		AUnorderedMapIterator(Bucket* bucketArr,
 			size_t currBucket, BucketAIterator& currIt, size_t maxCount)
 			: m_bucketArr(bucketArr), m_currBucket(currBucket), m_currIt(currIt), m_maxCount(maxCount) { }
 
+	private:
 		Bucket* m_bucketArr;
 		size_t m_currBucket;
 		size_t m_maxCount;
@@ -128,13 +129,13 @@ namespace AstralEngine
 
 		const AKeyElementPair<K, T>& operator*() const
 		{
-			return AUnorderedMapIterator<K, T>::operator*();
+			return const_cast<AUnorderedMapConstIterator*>(this)->AUnorderedMapIterator<K, T>::operator*();
 		}
 
 	private:
 		AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt)
-			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt) { }
+			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt, size_t maxCount)
+			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt, maxCount) { }
 
 	};
 
@@ -298,6 +299,23 @@ namespace AstralEngine
 			AE_CORE_ERROR("AUnorderedMap could not find new added key");
 		}
 
+		const T& operator[](const K& key) const
+		{
+			AE_PROFILE_FUNCTION();
+			size_t bucketIndex = GetBucketIndex(key);
+
+			//try to find existing key
+			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
+			{
+				if (m_equalsFunc(pair.GetKey(), key))
+				{
+					return pair.GetElement();
+				}
+			}
+			AE_CORE_ERROR("Unknown key provided to AUnorderedMap");
+			return begin().operator*().GetElement();
+		}
+
 		AUnorderedMap<K, T>::AIterator begin()
 		{
 			size_t bucketIndex;
@@ -338,6 +356,11 @@ namespace AstralEngine
 					break;
 				}
 			}
+			
+			/*
+			AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
+				size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt)
+			*/
 			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].begin(), m_bucketCount);
 		}
 

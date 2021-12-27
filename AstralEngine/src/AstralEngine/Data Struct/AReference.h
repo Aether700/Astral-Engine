@@ -15,7 +15,9 @@ namespace AstralEngine
 		int count;
 		int weakCount;
 		void* ptr;
+
 		ControlBlock(void* p) : ptr(p), count(1), weakCount(0) { }
+		~ControlBlock() { delete ptr; }
 
 		void DecrementWeak()
 		{

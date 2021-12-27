@@ -1,19 +1,20 @@
-﻿  WindowsInput.cpp
+﻿  UIText.cpp
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(462,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(461): message : while compiling class template member function 'bool AstralEngine::AUnorderedMap<int,AstralEngine::InputState>::CheckLoadFactor(void)'
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(284): message : see reference to function template instantiation 'bool AstralEngine::AUnorderedMap<int,AstralEngine::InputState>::CheckLoadFactor(void)' being compiled
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\Windows\WindowsInput.cpp(18): message : see reference to class template instantiation 'AstralEngine::AUnorderedMap<int,AstralEngine::InputState>' being compiled
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(451,47): warning C4244: 'argument': conversion from 'size_t' to 'float', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(449): message : while compiling class template member function 'int AstralEngine::AUnorderedMap<int,AstralEngine::InputState>::GetBucketIndex(const K &) const'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\View.h(61,16): warning C4003: not enough arguments for function-like macro invocation 'min'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(485,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(484): message : while compiling class template member function 'bool AstralEngine::AUnorderedMap<char,AstralEngine::TextCharacter>::CheckLoadFactor(void)'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(212): message : see reference to function template instantiation 'bool AstralEngine::AUnorderedMap<char,AstralEngine::TextCharacter>::CheckLoadFactor(void)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UIText.h(46): message : see reference to class template instantiation 'AstralEngine::AUnorderedMap<char,AstralEngine::TextCharacter>' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(474,47): warning C4244: 'argument': conversion from 'size_t' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(472): message : while compiling class template member function 'int AstralEngine::AUnorderedMap<char,AstralEngine::TextCharacter>::GetBucketIndex(const K &) const'
           with
           [
-              K=int
+              K=char
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(268): message : see reference to function template instantiation 'int AstralEngine::AUnorderedMap<int,AstralEngine::InputState>::GetBucketIndex(const K &) const' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(305): message : see reference to function template instantiation 'int AstralEngine::AUnorderedMap<char,AstralEngine::TextCharacter>::GetBucketIndex(const K &) const' being compiled
           with
           [
-              K=int
+              K=char
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(299): warning C4715: 'AstralEngine::AUnorderedMap<int,AstralEngine::InputState>::operator[]': not all control paths return a value
   AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib

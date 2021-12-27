@@ -4,6 +4,7 @@
 
 //temp
 #include "AstralEngine/UI/UICore.h"
+#include "AstralEngine/UI/UIText.h"
 ////////
 
 
@@ -408,6 +409,20 @@ private:
 	float curr;
 };
 
+class DisableSprite : public AstralEngine::NativeScript 
+{
+public:
+	void OnUpdate()
+	{
+		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::T))
+		{
+			AstralEngine::SpriteRendererComponent& spriteRenderer 
+				= GetComponent<AstralEngine::SpriteRendererComponent>();
+			spriteRenderer.SetEnable(!spriteRenderer.IsEnabled());
+		}
+	}
+};
+
 void OnButtonClicked()
 {
 	static int count = 0;
@@ -451,16 +466,27 @@ public:
 
 		AstralEngine::AReference<AstralEngine::UIButton> button 
 			= AstralEngine::AReference<AstralEngine::UIButton>::Create("My Button", AstralEngine::Vector4(0.8f, 0, 0, 1));
-		uiWindow->AddElement((AstralEngine::AReference<AstralEngine::UIElement>)button);
+		uiWindow->AddElement((AstralEngine::AReference<AstralEngine::RenderableUIElement>)button);
 		button->SetParent(uiWindow);
 		button->AddListener(AstralEngine::ADelegate<void()>(&OnButtonClicked));
 		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
+
+		AstralEngine::AReference<AstralEngine::UIWindow> textWindow
+			= AstralEngine::UIContext::CreateUIWindow({ 100, 500 }, 200, 200,
+				(AstralEngine::UIWindowFlags)(AstralEngine::UIWindowFlags::UIWindowFlagsNoMove | AstralEngine::UIWindowFlags::UIWindowFlagsNoResize),
+				AstralEngine::Vector4(1, 0, 0, 0));
+		AstralEngine::AReference<AstralEngine::TextElement> text 
+			= AstralEngine::AReference<AstralEngine::TextElement>::Create(
+				AstralEngine::Font::Create("assets/fonts/arial.fnt"), "I'm Stoping");
+		text->SetColor(AstralEngine::Vector4(0, 1, 0, 1));
+		text->SetParent(textWindow);
+		textWindow->AddElement((AstralEngine::AReference<AstralEngine::RenderableUIElement>)text);
 
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
-		
+
 		m_entity.EmplaceComponent<AstralEngine::SpriteRendererComponent>(1, 0, 0, 1);
 		m_entity.EmplaceComponent<ColorSwitcher>();
 		
@@ -471,13 +497,17 @@ public:
 
 		
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
-		e.EmplaceComponent<PerlinNoiseTest>();
-		e.GetComponent<AstralEngine::TransformComponent>().scale.x = 5.0f;
-		e.GetComponent<AstralEngine::TransformComponent>().scale.y = 5.0f;
-		e.GetComponent<AstralEngine::TransformComponent>().position.y = 5.0f;
+		auto& sprite = e.EmplaceComponent<AstralEngine::SpriteRendererComponent>(text->GetFont()->GetFontAtlas());
+		e.GetTransform().scale.x = 5.0f;
+		e.GetTransform().scale.y = 5.0f;
+		e.GetTransform().position.y = 5.0f;
+		e.EmplaceComponent<DisableSprite>();
+
+		//e.GetComponent<AstralEngine::SpriteRendererComponent>().SetEnable(false);
 
 		AstralEngine::AEntity texturedQuad = m_scene->CreateAEntity();
-		texturedQuad.GetTransform().position.x = -5.0f;
+		texturedQuad.GetTransform().position = e.GetTransform().position;
+		texturedQuad.GetTransform().position.z += -0.1f;
 		AstralEngine::SpriteRendererComponent& spriteRenderer 
 			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRendererComponent>();
 		spriteRenderer.SetSprite(m_texture);

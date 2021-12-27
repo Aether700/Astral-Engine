@@ -12,7 +12,6 @@
 
 namespace AstralEngine
 {
-
 	class UIWindow;
 
 	enum UIWindowFlags
@@ -91,9 +90,12 @@ namespace AstralEngine
 		UIElement(const Vector2& pos, size_t width, size_t height, Vector2 minResize)
 			: m_pos(pos), m_width(width), m_height(height), m_minResize(minResize) { }
 
+		UIElement(const UIElement& other) : m_pos(other.m_pos), m_width(other.m_width), m_height(other.m_height), 
+			m_minResize(other.m_minResize), m_parentElement(other.m_parentElement) { }
+
 		virtual ~UIElement() { }
 
-		const Vector2& GetScreenCoords() const 
+		const Vector2 GetScreenCoords() const 
 		{ 
 			if (m_parentElement != nullptr)
 			{
@@ -106,13 +108,7 @@ namespace AstralEngine
 
 		Vector2 GetWorldPos() const 
 		{
-			unsigned int width = Application::GetWindow()->GetWidth();
-			unsigned int height = Application::GetWindow()->GetHeight();
-
-			Vector2 screenCoords = GetScreenCoords();
-
-			//world width/height is from -1 to 1 hence the times 2
-			return Vector2(2 * screenCoords.x / width - 1.0f, 1.0f - 2 * screenCoords.y / height );
+			return ScreenToWorldCoords(GetScreenCoords());
 		}
 
 		float GetWorldWidth() const 
@@ -136,19 +132,14 @@ namespace AstralEngine
 		void SetScreenCoordsWidth(unsigned int w) { m_width = w; }
 		void SetScreenCoordsHeight(unsigned int h) { m_height = h; }
 
-		void DrawToScreen() const
+		static Vector2 ScreenToWorldCoords(const Vector2& screenCoords)
 		{
-			if (m_renderFunc.HasFunction())
-			{
-				m_renderFunc(this);
-			}
-			else
-			{
-				Draw();
-			}
-		}
+			unsigned int width = Application::GetWindow()->GetWidth();
+			unsigned int height = Application::GetWindow()->GetHeight();
 
-		void SetRenderingFunction(ADelegate<void(const UIElement*)> func) { m_renderFunc = func; }
+			//world width/height is from -1 to 1 hence the times 2
+			return Vector2(2 * screenCoords.x / width - 1.0f, 1.0f - 2 * screenCoords.y / height);
+		}
 
 		bool IsHovered() const
 		{
@@ -194,28 +185,53 @@ namespace AstralEngine
 			return !(*this == other);
 		}
 
-	protected:
-		virtual void Draw() const = 0;
 	private:
 		Vector2 m_pos;
 		size_t m_width, m_height;
 		AReference<UIElement> m_parentElement;
 		Vector2 m_minResize; //the smallest size allowed when resizing in pixels
+	};
+
+	class RenderableUIElement : public UIElement
+	{
+	public:
+		RenderableUIElement(const Vector2& pos, size_t width, size_t height)
+			: UIElement(pos, width, height) { }
+
+		RenderableUIElement(const Vector2& pos, size_t width, size_t height, Vector2 minResize)
+			: UIElement(pos, width, height, minResize) { }
+
+		void DrawToScreen() const
+		{
+			if (m_renderFunc.HasFunction())
+			{
+				m_renderFunc(this);
+			}
+			else
+			{
+				Draw();
+			}
+		}
+
+		void SetRenderingFunction(ADelegate<void(const UIElement*)> func) { m_renderFunc = func; }
+
+	protected:
+		virtual void Draw() const = 0;
+	private:
 		ADelegate<void(const UIElement*)> m_renderFunc = nullptr;
 	};
 
-
 	//basic UI window which will contain all the widgets
-	class UIWindow : public UIElement
+	class UIWindow : public RenderableUIElement
 	{
 	public:
 		UIWindow(const Vector2& position, unsigned int width, unsigned int height)
-			: UIElement(position, width, height), m_backgroundColor({ 0.1f, 0.1f, 0.1f, 1.0f }), 
+			: RenderableUIElement(position, width, height), m_backgroundColor({ 0.1f, 0.1f, 0.1f, 1.0f }),
 			m_flags(UIWindowFlagsNone) { }
 
 		UIWindow(const Vector2& position, unsigned int width, unsigned int height, UIWindowFlags flags,
 			const Vector4& backgroundColor = { 0.1f, 0.1f, 0.1f, 1.0f }, Vector2Int minResize = { 10, 10 })
-			: UIElement(position, width, height, minResize), m_backgroundColor(backgroundColor), m_flags(flags) { }
+			: RenderableUIElement(position, width, height, minResize), m_backgroundColor(backgroundColor), m_flags(flags) { }
 
 		const Vector4& GetBackgroundColor() const { return m_backgroundColor; }
 
@@ -224,12 +240,12 @@ namespace AstralEngine
 		void SetFlags(const UIWindowFlags flags) { m_flags = flags; }
 
 
-		void AddElement(AReference<UIElement>& element)
+		void AddElement(AReference<RenderableUIElement>& element)
 		{
 			m_elements.Add(element);
 		}
 
-		void RemoveElement(AReference<UIElement>& element)
+		void RemoveElement(AReference<RenderableUIElement>& element)
 		{
 			m_elements.Remove(element);
 		}
@@ -237,7 +253,7 @@ namespace AstralEngine
 		//returns the first hovered element in the window or nullptr if none is hovered
 		AReference<UIElement> GetHoveredElement()
 		{
-			for (AReference<UIElement>& element : m_elements)
+			for (AReference<RenderableUIElement>& element : m_elements)
 			{
 				if (element->IsHovered())
 				{
@@ -250,7 +266,7 @@ namespace AstralEngine
 
 		virtual bool OnEvent(AEvent& e) override
 		{
-			for (AReference<UIElement>& element : m_elements)
+			for (AReference<RenderableUIElement>& element : m_elements)
 			{
 				if (element->OnEvent(e))
 				{
@@ -274,27 +290,28 @@ namespace AstralEngine
 	protected:
 		void Draw() const override
 		{ 
-			for (const AReference<UIElement>& element : m_elements)
+			for (const AReference<RenderableUIElement>& element : m_elements)
 			{
 				element->DrawToScreen();
 			}
 			Renderer::DrawUIElement(*this, m_backgroundColor);
 		}
+
 	private:
-		ASinglyLinkedList<AReference<UIElement>> m_elements; //can include windows
+		ASinglyLinkedList<AReference<RenderableUIElement>> m_elements; //can include windows
 		Vector4 m_backgroundColor;
 		UIWindowFlags m_flags;
 	};
 
-	class UIButton : public UIElement
+	class UIButton : public RenderableUIElement
 	{
 	public:
 		UIButton(const std::string& text, const Vector4& color) 
-			: UIElement({ 0, 0 }, 75, 75), m_text(text), m_defaultColor(color), 
+			: RenderableUIElement({ 0, 0 }, 75, 75), m_text(text), m_defaultColor(color),
 			m_hoveredColor(1.2f * color), m_buttonPressedColor(0.8f * color) { }
 
 		UIButton(const Vector2& pos, size_t width, size_t height, const std::string& text) 
-			: UIElement(pos, width, height), m_text(text), m_defaultColor({0.5, 0.5, 0.5, 1}),
+			: RenderableUIElement(pos, width, height), m_text(text), m_defaultColor({0.5, 0.5, 0.5, 1}),
 			m_hoveredColor(1.2f * m_defaultColor), m_buttonPressedColor(0.8f * m_defaultColor) { }
 
 		const Vector4& GetDefaultColor() const { return m_defaultColor; }
@@ -314,8 +331,6 @@ namespace AstralEngine
 		{
 			m_listeners.RemoveDelegate(listener);
 		}
-
-
 
 		virtual bool OnEvent(AEvent& e)
 		{
@@ -397,5 +412,4 @@ namespace AstralEngine
 		
 		SignalHandler<void()> m_listeners;
 	};
-
 }
