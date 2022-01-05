@@ -459,7 +459,7 @@ public:
 		*/
 
 		AstralEngine::AReference<AstralEngine::UIWindow> uiWindow 
-			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200, 
+			= AstralEngine::UIContext::CreateUIWindow({ 100, 100 }, 200, 200, 
 				AstralEngine::UIWindowFlags::UIWindowFlagsNone, AstralEngine::Vector4(1, 1, 1, 1));
 		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200,
 			AstralEngine::UIWindowFlags::UIWindowFlagsNone, AstralEngine::Vector4(1, 1, 1, 1));
@@ -472,12 +472,15 @@ public:
 		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
 
 		AstralEngine::AReference<AstralEngine::UIWindow> textWindow
-			= AstralEngine::UIContext::CreateUIWindow({ 100, 500 }, 200, 200,
-				(AstralEngine::UIWindowFlags)(AstralEngine::UIWindowFlags::UIWindowFlagsNoMove | AstralEngine::UIWindowFlags::UIWindowFlagsNoResize),
-				AstralEngine::Vector4(1, 0, 0, 0));
+			= AstralEngine::UIContext::CreateUIWindow({ 300, 500 }, 500, 500,
+				AstralEngine::UIWindowFlags::UIWindowFlagsNone,
+				AstralEngine::Vector4(1, 0, 0, 1));
 		AstralEngine::AReference<AstralEngine::TextElement> text 
 			= AstralEngine::AReference<AstralEngine::TextElement>::Create(
-				AstralEngine::Font::Create("assets/fonts/arial.fnt"), "I'm Stoping");
+				AstralEngine::Font::Create("assets/fonts/arial.fnt"), "I'm\tStopping   e\thi jim");
+		text->SetPadding(5);
+		text->SetScreenCoordsWidth(400);
+		text->SetScreenCoordsHeight(400);
 		text->SetColor(AstralEngine::Vector4(0, 1, 0, 1));
 		text->SetParent(textWindow);
 		textWindow->AddElement((AstralEngine::AReference<AstralEngine::RenderableUIElement>)text);

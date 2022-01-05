@@ -39,6 +39,9 @@ namespace AstralEngine
 			UIWindowFlags flags, const Vector4& backgroundColor = { 0.1f, 0.1f, 0.1f, 1.0f }, 
 			Vector2Int minResize = { 10, 10 });
 
+		static unsigned int GetNumSpacesPerTab();
+		static void SetNumSpacesPerTab(unsigned int numSpaces);
+
 	private:
 
 		void RenderUI();
@@ -72,7 +75,7 @@ namespace AstralEngine
 		bool m_resizingWindow = false;
 		Vector2 m_lastMousePos;
 		Vector2Short m_resizeDir;
-
+		unsigned int m_numSpacesPerTab = 4;
 	};
 
 	/* Keeps track of the position, width and height of any UI element

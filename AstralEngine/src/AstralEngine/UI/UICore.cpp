@@ -59,6 +59,17 @@ namespace AstralEngine
 		return newWindow;
 	}
 
+	unsigned int UIContext::GetNumSpacesPerTab()
+	{
+		return Application::GetUIContext()->m_numSpacesPerTab;
+	}
+
+	void UIContext::SetNumSpacesPerTab(unsigned int numSpaces)
+	{
+		AE_CORE_ASSERT(numSpaces > 0, "Invalid number of spaces provided")
+		Application::GetUIContext()->m_numSpacesPerTab = numSpaces;
+	}
+
 	void UIContext::RenderUI()
 	{
 		Renderer::BeginScene();
