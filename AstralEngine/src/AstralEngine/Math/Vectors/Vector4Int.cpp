@@ -35,8 +35,16 @@ namespace AstralEngine
 
 	const Vector4Int Vector4Int::operator+(const Vector4Int& v) const { return Vector4Int(x + v.x, y + v.y, z + v.z, w + v.w); }
 	const Vector4Int Vector4Int::operator-(const Vector4Int& v) const { return Vector4Int(x - v.x, y - v.y, z - v.z, w - v.w); }
-	const Vector4Int Vector4Int::operator+=(const Vector4Int& v) const { return *this + v; }
-	const Vector4Int Vector4Int::operator-=(const Vector4Int& v) const { return *this - v; }
+	void Vector4Int::operator+=(const Vector4Int& v) 
+	{ 
+		*this = *this + v;
+	}
+	
+	void Vector4Int::operator-=(const Vector4Int& v) 
+	{
+		*this = *this - v;
+	}
+
 	const Vector4Int Vector4Int::operator*(int k) const { return Vector4Int(x * k, y * k, z * k, w * k); }
 	const Vector4Int Vector4Int::operator/(int k) const { return Vector4Int(x / k, y / k, z / k, w / k); }
 	const int Vector4Int::operator[](unsigned int index) const

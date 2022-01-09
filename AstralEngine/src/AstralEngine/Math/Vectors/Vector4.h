@@ -30,8 +30,8 @@ namespace AstralEngine
 
 		const Vector4 operator+(const Vector4& v) const;
 		const Vector4 operator-(const Vector4& v) const;
-		const Vector4 operator+=(const Vector4& v) const;
-		const Vector4 operator-=(const Vector4& v) const;
+		void operator+=(const Vector4& v);
+		void operator-=(const Vector4& v);
 		const Vector4 operator*(float k) const;
 		const Vector4 operator/(float k) const;
 		float& operator[](unsigned int index);

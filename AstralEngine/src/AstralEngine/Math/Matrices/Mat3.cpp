@@ -136,19 +136,36 @@ namespace AstralEngine
 	{
 		return Mat3(
 			{ m_vectors[0].x + other.m_vectors[0].x, 
-			  m_vectors[0].y * other.m_vectors[0].y,
-			  m_vectors[0].z * other.m_vectors[0].z },
+			  m_vectors[0].y + other.m_vectors[0].y,
+			  m_vectors[0].z + other.m_vectors[0].z },
 
 			{ m_vectors[1].x + other.m_vectors[1].x,  
-			  m_vectors[1].y * other.m_vectors[1].y, 
-			  m_vectors[1].z * other.m_vectors[1].z },
+			  m_vectors[1].y + other.m_vectors[1].y, 
+			  m_vectors[1].z + other.m_vectors[1].z },
 
 			{ m_vectors[2].x + other.m_vectors[2].x,
-			  m_vectors[2].y * other.m_vectors[2].y,
-			  m_vectors[2].z * other.m_vectors[2].z });
+			  m_vectors[2].y + other.m_vectors[2].y,
+			  m_vectors[2].z + other.m_vectors[2].z });
 	}
 
-	const Mat3 Mat3::operator+=(const Mat3& other) const { return *this + other; }
+	const Mat3 Mat3::operator-(const Mat3& other) const
+	{
+		return Mat3(
+			{ m_vectors[0].x - other.m_vectors[0].x,
+			  m_vectors[0].y - other.m_vectors[0].y,
+			  m_vectors[0].z - other.m_vectors[0].z },
+
+			{ m_vectors[1].x - other.m_vectors[1].x,
+			  m_vectors[1].y - other.m_vectors[1].y,
+			  m_vectors[1].z - other.m_vectors[1].z },
+
+			{ m_vectors[2].x - other.m_vectors[2].x,
+			  m_vectors[2].y - other.m_vectors[2].y,
+			  m_vectors[2].z - other.m_vectors[2].z });
+	}
+
+	void Mat3::operator+=(const Mat3& other) { *this = *this + other; }
+	void Mat3::operator-=(const Mat3& other) { *this = *this - other; }
 
 	const Vector3 Mat3::operator*(const Vector3& v) const
 	{

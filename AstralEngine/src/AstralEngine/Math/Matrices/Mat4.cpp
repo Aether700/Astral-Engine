@@ -305,27 +305,59 @@ namespace AstralEngine
 	{
 		return Mat4(
 			{ m_vectors[0].x + other.m_vectors[0].x,
-			  m_vectors[0].y * other.m_vectors[0].y,
-			  m_vectors[0].z * other.m_vectors[0].z, 
-			  m_vectors[0].w * other.m_vectors[0].w },
+			  m_vectors[0].y + other.m_vectors[0].y,
+			  m_vectors[0].z + other.m_vectors[0].z, 
+			  m_vectors[0].w + other.m_vectors[0].w },
 
 			{ m_vectors[1].x + other.m_vectors[1].x,
-			  m_vectors[1].y * other.m_vectors[1].y,
-			  m_vectors[1].z * other.m_vectors[1].z,
-          	  m_vectors[1].w * other.m_vectors[1].w },
+			  m_vectors[1].y + other.m_vectors[1].y,
+			  m_vectors[1].z + other.m_vectors[1].z,
+          	  m_vectors[1].w + other.m_vectors[1].w },
 
 			{ m_vectors[2].x + other.m_vectors[2].x,
-			  m_vectors[2].y * other.m_vectors[2].y,
-			  m_vectors[2].z * other.m_vectors[2].z,
-			  m_vectors[2].w * other.m_vectors[2].w },
+			  m_vectors[2].y + other.m_vectors[2].y,
+			  m_vectors[2].z + other.m_vectors[2].z,
+			  m_vectors[2].w + other.m_vectors[2].w },
 			
 			{ m_vectors[3].x + other.m_vectors[3].x,
-			  m_vectors[3].y * other.m_vectors[3].y,
-			  m_vectors[3].z * other.m_vectors[3].z,
-			  m_vectors[3].w * other.m_vectors[3].w });
+			  m_vectors[3].y + other.m_vectors[3].y,
+			  m_vectors[3].z + other.m_vectors[3].z,
+			  m_vectors[3].w + other.m_vectors[3].w });
 	}
 	
-	const Mat4 Mat4::operator+=(const Mat4& other) const { return *this + other; }
+	const Mat4 Mat4::operator-(const Mat4& other) const
+	{
+		return Mat4(
+			{ m_vectors[0].x - other.m_vectors[0].x,
+			  m_vectors[0].y - other.m_vectors[0].y,
+			  m_vectors[0].z - other.m_vectors[0].z,
+			  m_vectors[0].w - other.m_vectors[0].w },
+
+			{ m_vectors[1].x - other.m_vectors[1].x,
+			  m_vectors[1].y - other.m_vectors[1].y,
+			  m_vectors[1].z - other.m_vectors[1].z,
+			  m_vectors[1].w - other.m_vectors[1].w },
+
+			{ m_vectors[2].x - other.m_vectors[2].x,
+			  m_vectors[2].y - other.m_vectors[2].y,
+			  m_vectors[2].z - other.m_vectors[2].z,
+			  m_vectors[2].w - other.m_vectors[2].w },
+
+			{ m_vectors[3].x - other.m_vectors[3].x,
+			  m_vectors[3].y - other.m_vectors[3].y,
+			  m_vectors[3].z - other.m_vectors[3].z,
+			  m_vectors[3].w - other.m_vectors[3].w });
+	}
+
+	void Mat4::operator+=(const Mat4& other) 
+	{ 
+		*this = *this + other; 
+	}
+
+	void Mat4::operator-=(const Mat4& other)
+	{
+		*this = *this - other;
+	}
 
 	const Vector4 Mat4::operator*(const Vector4& v) const
 	{

@@ -60,8 +60,17 @@ namespace AstralEngine
 
 	const Vector2 Vector2::operator+(const Vector2& v) const { return Vector2(x + v.x, y + v.y); }
 	const Vector2 Vector2::operator-(const Vector2& v) const { return Vector2(x - v.x, y - v.y); }
-	const Vector2 Vector2::operator+=(const Vector2& v) const { return *this + v; }
-	const Vector2 Vector2::operator-=(const Vector2& v) const { return *this - v; }
+	
+	void Vector2::operator+=(const Vector2& v) 
+	{ 
+		*this = *this + v;
+	}
+	
+	void Vector2::operator-=(const Vector2& v) 
+	{ 
+		*this = *this - v;
+	}
+
 	const Vector2 Vector2::operator*(float k) const { return Vector2(x * k, y * k); }
 	const Vector2 Vector2::operator/(float k) const { return Vector2(x / k, y / k); }
 	

@@ -80,8 +80,16 @@ namespace AstralEngine
 		return *this;
 	}
 
-	const Vector2Int Vector2Int::operator+=(const Vector2Int& v) const { return *this + v; }
-	const Vector2Int Vector2Int::operator-=(const Vector2Int& v) const { return *this - v; }
+	void Vector2Int::operator+=(const Vector2Int& v)
+	{ 
+		*this = *this + v;
+	}
+	
+	void Vector2Int::operator-=(const Vector2Int& v)
+	{ 
+		*this = *this - v;
+	}
+	
 	Vector2Int operator*(float k, const Vector2Int& v) { return v * k; }
 
 	bool Vector2Int::operator==(const Vector2Int& other) const

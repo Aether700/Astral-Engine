@@ -182,6 +182,8 @@
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector3Int.h" />
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector4.h" />
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector4Int.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLIndexBuffer.h" />
@@ -226,6 +228,8 @@
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector3Int.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector4.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector4Int.cpp" />
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp" />
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLIndexBuffer.cpp" />

@@ -7,6 +7,7 @@
 namespace AstralEngine
 {
 	class UIContext;
+	class PhysicsEngine2D;
 
 	class Application
 	{
@@ -24,6 +25,7 @@ namespace AstralEngine
 
 		static AWindow* GetWindow() { return GetApp()->m_window; }
 		static UIContext* GetUIContext() { return GetApp()->m_uiContext; }
+		static PhysicsEngine2D* GetPhysicsEngine2D() { return GetApp()->m_physics2D; }
 
 		static void Exit() { GetApp()->m_isRunning = false; }
 
@@ -37,6 +39,7 @@ namespace AstralEngine
 		LayerStack m_layerStack;
 		AWindow* m_window;
 		UIContext* m_uiContext;
+		PhysicsEngine2D* m_physics2D;
 		bool m_minimized;
 
 		static Application* s_instance;

@@ -27,7 +27,9 @@ namespace AstralEngine
 		const Mat3 operator/(float k) const;
 		const Mat3 operator*(const Mat3& other) const;
 		const Mat3 operator+(const Mat3& other) const;
-		const Mat3 operator+=(const Mat3& other) const;
+		const Mat3 operator-(const Mat3& other) const;
+		void operator+=(const Mat3& other);
+		void operator-=(const Mat3& other);
 		
 		const Vector3 operator*(const Vector3& v) const;
 		const Vector3& operator[](unsigned int index) const;

@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "Time.h"
 #include "AstralEngine/UI/UICore.h"
+#include "AstralEngine/Physics/Physics2D/PhysicsEngine2D.h"
 
 #include <glad/glad.h>
 
@@ -20,8 +21,10 @@ namespace AstralEngine
 		s_instance = this;
 		m_window = AWindow::Create(windowTitle, width, height);
 		m_uiContext = new UIContext();
+		m_physics2D = new PhysicsEngine2D();
 
 		m_layerStack.AttachLayer(m_uiContext);
+		m_layerStack.AttachLayer(m_physics2D);
 
 		Renderer::Init();
 		Random::Init();
