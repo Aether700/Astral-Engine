@@ -1,3 +1,5 @@
 *.ipch
 *.opendb
 .vs/
+*.log
+*.obj
