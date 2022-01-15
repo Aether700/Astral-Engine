@@ -5,6 +5,7 @@
 //temp
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/Physics/Physics2D/Rigidbody2D.h"
+#include "AstralEngine/Physics/Physics2D/Collider2D.h"
 ////////
 
 //Scripts////////////////////////////////////////////////////////////////////////
@@ -13,16 +14,37 @@ class PhysicObj : public AstralEngine::NativeScript
 public:
 	void OnUpdate()
 	{
-		GetTransform().position = AstralEngine::Vector3(m_rb.GetPosition().x, m_rb.GetPosition().y, 0.0f);
+		auto& rb = GetRigidbody();
+		GetTransform().position = AstralEngine::Vector3(rb.GetPosition().x, rb.GetPosition().y, 0.0f);
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
 		{
-			m_rb.AddForce(AstralEngine::Vector2(0.0f, verticalForce));
+			rb.AddForce(AstralEngine::Vector2(0.0f, verticalForce));
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
+		{
+			ResetObj(rb);
+		}
+
+		if (HasComponent<AstralEngine::BoxCollider2D>() && AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::X))
+		{
+			RemoveComponent<AstralEngine::BoxCollider2D>();
 		}
 	}
 
 private:
-	AstralEngine::Rigidbody2D m_rb;
-	float verticalForce = 10.0f;
+	void ResetObj(AstralEngine::Rigidbody2D& rb)
+	{
+		rb.SetPosition(AstralEngine::Vector2::Zero());
+		rb.SetVelocity(AstralEngine::Vector2::Zero());
+	}
+
+	AstralEngine::Rigidbody2D& GetRigidbody()
+	{
+		return GetComponent<AstralEngine::Rigidbody2D>();
+	}
+
+	float verticalForce = 20.0f;
 };
 
 //layer/////////////////////////////////
@@ -58,6 +80,8 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
+		m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
+		m_entity.EmplaceComponent<AstralEngine::BoxCollider2D>();
 		m_entity.EmplaceComponent<PhysicObj>();
 	}
 

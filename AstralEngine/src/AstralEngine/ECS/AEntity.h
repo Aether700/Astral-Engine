@@ -19,10 +19,15 @@ namespace AstralEngine
 		template<typename Component, typename... Args>
 		Component& EmplaceComponent(Args... args)
 		{
-			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
+			Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+			
+			if constexpr (std::is_base_of_v<EntityLinkedComponent, Component>)
 			{
-				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
-				
+				comp.SetEntity(*this);
+			}
+			
+			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
+			{	
 				if (HasComponent<CallbackList>())
 				{
 					GetComponent<CallbackList>().AddCallback(&comp);
@@ -32,20 +37,12 @@ namespace AstralEngine
 					CallbackList& list = EmplaceComponent<CallbackList>();
 					list.AddCallback(&comp);
 				}
-
-				if constexpr (std::is_base_of_v<NativeScript, Component>)
-				{
-					comp.SetEntity(*this);
-				}
-
 				comp.OnCreate();
 
 				return comp;
 			}
-			else
-			{
-				return m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
-			}
+			
+			return comp;
 		}
 
 		template<typename Component>

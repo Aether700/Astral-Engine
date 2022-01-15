@@ -102,10 +102,56 @@ namespace AstralEngine
 		std::string m_tag;
 	};
 
+	//Base class for any entity which needs to reference the AEntity object it is attached to
+	class EntityLinkedComponent 
+	{
+		friend class AEntity;
+	public:
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return entity.HasComponent<Component...>();
+		}
+
+		template<typename Component>
+		void RemoveComponent()
+		{
+			entity.RemoveComponent<Component>();
+		}
+
+		Transform& GetTransform() { return entity.GetTransform(); }
+		const Transform& GetTransform() const { return entity.GetTransform(); }
+
+		const std::string& GetName() const { return entity.GetName(); }
+		void SetName(const std::string& name) { entity.SetName(name); }
+
+		static void Destroy(AEntity& e) { e.Destroy(); }
+
+	protected:
+		AEntity entity;
+
+	private:
+		virtual void SetEntity(AEntity& e)
+		{
+			entity = e;
+		}
+	};
+
 	class SpriteRenderer : public ToggleableComponent
 	{
 	public:
-
 		SpriteRenderer()
 			: m_color(1.0f, 1.0f, 1.0f, 1.0f), 
 			m_sprite(Renderer2D::GetDefaultTexture()) { }
@@ -208,7 +254,6 @@ namespace AstralEngine
 	class Transform
 	{
 	public:
-
 		Transform() : scale(1.0f, 1.0f, 1.0f) { }
 		Transform(Vector3 translation)
 			: position(translation), scale(1.0f, 1.0f, 1.0f) { }
@@ -253,7 +298,7 @@ namespace AstralEngine
 		}
 
 		Vector3 position;
-		Vector3 rotation;
+		Vector3 rotation; //rotation is in degree
 		Vector3 scale;
 
 	private:
@@ -324,32 +369,11 @@ namespace AstralEngine
 		ASinglyLinkedList<CallbackComponent*> m_callbacks;
 	};
 
-	class NativeScript : public CallbackComponent
+	class NativeScript : public CallbackComponent, public EntityLinkedComponent
 	{
 		friend class AEntity;
 	public:
-
 		NativeScript() : CallbackComponent(false) { }
-
-		template<typename... Component>
-		decltype(auto) GetComponent()
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		template<typename... Component>
-		decltype(auto) GetComponent() const
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		Transform& GetTransform() { return entity.GetTransform(); }
-		const Transform& GetTransform() const { return entity.GetTransform(); }
-
-		const std::string& GetName() const { return entity.GetName(); }
-		void SetName(const std::string& name) { entity.SetName(name); }
-
-		static void Destroy(AEntity& e) { e.Destroy(); }
 
 		bool operator==(const NativeScript& other) const
 		{
@@ -361,12 +385,8 @@ namespace AstralEngine
 			return !(*this == other);
 		}
 
-
-	protected:
-		AEntity entity;
-
 	private:
-		void SetEntity(AEntity& e)
+		virtual void SetEntity(AEntity& e) override
 		{
 			entity = e;
 			m_isActive = true;

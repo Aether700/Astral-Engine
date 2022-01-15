@@ -167,6 +167,11 @@ namespace AstralEngine
 		return PerlinNoise(pos.x, pos.y);
 	}
 
+	double Math::Pi()
+	{
+		return 3.141592653589793238462643383279;
+	}
+
 	// Random ////////////////////////////////////////
 
 	/*initializes the seed of the rand function using the standard srand function

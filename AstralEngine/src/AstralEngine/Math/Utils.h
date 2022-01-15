@@ -28,7 +28,7 @@ namespace AstralEngine
 		static float Ceiling(float f);
 		static float PerlinNoise(float x, float y);
 		static float PerlinNoise(Vector2 pos);
-
+		static double Pi();
 	};
 
 	/* Basic rudementary Random class to get random ints and floats

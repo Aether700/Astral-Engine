@@ -231,6 +231,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collider2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -339,5 +340,6 @@
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp" />
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collider2D.cpp" />
   </ItemGroup>
 </Project>
