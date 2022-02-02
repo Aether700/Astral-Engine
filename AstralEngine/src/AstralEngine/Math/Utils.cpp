@@ -52,6 +52,12 @@ namespace AstralEngine
 		return degrees * 0.01745329251994329576923690768489f;
 	}
 
+	float Math::RadiantsToDegree(float radians)
+	{
+		AE_PROFILE_FUNCTION();
+		return radians / 0.01745329251994329576923690768489f;
+	}
+
 	float Math::Sqrt(float v)
 	{
 		AE_PROFILE_FUNCTION();

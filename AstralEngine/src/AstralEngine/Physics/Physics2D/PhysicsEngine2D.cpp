@@ -6,31 +6,36 @@ namespace AstralEngine
 {
 	void PhysicsEngine2D::OnUpdate()
 	{
-		ApplyForces();
+		ApplyForcesAndTorque();
 		UpdatePositions();
 		// check for collision here
 	}
 
-	void PhysicsEngine2D::ApplyForces()
+	void PhysicsEngine2D::ApplyForcesAndTorque()
 	{
+		//Should use different time step(?)
+		float timeStep = Time::GetDeltaTime();
 		for(Rigidbody2D* rb : m_rigidbodies)
 		{
-			Vector2 gravityForce = m_gravity * rb->GetGravityScale(); //temp
 			rb->AddForce(m_gravity * rb->GetGravityScale());
-			Vector2 forceToApply = rb->m_forceToApplyThisFrame;
+			Vector2 forceToApply = rb->m_forceToApplyThisUpdate;
+			rb->SetVelocity(rb->GetVelocity() + (forceToApply / rb->GetMass()) * timeStep);
 
-			//Should use different time step(?)
-			rb->SetVelocity(rb->GetVelocity() + (forceToApply / rb->GetMass()) * Time::GetDeltaTime());
-			rb->m_forceToApplyThisFrame = Vector2::Zero();
+			rb->m_forceToApplyThisUpdate = Vector2::Zero();
+			rb->SetAngularVelocity(rb->GetAngularVelocity() 
+				+ (rb->m_torqueToApplyThisUpdate * timeStep) / rb->m_inertia);
+			rb->m_torqueToApplyThisUpdate = 0.0f;
 		}
 	}
 
 	void PhysicsEngine2D::UpdatePositions()
 	{
+		//Should use different time step(?)
+		float timeStep = Time::GetDeltaTime();
 		for (Rigidbody2D* rb : m_rigidbodies)
 		{
-			//Should use different time step(?)
-			rb->SetPosition(rb->GetPosition() + rb->GetVelocity() * Time::GetDeltaTime());
+			rb->SetPosition(rb->GetPosition() + rb->GetVelocity() * timeStep);
+			rb->SetRotation(rb->GetRotation() + Math::RadiantsToDegree(rb->GetAngularVelocity() * timeStep));
 		}
 	}
 }

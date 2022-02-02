@@ -15,10 +15,20 @@ public:
 	void OnUpdate()
 	{
 		auto& rb = GetRigidbody();
-		GetTransform().position = AstralEngine::Vector3(rb.GetPosition().x, rb.GetPosition().y, 0.0f);
+
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
 		{
 			rb.AddForce(AstralEngine::Vector2(0.0f, verticalForce));
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
+		{
+			rb.AddTorque(rotationSpeed);
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
+		{
+			rb.AddTorque(-rotationSpeed);
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
@@ -26,9 +36,14 @@ public:
 			ResetObj(rb);
 		}
 
-		if (HasComponent<AstralEngine::BoxCollider2D>() && AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::X))
+		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::T))
 		{
-			RemoveComponent<AstralEngine::BoxCollider2D>();
+			ToggleRotation(rb);
+		}
+
+		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::Y))
+		{
+			ToggleTranslation(rb);
 		}
 	}
 
@@ -37,6 +52,32 @@ private:
 	{
 		rb.SetPosition(AstralEngine::Vector2::Zero());
 		rb.SetVelocity(AstralEngine::Vector2::Zero());
+		rb.SetRotation(0.0f);
+		rb.SetAngularVelocity(0.0f);
+	}
+
+	void ToggleRotation(AstralEngine::Rigidbody2D& rb)
+	{
+		if (rb.GetContraints() & AstralEngine::Rigidbody2DConstraintsFixedRotation)
+		{
+			rb.SetConstraints(~AstralEngine::Rigidbody2DConstraintsFixedRotation & rb.GetContraints());
+		}
+		else
+		{
+			rb.SetConstraints(rb.GetContraints() | AstralEngine::Rigidbody2DConstraintsFixedRotation);
+		}
+	}
+
+	void ToggleTranslation(AstralEngine::Rigidbody2D& rb)
+	{
+		if (rb.GetContraints() & AstralEngine::Rigidbody2DConstraintsFixedPosition)
+		{
+			rb.SetConstraints(~AstralEngine::Rigidbody2DConstraintsFixedPosition & rb.GetContraints());
+		}
+		else
+		{
+			rb.SetConstraints(rb.GetContraints() | AstralEngine::Rigidbody2DConstraintsFixedPosition);
+		}
 	}
 
 	AstralEngine::Rigidbody2D& GetRigidbody()
@@ -45,6 +86,7 @@ private:
 	}
 
 	float verticalForce = 20.0f;
+	float rotationSpeed = 0.5f;
 };
 
 //layer/////////////////////////////////

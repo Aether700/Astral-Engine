@@ -44,6 +44,55 @@ namespace AstralEngine
 		bool m_isActive;
 	};
 
+	//Base class for any entity which needs to reference the AEntity object it is attached to
+	class EntityLinkedComponent 
+	{
+		friend class AEntity;
+	public:
+		~EntityLinkedComponent() { }
+
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return entity.HasComponent<Component...>();
+		}
+
+		template<typename Component>
+		void RemoveComponent()
+		{
+			entity.RemoveComponent<Component>();
+		}
+
+		Transform& GetTransform() { return entity.GetTransform(); }
+		const Transform& GetTransform() const { return entity.GetTransform(); }
+
+		const std::string& GetName() const { return entity.GetName(); }
+		void SetName(const std::string& name) { entity.SetName(name); }
+
+		static void Destroy(AEntity& e) { e.Destroy(); }
+
+	protected:
+		AEntity entity;
+
+	private:
+		virtual void SetEntity(AEntity& e)
+		{
+			entity = e;
+		}
+	};
+
 	class CallbackComponent : public ToggleableComponent
 	{
 	public:
@@ -100,53 +149,6 @@ namespace AstralEngine
 	private:
 		std::string m_name;
 		std::string m_tag;
-	};
-
-	//Base class for any entity which needs to reference the AEntity object it is attached to
-	class EntityLinkedComponent 
-	{
-		friend class AEntity;
-	public:
-		template<typename... Component>
-		decltype(auto) GetComponent()
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		template<typename... Component>
-		decltype(auto) GetComponent() const
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		template<typename... Component>
-		bool HasComponent() const
-		{
-			return entity.HasComponent<Component...>();
-		}
-
-		template<typename Component>
-		void RemoveComponent()
-		{
-			entity.RemoveComponent<Component>();
-		}
-
-		Transform& GetTransform() { return entity.GetTransform(); }
-		const Transform& GetTransform() const { return entity.GetTransform(); }
-
-		const std::string& GetName() const { return entity.GetName(); }
-		void SetName(const std::string& name) { entity.SetName(name); }
-
-		static void Destroy(AEntity& e) { e.Destroy(); }
-
-	protected:
-		AEntity entity;
-
-	private:
-		virtual void SetEntity(AEntity& e)
-		{
-			entity = e;
-		}
 	};
 
 	class SpriteRenderer : public ToggleableComponent

@@ -5,27 +5,24 @@
 
 namespace AstralEngine
 {
-	// Collider2D /////////////////////////////////////////////
-	void Collider2D::OnCreate()
-	{
-		AE_CORE_ASSERT(HasComponent<Rigidbody2D>(), "Collider does not have a Rigidbody2D");
-		Rigidbody2D& rb = GetComponent<Rigidbody2D>();
-		AE_CORE_ASSERT(rb.m_collider == nullptr, "Rigidbody has more than one collider");
-		rb.m_collider = this;
-	}
-	
+	// Collider2D /////////////////////////////////////////////	
 	void Collider2D::OnDestroy()
 	{
-		AE_CORE_ASSERT(HasComponent<Rigidbody2D>(), "Collider does not have a Rigidbody2D");
-		Rigidbody2D& rb = GetComponent<Rigidbody2D>();
-		AE_CORE_ASSERT(rb.m_collider != nullptr, "Rigidbody has no collider to remove");
-		rb.m_collider = nullptr;
+		if (HasComponent<Rigidbody2D>())
+		{
+			GetComponent<Rigidbody2D>().SetInertia(1.0f);
+		}
 	}
 
 	// BoxCollider2D /////////////////////////////////////////
 	void BoxCollider2D::OnCreate()
 	{
-		Collider2D::OnCreate();
+		if (HasComponent<Rigidbody2D>())
+		{
+			Rigidbody2D& rb = GetComponent<Rigidbody2D>();
+			rb.SetInertia(GetMomentOfInertia(rb.GetMass()));
+		}
+
 		if (HasComponent<SpriteRenderer>())
 		{
 			m_width = GetTransform().scale.x;
@@ -33,10 +30,8 @@ namespace AstralEngine
 		}
 	}
 
-	float BoxCollider2D::GetMomentOfInertia() const
+	float BoxCollider2D::GetMomentOfInertia(float mass) const
 	{
-		AE_CORE_ASSERT(HasComponent<Rigidbody2D>(), "BoxCollider2D Has no Rigidbody2D attached");
-		Rigidbody2D& rb = GetComponent<Rigidbody2D>();
-		return rb.GetMass() * (m_width * m_width + m_height * m_height) / 12.0f;
+		return mass * (m_width * m_width + m_height * m_height) / 12.0f;
 	}
 }

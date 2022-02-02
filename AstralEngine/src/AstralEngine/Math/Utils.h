@@ -11,7 +11,8 @@ namespace AstralEngine
 		static float Sin(float v);
 		static float Cos(float v);
 		static float Tan(float v);
-		static float DegreeToRadiants(float v);
+		static float DegreeToRadiants(float degrees);
+		static float RadiantsToDegree(float radians);
 		static float Sqrt(float v);
 		static float Min(float f1, float f2);
 		static float Max(float f1, float f2);

@@ -13,10 +13,17 @@ namespace AstralEngine
 		void OnUpdate() override;
 
 	private:		
-		void ApplyForces();
+		void ApplyForcesAndTorque();
 		void UpdatePositions();
 
 		Vector2 m_gravity = Vector2(0.0f, -9.8f);
 		ASinglyLinkedList<Rigidbody2D*> m_rigidbodies;
+	};
+
+	//move to somewhere more appropriate?
+	struct AxisAlignedBoundingBox2D
+	{
+		Vector2 min;
+		Vector2 max;
 	};
 }

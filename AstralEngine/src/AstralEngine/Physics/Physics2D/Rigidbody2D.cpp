@@ -14,4 +14,10 @@ namespace AstralEngine
 	{
 		Application::GetPhysicsEngine2D()->m_rigidbodies.Remove(this);
 	}
+
+	void Rigidbody2D::OnUpdate()
+	{
+		GetTransform().position = m_position;
+		GetTransform().rotation.z = m_rotation;
+	}
 }

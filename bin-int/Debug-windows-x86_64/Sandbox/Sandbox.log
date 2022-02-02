@@ -42,7 +42,7 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
               Component=AstralEngine::SpriteRenderer,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(82): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRenderer,int,int,int,int>(int,int,int,int)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(124): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRenderer,int,int,int,int>(int,int,int,int)' being compiled
           with
           [
               Component=AstralEngine::SpriteRenderer
