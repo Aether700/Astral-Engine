@@ -53,50 +53,19 @@ namespace AstralEngine
 
 		void AddForce(const Vector2& force)
 		{
-			if (!(m_constraints & Rigidbody2DConstraintsFixedPosition))
-			{
-				m_forceToApplyThisUpdate += force;
-				if (m_constraints * Rigidbody2DConstraintsFixedXPosition)
-				{
-					m_forceToApplyThisUpdate.x = 0.0f;
-				}
-				else if (m_constraints * Rigidbody2DConstraintsFixedYPosition)
-				{
-					m_forceToApplyThisUpdate.y = 0.0f;
-				}
-			}
+			m_forceToApplyThisUpdate += force;
 		}
+		
 		void AddTorque(float torque) 
 		{
-			if (m_constraints & Rigidbody2DConstraintsFixedRotation)
-			{
-				return;
-			}
 			m_torqueToApplyThisUpdate += torque; 
 		}
 
 		Rigidbody2DConstraints GetContraints() const { return m_constraints; }
+		
 		void SetConstraints(int contraints) 
 		{ 
 			m_constraints = (Rigidbody2DConstraints)contraints;
-
-			if (m_constraints & Rigidbody2DConstraintsFixedPosition)
-			{
-				m_velocity = Vector2::Zero();
-			}
-			else if (m_constraints & Rigidbody2DConstraintsFixedXPosition)
-			{
-				m_velocity.x = 0.0f;
-			}
-			else if (m_constraints & Rigidbody2DConstraintsFixedYPosition)
-			{
-				m_velocity.y = 0.0f;
-			}
-
-			if (m_constraints & Rigidbody2DConstraintsFixedRotation)
-			{
-				m_angularVelocity = 0.0f;
-			}
 		}
 
 		void OnUpdate();

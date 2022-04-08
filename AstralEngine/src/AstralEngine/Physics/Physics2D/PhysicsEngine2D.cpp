@@ -34,8 +34,28 @@ namespace AstralEngine
 		float timeStep = Time::GetDeltaTime();
 		for (Rigidbody2D* rb : m_rigidbodies)
 		{
-			rb->SetPosition(rb->GetPosition() + rb->GetVelocity() * timeStep);
-			rb->SetRotation(rb->GetRotation() + Math::RadiantsToDegree(rb->GetAngularVelocity() * timeStep));
+			Rigidbody2DConstraints constraints = rb->GetContraints();
+			if (!(constraints & Rigidbody2DConstraintsFixedPosition))
+			{
+				Vector2 velocity = rb->GetVelocity();
+
+				if (constraints & Rigidbody2DConstraintsFixedXPosition)
+				{
+					velocity.x = 0.0f;
+				}
+
+				if (constraints & Rigidbody2DConstraintsFixedYPosition)
+				{
+					velocity.y = 0.0f;
+				}
+
+				rb->SetPosition(rb->GetPosition() + velocity * timeStep);
+			}
+
+			if (!(constraints & Rigidbody2DConstraintsFixedRotation)) 
+			{
+				rb->SetRotation(rb->GetRotation() + Math::RadiantsToDegree(rb->GetAngularVelocity() * timeStep));
+			}
 		}
 	}
 }
