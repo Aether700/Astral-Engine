@@ -72,6 +72,7 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
 
+			/*
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
 				Assure<AReference<CallbackComponent>>().RemoveComponent<Component>(*this, e);
@@ -80,6 +81,8 @@ namespace AstralEngine
 			{
 				Assure<Component>().RemoveComponent<Component>(*this, e);
 			}
+			*/
+			Assure<Component>().RemoveComponent<Component>(*this, e);
 		}
 
 		template<typename Component>
@@ -370,6 +373,7 @@ namespace AstralEngine
 			{
 				AE_PROFILE_FUNCTION();
 
+				/*
 				if constexpr (std::is_same_v<AReference<CallbackComponent>, Component>)
 				{
 					auto comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
@@ -382,6 +386,11 @@ namespace AstralEngine
 					m_create.CallDelagates(owner, e);
 					return comp;
 				}
+				*/
+
+				auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
+				m_create.CallDelagates(owner, e);
+				return comp;
 
 			}
 
@@ -402,10 +411,12 @@ namespace AstralEngine
 			{
 				Storage<Entity, Component>::RemoveComponent(e, comp);
 
+				/*
 				if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 				{
 					comp.OnDestroy();
 				}
+				*/
 
 				m_destroy(owner, e);
 			}
@@ -576,7 +587,7 @@ namespace AstralEngine
 			}
 			else
 			{
-				SparseSet<Entity>* pool = nullptr;
+				ASparseSet<Entity>* pool = nullptr;
 
 				//check if there is a previously made pool for the component (pool list can be cleared)
 				for (PoolData& data : m_pools)
@@ -591,11 +602,11 @@ namespace AstralEngine
 				//if no pool has been made we create it
 				if (pool == nullptr)
 				{
-					AUniqueRef<SparseSet<Entity>> ptr = AUniqueRef<SparseSet<Entity>>::Create();
+					AUniqueRef<ASparseSet<Entity>> ptr = AUniqueRef<ASparseSet<Entity>>::Create();
 					unsigned int index = IndexProvider<Component>::GetIndex();
 					m_pools.EmplaceBack(PoolData{ index,
 						ptr, 
-						[](SparseSet<Entity> & pool, Registry<Entity> & owner, const Entity e)
+						[](ASparseSet<Entity> & pool, Registry<Entity> & owner, const Entity e)
 							{
 								static_cast<PoolHandler<Component>&>(pool).Remove(owner, e);
 							}

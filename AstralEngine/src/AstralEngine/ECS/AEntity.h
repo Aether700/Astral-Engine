@@ -5,6 +5,8 @@
 namespace AstralEngine
 {
 	class Transform;
+	class CallbackComponent;
+	class CallbackList;
 
 	class AEntity
 	{
@@ -51,16 +53,16 @@ namespace AstralEngine
 		template<typename Component>
 		void AddComponent(const Component& c)
 		{
-			m_scene->m_registry.Add(*this, c);
+			m_scene->m_registry.EmplaceComponent<Component>(*this, c);
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				if (HasComponent<CallbackListComponent>())
+				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackListComponent>().AddCallback(&c);
+					GetComponent<CallbackList>().AddCallback(&c);
 				}
 				else
 				{
-					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					CallbackList& list = EmplaceComponent<CallbackList>();
 					list.AddCallback(&c);
 				}
 			}
@@ -92,13 +94,13 @@ namespace AstralEngine
 			{
 				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
 					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackListComponent* list;
-				list = GetComponent<CallbackListComponent>();
+				CallbackList* list;
+				list = GetComponent<CallbackList>();
 				list->RemoveCallback(&comp);
 
 				if (list->IsEmpty())
 				{
-					RemoveComponent<CallbackListComponent>();
+					RemoveComponent<CallbackList>();
 				}
 			}
 			m_scene->m_registry.RemoveComponent<Component>(*this, comp);

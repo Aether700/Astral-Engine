@@ -44,7 +44,7 @@ namespace AstralEngine
 		const int operator[](unsigned int index) const;
 		int& operator[](unsigned int index);
 
-		Vector2Int& Vector2Int::operator=(const Vector2Int& v);
+		Vector2Int& operator=(const Vector2Int& v);
 
 		bool operator==(const Vector2Int& other) const;
 

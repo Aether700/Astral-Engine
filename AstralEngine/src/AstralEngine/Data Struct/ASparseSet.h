@@ -533,7 +533,7 @@ namespace AstralEngine
 
 		size_t GetIndex(const K key) const
 		{
-			return (size_t)m_sparse[Page(e)][Offset(e)];
+			return (size_t)m_sparse[Page(key)][Offset(key)];
 		}
 
 		void Swap(const K lhs, const K rhs)

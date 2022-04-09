@@ -6,7 +6,8 @@ namespace RogueLike
 
 	void GameLayer::OnAttach()
 	{
-
+		AEntity background = m_scene->CreateAEntity();
+		background.EmplaceComponent<SpriteRenderer>(0.2f, 0.2f, 0.2f, 1.0f);
 	}
 
 	void GameLayer::OnUpdate()

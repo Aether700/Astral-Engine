@@ -286,7 +286,7 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 
-			for (size_t j = 0 j < i; j++)
+			for (size_t j = 0; j < i; j++)
 			{
 				m_currNode = m_currNode->next;
 			}
@@ -368,7 +368,7 @@ namespace AstralEngine
 		}
 
 	private:
-		ASinglyLinkedListConstIterator(Node* node)
+		ASinglyLinkedListConstIterator(ASinglyLinkedListIterator<T>::Node* node)
 			: ASinglyLinkedListIterator<T>(node) { }
 
 	};

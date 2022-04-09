@@ -50,7 +50,7 @@ namespace AstralEngine
 			va_list args;
 			va_start(args, format);
 			
-			std::string& message = GetFormatedString(format, args);
+			std::string message = GetFormatedString(format, args);
 			PrintInColor(prefix, message, FOREGROUND_INTENSITY | FOREGROUND_GREEN);
 
 			va_end(args);
@@ -68,7 +68,7 @@ namespace AstralEngine
 			va_list args;
 			va_start(args, format);
 
-			std::string& message = GetFormatedString(format, args);
+			std::string message = GetFormatedString(format, args);
 			PrintInColor(prefix, message, FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN);
 
 			va_end(args);
@@ -86,7 +86,7 @@ namespace AstralEngine
 			va_list args;
 			va_start(args, format);
 
-			std::string& message = GetFormatedString(format, args);
+			std::string message = GetFormatedString(format, args);
 			PrintInColor(prefix, message, FOREGROUND_INTENSITY | FOREGROUND_RED);
 
 			va_end(args);

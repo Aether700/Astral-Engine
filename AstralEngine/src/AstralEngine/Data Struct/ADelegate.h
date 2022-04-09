@@ -113,6 +113,7 @@ namespace AstralEngine
 			return *this;
 		}
 
+		/*
 		template<auto Function, typename Type>
 		ADelegate<Func>& BindFunction(Type& obj)
 		{
@@ -120,6 +121,7 @@ namespace AstralEngine
 			ConnectFunction<Function, Type>(&obj);
 			return *this;
 		}
+		*/
 
 		template<auto Function, typename Type>
 		ADelegate<Func>& BindFunction(Type* obj)

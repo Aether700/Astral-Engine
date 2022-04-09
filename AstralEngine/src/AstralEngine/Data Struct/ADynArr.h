@@ -387,7 +387,7 @@ namespace AstralEngine
 		
 		AIterator begin()
 		{
-			return ADynArrIterator(0, m_arr); 
+			return ADynArrIterator<T>(0, m_arr); 
 		}
 		
 		AIterator end()
@@ -402,27 +402,27 @@ namespace AstralEngine
 		
 		AIterator rend() 
 		{
-			return ADynArrIterator(-1, m_arr);
+			return ADynArrIterator<T>(-1, m_arr);
 		}
 
 		AConstIterator begin() const
 		{
-			return ADynArrConstIterator(0, m_arr);
+			return ADynArrConstIterator<T>(0, m_arr);
 		}
 
 		AConstIterator end() const
 		{
-			return ADynArrConstIterator(m_count, m_arr);
+			return ADynArrConstIterator<T>(m_count, m_arr);
 		}
 
 		AConstIterator rbegin() const
 		{
-			return ADynArrConstIterator(m_count - 1, m_arr);
+			return ADynArrConstIterator<T>(m_count - 1, m_arr);
 		}
 
 		AConstIterator rend() const
 		{
-			return ADynArrConstIterator(-1, m_arr);
+			return ADynArrConstIterator<T>(-1, m_arr);
 		}
 
 

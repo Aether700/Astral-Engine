@@ -211,7 +211,7 @@ namespace AstralEngine
 			auto it = std::make_tuple((std::get<PoolType<Strong>*>(m_pools)->end() - *m_length)...);
 			auto data = std::get<0>(m_pools)->SparseSet<Entity>::end() - *m_length;
 
-			for (size_t i = 0; i < *length; i++)
+			for (size_t i = 0; i < *m_length; i++)
 			{
 				if constexpr (std::is_invocable_v < Func, decltype(Get<Strong>({}))..., decltype(Get<Weak>({}))... > )
 				{
