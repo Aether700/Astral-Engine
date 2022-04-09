@@ -16,15 +16,15 @@ namespace AstralEngine
 			break;
 
 		case GL_DEBUG_SEVERITY_MEDIUM:
-			AE_CORE_ERROR("High Medium: %s", message);
+			AE_CORE_ERROR("Medium Severity: %s", message);
 			break;
 
 		case GL_DEBUG_SEVERITY_LOW:
-			AE_CORE_WARN("High LOW: %s", message);
+			AE_CORE_WARN("Low Severity: %s", message);
 			break;
 
 		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			AE_CORE_INFO("NOTIFICATION: %s", message);
+			AE_CORE_INFO("Notification: %s", message);
 			break;
 		}
 	}
