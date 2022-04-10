@@ -1,12 +1,11 @@
 #pragma once
 #include "ECS Core/Registry.h"
 #include "Scene.h"
+#include "CoreComponents.h"
 
 namespace AstralEngine
 {
 	class Transform;
-	class CallbackComponent;
-	class CallbackList;
 
 	class AEntity
 	{

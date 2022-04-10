@@ -287,6 +287,20 @@ namespace AstralEngine
 
 		};
 
+		ResizableArr<T>& operator=(const ResizableArr<T>& other)
+		{
+			delete[] m_arr;
+			m_arr = new T[other.m_maxCount];
+			for (int i = 0; i < other.m_count; i++)
+			{
+				m_arr[i] = other.m_arr[i];
+			}
+
+			m_count = other.m_count;
+			m_maxCount = other.m_maxCount;
+			return *this;
+		}
+
 	private:
 		void CheckSize()
 		{
@@ -330,6 +344,9 @@ namespace AstralEngine
 		using AConstIterator = typename ADynArr<T>::AConstIterator;
 
 		ASparseSet(ToIntFunc func = ToIntFunc(&ToInt<T>)) : m_toInt(func) { }
+
+		ASparseSet(const ASparseSet<T>& other) 
+			: m_packed(other.m_packed), m_sparse(other.m_sparse), m_toInt(other.m_toInt) { }
 
 		virtual ~ASparseSet() { }
 
@@ -417,8 +434,15 @@ namespace AstralEngine
 			return m_packed.GetData();
 		}
 
-	private:
+		ASparseSet<T>& operator=(const ASparseSet<T>& other)
+		{
+			m_sparse = other.m_sparse;
+			m_packed = other.m_packed;
+			m_toInt = other.m_toInt;
+			return *this;
+		}
 
+	private:
 		size_t Page(const T e) const
 		{
 			return size_t{ m_toInt(e) / ElementPerPage };

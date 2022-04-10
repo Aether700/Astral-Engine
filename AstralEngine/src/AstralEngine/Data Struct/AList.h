@@ -9,12 +9,12 @@ namespace AstralEngine
 		virtual ~AList() { }
 		virtual bool IsEmpty() const { return GetCount() == 0; }
 		virtual size_t GetCount() const = 0;
-		virtual void Add(T element) = 0;
-		virtual void AddFirst(T element) = 0;
-		virtual void AddLast(T element) = 0;
+		virtual void Add(const T& element) = 0;
+		virtual void AddFirst(const T& element) = 0;
+		virtual void AddLast(const T& element) = 0;
 		virtual size_t Find(const T& element) const = 0;
-		virtual void Insert(T element, size_t index) = 0;
-		virtual void Remove(T element) = 0;
+		virtual void Insert(const T& element, size_t index) = 0;
+		virtual void Remove(const T& element) = 0;
 		virtual void RemoveAt(size_t index) = 0;
 		virtual void Reserve(size_t count) = 0;
 		virtual void Clear() = 0;

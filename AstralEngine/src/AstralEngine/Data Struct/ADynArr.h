@@ -200,7 +200,7 @@ namespace AstralEngine
 			return m_maxCount;
 		}
 
-		virtual void Add(T element) override 
+		virtual void Add(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 			CheckSize();
@@ -224,13 +224,13 @@ namespace AstralEngine
 			return m_arr[0];
 		}
 
-		virtual void AddFirst(T element) override 
+		virtual void AddFirst(const T& element) override 
 		{
 			AE_PROFILE_FUNCTION();
 			Insert(element, 0);	
 		}
 
-		virtual void AddLast(T element) override 
+		virtual void AddLast(const T& element) override 
 		{
 			Add(element); 
 		}
@@ -259,17 +259,17 @@ namespace AstralEngine
 			return -1;
 		}
 
-		void Insert(T element, AIterator it)
+		void Insert(const T& element, AIterator it)
 		{
 			Insert(element, it.m_pos);
 		}
 
-		void Insert(T element, AConstIterator it)
+		void Insert(const T& element, AConstIterator it)
 		{
 			Insert(element, it.m_pos);
 		}
 
-		virtual void Insert(T element, size_t index) override
+		virtual void Insert(const T& element, size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 			
@@ -296,15 +296,47 @@ namespace AstralEngine
 			}
 			m_arr[index] = element;
 			m_count++;
-
-			//allow user to create holes in the array where no valid data is present
-			if (m_count <= index)
-			{
-				m_count = index + 1;
-			}
 		}
 
-		virtual void Remove(T element) override
+		void Insert(T&& element, AIterator it)
+		{
+			Insert(std::forward(element), it.m_pos);
+		}
+
+		void Insert(T&& element, AConstIterator it)
+		{
+			Insert(std::forward(element), it.m_pos);
+		}
+
+		void Insert(T&& element, size_t index)
+		{
+			AE_PROFILE_FUNCTION();
+
+			//allow user to create holes in the array where no valid data is present
+			if (index > m_count)
+			{
+				Reserve(index);
+			}
+			else
+			{
+				CheckSize();
+			}
+
+			if (m_count == 0)
+			{
+				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				Add(element);
+				return;
+			}
+
+			for (size_t i = m_count - 1; i >= index; i--)
+			{
+				m_arr[i + 1] = std::move(m_arr[i]);
+			}
+			m_arr[index] = std::move(element);
+			m_count++;
+		}
+		virtual void Remove(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 			size_t index = Find(element);
@@ -326,7 +358,7 @@ namespace AstralEngine
 
 			for (size_t i = index; i < m_count; i++)
 			{
-				m_arr[i] = m_arr[i + 1];
+				m_arr[i] = std::move(m_arr[i + 1]);
 			}
 			m_count--;
 		}

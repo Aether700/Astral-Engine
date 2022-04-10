@@ -64,13 +64,13 @@ namespace AstralEngine
 
 			if constexpr (sizeof... (Comp) == 1)
 			{
-				//need to unwrap the Type "packet" even if just one (I believe?)
+				//need to unwrap the Type "packet" even if just one
 				return (std::get<PoolType<Comp>*>(m_pools)->Get(e), ...);
 			}
 			else
 			{
 				//recursive call
-				return std::tuple<decltype(Get<Comp>({}))... > { Get<Comp>(e), ... };
+				return std::tuple<decltype(Get<Comp>({}))...> { Get<Comp>(e)... };
 			}
 		}
 

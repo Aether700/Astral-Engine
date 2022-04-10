@@ -79,12 +79,12 @@ namespace AstralEngine
 			return m_count;
 		}
 
-		virtual void Add(T element) override
+		virtual void Add(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 
 			Node* newNode = new Node();
-			newNode->element = element;
+			newNode->element = std::move(element);
 
 			newNode->next = m_head;
 			m_head->prev = newNode;
@@ -136,17 +136,17 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		virtual void AddFirst(T element) override
+		virtual void AddFirst(const T& element) override
 		{
 			Add(element);
 		}
 
-		virtual void AddLast(T element) override
+		virtual void AddLast(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 
 			Node* newNode = new Node();
-			newNode->element = element;
+			newNode->element = std::move(element);
 
 			newNode->next = m_dummy;
 
@@ -181,13 +181,13 @@ namespace AstralEngine
 			return -1;
 		}
 
-		virtual void Insert(T element, size_t index) override
+		virtual void Insert(const T& element, size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 
 			Node* indexNode = GetNode(index);
 			Node* newNode = new Node();
-			newNode->element = element;
+			newNode->element = std::move(element);
 
 			if (indexNode == m_head)
 			{
@@ -211,7 +211,7 @@ namespace AstralEngine
 
 			Node* indexNode = it.m_currNode;
 			Node* newNode = new Node();
-			newNode->element = element;
+			newNode->element = std::move(element);
 
 			if (indexNode == m_head)
 			{
@@ -253,7 +253,7 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		virtual void Remove(T element) override
+		virtual void Remove(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 

@@ -129,7 +129,7 @@ namespace AstralEngine
 			}
 			else
 			{
-				return std::forward_as_tuple(GetComponent<Component>(e), ...);
+				return std::forward_as_tuple(GetComponent<Component>(e)...);
 			}
 		}
 
@@ -193,7 +193,7 @@ namespace AstralEngine
 			//assert at least one of the components is const
 			static_assert(std::conjunction_v<std::is_const_v<Component>...>);
 			//remove const from this and call the other GetView function
-			return const_cast<Registry*>(this)->GetView<Component...>(ExcludeList<Exclude...>);
+			return const_cast<Registry*>(this)->GetView<Component...>(exclude<Exclude...>);
 		}
 
 		template<typename... Owned, typename... Get, typename... Exclude>
@@ -279,18 +279,18 @@ namespace AstralEngine
 
 
 				(OnCreate<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
 				(OnCreate<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::MaybeValidIf<std::decay_t<Get>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Get>>>(handler)), ...);
 				(OnDestroy<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<Exclude>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 
 				(OnDestroy<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<std::decay_t<Owned>>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 				(OnDestroy<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<std::decay_t<Get>>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 				(OnCreate<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 
 				if constexpr(sizeof...(Owned) == 0)
 				{
@@ -438,29 +438,6 @@ namespace AstralEngine
 
 			std::conditional_t<sizeof...(Owned) == 0, ASparseSet<Entity>, size_t> current{};
 
-
-			/*calls MaybeValidIf or DiscardIf depending on whether the component destroyed 
-			  if the entity provided has no component of the destroyed type
-			  
-			  this functions is used to filter out the updating of groups when a component was 
-			  destroyed on an entity but that entity still has other components of the same type
-
-			  This functions is to be called when a component was destroyed
-			*/
-			template<typename Component>
-			void CheckValidityOnComponentDestroyed(Registry<Entity>& owner, const Entity e)
-			{
-				//excluded component destroyed
-				if constexpr ((std::is_same_v<Component, Exclude> || ...))
-				{
-					MaybeValidIf<Component>(owner, e);
-				}
-				else 
-				{
-					DiscardIf(owner, e);
-				}
-			}
-
 			/*manages the order of the entity/component pair to compact the data managed 
 			  by groups to optimize the iteration of them
 
@@ -541,6 +518,22 @@ namespace AstralEngine
 			bool (*owned)(const unsigned int);
 			bool (*get)(const unsigned int);
 			bool (*exclude)(const unsigned int);
+
+			GroupData& operator=(GroupData&& other)
+			{
+				size = other.size;
+				handler = std::move(handler);
+				owned = other.owned;
+				get = other.get;
+				exclude = other.exclude;
+
+				other.size = 0 - 1;
+				handler = nullptr;
+				other.owned = nullptr;
+				other.get = nullptr;
+				other.exclude = nullptr;
+				return *this;
+			}
 
 			bool operator==(const GroupData& other) const
 			{
@@ -648,6 +641,18 @@ namespace AstralEngine
 			AUniqueRef<ASparseSet<Entity>> pool;
 
 			void (*remove)(ASparseSet<Entity>&, Registry<Entity>&, const Entity) {};
+
+			PoolData& operator=(PoolData&& other)
+			{
+				index = other.index;
+				pool = std::move(other.pool);
+				remove = other.remove;
+
+				other.index = 0 - 1;
+				other.pool = nullptr;
+				other.remove = nullptr;
+				return *this;
+			}
 
 			bool operator==(const PoolData& other) const 
 			{

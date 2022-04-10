@@ -32,7 +32,7 @@ namespace AstralEngine
 		
 		virtual size_t GetCount() const override { return m_count; }
 
-		virtual void Add(T element) override
+		virtual void Add(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 			Node* newNode = new Node(element);
@@ -41,12 +41,12 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		virtual void AddFirst(T element) override
+		virtual void AddFirst(const T& element) override
 		{
 			Add(element);
 		}
 
-		virtual void AddLast(T element) override
+		virtual void AddLast(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 			Node* ptr = m_head;
@@ -79,7 +79,7 @@ namespace AstralEngine
 			return -1;
 		}
 
-		virtual void Insert(T element, size_t index) override
+		virtual void Insert(const T& element, size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
 			if (index == 0)
@@ -96,7 +96,7 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		virtual void Remove(T element) override
+		virtual void Remove(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
 			Node* ptr1 = m_head;
@@ -229,8 +229,8 @@ namespace AstralEngine
 
 			Node() { }
 			Node(std::nullptr_t) : next(nullptr) { }
-			Node(T& e) : element(e) { }
-			Node(T& e, Node* ptr) : element(e), next(ptr) { }
+			Node(const T& e) : element(e) { }
+			Node(const T& e, Node* ptr) : element(e), next(ptr) { }
 		};
 
 		//takes the previous node of the node to we want to remove as argument

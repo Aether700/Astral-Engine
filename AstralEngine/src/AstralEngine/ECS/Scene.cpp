@@ -82,7 +82,7 @@ namespace AstralEngine
 	{
 		AEntity camera = CreateAEntity();
 		camera.GetComponent<Transform>().position.z = -1.0f;
-		camera.EmplaceComponent<CameraComponent>();
+		camera.EmplaceComponent<Camera>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
@@ -121,10 +121,10 @@ namespace AstralEngine
 
 		RuntimeCamera* mainCamera = nullptr;
 		Transform* cameraTransform;
-		auto camView = m_registry.GetView<CameraComponent, Transform>();
+		auto camView = m_registry.GetView<Camera, Transform>();
 		for (auto entity : camView)
 		{
-			auto[transform, camera] = camView.Get<Transform, CameraComponent>(entity);
+			auto[transform, camera] = camView.Get<Transform, Camera>(entity);
 
 			if (camera.primary)
 			{
@@ -173,10 +173,10 @@ namespace AstralEngine
 		m_viewportWidth = width;
 		m_viewportHeight = height;
 
-		auto& view = m_registry.GetView<CameraComponent>();
+		auto& view = m_registry.GetView<Camera>();
 		for (auto entity : view)
 		{
-			auto& cameraComponent = view.Get<CameraComponent>(entity);
+			auto& cameraComponent = view.Get<Camera>(entity);
 			if (!cameraComponent.fixedAspectRatio)
 			{
 				cameraComponent.camera.SetViewportSize(width, height);

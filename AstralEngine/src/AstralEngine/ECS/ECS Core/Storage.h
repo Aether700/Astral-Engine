@@ -55,7 +55,7 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(Contains(e), "Storage does not contain provided Entity");
-			return m_components[GetIndex(e)];
+			return m_components[ASparseSet<Entity>::GetIndex(e)];
 		}
 	
 		void Clear()
