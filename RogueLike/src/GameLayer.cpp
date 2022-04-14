@@ -12,7 +12,7 @@ namespace RogueLike
 
 	void GameLayer::OnUpdate()
 	{
-
+		m_scene->OnUpdate();
 	}
 
 	void GameLayer::OnDetach()
@@ -22,8 +22,9 @@ namespace RogueLike
 
 	RogueLikeGame::RogueLikeGame() { AttachLayer(new GameLayer()); }
 
-	AstralEngine::Application* CreateApp()
-	{
-		return new RogueLikeGame();
-	}
+}
+
+AstralEngine::Application* CreateApp()
+{
+	return new RogueLike::RogueLikeGame();
 }

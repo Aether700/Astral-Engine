@@ -245,6 +245,26 @@ namespace AstralEngine
 
 			return m_arr[m_count - 1];
 		}
+
+		template<typename... Args>
+		T& EmplaceAt(size_t index, Args&&... args)
+		{
+			AE_PROFILE_FUNCTION();
+			CheckSize();
+
+			if (m_count == 0)
+			{
+				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				return EmplaceBack(std::forward<Args>(args)...);
+			}
+
+			for (size_t i = m_count - 1; i >= index; i--)
+			{
+				m_arr[i + 1] = std::move(m_arr[i]);
+			}
+			m_arr[index] = T(std::forward<Args>(args)...);
+			m_count++;
+		}
 		
 		virtual size_t Find(const T& element) const override
 		{
@@ -272,16 +292,7 @@ namespace AstralEngine
 		virtual void Insert(const T& element, size_t index) override
 		{
 			AE_PROFILE_FUNCTION();
-			
-			//allow user to create holes in the array where no valid data is present
-			if (index > m_count)
-			{
-				Reserve(index);
-			}
-			else
-			{
-				CheckSize();
-			}
+			CheckSize();
 			
 			if (m_count == 0)
 			{
@@ -298,29 +309,10 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		void Insert(T&& element, AIterator it)
-		{
-			Insert(std::forward(element), it.m_pos);
-		}
-
-		void Insert(T&& element, AConstIterator it)
-		{
-			Insert(std::forward(element), it.m_pos);
-		}
-
 		void Insert(T&& element, size_t index)
 		{
 			AE_PROFILE_FUNCTION();
-
-			//allow user to create holes in the array where no valid data is present
-			if (index > m_count)
-			{
-				Reserve(index);
-			}
-			else
-			{
-				CheckSize();
-			}
+			CheckSize();
 
 			if (m_count == 0)
 			{
@@ -336,6 +328,17 @@ namespace AstralEngine
 			m_arr[index] = std::move(element);
 			m_count++;
 		}
+
+		void Insert(T&& element, const AIterator& it)
+		{
+			Insert(std::forward(element), it.m_pos);
+		}
+
+		void Insert(T&& element, const AConstIterator& it)
+		{
+			Insert(std::forward(element), it.m_pos);
+		}
+
 		virtual void Remove(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();

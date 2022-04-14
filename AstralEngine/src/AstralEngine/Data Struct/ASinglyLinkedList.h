@@ -99,8 +99,14 @@ namespace AstralEngine
 		virtual void Remove(const T& element) override
 		{
 			AE_PROFILE_FUNCTION();
+
+			if (IsEmpty())
+			{
+				return;
+			}
+
 			Node* ptr1 = m_head;
-			Node* ptr2;
+			Node* ptr2 = m_head;
 
 			while (ptr1 != m_dummy)
 			{
@@ -113,7 +119,7 @@ namespace AstralEngine
 				ptr1 = ptr1->next;
 			}
 		
-			if(ptr1 == m_dummy)
+			if (ptr1 == m_dummy)
 			{
 				return;
 			}
@@ -181,7 +187,7 @@ namespace AstralEngine
 		{
 			Clear();
 
-			for (T& element : other)
+			for (const T& element : other)
 			{
 				Add(element);
 			}

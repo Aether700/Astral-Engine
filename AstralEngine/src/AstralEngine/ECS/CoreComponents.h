@@ -100,6 +100,9 @@ namespace AstralEngine
 	class CallbackList
 	{
 	public:
+		CallbackList() { }
+		CallbackList(const CallbackList&) { }
+
 		void AddCallback(CallbackComponent* callback)
 		{
 			m_callbacks.Add(callback);

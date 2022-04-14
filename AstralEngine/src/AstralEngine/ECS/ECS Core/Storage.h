@@ -31,9 +31,9 @@ namespace AstralEngine
 			AE_CORE_ASSERT(!Contains(e), "Entity already contains the provided component type");
 
 			ASparseSet<Entity>::Add(e);
-			m_components[GetIndex(e)] = Component(std::forward<Args>(args)...);
+			m_components[ASparseSet<Entity>::GetIndex(e)] = Component(std::forward<Args>(args)...);
 
-			return m_components[GetIndex(e)];
+			return m_components[ASparseSet<Entity>::GetIndex(e)];
 		}
 	
 		const Component& Remove(const Entity& e)
@@ -42,15 +42,14 @@ namespace AstralEngine
 			AE_CORE_ASSERT(Contains(e), "Storage does not contain provided Entity");
 	
 			//take last component and move it to the index to remove then remove the last element to be more efficient
-			Component& last = std::move(m_components[m_components.GetCount() - 1]);
-			m_components[GetIndex(e)] = std::move(last);
+			Component last = std::move(m_components[m_components.GetCount() - 1]);
+			m_components[ASparseSet<Entity>::GetIndex(e)] = std::move(last);
 			Component& c = m_components[m_components.GetCount() - 1];
 			ASparseSet<Entity>::Remove(e);
 
 			return c;
 		}
 	
-		//provides the first component found for the type
 		Component& Get(const Entity& e)
 		{
 			AE_PROFILE_FUNCTION();

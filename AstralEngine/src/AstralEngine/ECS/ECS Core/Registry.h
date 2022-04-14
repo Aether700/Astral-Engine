@@ -233,12 +233,11 @@ namespace AstralEngine
 				AUniqueRef<void, void(void*)> ptr = AUniqueRef<void, void(void*)>(new HandlerType{}, [](void* instance) 
 					{ delete static_cast<HandlerType*>(instance); });
 				
-				GroupData candidate = {
-					size, ptr,
+				GroupData candidate = GroupData(size, std::move(ptr),
 					[](const unsigned int type) { return ((type == TypeInfo<std::decay_t<Owned>>::ID()) || ...); },
 					[](const unsigned int type) { return ((type == TypeInfo<std::decay_t<Get>>::ID()) || ...); },
 					[](const unsigned int type) { return ((type == TypeInfo<Exclude>::ID()) || ...); }
-				};
+				);
 
 				handler = static_cast<HandlerType*>(candidate.handler.Get());
 
@@ -276,8 +275,6 @@ namespace AstralEngine
 
 				//links the MaybeValidIf & DiscardIf so that a group is re-evaluated and updated when different 
 				//component types are being created and destroyed
-
-
 				(OnCreate<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
 					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
 				(OnCreate<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
@@ -519,16 +516,36 @@ namespace AstralEngine
 			bool (*get)(const unsigned int);
 			bool (*exclude)(const unsigned int);
 
+			GroupData() { }
+			GroupData(size_t s, AUniqueRef<void, void(void*)>&& ptr, bool (*ownedFunc)(const unsigned int),
+				bool (*getFunc)(const unsigned int), bool (*excludeFunc)(const unsigned int)) 
+				: size(s), handler(ptr), owned(ownedFunc), get(getFunc), exclude(excludeFunc)
+			{ }
+
+			GroupData(GroupData&& other) : size(other.size), owned(other.owned), get(other.get), exclude(other.exclude)
+			{
+				handler = std::move(other.handler);
+				other.owned = nullptr;
+				other.get = nullptr;
+				other.exclude = nullptr;
+				other.size = 0;
+			}
+
+			GroupData& operator=(const GroupData& other)
+			{
+				return *this;
+			}
+
 			GroupData& operator=(GroupData&& other)
 			{
 				size = other.size;
-				handler = std::move(handler);
+				handler = std::move(other.handler);
 				owned = other.owned;
 				get = other.get;
 				exclude = other.exclude;
 
 				other.size = 0 - 1;
-				handler = nullptr;
+				other.handler = nullptr;
 				other.owned = nullptr;
 				other.get = nullptr;
 				other.exclude = nullptr;
@@ -559,7 +576,7 @@ namespace AstralEngine
 				{
 					//if not enough space for the index we reserve that space
 					m_pools.Reserve(index + 1);
-					m_pools.Insert(PoolData(), (size_t)index);
+					m_pools.EmplaceAt((size_t)index);
 				}
 
 				PoolData& data = m_pools[index];
@@ -641,6 +658,11 @@ namespace AstralEngine
 			AUniqueRef<ASparseSet<Entity>> pool;
 
 			void (*remove)(ASparseSet<Entity>&, Registry<Entity>&, const Entity) {};
+
+			PoolData& operator=(const PoolData& other)
+			{
+				return *this;
+			}
 
 			PoolData& operator=(PoolData&& other)
 			{

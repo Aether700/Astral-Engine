@@ -126,12 +126,13 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\GLFW\include;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AstralEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AstralEngine.lib;GLFW.lib;Glad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\GLFW\bin\Debug-windows-x86_64\GLFW;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\Glad\bin\Debug-windows-x86_64\GLAD;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

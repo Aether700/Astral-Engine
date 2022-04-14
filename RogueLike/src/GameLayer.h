@@ -1,5 +1,6 @@
 #pragma once
 #include <AstralEngine.h>
+#include <AstralEngine/EntryPoint.h>
 
 
 namespace RogueLike

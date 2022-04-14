@@ -187,6 +187,30 @@ namespace AstralEngine
 
 			Node* indexNode = GetNode(index);
 			Node* newNode = new Node();
+			newNode->element = element;
+
+			if (indexNode == m_head)
+			{
+				newNode->next = m_head;
+				m_head->prev = newNode;
+				m_head = newNode;
+			}
+			else
+			{
+				newNode->next = indexNode;
+				newNode->prev = indexNode->prev;
+				indexNode->prev->next = newNode;
+				indexNode->prev = newNode;
+			}
+			m_count++;
+		}
+
+		void Insert(T&& element, size_t index)
+		{
+			AE_PROFILE_FUNCTION();
+
+			Node* indexNode = GetNode(index);
+			Node* newNode = new Node();
 			newNode->element = std::move(element);
 
 			if (indexNode == m_head)

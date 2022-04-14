@@ -4,13 +4,47 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h(4,25): warning C4091: 'extern ': ignored on left of 'GLFWwindow' when no variable is declared
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(297,17): error C2280: 'AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData &AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData::operator =(const AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData &)': attempting to reference a deleted function
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(666): message : compiler has generated 'AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData::operator =' here
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(666,1): message : 'AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData &AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData::operator =(const AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData &)': function was implicitly deleted because 'AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData' has a user-defined move assignment operator
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(273): message : while compiling class template member function 'void AstralEngine::ADynArr<AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData>::Insert(const T &,size_t)'
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Storage.h(34,80): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
           with
           [
-              T=AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData
+              _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(669): message : see reference to class template instantiation 'AstralEngine::ADynArr<AstralEngine::Registry<AstralEngine::BaseEntity>::PoolData>' being compiled
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\Scene.h(27): message : see reference to class template instantiation 'AstralEngine::Registry<AstralEngine::BaseEntity>' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(370): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int,
+              Entity=AstralEngine::BaseEntity
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(388): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int,
+              Entity=AstralEngine::BaseEntity
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(62): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::PoolHandler<Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(AstralEngine::Registry<AstralEngine::BaseEntity> &,const AstralEngine::BaseEntity &,_Ty,_Ty,_Ty,_Ty)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(22): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(48): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(461): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRenderer,int,int,int,int>(int,int,int,int)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(267): warning C4715: 'AstralEngine::ADynArr<AstralEngine::Registry<enum AstralEngine::BaseEntity>::PoolData>::EmplaceAt<>': not all control paths return a value
+  Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe
