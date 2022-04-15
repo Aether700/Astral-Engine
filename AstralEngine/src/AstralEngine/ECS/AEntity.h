@@ -11,7 +11,7 @@ namespace AstralEngine
 	{
 		friend class NativeScript;
 	public:
-		AEntity() : m_id(Null), m_scene(nullptr) { }
+		constexpr AEntity() : m_id(Null), m_scene(nullptr) { }
 
 		AEntity(BaseEntity entity, Scene* scene) : m_id(entity), m_scene(scene) { }
 
@@ -147,6 +147,7 @@ namespace AstralEngine
 
 		BaseEntity GetID() const { return m_id; }
 
+
 		operator BaseEntity() const
 		{
 			return m_id;
@@ -169,4 +170,6 @@ namespace AstralEngine
 		BaseEntity m_id;
 		Scene* m_scene;
 	};
+	
+	inline constexpr AEntity NullEntity = AEntity();
 }

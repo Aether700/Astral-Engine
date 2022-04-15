@@ -121,12 +121,17 @@ namespace AstralEngine
 				* rotationMatrix * Mat4::Scale(Mat4::Identity(), scale);
 		}
 
-		if (m_parent != nullptr)
+		if (m_parent.IsValid())
 		{
-			return m_parent->GetTransformMatrix() * transformMatrix;
+			return m_parent.GetTransform().GetTransformMatrix() * transformMatrix;
 		}
 
 		return transformMatrix;
+	}
+
+	void Transform::SetParent(AEntity parent)
+	{
+		m_parent = parent;
 	}
 
 	bool Transform::operator==(const Transform& other) const

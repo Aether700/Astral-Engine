@@ -1,7 +1,5 @@
 #pragma once
 #include <AstralEngine.h>
-#include <AstralEngine/EntryPoint.h>
-
 
 namespace RogueLike
 {
@@ -16,8 +14,27 @@ namespace RogueLike
 		void OnUpdate() override;
 		void OnDetach() override;
 
+		const AReference<Texture2D>& GetBlockTexture() const;
+		const AReference<Texture2D>& GetGoalFlagTexture() const;
+		const AReference<Texture2D>& GetPlayerTexture() const;
+
+		static GameLayer* GetGameLayer();
+
 	private:
+		static GameLayer* s_instance;
+
+		AEntity CreateBlockEntity();
+		void SetupBoard();
+
 		AReference<Scene> m_scene;
+		AReference<Texture2D> m_blockTexture;
+		AReference<Texture2D> m_goalFlagTexture;
+		AReference<Texture2D> m_playerTexture;
+
+		//entities
+		AEntity m_environment;
+		AEntity m_boardManager;
+		AEntity m_player;
 	};
 
 

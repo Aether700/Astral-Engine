@@ -18,9 +18,15 @@
     <ClInclude Include="src\GameLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scripts\BoardManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scripts\BoardManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

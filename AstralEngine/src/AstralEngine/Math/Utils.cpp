@@ -58,6 +58,11 @@ namespace AstralEngine
 		return sqrt(v);
 	}
 
+	float Math::Log(float v)
+	{
+		return std::log(v);
+	}
+
 	float Math::Min(float f1, float f2) 
 	{
 		if (f1 < f2)

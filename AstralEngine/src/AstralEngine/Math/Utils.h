@@ -13,6 +13,7 @@ namespace AstralEngine
 		static float Tan(float v);
 		static float DegreeToRadiants(float v);
 		static float Sqrt(float v);
+		static float Log(float v);
 		static float Min(float f1, float f2);
 		static float Max(float f1, float f2);
 		static float Floor(float f);

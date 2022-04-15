@@ -43,6 +43,9 @@ namespace AstralEngine
 
 		Mat4 GetTransformMatrix() const;
 
+		AEntity GetParent() const { return m_parent; }
+		void SetParent(AEntity parent);
+
 		bool operator==(const Transform& other) const;
 		bool operator!=(const Transform& other) const;
 
@@ -51,7 +54,7 @@ namespace AstralEngine
 		Vector3 scale;
 
 	private:
-		AReference<Transform> m_parent;
+		AEntity m_parent;
 	};
 
 	struct Camera : public ToggleableComponent
@@ -97,7 +100,8 @@ namespace AstralEngine
 		const std::string& GetName() const { return entity.GetName(); }
 		void SetName(const std::string& name) { entity.SetName(name); }
 
-		static void Destroy(AEntity& e) { e.Destroy(); }
+		void Destroy(AEntity& e) const { e.Destroy(); }
+		AEntity CreateAEntity() const { return entity.m_scene->CreateAEntity(); }
 
 		bool operator==(const NativeScript& other) const
 		{

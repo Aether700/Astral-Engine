@@ -70,11 +70,11 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.cpp(205,48): warning C4244: '=': conversion from 'const float' to 'int', possible loss of data
   Generating Code...
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<enum AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::operator[]': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(267): warning C4715: 'AstralEngine::ADynArr<AstralEngine::Registry<enum AstralEngine::BaseEntity>::PoolData>::EmplaceAt<>': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(267): warning C4715: 'AstralEngine::ADynArr<AstralEngine::Registry<enum AstralEngine::BaseEntity>::PoolData>::EmplaceAt<>': not all control paths return a value
   AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib
