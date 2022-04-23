@@ -13,11 +13,10 @@ namespace RogueLike
 		void OnAttach() override;
 		void OnUpdate() override;
 
-		const AReference<Texture2D>& GetBlockTexture() const;
-		const AReference<Texture2D>& GetGoalFlagTexture() const;
-		const AReference<Texture2D>& GetPlayerTexture() const;
-		
-		static GameLayer* GetGameLayer();
+		static const AReference<Texture2D>& GetBlockTexture();
+		static const AReference<Texture2D>& GetGoalFlagTexture();
+		static const AReference<Texture2D>& GetPlayerTexture();
+		static const AReference<Texture2D>& GetEnemyTexture();
 
 		bool OnEvent(AEvent& e) override;
 
@@ -36,6 +35,7 @@ namespace RogueLike
 		AReference<Texture2D> m_blockTexture;
 		AReference<Texture2D> m_goalFlagTexture;
 		AReference<Texture2D> m_playerTexture;
+		AReference<Texture2D> m_enemyTexture;
 
 		//entities
 		AEntity m_boardManager;

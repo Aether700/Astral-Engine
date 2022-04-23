@@ -26,7 +26,11 @@ namespace RogueLike
 		size_t GetNumBlocks() const;
 		Vector2Int GetRandomBlockCoord() const;
 
+		void GenerateBlocks();
+		void GenerateEnemies();
+
 		AEntity CreateInnerBlock(const Vector2Int& coords) const;
+		AEntity CreateEnemy(const Vector2Int& coords) const;
 
 		static constexpr size_t s_size = 7;
 		static BoardManager* s_instance;

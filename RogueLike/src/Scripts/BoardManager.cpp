@@ -1,5 +1,6 @@
 #include "BoardManager.h"
 #include "../GameLayer.h"
+#include "BoardMoveable.h"
 
 namespace RogueLike
 {
@@ -50,28 +51,15 @@ namespace RogueLike
 	void BoardManager::RegenerateBoard()
 	{
 		s_instance->ClearBoard();
-		// generate random blocks
-		size_t numBlocks = s_instance->GetNumBlocks();
-
-		for (size_t i = 0; i < numBlocks; i++)
-		{
-			Vector2Int coords = s_instance->GetRandomBlockCoord();
-			AEntity currCoord = s_instance->GetCell(coords.x, coords.y);
-			while (currCoord != NullEntity)
-			{
-				coords = s_instance->GetRandomBlockCoord();
-				currCoord = s_instance->GetCell(coords.x, coords.y);
-			}
-			AE_INFO("(%d, %d)", coords.x, coords.y);
-			s_instance->SetCell(s_instance->CreateInnerBlock(coords), coords.x, coords.y);
-		}
+		s_instance->GenerateBlocks();
+		s_instance->GenerateEnemies();
 	}
 
 	void BoardManager::ClearBoard()
 	{
 		for (size_t i = 0; i < s_size * s_size; i++)
 		{
-			if (m_board[i].IsValid() && m_board[i].GetName() == "Block")
+			if (m_board[i].IsValid() && (m_board[i].GetName() == "Block" || m_board[i].GetName() == "Enemy"))
 			{
 				Destroy(m_board[i]);
 			}
@@ -83,9 +71,10 @@ namespace RogueLike
 	{
 		AEntity goal = CreateAEntity();
 		goal.GetTransform().SetParent(entity);
-		goal.EmplaceComponent<SpriteRenderer>(GameLayer::GetGameLayer()->GetGoalFlagTexture());
+		goal.EmplaceComponent<SpriteRenderer>(GameLayer::GetGoalFlagTexture());
 		goal.GetTransform().position = Vector3(s_size - 1, s_size - 1, 0);
-		RegenerateBoard();
+		GenerateBlocks();
+		GenerateEnemies();
 	}
 
 	size_t BoardManager::GetNumBlocks() const
@@ -98,13 +87,48 @@ namespace RogueLike
 		return Vector2Int((Random::GetInt() % (s_size - 2)) + 1, (Random::GetInt() % (s_size - 2)) + 1);
 	}
 
+	void BoardManager::GenerateBlocks()
+	{
+		// generate random blocks
+		size_t numBlocks = GetNumBlocks();
+
+		for (size_t i = 0; i < numBlocks; i++)
+		{
+			Vector2Int coords = GetRandomBlockCoord();
+			AEntity currCoord = GetCell(coords.x, coords.y);
+			while (currCoord != NullEntity)
+			{
+				coords = GetRandomBlockCoord();
+				currCoord = GetCell(coords.x, coords.y);
+			}
+			AE_INFO("(%d, %d)", coords.x, coords.y);
+			SetCell(CreateInnerBlock(coords), coords.x, coords.y);
+		}
+	}
+
+	void BoardManager::GenerateEnemies()
+	{
+		CreateEnemy(Vector2Int(0, s_size - 1));
+	}
+
 	AEntity BoardManager::CreateInnerBlock(const Vector2Int& coords) const
 	{
 		AEntity innerBlock = CreateAEntity();
 		innerBlock.GetTransform().position = Vector3(coords.x, coords.y, 0);
 		innerBlock.GetTransform().SetParent(entity);
-		innerBlock.EmplaceComponent<SpriteRenderer>(GameLayer::GetGameLayer()->GetBlockTexture());
+		innerBlock.EmplaceComponent<SpriteRenderer>(GameLayer::GetBlockTexture());
 		innerBlock.SetName("Block");
 		return innerBlock;
+	}
+
+	AEntity BoardManager::CreateEnemy(const Vector2Int& coords) const
+	{
+		AEntity enemy = CreateAEntity();
+		enemy.SetName("Enemy");
+		enemy.GetTransform().SetParent(entity);
+		BoardMoveable& move = enemy.EmplaceComponent<BoardMoveable>();
+		move.Set(coords);
+		enemy.EmplaceComponent<SpriteRenderer>(GameLayer::GetEnemyTexture());
+		return enemy;
 	}
 }

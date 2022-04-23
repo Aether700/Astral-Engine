@@ -23,22 +23,25 @@ namespace RogueLike
 		m_scene->OnUpdate();
 	}
 
-	const AReference<Texture2D>& GameLayer::GetBlockTexture() const
+	const AReference<Texture2D>& GameLayer::GetBlockTexture()
 	{
-		return m_blockTexture;
+		return s_instance->m_blockTexture;
 	}
 
-	const AReference<Texture2D>& GameLayer::GetGoalFlagTexture() const
+	const AReference<Texture2D>& GameLayer::GetGoalFlagTexture()
 	{
-		return m_goalFlagTexture;
+		return s_instance->m_goalFlagTexture;
 	}
 
-	const AReference<Texture2D>& GameLayer::GetPlayerTexture() const
+	const AReference<Texture2D>& GameLayer::GetPlayerTexture()
 	{
-		return m_playerTexture;
+		return s_instance->m_playerTexture;
 	}
 
-	GameLayer* GameLayer::GetGameLayer() { return s_instance; }
+	const AReference<Texture2D>& GameLayer::GetEnemyTexture()
+	{
+		return s_instance->m_enemyTexture;
+	}
 
 	bool GameLayer::OnEvent(AEvent& e)
 	{
@@ -64,6 +67,7 @@ namespace RogueLike
 		m_goalFlagTexture = Texture2D::Create("assets/textures/goalFlag.png");
 		m_blockTexture = Texture2D::Create("assets/textures/brickSprite.png");
 		m_playerTexture = Texture2D::Create("assets/textures/player.png");
+		m_enemyTexture = Texture2D::Create("assets/textures/enemy.png");
 	}
 
 	void GameLayer::SetupBoard()
@@ -94,6 +98,7 @@ namespace RogueLike
 	void GameLayer::SetupPlayer()
 	{
 		m_player = m_scene->CreateAEntity();
+		m_player.SetName("Player");
 		m_player.GetTransform().SetParent(m_boardManager);
 		m_player.GetTransform().scale.x = -1.0f;
 		m_player.EmplaceComponent<SpriteRenderer>(m_playerTexture);

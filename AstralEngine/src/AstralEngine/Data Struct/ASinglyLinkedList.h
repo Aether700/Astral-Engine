@@ -38,7 +38,6 @@ namespace AstralEngine
 			other.m_head = nullptr;
 			other.m_dummy = nullptr;
 			other.m_count = 0;
-			AE_CORE_INFO("move constructor called for ASinglyLinkedList");
 		}
 
 		virtual ~ASinglyLinkedList() 

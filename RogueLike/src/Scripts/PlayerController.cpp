@@ -1,9 +1,5 @@
 #include "PlayerController.h"
 
-//temp
-#include "../GameLayer.h"
-/////////////////////
-
 namespace RogueLike
 {
 	void PlayerController::OnStart()
@@ -13,7 +9,6 @@ namespace RogueLike
 
 	void PlayerController::OnUpdate()
 	{
-		AE_INFO("PlayerController::OnUpdate called");
 		m_hasMoved = false;
 		Vector2Int dir = Vector2Int::Zero();
 
@@ -60,7 +55,6 @@ namespace RogueLike
 		
 		if (dir != Vector2Int::Zero())
 		{
-			AE_INFO("PlayerController trying to move");
 			if (GetComponent<BoardMoveable>().Move(dir))
 			{
 				m_hasMoved = true;
