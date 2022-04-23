@@ -154,7 +154,6 @@ namespace AstralEngine
 			}
 		}
 
-
 		AIterator begin() const
 		{
 			return std::get<0>(m_pools)->ASparseSet<Entity>::begin();

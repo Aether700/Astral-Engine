@@ -4,7 +4,6 @@
 #include "AstralEngine/Data Struct/ASparseSet.h"
 #include "AstralEngine/Data Struct/AKeyElementPair.h"
 
-
 namespace AstralEngine
 {
 	template<typename...>
@@ -36,18 +35,15 @@ namespace AstralEngine
 			return m_components[ASparseSet<Entity>::GetIndex(e)];
 		}
 	
-		const Component& Remove(const Entity& e)
+		void Remove(const Entity& e)
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(Contains(e), "Storage does not contain provided Entity");
-	
 			//take last component and move it to the index to remove then remove the last element to be more efficient
 			Component last = std::move(m_components[m_components.GetCount() - 1]);
 			m_components[ASparseSet<Entity>::GetIndex(e)] = std::move(last);
-			Component& c = m_components[m_components.GetCount() - 1];
+			m_components.RemoveAt(m_components.GetCount() - 1);
 			ASparseSet<Entity>::Remove(e);
-
-			return c;
 		}
 	
 		Component& Get(const Entity& e)

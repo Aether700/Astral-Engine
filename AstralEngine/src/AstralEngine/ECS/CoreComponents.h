@@ -1,7 +1,10 @@
 #pragma once
+#include "AstralEngine/ECS/ECS Core/ECSUtils.h"
 
 namespace AstralEngine
 {
+	class AEntity;
+
 	class ToggleableComponent
 	{
 		friend class NativeScript;
@@ -49,15 +52,6 @@ namespace AstralEngine
 		virtual void OnUpdate() { }
 		virtual void OnDestroy() { }
 
-		//calls OnUpdate but only if the component is enabled
-		void FilteredUpdate()
-		{
-			if (IsActive())
-			{
-				OnUpdate();
-			}
-		}
-
 		bool operator==(const CallbackComponent& other) const
 		{
 			return this == &other;
@@ -96,26 +90,99 @@ namespace AstralEngine
 		std::string m_tag;
 	};
 
+	// base object used to gather pairs of AEntity objects and different types 
+	//of CallbackComponent objects
+	class CallbackAEntityPair
+	{
+	public:
+		virtual ~CallbackAEntityPair() { }
+		virtual void OnStart() = 0;
+		virtual void OnUpdate() = 0;
+		virtual size_t GetTypeID() const = 0;
+	};
+
+	template<typename Component>
+	class ComponentAEntityPair : public CallbackAEntityPair
+	{
+	public:
+		ComponentAEntityPair(AEntity e) : m_entity(e) { }
+
+		virtual void OnStart() override
+		{
+			if (AEntityAndComponentAreActive())
+			{
+				m_entity.GetComponent<Component>().OnStart();
+			}
+		}
+
+		virtual void OnUpdate() override
+		{
+			if (AEntityAndComponentAreActive())
+			{
+				m_entity.GetComponent<Component>().OnUpdate();
+			}
+		}
+
+		virtual size_t GetTypeID() const override
+		{
+			return TypeInfo<Component>::ID();
+		}
+
+	private:
+		bool AEntityAndComponentAreActive()
+		{
+			if (m_entity.IsActive())
+			{
+				Component& comp = m_entity.GetComponent<Component>();
+				return comp.IsActive();
+			}
+			return false;
+		}
+
+		AEntity m_entity;
+	};
+
 	//add all callback components to this list so they can easily be retrieved and their callbacks can be accessed easily
 	class CallbackList
 	{
 	public:
 		CallbackList() { }
 		CallbackList(const CallbackList&) { }
+		CallbackList(CallbackList&& other) 
+		{
+			m_callbacks = std::move(other.m_callbacks);
+		}
 
-		void AddCallback(CallbackComponent* callback)
+		~CallbackList()
+		{
+			Clear();
+		}
+
+
+		void AddCallback(CallbackAEntityPair* callback)
 		{
 			m_callbacks.Add(callback);
 		}
 
-		void RemoveCallback(CallbackComponent* callback)
+		template<typename Component>
+		void RemoveCallback()
 		{
-			m_callbacks.Remove(callback);
+			size_t id = TypeInfo<Component>::ID();
+			for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+			{
+				if ((*it)->GetTypeID() == id)
+				{
+					CallbackAEntityPair* removed = *it;
+					m_callbacks.Remove(it);
+					delete removed;
+					return;
+				}
+			}
 		}
 
 		void CallOnStart()
 		{
-			for (CallbackComponent* callback : m_callbacks)
+			for (CallbackAEntityPair* callback : m_callbacks)
 			{
 				callback->OnStart();
 			}
@@ -123,13 +190,36 @@ namespace AstralEngine
 
 		void CallOnUpdate()
 		{
-			for (CallbackComponent* callback : m_callbacks)
+			for (CallbackAEntityPair* callback : m_callbacks)
 			{
-				callback->FilteredUpdate();
+				callback->OnUpdate();
 			}
 		}
 
 		bool IsEmpty() const { return m_callbacks.IsEmpty(); }
+
+		void Clear()
+		{
+			for (CallbackAEntityPair* ptr : m_callbacks)
+			{
+				delete ptr;
+			}
+			m_callbacks.Clear();
+		}
+
+		CallbackList& operator=(const CallbackList& other)
+		{
+			Clear();
+			m_callbacks = other.m_callbacks;
+			return *this;
+		}
+
+		CallbackList& operator=(CallbackList&& other)
+		{
+			Clear();
+			m_callbacks = std::move(other.m_callbacks);
+			return *this;
+		}
 
 		bool operator==(const CallbackList& other) const
 		{
@@ -142,6 +232,6 @@ namespace AstralEngine
 		}
 
 	private:
-		ASinglyLinkedList<CallbackComponent*> m_callbacks;
+		ASinglyLinkedList<CallbackAEntityPair*> m_callbacks;
 	};
 }

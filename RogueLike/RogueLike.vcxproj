@@ -158,10 +158,14 @@
   <ItemGroup>
     <ClInclude Include="src\GameLayer.h" />
     <ClInclude Include="src\Scripts\BoardManager.h" />
+    <ClInclude Include="src\Scripts\BoardMoveable.h" />
+    <ClInclude Include="src\Scripts\PlayerController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameLayer.cpp" />
     <ClCompile Include="src\Scripts\BoardManager.cpp" />
+    <ClCompile Include="src\Scripts\BoardMoveable.cpp" />
+    <ClCompile Include="src\Scripts\PlayerController.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

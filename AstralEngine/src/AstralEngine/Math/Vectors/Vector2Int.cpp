@@ -84,12 +84,10 @@ namespace AstralEngine
 	const Vector2Int Vector2Int::operator-=(const Vector2Int& v) const { return *this - v; }
 	Vector2Int operator*(float k, const Vector2Int& v) { return v * k; }
 
-	bool Vector2Int::operator==(const Vector2Int& other) const
-	{
-		return x == other.x && y == other.y;
-	}
+	bool Vector2Int::operator==(const Vector2Int& other) const { return x == other.x && y == other.y; }
+	bool Vector2Int::operator!=(const Vector2Int& other) const { return !(*this == other); }
 
-	// Vector2Int //////////////////////////////////////////////////////////////////////////////
+	// Vector2Short //////////////////////////////////////////////////////////////////////////////
 	
 	const float Vector2Short::Length() const
 	{
@@ -135,5 +133,5 @@ namespace AstralEngine
 	}
 
 	bool Vector2Short::operator==(const Vector2Short& other) const { return x == other.x && y == other.y; }
-
+	bool Vector2Short::operator!=(const Vector2Short& other) const { return !(*this == other); }
 }

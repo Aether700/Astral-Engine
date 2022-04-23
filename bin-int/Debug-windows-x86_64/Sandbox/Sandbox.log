@@ -4,19 +4,19 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h(4,25): warning C4091: 'extern ': ignored on left of 'GLFWwindow' when no variable is declared
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Storage.h(34,80): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Storage.h(33,80): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
           with
           [
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(370): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(359): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRenderer,
               _Ty=int,
               Entity=AstralEngine::BaseEntity
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(388): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(361): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRenderer,
@@ -29,13 +29,13 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
               Component=AstralEngine::SpriteRenderer,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(22): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(23): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRenderer,
               _Ty=int
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(48): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(49): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
           with
           [
               Component=AstralEngine::SpriteRenderer,

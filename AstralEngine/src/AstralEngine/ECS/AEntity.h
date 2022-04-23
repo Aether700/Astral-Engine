@@ -1,4 +1,5 @@
 #pragma once
+#include "ECS Core/ECSUtils.h"
 #include "ECS Core/Registry.h"
 #include "Scene.h"
 #include "CoreComponents.h"
@@ -26,12 +27,12 @@ namespace AstralEngine
 				
 				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackList>().AddCallback(&comp);
+					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 				else
 				{
 					CallbackList& list = EmplaceComponent<CallbackList>();
-					list.AddCallback(&comp);
+					list.AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 
 				if constexpr (std::is_base_of_v<NativeScript, Component>)
@@ -76,7 +77,7 @@ namespace AstralEngine
 					"CallbackListComponent was not added to entity with a CallbackComponent");
 				CallbackList* list;
 				list = &GetComponent<CallbackList>();
-				list->RemoveCallback(&GetComponent<Component>());
+				list->RemoveCallback<Component>();
 
 				if (list->IsEmpty()) 
 				{

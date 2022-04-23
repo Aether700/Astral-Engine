@@ -71,17 +71,6 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
-
-			/*
-			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-			{
-				Assure<AReference<CallbackComponent>>().RemoveComponent<Component>(*this, e);
-			}
-			else 
-			{
-				Assure<Component>().RemoveComponent<Component>(*this, e);
-			}
-			*/
 			Assure<Component>().RemoveComponent<Component>(*this, e);
 		}
 
@@ -172,7 +161,7 @@ namespace AstralEngine
 		{
 			return Assure<Component>().OnCreate();
 		}
-
+		
 		template<typename Component>
 		auto OnDestroy()
 		{
@@ -369,22 +358,6 @@ namespace AstralEngine
 			decltype(auto) Emplace(Registry<Entity>& owner, const Entity& e, Args... args)
 			{
 				AE_PROFILE_FUNCTION();
-
-				/*
-				if constexpr (std::is_same_v<AReference<CallbackComponent>, Component>)
-				{
-					auto comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
-					m_create.CallDelagates(owner, e);
-					return comp;
-				}
-				else
-				{
-					auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
-					m_create.CallDelagates(owner, e);
-					return comp;
-				}
-				*/
-
 				auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
 				m_create.CallDelagates(owner, e);
 				return comp;
@@ -394,7 +367,7 @@ namespace AstralEngine
 			void Remove(Registry<Entity>& owner, const Entity& e)
 			{
 				m_destroy(owner, e);
-				auto& list = Storage<Entity, Component>::Remove(e);
+				Storage<Entity, Component>::Remove(e);
 			}
 
 			template<typename Comp>
@@ -407,14 +380,6 @@ namespace AstralEngine
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e, const Component& comp)
 			{
 				Storage<Entity, Component>::RemoveComponent(e, comp);
-
-				/*
-				if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-				{
-					comp.OnDestroy();
-				}
-				*/
-
 				m_destroy(owner, e);
 			}
 

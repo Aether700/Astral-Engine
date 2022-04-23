@@ -401,23 +401,25 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(Contains(e), "Cannot remove an element that is not contained in the SparseSet");
-
+			
 			size_t page = Page(e);
 			size_t offset = Offset(e);
-
+			
 			/*move last element to the position of the element to remove
 			  so that removing the element is more efficient
 			  (also need to move the element in the sparse set)
 			*/
+			T lastElement = m_packed[m_packed.GetCount() - 1];
 
-			m_packed[m_toInt(m_sparse[page][offset])] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1])][Offset(m_packed[m_packed.GetCount() - 1])] = m_sparse[page][offset];
+			m_packed[m_toInt(m_sparse[page][offset])] = lastElement;
+			m_sparse[Page(lastElement)][Offset(lastElement)] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.RemoveAt(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const T e) const
 		{
+			AE_CORE_ASSERT(Contains(e), "Trying to get index of an object not in the sparse set");
 			return (size_t)m_sparse[Page(e)][Offset(e)];
 		}
 
@@ -480,7 +482,6 @@ namespace AstralEngine
 	{
 		static constexpr auto ElementPerPage = AE_PAGE_SIZE / sizeof(T);
 		using PageType = typename AUniqueRef<K[]>;
-
 
 	public:
 		using AIterator = typename ADynArr<AKeyElementPair<K, T>>::AIterator;

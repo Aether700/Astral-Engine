@@ -1,5 +1,6 @@
 #include "GameLayer.h"
 #include "Scripts/BoardManager.h"
+#include "Scripts/PlayerController.h"
 
 #include <AstralEngine/EntryPoint.h>
 
@@ -11,24 +12,15 @@ namespace RogueLike
 
 	void GameLayer::OnAttach()
 	{
-		m_goalFlagTexture = Texture2D::Create("assets/textures/goalFlag.png");
-		m_blockTexture = Texture2D::Create("assets/textures/brickSprite.png");
-		m_playerTexture = Texture2D::Create("assets/textures/player.png");
-		
+		RemoveCameraControls();
+		SetupTextures();
 		SetupBoard();
-		m_player = m_scene->CreateAEntity();
-		m_player.EmplaceComponent<SpriteRenderer>(m_playerTexture);
-		m_player.GetTransform().SetParent(m_boardManager);
+		SetupPlayer();
 	}
 
 	void GameLayer::OnUpdate()
 	{
 		m_scene->OnUpdate();
-	}
-
-	void GameLayer::OnDetach()
-	{
-
 	}
 
 	const AReference<Texture2D>& GameLayer::GetBlockTexture() const
@@ -48,12 +40,30 @@ namespace RogueLike
 
 	GameLayer* GameLayer::GetGameLayer() { return s_instance; }
 
+	bool GameLayer::OnEvent(AEvent& e)
+	{
+		if (e.GetType() == AEventType::WindowResize)
+		{
+			WindowResizeEvent& resize = (WindowResizeEvent&)e;
+			m_scene->OnViewportResize(resize.GetWidth(), resize.GetHeight());
+		}
+		return false;
+	}
+
 	AEntity GameLayer::CreateBlockEntity()
 	{
 		AEntity block = m_scene->CreateAEntity();
 		block.EmplaceComponent<SpriteRenderer>(m_blockTexture);
 		block.GetTransform().SetParent(m_environment);
+		block.SetName("Block");
 		return block;
+	}
+
+	void GameLayer::SetupTextures()
+	{
+		m_goalFlagTexture = Texture2D::Create("assets/textures/goalFlag.png");
+		m_blockTexture = Texture2D::Create("assets/textures/brickSprite.png");
+		m_playerTexture = Texture2D::Create("assets/textures/player.png");
 	}
 
 	void GameLayer::SetupBoard()
@@ -79,6 +89,28 @@ namespace RogueLike
 				}
 			}
 		}
+	}
+
+	void GameLayer::SetupPlayer()
+	{
+		m_player = m_scene->CreateAEntity();
+		m_player.GetTransform().SetParent(m_boardManager);
+		m_player.GetTransform().scale.x = -1.0f;
+		m_player.EmplaceComponent<SpriteRenderer>(m_playerTexture);
+		m_player.EmplaceComponent<PlayerController>();
+		m_player.EmplaceComponent<BoardMoveable>();
+	}
+
+	void GameLayer::RemoveCameraControls()
+	{
+		//hack to by-pass ECS will need to be modified in the future
+		AEntity camera = AEntity((BaseEntity)0, m_scene.Get());
+		Camera& cam = camera.GetComponent<Camera>();
+		cam.primary = false;
+		camera.Destroy();
+		m_cam = m_scene->CreateAEntity();
+		m_cam.EmplaceComponent<Camera>(cam).primary = true;
+		m_cam.GetTransform().position = Vector3(-0.5f, -0.5f, - 1.0f);
 	}
 
 	RogueLikeGame::RogueLikeGame() { AttachLayer(new GameLayer()); }

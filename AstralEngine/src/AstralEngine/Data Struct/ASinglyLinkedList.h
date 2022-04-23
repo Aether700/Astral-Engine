@@ -23,6 +23,24 @@ namespace AstralEngine
 		ASinglyLinkedList() : m_count(0), 
 			m_dummy(new Node(nullptr)), m_head(m_dummy) { }
 
+		ASinglyLinkedList(const ASinglyLinkedList& other) : m_count(0),
+			m_dummy(new Node(nullptr)), m_head(m_dummy)
+		{
+			for(T element : other)
+			{
+				Add(element);
+			}
+		}
+
+		ASinglyLinkedList(ASinglyLinkedList&& other) : m_count(other.m_count),
+			m_dummy(other.m_dummy), m_head(other.m_head)
+		{
+			other.m_head = nullptr;
+			other.m_dummy = nullptr;
+			other.m_count = 0;
+			AE_CORE_INFO("move constructor called for ASinglyLinkedList");
+		}
+
 		virtual ~ASinglyLinkedList() 
 		{
 			AE_PROFILE_FUNCTION();
@@ -201,6 +219,7 @@ namespace AstralEngine
 			m_dummy = other.m_dummy;
 			m_head = other.m_head;
 			m_count = other.m_count;
+
 			other.m_count = 0;
 			other.m_dummy = nullptr;
 			other.m_head = nullptr;

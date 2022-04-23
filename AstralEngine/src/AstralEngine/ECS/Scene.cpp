@@ -81,12 +81,12 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetComponent<Transform>().position.z = -1.0f;
+		camera.GetTransform().position.z = -1.0f;
 		camera.EmplaceComponent<Camera>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
-		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
+		AWindow* window = Application::GetWindow();
 		OnViewportResize(window->GetWidth(), window->GetHeight());
 	}
 

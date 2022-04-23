@@ -47,6 +47,7 @@ namespace AstralEngine
 		Vector2Int& operator=(const Vector2Int& v);
 
 		bool operator==(const Vector2Int& other) const;
+		bool operator!=(const Vector2Int& other) const;
 
 		int x, y;
 	};
@@ -83,6 +84,7 @@ namespace AstralEngine
 		Vector2Short& operator=(const Vector2Short& v);
 
 		bool operator==(const Vector2Short& other) const;
+		bool operator!=(const Vector2Short& other) const;
 
 		short x, y;
 	};
