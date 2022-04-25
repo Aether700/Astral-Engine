@@ -13,6 +13,7 @@ namespace RogueLike
 		void OnAttach() override;
 		void OnUpdate() override;
 
+		static AEntity GetPlayer();
 		static const AReference<Texture2D>& GetBlockTexture();
 		static const AReference<Texture2D>& GetGoalFlagTexture();
 		static const AReference<Texture2D>& GetPlayerTexture();

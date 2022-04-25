@@ -50,6 +50,7 @@ namespace AstralEngine
 		virtual void OnCreate() { }
 		virtual void OnStart() { }
 		virtual void OnUpdate() { }
+		virtual void OnLateUpdate() { }
 		virtual void OnDestroy() { }
 
 		bool operator==(const CallbackComponent& other) const
@@ -98,6 +99,7 @@ namespace AstralEngine
 		virtual ~CallbackAEntityPair() { }
 		virtual void OnStart() = 0;
 		virtual void OnUpdate() = 0;
+		virtual void OnLateUpdate() = 0;
 		virtual size_t GetTypeID() const = 0;
 	};
 
@@ -120,6 +122,14 @@ namespace AstralEngine
 			if (AEntityAndComponentAreActive())
 			{
 				m_entity.GetComponent<Component>().OnUpdate();
+			}
+		}
+
+		virtual void OnLateUpdate() override
+		{
+			if (AEntityAndComponentAreActive())
+			{
+				m_entity.GetComponent<Component>().OnLateUpdate();
 			}
 		}
 
@@ -193,6 +203,14 @@ namespace AstralEngine
 			for (CallbackAEntityPair* callback : m_callbacks)
 			{
 				callback->OnUpdate();
+			}
+		}
+
+		void CallOnLateUpdate()
+		{
+			for (CallbackAEntityPair* callback : m_callbacks)
+			{
+				callback->OnLateUpdate();
 			}
 		}
 

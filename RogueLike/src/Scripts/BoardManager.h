@@ -18,16 +18,20 @@ namespace RogueLike
 		static Vector2Int FindEntityOnBoard(AEntity e);
 
 		static void RegenerateBoard();
+		static void ResetLevel();
+		static void IncrementLevel();
 
 	private:
 
 		void ClearBoard();
 		void InitializeBoard();
+		void GenerateBlocks();
 		size_t GetNumBlocks() const;
 		Vector2Int GetRandomBlockCoord() const;
-
-		void GenerateBlocks();
+		
 		void GenerateEnemies();
+		size_t GetNumEnemies() const;
+		Vector2Int GetRandomEnemyCoord() const;
 
 		AEntity CreateInnerBlock(const Vector2Int& coords) const;
 		AEntity CreateEnemy(const Vector2Int& coords) const;

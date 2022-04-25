@@ -1,6 +1,7 @@
 #include "BoardManager.h"
 #include "../GameLayer.h"
 #include "BoardMoveable.h"
+#include "EnemyAI.h"
 
 namespace RogueLike
 {
@@ -55,6 +56,16 @@ namespace RogueLike
 		s_instance->GenerateEnemies();
 	}
 
+	void BoardManager::ResetLevel()
+	{
+		s_instance->m_level = 1;
+	}
+
+	void BoardManager::IncrementLevel()
+	{
+		s_instance->m_level++;
+	}
+
 	void BoardManager::ClearBoard()
 	{
 		for (size_t i = 0; i < s_size * s_size; i++)
@@ -76,17 +87,7 @@ namespace RogueLike
 		GenerateBlocks();
 		GenerateEnemies();
 	}
-
-	size_t BoardManager::GetNumBlocks() const
-	{
-		return (size_t)(5.0f * Math::Log(m_level) + 10.0f);
-	}
-
-	Vector2Int BoardManager::GetRandomBlockCoord() const
-	{
-		return Vector2Int((Random::GetInt() % (s_size - 2)) + 1, (Random::GetInt() % (s_size - 2)) + 1);
-	}
-
+	
 	void BoardManager::GenerateBlocks()
 	{
 		// generate random blocks
@@ -106,9 +107,40 @@ namespace RogueLike
 		}
 	}
 
+	size_t BoardManager::GetNumBlocks() const
+	{
+		return (size_t)(5.0f * Math::Log(m_level) + 10.0f);
+	}
+
+	Vector2Int BoardManager::GetRandomBlockCoord() const
+	{
+		return Vector2Int((Random::GetInt() % (s_size - 2)) + 1, (Random::GetInt() % (s_size - 2)) + 1);
+	}
+
 	void BoardManager::GenerateEnemies()
 	{
-		CreateEnemy(Vector2Int(0, s_size - 1));
+		size_t numEnemies = GetNumEnemies();
+
+		for (size_t i = 0; i < numEnemies; i++)
+		{
+			Vector2Int coords = GetRandomEnemyCoord();
+
+			while (BoardManager::GetCell(coords.x, coords.y) != NullEntity || coords == Vector2Int::Zero())
+			{
+				coords = GetRandomEnemyCoord();
+			}
+			SetCell(CreateEnemy(coords), coords.x, coords.y);
+		}
+	}
+	
+	size_t BoardManager::GetNumEnemies() const
+	{
+		return (size_t)(2.0f * Math::Log(m_level) + 1.0f);
+	}
+
+	Vector2Int BoardManager::GetRandomEnemyCoord() const
+	{
+		return Vector2Int(Random::GetInt() % s_size, Random::GetInt() % s_size);
 	}
 
 	AEntity BoardManager::CreateInnerBlock(const Vector2Int& coords) const
@@ -129,6 +161,8 @@ namespace RogueLike
 		BoardMoveable& move = enemy.EmplaceComponent<BoardMoveable>();
 		move.Set(coords);
 		enemy.EmplaceComponent<SpriteRenderer>(GameLayer::GetEnemyTexture());
+		EnemyAI& ai = enemy.EmplaceComponent<EnemyAI>();
+		ai.SaveStartPos();
 		return enemy;
 	}
 }

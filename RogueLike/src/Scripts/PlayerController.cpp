@@ -5,11 +5,27 @@ namespace RogueLike
 	void PlayerController::OnStart()
 	{
 		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+		m_isDead = false;
 	}
 
 	void PlayerController::OnUpdate()
 	{
 		m_hasMoved = false;
+		if (m_isDead)
+		{
+			if (m_currDeathTimer < m_deathTime)
+			{
+				m_currDeathTimer += Time::GetDeltaTime();
+				return;
+			}
+			else
+			{
+				m_isDead = false;
+				GetComponent<SpriteRenderer>().SetActive(true);
+				ResetLevel();
+			}
+		}
+
 		Vector2Int dir = Vector2Int::Zero();
 
 		if (Input::GetKeyDown(KeyCode::W))
@@ -69,10 +85,34 @@ namespace RogueLike
 
 	bool PlayerController::HasMoved() const { return m_hasMoved; }
 
+	void PlayerController::RegisterEnemy(EnemyAI& enemy)
+	{
+		m_enemies.Add(enemy.GetEntity());
+	}
+
+	void PlayerController::KillPlayer()
+	{
+		m_isDead = true;
+		m_currDeathTimer = 0.0f;
+		GetComponent<SpriteRenderer>().SetActive(false);
+	}
+
 	void PlayerController::ChangeLevel()
 	{
+		m_hasMoved = false;
+		m_enemies.Clear();
+		BoardManager::IncrementLevel();
 		BoardManager::RegenerateBoard();
 		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+	}
+
+	void PlayerController::ResetLevel()
+	{
+		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+		for(AEntity& e : m_enemies)
+		{
+			e.GetComponent<EnemyAI>().ResetPosition();
+		}
 	}
 
 }

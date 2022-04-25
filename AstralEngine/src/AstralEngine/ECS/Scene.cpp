@@ -163,6 +163,7 @@ namespace AstralEngine
 
 		//update Scripts
 		CallOnUpdate();
+		CallOnLateUpdate();
 
 		//destroy all entities enqueued for destruction this frame
 		DestroyEntitiesToDestroy();
@@ -201,6 +202,16 @@ namespace AstralEngine
 		{
 			auto& list = view.Get<CallbackList>(e);
 			list.CallOnUpdate();
+		}
+	}
+
+	void Scene::CallOnLateUpdate()
+	{
+		auto view = m_registry.GetView<CallbackList>();
+		for (BaseEntity e : view)
+		{
+			auto& list = view.Get<CallbackList>(e);
+			list.CallOnLateUpdate();
 		}
 	}
 

@@ -23,6 +23,11 @@ namespace RogueLike
 		m_scene->OnUpdate();
 	}
 
+	AEntity GameLayer::GetPlayer()
+	{
+		return s_instance->m_player;
+	}
+
 	const AReference<Texture2D>& GameLayer::GetBlockTexture()
 	{
 		return s_instance->m_blockTexture;
