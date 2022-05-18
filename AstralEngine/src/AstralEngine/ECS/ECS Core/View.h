@@ -391,13 +391,17 @@ namespace AstralEngine
 
 		bool IsEmpty() const { return m_pool->IsEmpty(); }
 
-		AIterator begin() const { return m_pool->ASparseSet<Entity>::begin(); }
+		AIterator begin() const 
+		{ 
+			AE_CORE_INFO("View::begin is called");
+			return m_pool->ASparseSet<Entity>::begin(); 
+		}
 
 		AIterator end() const { return m_pool->ASparseSet<Entity>::end(); }
 
 		Entity operator[](size_t index) const
 		{
-			return *(begin() + index);
+			return *(begin() += index);
 		}
 
 		bool Contains(const Entity e) const

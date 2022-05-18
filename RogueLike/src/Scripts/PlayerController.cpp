@@ -99,6 +99,7 @@ namespace RogueLike
 
 	void PlayerController::ChangeLevel()
 	{
+		AE_INFO("changing level");
 		m_hasMoved = false;
 		m_enemies.Clear();
 		BoardManager::IncrementLevel();

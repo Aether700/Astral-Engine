@@ -551,7 +551,7 @@ namespace AstralEngine
 			  (will also need to move the element in the sparse set)
 			*/
 			m_packed[m_sparse[page][offset]] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1)].GetKey()][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
+			m_sparse[Page(m_packed[m_packed.GetCount() - 1].GetKey())][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.Remove(m_packed.GetCount() - 1);
 		}

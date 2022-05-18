@@ -3,7 +3,6 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\Log.h(125,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h(4,25): warning C4091: 'extern ': ignored on left of 'GLFWwindow' when no variable is declared
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.h(13,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(84,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Storage.h(33,80): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
           with
           [
@@ -46,5 +45,5 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\Sand
           [
               Component=AstralEngine::SpriteRenderer
           ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(267): warning C4715: 'AstralEngine::ADynArr<AstralEngine::Registry<enum AstralEngine::BaseEntity>::PoolData>::EmplaceAt<>': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(269): warning C4715: 'AstralEngine::ADynArr<AstralEngine::Registry<enum AstralEngine::BaseEntity>::PoolData>::EmplaceAt<>': not all control paths return a value
   Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe

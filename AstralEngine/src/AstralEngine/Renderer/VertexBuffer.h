@@ -81,7 +81,7 @@ namespace AstralEngine
 
 		unsigned int GetStride() const { return m_stride; }
 		
-		inline int GetCount() const { return m_elements.GetCount(); }
+		inline size_t GetCount() const { return m_elements.GetCount(); }
 
 		const LayoutElement& operator[](unsigned int index) const
 		{

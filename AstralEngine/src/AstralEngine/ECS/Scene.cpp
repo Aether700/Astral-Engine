@@ -188,9 +188,9 @@ namespace AstralEngine
 	void Scene::CallOnStart()
 	{
 		auto view = m_registry.GetView<CallbackList>();
-		for (BaseEntity e : view)
+		for (size_t i = 0; i < view.GetCount(); i++)
 		{
-			auto& list = view.Get<CallbackList>(e);
+			auto& list = view.Get<CallbackList>(view[i]);
 			list.CallOnStart();
 		}
 	}
@@ -198,9 +198,9 @@ namespace AstralEngine
 	void Scene::CallOnUpdate()
 	{
 		auto view = m_registry.GetView<CallbackList>();
-		for (BaseEntity e : view)
+		for (size_t i = 0; i < view.GetCount(); i++)
 		{
-			auto& list = view.Get<CallbackList>(e);
+			auto& list = view.Get<CallbackList>(view[i]);
 			list.CallOnUpdate();
 		}
 	}
@@ -208,9 +208,9 @@ namespace AstralEngine
 	void Scene::CallOnLateUpdate()
 	{
 		auto view = m_registry.GetView<CallbackList>();
-		for (BaseEntity e : view)
+		for (size_t i = 0; i < view.GetCount(); i++)
 		{
-			auto& list = view.Get<CallbackList>(e);
+			auto& list = view.Get<CallbackList>(view[i]);
 			list.CallOnLateUpdate();
 		}
 	}

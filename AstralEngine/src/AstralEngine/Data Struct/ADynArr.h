@@ -14,8 +14,6 @@ namespace AstralEngine
 	{
 		friend class ADynArr<T>;
 	public:
-		ADynArrIterator(size_t pos, T* arr) : m_pos(pos), m_arr(arr) { }
-
 		ADynArrIterator(const ADynArrIterator<T>& other) : m_pos(other.m_pos), m_arr(other.m_arr) { }
 
 		virtual ~ADynArrIterator() { }
@@ -73,6 +71,9 @@ namespace AstralEngine
 			return m_arr[m_pos];
 		}
 
+	protected:
+		ADynArrIterator(size_t pos, T* arr) : m_pos(pos), m_arr(arr) { }
+
 	private:
 		size_t m_pos;
 		T* m_arr;
@@ -81,9 +82,8 @@ namespace AstralEngine
 	template<typename T>
 	class ADynArrConstIterator : public ADynArrIterator<T>
 	{
+		friend class ADynArr<T>;
 	public:
-		ADynArrConstIterator(size_t pos, T* arr) : ADynArrIterator<T>(pos, arr) { }
-		
 		ADynArrConstIterator(const ADynArrConstIterator<T>& other) : ADynArrIterator<T>(other) { }
 
 		virtual ADynArrConstIterator<T>& operator++()
@@ -140,6 +140,8 @@ namespace AstralEngine
 			return ADynArrIterator<T>::operator*();
 		}
 
+	private:
+		ADynArrConstIterator(size_t pos, T* arr) : ADynArrIterator<T>(pos, arr) { }
 	};
 
 	template<typename T>
