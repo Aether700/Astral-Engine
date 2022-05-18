@@ -68,15 +68,15 @@ namespace AstralEngine
 
 		T& operator*() const
 		{
-			return m_arr[m_pos];
+			return m_arr->Get(m_pos);
 		}
 
 	protected:
-		ADynArrIterator(size_t pos, T* arr) : m_pos(pos), m_arr(arr) { }
+		ADynArrIterator(size_t pos, ADynArr<T>* arr) : m_pos(pos), m_arr(arr) { }
 
 	private:
 		size_t m_pos;
-		T* m_arr;
+		ADynArr<T>* m_arr;
 	};
 
 	template<typename T>
@@ -141,7 +141,7 @@ namespace AstralEngine
 		}
 
 	private:
-		ADynArrConstIterator(size_t pos, T* arr) : ADynArrIterator<T>(pos, arr) { }
+		ADynArrConstIterator(size_t pos, const ADynArr<T>* arr) : ADynArrIterator<T>(pos, const_cast<ADynArr<T>*>(arr)) { }
 	};
 
 	template<typename T>
@@ -424,42 +424,42 @@ namespace AstralEngine
 		
 		AIterator begin()
 		{
-			return ADynArrIterator<T>(0, m_arr); 
+			return ADynArrIterator<T>(0, this); 
 		}
 		
 		AIterator end()
 		{
-			return ADynArrIterator<T>(m_count, m_arr); 
+			return ADynArrIterator<T>(m_count, this); 
 		}
 
 		AIterator rbegin() 
 		{
-			return ADynArrIterator<T>(m_count - 1, m_arr);
+			return ADynArrIterator<T>(m_count - 1, this);
 		}
 		
 		AIterator rend() 
 		{
-			return ADynArrIterator<T>(-1, m_arr);
+			return ADynArrIterator<T>(-1, this);
 		}
 
 		AConstIterator begin() const
 		{
-			return ADynArrConstIterator<T>(0, m_arr);
+			return ADynArrConstIterator<T>(0, this);
 		}
 
 		AConstIterator end() const
 		{
-			return ADynArrConstIterator<T>(m_count, m_arr);
+			return ADynArrConstIterator<T>(m_count, this);
 		}
 
 		AConstIterator rbegin() const
 		{
-			return ADynArrConstIterator<T>(m_count - 1, m_arr);
+			return ADynArrConstIterator<T>(m_count - 1, this);
 		}
 
 		AConstIterator rend() const
 		{
-			return ADynArrConstIterator<T>(-1, m_arr);
+			return ADynArrConstIterator<T>(-1, this);
 		}
 
 

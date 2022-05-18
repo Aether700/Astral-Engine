@@ -132,8 +132,8 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector3Int.cpp(77): warning C4715: 'AstralEngine::Vector3Int::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector3.cpp(111): warning C4715: 'AstralEngine::Vector3::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector3.cpp(94): warning C4715: 'AstralEngine::Vector3::operator[]': not all control paths return a value
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2Int.cpp(59): warning C4715: 'AstralEngine::Vector2Int::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2Int.cpp(73): warning C4715: 'AstralEngine::Vector2Int::operator[]': not all control paths return a value
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2Int.cpp(59): warning C4715: 'AstralEngine::Vector2Int::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2Int.cpp(126): warning C4715: 'AstralEngine::Vector2Short::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2.cpp(80): warning C4715: 'AstralEngine::Vector2::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Math\Vectors\Vector2.cpp(94): warning C4715: 'AstralEngine::Vector2::operator[]': not all control paths return a value
@@ -253,8 +253,8 @@ C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src
   Generating Code...
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,AstralEngine::AReference<AstralEngine::Shader> >::operator[]': not all control paths return a value
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\AUnorderedMap.h(297): warning C4715: 'AstralEngine::AUnorderedMap<enum AstralEngine::RenderingPrimitive,AstralEngine::RenderingBatch>::operator[]': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\VertexBuffer.h(31): warning C4715: 'AstralEngine::ADataTypeSize': not all control paths return a value
 C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\UI\UICore.h(100): warning C4172: returning address of local variable or temporary
