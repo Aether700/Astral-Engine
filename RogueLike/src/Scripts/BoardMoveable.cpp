@@ -13,7 +13,7 @@ namespace RogueLike
 		
 		AEntity targetCell = BoardManager::GetCell(newPos.x, newPos.y);
 
-		if (targetCell == NullEntity || targetCell.GetName() == "Player")
+		if (!targetCell.IsValid() || !(targetCell.GetName() == "Block" || targetCell.GetName() == "Goal"))
 		{
 			BoardManager::SetCell(NullEntity, m_boardCoords.x, m_boardCoords.y);
 			m_boardCoords = newPos;

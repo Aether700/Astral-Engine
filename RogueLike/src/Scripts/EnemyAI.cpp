@@ -39,7 +39,10 @@ namespace RogueLike
 
 	void EnemyAI::ResetPosition()
 	{
-		GetComponent<BoardMoveable>().Set(m_startPos);
+		BoardMoveable& move = GetComponent<BoardMoveable>();
+		Vector2Int coords = move.GetCoords();
+		BoardManager::SetCell(NullEntity, coords.x, coords.y);
+		move.Set(m_startPos);
 	}
 
 	Vector2Int EnemyAI::ComputeDesiredMove()

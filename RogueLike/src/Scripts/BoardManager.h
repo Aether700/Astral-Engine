@@ -41,6 +41,7 @@ namespace RogueLike
 
 
 		size_t m_level;
+		AEntity m_goal;
 		AEntity m_board[s_size * s_size];
 	};
 }

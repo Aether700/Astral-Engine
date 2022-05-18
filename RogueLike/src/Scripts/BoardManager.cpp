@@ -76,14 +76,16 @@ namespace RogueLike
 			}
 			m_board[i] = NullEntity;
 		}
+		SetCell(m_goal, s_size - 1, s_size - 1);
 	}
 
 	void BoardManager::InitializeBoard()
 	{
-		AEntity goal = CreateAEntity();
-		goal.GetTransform().SetParent(entity);
-		goal.EmplaceComponent<SpriteRenderer>(GameLayer::GetGoalFlagTexture());
-		goal.GetTransform().position = Vector3(s_size - 1, s_size - 1, 0);
+		m_goal = CreateAEntity();
+		m_goal.GetTransform().SetParent(entity);
+		m_goal.EmplaceComponent<SpriteRenderer>(GameLayer::GetGoalFlagTexture());
+		SetCell(m_goal, s_size - 1, s_size - 1);
+		m_goal.GetTransform().position = Vector3(s_size - 1, s_size - 1, 0);
 		GenerateBlocks();
 		GenerateEnemies();
 	}
@@ -109,7 +111,7 @@ namespace RogueLike
 
 	size_t BoardManager::GetNumBlocks() const
 	{
-		return (size_t)(5.0f * Math::Log(m_level) + 10.0f);
+		return Math::Min((size_t)(5.0f * Math::Log(m_level) + 5.0f), 17);
 	}
 
 	Vector2Int BoardManager::GetRandomBlockCoord() const
@@ -135,7 +137,15 @@ namespace RogueLike
 	
 	size_t BoardManager::GetNumEnemies() const
 	{
-		return (size_t)(2.0f * Math::Log(m_level) + 1.0f);
+		if (m_level < 3)
+		{
+			return 1;
+		}
+		else if (m_level < 8) 
+		{
+			return 2;
+		}
+		return 3;
 	}
 
 	Vector2Int BoardManager::GetRandomEnemyCoord() const

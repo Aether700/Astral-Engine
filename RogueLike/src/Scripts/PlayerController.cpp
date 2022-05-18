@@ -109,7 +109,13 @@ namespace RogueLike
 
 	void PlayerController::ResetLevel()
 	{
-		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+		{
+			BoardMoveable& move = GetComponent<BoardMoveable>();
+			Vector2Int coords = move.GetCoords();
+			BoardManager::SetCell(NullEntity, coords.x, coords.y);
+			move.Set(Vector2Int::Zero());
+		}
+
 		for(AEntity& e : m_enemies)
 		{
 			e.GetComponent<EnemyAI>().ResetPosition();
