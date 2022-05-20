@@ -18,9 +18,17 @@ namespace RogueLike
 	private:
 		void ChangeLevel();
 		void ResetLevel();
+		void RegenerateLevel();
+
+		void ResetGame();
+		
+		void RespawnPlayerAfterDeath();
 
 		bool m_hasMoved;
 		bool m_isDead;
+
+		unsigned int m_skipCount = 3;
+		unsigned int m_currSkipCount;
 
 		float m_deathTime = 3.0f;
 		float m_currDeathTimer = 0.0f;

@@ -127,7 +127,8 @@ namespace RogueLike
 		{
 			Vector2Int coords = GetRandomEnemyCoord();
 
-			while (BoardManager::GetCell(coords.x, coords.y) != NullEntity || coords == Vector2Int::Zero())
+			while (BoardManager::GetCell(coords.x, coords.y) != NullEntity || coords == Vector2Int::Zero() 
+				|| coords.x < 3 || coords.y < 3)
 			{
 				coords = GetRandomEnemyCoord();
 			}

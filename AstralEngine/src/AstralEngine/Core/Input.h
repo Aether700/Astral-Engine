@@ -11,12 +11,20 @@ namespace AstralEngine
 	public:
 		static bool GetKey(int keycode);
 		static bool GetKey(KeyCode key);
+		static bool GetAnyKey();
+		
+
 		static bool GetKeyDown(int keycode);
 		static bool GetKeyDown(KeyCode key);
+		static bool GetAnyKeyDown();
+		
+		
 		static bool GetMouseButton(int mouseButton);
 		static bool GetMouseButton(MouseButtonCode mouseButton);
+		
 		static bool GetMouseButtonDown(int mouseButton);
 		static bool GetMouseButtonDown(MouseButtonCode mouseButton);
+		
 		static Vector2 GetMousePosition();
 		static float GetMouseXPos();
 		static float GetMouseYPos();

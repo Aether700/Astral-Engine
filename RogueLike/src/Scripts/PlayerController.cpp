@@ -11,8 +11,20 @@ namespace RogueLike
 	void PlayerController::OnUpdate()
 	{
 		m_hasMoved = false;
+
+
 		if (m_isDead)
 		{
+			if (Input::GetAnyKeyDown())
+			{
+				m_currSkipCount++;
+
+				if (m_currSkipCount >= m_skipCount)
+				{
+					RespawnPlayerAfterDeath();
+				}
+			}
+
 			if (m_currDeathTimer < m_deathTime)
 			{
 				m_currDeathTimer += Time::GetDeltaTime();
@@ -20,11 +32,23 @@ namespace RogueLike
 			}
 			else
 			{
-				m_isDead = false;
-				GetComponent<SpriteRenderer>().SetActive(true);
-				ResetLevel();
+				RespawnPlayerAfterDeath();
 			}
 		}
+
+		if (Input::GetKeyDown(KeyCode::Backspace))
+		{
+			ResetGame();
+		}
+		else if (Input::GetKeyDown(KeyCode::R))
+		{
+			ResetLevel();
+		}
+		else if (Input::GetKeyDown(KeyCode::Enter))
+		{
+			RegenerateLevel();
+		}
+
 
 		Vector2Int dir = Vector2Int::Zero();
 
@@ -105,6 +129,31 @@ namespace RogueLike
 		BoardManager::IncrementLevel();
 		BoardManager::RegenerateBoard();
 		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+	}
+	
+	void PlayerController::RegenerateLevel()
+	{
+		m_hasMoved = false;
+		m_enemies.Clear();
+		BoardManager::RegenerateBoard();
+		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+	}
+
+	void PlayerController::ResetGame()
+	{
+		m_hasMoved = false;
+		m_enemies.Clear();
+		BoardManager::ResetLevel();
+		BoardManager::RegenerateBoard();
+		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+	}
+
+	void PlayerController::RespawnPlayerAfterDeath()
+	{
+		m_currSkipCount = 0;
+		m_isDead = false;
+		GetComponent<SpriteRenderer>().SetActive(true);
+		ResetLevel();
 	}
 
 	void PlayerController::ResetLevel()
