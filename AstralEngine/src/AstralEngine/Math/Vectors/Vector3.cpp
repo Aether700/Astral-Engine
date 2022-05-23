@@ -12,10 +12,10 @@ namespace AstralEngine
 	Vector3::Vector3() : x(0.0f), y(0.0f), z(0.0f) { }
 	Vector3::Vector3(float X, float Y, float Z) : x(X), y(Y), z(Z) { }
 	Vector3::Vector3(const Vector2& v2) : x(v2.x), y(v2.y), z(0.0f) { }
-	Vector3::Vector3(const Vector2Int& v2i) : x(v2i.x), y(v2i.y), z(0.0f) { }
-	Vector3::Vector3(const Vector3Int& v3i) : x(v3i.x), y(v3i.y), z(v3i.z) { }
+	Vector3::Vector3(const Vector2Int& v2i) : x((float)v2i.x), y((float)v2i.y), z(0.0f) { }
+	Vector3::Vector3(const Vector3Int& v3i) : x((float)v3i.x), y((float)v3i.y), z((float)v3i.z) { }
 	Vector3::Vector3(const Vector4& v4) : x(v4.x), y(v4.y), z(v4.z) { }
-	Vector3::Vector3(const Vector4Int& v4i) : x(v4i.x), y(v4i.y), z(v4i.z) { }
+	Vector3::Vector3(const Vector4Int& v4i) : x((float)v4i.x), y((float)v4i.y), z((float)v4i.z) { }
 
 	Vector3::~Vector3() { }
 
@@ -91,6 +91,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return 0.0f;
 	}
 
 	float& Vector3::operator[](unsigned int index)
@@ -108,6 +109,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return x;
 	}
 
 	Vector3& Vector3::operator=(const Vector3& v)

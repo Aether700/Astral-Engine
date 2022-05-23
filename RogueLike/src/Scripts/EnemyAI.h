@@ -13,7 +13,7 @@ namespace RogueLike
 
 		AEntity GetEntity() const;
 
-		void SaveStartPos();
+		void SetStartPos(const Vector2Int& coords);
 		void ResetPosition();
 
 	private:

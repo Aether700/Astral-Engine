@@ -629,13 +629,13 @@ namespace AstralEngine
 				return *this;
 			}
 
-			PoolData& operator=(PoolData&& other)
+			PoolData& operator=(PoolData&& other) noexcept
 			{
 				index = other.index;
 				pool = std::move(other.pool);
 				remove = other.remove;
 
-				other.index = 0 - 1;
+				other.index = Null;
 				other.pool = nullptr;
 				other.remove = nullptr;
 				return *this;

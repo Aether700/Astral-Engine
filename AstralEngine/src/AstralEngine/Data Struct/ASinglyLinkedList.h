@@ -154,6 +154,7 @@ namespace AstralEngine
 				Node* ptr = m_head;
 				m_head = m_head->next;
 				delete ptr;
+				m_count--;
 				return;
 			}
 
@@ -211,7 +212,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		ASinglyLinkedList<T>& operator=(ASinglyLinkedList<T>&& other)
+		ASinglyLinkedList<T>& operator=(ASinglyLinkedList<T>&& other) noexcept
 		{
 			Clear();
 			delete m_dummy;
@@ -252,8 +253,8 @@ namespace AstralEngine
 			Node* next;
 
 			Node() { }
-			Node(std::nullptr_t) : next(nullptr) { }
-			Node(const T& e) : element(e) { }
+			Node(std::nullptr_t) : next(nullptr), element() { }
+			Node(const T& e) : element(e), next(nullptr) { }
 			Node(const T& e, Node* ptr) : element(e), next(ptr) { }
 		};
 

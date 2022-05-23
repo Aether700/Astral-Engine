@@ -294,6 +294,7 @@ namespace AstralEngine
 			}
 
 			AE_CORE_ERROR("AUnorderedMap could not find new added key");
+			return pair.GetElement();
 		}
 
 		AUnorderedMap<K, T>::AIterator begin()
@@ -446,7 +447,7 @@ namespace AstralEngine
 		int GetBucketIndex(const K& key) const
 		{
 			AE_PROFILE_FUNCTION();
-			return m_compressFunc((int)Math::Abs(m_hash(key)), m_bucketCount);
+			return m_compressFunc((int)m_hash(key), m_bucketCount);
 		}
 
 		void AddAKeyElementPair(AKeyElementPair<K, T> pair, int index)
@@ -457,7 +458,7 @@ namespace AstralEngine
 		//returns true if rehashed hash map
 		bool CheckLoadFactor()
 		{
-			int loadFactor = m_count / m_bucketCount;
+			size_t loadFactor = m_count / m_bucketCount;
 
 			if (loadFactor >= UNORDERED_MAP_MAX_LOAD_FACTOR)
 			{

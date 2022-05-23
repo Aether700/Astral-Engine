@@ -8,7 +8,6 @@ namespace RogueLike
 	void EnemyAI::OnCreate()
 	{
 		m_player = GameLayer::GetPlayer();
-		m_player.GetComponent<PlayerController>().RegisterEnemy(*this);
 	}
 
 	void EnemyAI::OnLateUpdate()
@@ -32,9 +31,11 @@ namespace RogueLike
 
 	AEntity EnemyAI::GetEntity() const { return entity; }
 
-	void EnemyAI::SaveStartPos()
+	void EnemyAI::SetStartPos(const Vector2Int& coords)
 	{
-		m_startPos = GetComponent<BoardMoveable>().GetCoords();
+		m_player.GetComponent<PlayerController>().RegisterEnemy(*this);
+		GetComponent<BoardMoveable>().Set(coords);
+		m_startPos = coords;
 	}
 
 	void EnemyAI::ResetPosition()
@@ -54,7 +55,7 @@ namespace RogueLike
 		Vector2Int currCoords = ownMoveable.GetCoords();
 		Vector2Int moveNeeded = playerCoords - currCoords;
 
-		Vector2Int moveDir;
+		Vector2Int moveDir = Vector2Int::Zero();
 
 		if (Math::Abs(moveNeeded.x) > Math::Abs(moveNeeded.y))
 		{

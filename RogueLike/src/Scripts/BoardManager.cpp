@@ -70,12 +70,21 @@ namespace RogueLike
 	{
 		for (size_t i = 0; i < s_size * s_size; i++)
 		{
-			if (m_board[i].IsValid() && (m_board[i].GetName() == "Block" || m_board[i].GetName() == "Enemy"))
+			if (m_board[i].IsValid() && m_board[i].GetName() != "Player")
 			{
-				Destroy(m_board[i]);
+				if (m_board[i].GetName() == "Block")
+				{
+					m_blocks.Add(m_board[i]);
+				}
+				else if (m_board[i].GetName() == "Enemy")
+				{
+					m_enemies.Add(m_board[i]);
+				}
+				m_board[i].SetActive(false);
 			}
 			m_board[i] = NullEntity;
 		}
+		m_goal.SetActive(true);
 		SetCell(m_goal, s_size - 1, s_size - 1);
 	}
 
@@ -105,13 +114,13 @@ namespace RogueLike
 				currCoord = GetCell(coords.x, coords.y);
 			}
 			AE_INFO("(%d, %d)", coords.x, coords.y);
-			SetCell(CreateInnerBlock(coords), coords.x, coords.y);
+			SetBlock(coords);
 		}
 	}
 
 	size_t BoardManager::GetNumBlocks() const
 	{
-		return Math::Min((size_t)(5.0f * Math::Log(m_level) + 5.0f), 17);
+		return Math::Min((size_t)(2.5f * Math::Log(m_level) + 5.0f), 17);
 	}
 
 	Vector2Int BoardManager::GetRandomBlockCoord() const
@@ -128,11 +137,11 @@ namespace RogueLike
 			Vector2Int coords = GetRandomEnemyCoord();
 
 			while (BoardManager::GetCell(coords.x, coords.y) != NullEntity || coords == Vector2Int::Zero() 
-				|| coords.x < 3 || coords.y < 3)
+				|| coords.x < 2 || coords.y < 2)
 			{
 				coords = GetRandomEnemyCoord();
 			}
-			SetCell(CreateEnemy(coords), coords.x, coords.y);
+			SetEnemy(coords);
 		}
 	}
 	
@@ -161,6 +170,7 @@ namespace RogueLike
 		innerBlock.GetTransform().SetParent(entity);
 		innerBlock.EmplaceComponent<SpriteRenderer>(GameLayer::GetBlockTexture());
 		innerBlock.SetName("Block");
+		SetCell(innerBlock, coords.x, coords.y);
 		return innerBlock;
 	}
 
@@ -170,10 +180,36 @@ namespace RogueLike
 		enemy.SetName("Enemy");
 		enemy.GetTransform().SetParent(entity);
 		BoardMoveable& move = enemy.EmplaceComponent<BoardMoveable>();
-		move.Set(coords);
 		enemy.EmplaceComponent<SpriteRenderer>(GameLayer::GetEnemyTexture());
 		EnemyAI& ai = enemy.EmplaceComponent<EnemyAI>();
-		ai.SaveStartPos();
+		ai.SetStartPos(coords);
 		return enemy;
+	}
+
+	AEntity BoardManager::SetBlock(const Vector2Int &coords)
+	{
+		if (m_blocks.GetCount() > 0)
+		{
+			AEntity e = m_blocks[m_blocks.GetCount() - 1];
+			m_blocks.RemoveAt(m_blocks.GetCount() - 1);
+			e.SetActive(true);
+			e.GetTransform().position = Vector3(coords.x, coords.y, 0);
+			SetCell(e, coords.x, coords.y);
+			return e;
+		}
+		return CreateInnerBlock(coords);
+	}
+
+	AEntity BoardManager::SetEnemy(const Vector2Int &coords)
+	{
+		if (m_enemies.GetCount() > 0)
+		{
+			AEntity e = m_enemies[m_enemies.GetCount() - 1];
+			m_enemies.RemoveAt(m_enemies.GetCount() - 1);
+			e.SetActive(true);
+			e.GetComponent<EnemyAI>().SetStartPos(coords);
+			return e;
+		}
+		return CreateEnemy(coords);
 	}
 }

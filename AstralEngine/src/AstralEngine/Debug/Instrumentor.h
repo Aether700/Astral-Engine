@@ -126,7 +126,7 @@ namespace AstralEngine
 			long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_startPoint).time_since_epoch().count();
 			long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTime).time_since_epoch().count();
 
-			unsigned int threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
+			unsigned int threadID = (unsigned int)std::hash<std::thread::id>{}(std::this_thread::get_id());
 			Instrumentor::Get().WriteProfile({ m_name, start, end, threadID });
 
 			m_stopped = true;

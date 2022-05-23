@@ -4,6 +4,16 @@
 
 namespace AstralEngine
 {
+	int Math::Abs(int v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0)
+		{
+			return -1 * v;
+		}
+		return v;
+	}
+
 	float Math::Abs(float v)
 	{
 		AE_PROFILE_FUNCTION();

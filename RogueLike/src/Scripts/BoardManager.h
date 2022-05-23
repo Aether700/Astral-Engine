@@ -36,6 +36,9 @@ namespace RogueLike
 		AEntity CreateInnerBlock(const Vector2Int& coords) const;
 		AEntity CreateEnemy(const Vector2Int& coords) const;
 
+		AEntity SetBlock(const Vector2Int& coords);
+		AEntity SetEnemy(const Vector2Int& coords);
+
 		static constexpr size_t s_size = 7;
 		static BoardManager* s_instance;
 
@@ -43,5 +46,7 @@ namespace RogueLike
 		size_t m_level;
 		AEntity m_goal;
 		AEntity m_board[s_size * s_size];
+		ADynArr<AEntity> m_blocks;
+		ADynArr<AEntity> m_enemies;
 	};
 }

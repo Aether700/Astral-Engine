@@ -63,7 +63,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<T>& operator=(AUniqueRef<T>&& other)
+		AUniqueRef<T>& operator=(AUniqueRef<T>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -259,7 +259,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<void>& operator=(AUniqueRef<void>&& other)
+		AUniqueRef<void>& operator=(AUniqueRef<void>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -542,7 +542,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<void, DeleteFunc>&& other)
+		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<void, DeleteFunc>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;

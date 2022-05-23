@@ -158,7 +158,7 @@ namespace AstralEngine
 	public:
 		CallbackList() { }
 		CallbackList(const CallbackList&) { }
-		CallbackList(CallbackList&& other) 
+		CallbackList(CallbackList&& other) noexcept
 		{
 			m_callbacks = std::move(other.m_callbacks);
 		}
@@ -232,7 +232,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		CallbackList& operator=(CallbackList&& other)
+		CallbackList& operator=(CallbackList&& other) noexcept
 		{
 			Clear();
 			m_callbacks = std::move(other.m_callbacks);

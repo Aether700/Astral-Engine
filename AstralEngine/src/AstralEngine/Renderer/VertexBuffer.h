@@ -28,6 +28,8 @@ namespace AstralEngine
 		case ADataType::Int4:		return 4 * sizeof(int);
 		case ADataType::Bool:		return sizeof(bool);
 		}
+		AE_CORE_ERROR("Unknown ADataType provided");
+		return 0;
 	}
 
 	struct LayoutElement
@@ -37,7 +39,7 @@ namespace AstralEngine
 		unsigned int size;
 		bool normalized;
 
-		LayoutElement() { }
+		LayoutElement() : size(0), type(ADataType::Bool), normalized(false) { }
 
 		LayoutElement(ADataType t, const std::string& n, bool nor = false) : type(t), name(n), 
 			normalized(nor), size(ADataTypeSize(t)) { }

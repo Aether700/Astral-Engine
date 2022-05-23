@@ -266,6 +266,7 @@ namespace AstralEngine
 			}
 			m_arr[index] = T(std::forward<Args>(args)...);
 			m_count++;
+			return m_arr[index];
 		}
 		
 		virtual size_t Find(const T& element) const override

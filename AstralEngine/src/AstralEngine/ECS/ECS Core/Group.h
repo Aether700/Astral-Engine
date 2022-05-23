@@ -60,7 +60,7 @@ namespace AstralEngine
 		decltype(auto) Get(const Entity e) const
 		{
 			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e));
+			AE_CORE_ASSERT(Contains(e), "");
 
 			if constexpr (sizeof... (Comp) == 1)
 			{

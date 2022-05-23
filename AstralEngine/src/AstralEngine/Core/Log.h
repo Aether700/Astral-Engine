@@ -104,7 +104,7 @@ namespace AstralEngine
 			{
 				if (format[i] == '%')
 				{
-					float temp;
+					double temp;
 					bool correctFormat = true;
 					switch (format[i + 1])
 					{

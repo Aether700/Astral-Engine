@@ -6,6 +6,7 @@ namespace AstralEngine
 	class Math
 	{
 	public:
+		static int Abs(int v);
 		static float Abs(float v);
 		static float Clamp(float value, float min, float max);
 		static float Sin(float v);
