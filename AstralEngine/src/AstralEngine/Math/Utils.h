@@ -15,7 +15,9 @@ namespace AstralEngine
 		static float DegreeToRadiants(float v);
 		static float Sqrt(float v);
 		static float Log(float v);
+		static int Min(int i1, int i2);
 		static float Min(float f1, float f2);
+		static int Max(int i1, int i2);
 		static float Max(float f1, float f2);
 		static float Floor(float f);
 
@@ -48,7 +50,7 @@ namespace AstralEngine
 
 		/*	returns a random integer between 0 and RAND_MAX
 			(a maximum value defined by c libraries which is at least 32767).
-			Note that RAND_MAX is not cannot be returned
+			Note that RAND_MAX cannot be returned
 
 			returns: a random integer between 0 and RAND_MAX (RAND_MAX not included)
 		*/

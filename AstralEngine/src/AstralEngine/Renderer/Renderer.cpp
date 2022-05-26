@@ -474,17 +474,17 @@ namespace AstralEngine
 		offset += RenderingBatch::s_maxCubemapSlots;
 
 		int* samplers2DShadowMap = new int[RenderingBatch::s_maxTexture2DShadowMapSlots];
-		for (int i = 0; i < RenderingBatch::s_maxTexture2DShadowMapSlots; i++)
+		for (unsigned int i = 0; i < RenderingBatch::s_maxTexture2DShadowMapSlots; i++)
 		{
-			samplers2DShadowMap[i] = i + offset;
+			samplers2DShadowMap[i] = (int)(i + offset);
 		}
 
 		offset += RenderingBatch::s_maxTexture2DShadowMapSlots;
 
 		int* samplersCubemapShadowMap = new int[RenderingBatch::s_maxCubemapShadowMapSlots];
-		for (int i = 0; i < RenderingBatch::s_maxCubemapShadowMapSlots; i++)
+		for (unsigned int i = 0; i < RenderingBatch::s_maxCubemapShadowMapSlots; i++)
 		{
-			samplersCubemapShadowMap[i] = i + offset;
+			samplersCubemapShadowMap[i] = (int)(i + offset);
 		}
 
 		s_shader = Shader::Create("assets/shaders/Shader2D.glsl");

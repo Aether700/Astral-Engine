@@ -30,8 +30,7 @@ namespace RogueLike
 		unsigned int m_skipCount = 3;
 		unsigned int m_currSkipCount;
 
-		float m_deathTime = 3.0f;
-		float m_currDeathTimer = 0.0f;
+		Timer m_deathTimer;
 		ADynArr<AEntity> m_enemies;
 	};
 }

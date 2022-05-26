@@ -5,7 +5,10 @@ namespace RogueLike
 	void PlayerController::OnStart()
 	{
 		GetComponent<BoardMoveable>().Set(Vector2Int::Zero());
+		m_deathTimer.SetTimer(3.0f);
+		m_deathTimer.SetActive(false);
 		m_isDead = false;
+		m_deathTimer.AddListener(ADelegate<void()>().BindFunction<&PlayerController::RespawnPlayerAfterDeath>(this));
 	}
 
 	void PlayerController::OnUpdate()
@@ -25,14 +28,9 @@ namespace RogueLike
 				}
 			}
 
-			if (m_currDeathTimer < m_deathTime)
+			if (!m_deathTimer.IsReady())
 			{
-				m_currDeathTimer += Time::GetDeltaTime();
 				return;
-			}
-			else
-			{
-				RespawnPlayerAfterDeath();
 			}
 		}
 
@@ -117,7 +115,8 @@ namespace RogueLike
 	void PlayerController::KillPlayer()
 	{
 		m_isDead = true;
-		m_currDeathTimer = 0.0f;
+		m_deathTimer.Reset();
+		m_deathTimer.SetActive(true);
 		GetComponent<SpriteRenderer>().SetActive(false);
 	}
 
@@ -152,6 +151,7 @@ namespace RogueLike
 	{
 		m_currSkipCount = 0;
 		m_isDead = false;
+		m_deathTimer.SetActive(false);
 		GetComponent<SpriteRenderer>().SetActive(true);
 		ResetLevel();
 	}

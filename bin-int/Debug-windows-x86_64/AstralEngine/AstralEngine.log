@@ -1,2 +1,7 @@
-﻿  Vector2Int.cpp
+﻿  Application.cpp
+  Time.cpp
+  Scene.cpp
+  WindowsTime.cpp
+  OrthographicCameraController.cpp
+  Generating Code...
   AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib
