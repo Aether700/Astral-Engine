@@ -22,6 +22,7 @@ namespace AstralEngine
 
 		void CallOnStart();
 		void CallOnUpdate();
+		void CallOnLateUpdate();
 		void DestroyEntitiesToDestroy();
 
 		Registry<BaseEntity> m_registry;

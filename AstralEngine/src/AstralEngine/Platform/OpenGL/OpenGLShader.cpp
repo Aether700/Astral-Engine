@@ -25,13 +25,13 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		//Get name form filepath
-		unsigned int lastSlash = filepath.find_last_of("/\\");
+		unsigned int lastSlash = (unsigned int)filepath.find_last_of("/\\");
 		//check that there is any slash at all
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		unsigned int lastDot = filepath.rfind('.');
+		unsigned int lastDot = (unsigned int)filepath.rfind('.');
 		if (lastDot == std::string::npos)
 		{
-			lastDot = filepath.size();
+			lastDot = (unsigned int)filepath.size();
 		}
 		m_name = filepath.substr(lastSlash, lastDot - lastSlash);
 
@@ -219,7 +219,7 @@ namespace AstralEngine
 
 		while (position != std::string::npos)
 		{
-			unsigned int eol = src.find_first_of("\r\n", position);
+			unsigned int eol = (unsigned int)src.find_first_of("\r\n", position);
 			AE_CORE_ASSERT((eol != std::string::npos), "Syntax Error");
 			size_t start = position + typeTokenLength + 1;
 

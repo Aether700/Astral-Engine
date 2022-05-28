@@ -93,7 +93,7 @@ namespace AstralEngine
 
 		virtual ~UIElement() { }
 
-		const Vector2& GetScreenCoords() const 
+		Vector2 GetScreenCoords() const 
 		{ 
 			if (m_parentElement != nullptr)
 			{

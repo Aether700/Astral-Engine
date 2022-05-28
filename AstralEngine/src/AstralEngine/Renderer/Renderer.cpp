@@ -114,7 +114,7 @@ namespace AstralEngine
 
 			VertexData* vertexData = new VertexData[m_numVertices];
 
-			for (int i = 0; i < m_numVertices; i++)
+			for (unsigned int i = 0; i < m_numVertices; i++)
 			{
 				vertexData[i].position = (Vector3)(m_transform
 					* Vector4(m_positionArr[i].x, m_positionArr[i].y, m_positionArr[i].z, 1));
@@ -122,7 +122,7 @@ namespace AstralEngine
 				vertexData[i].color = m_tintColor;
 				vertexData[i].normal = (Vector3)(m_transform
 					* Vector4(m_normalArr[i].x, m_normalArr[i].y, m_normalArr[i].z, 0));
-				vertexData[i].textureIndex = textureIndex;
+				vertexData[i].textureIndex = (float)textureIndex;
 				vertexData[i].tillingFactor = m_tileFactor;
 				vertexData[i].uses3DTexture = 0;
 				vertexData[i].ignoresCamera = m_ignoresCam ? 1.0f : 0.0f;
@@ -284,11 +284,11 @@ namespace AstralEngine
 	{
 		int textureIndex = 0;
 		bool found = false;
-		for (int i = 0; i < m_texture2DIndex; i++)
+		for (unsigned int i = 0; i < m_texture2DIndex; i++)
 		{
 			if (*texture == *m_texture2DSlots[i])
 			{
-				textureIndex = i;
+				textureIndex = (int)i;
 				found = true;
 				break;
 			}
@@ -314,11 +314,11 @@ namespace AstralEngine
 	{
 		int textureIndex = 0;
 		bool found = false;
-		for (int i = 0; i < m_cubemapIndex; i++)
+		for (unsigned int i = 0; i < m_cubemapIndex; i++)
 		{
 			if (*cubemap == *m_cubemapSlots[i])
 			{
-				textureIndex = i;
+				textureIndex = (int)i;
 				found = true;
 				break;
 			}
@@ -341,19 +341,17 @@ namespace AstralEngine
 
 	void RenderingBatch::AddTexture2DShadowMap(AReference<Texture2D> shadowMap)
 	{
-		int textureIndex = 0;
-		bool found = false;
-		for (int i = 0; i < m_texture2DShadowMapIndex; i++)
+		int textureIndex = -1;
+		for (unsigned int i = 0; i < m_texture2DShadowMapIndex; i++)
 		{
 			if (*shadowMap == *m_texture2DShadowMapSlots[i])
 			{
-				textureIndex = i;
-				found = true;
+				textureIndex = (int)i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0 && !found)
+		if (textureIndex == -1)
 		{
 			if (m_texture2DShadowMapIndex == s_maxTexture2DShadowMapSlots)
 			{
@@ -368,19 +366,17 @@ namespace AstralEngine
 
 	void RenderingBatch::AddCubemapShadowMap(AReference<CubeMap> shadowMap)
 	{
-		int textureIndex = 0;
-		bool found = false;
-		for (int i = 0; i < m_cubemapShadowMapIndex; i++)
+		int textureIndex = -1;
+		for (unsigned int i = 0; i < m_cubemapShadowMapIndex; i++)
 		{
 			if (*shadowMap == *m_cubemapShadowMapSlots[i])
 			{
-				textureIndex = i;
-				found = true;
+				textureIndex = (int)i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0 && !found)
+		if (textureIndex == -1)
 		{
 			if (m_cubemapShadowMapIndex == s_maxCubemapShadowMapSlots)
 			{
@@ -462,15 +458,15 @@ namespace AstralEngine
 		s_defaultWhiteTexture = Texture2D::Create(1, 1, &whiteTextureData, sizeof(whiteTextureData));
 
 		int* samplers = new int[RenderingBatch::s_maxTexture2DSlots];
-		for (int i = 0; i < RenderingBatch::s_maxTexture2DSlots; i++)
+		for (int i = 0; i < (int)RenderingBatch::s_maxTexture2DSlots; i++)
 		{
-			samplers[i] = i;
+			samplers[i] = (int)i;
 		}
 
 		unsigned int offset = RenderingBatch::s_maxTexture2DSlots;
 
 		int* samplersCubemap = new int[RenderingBatch::s_maxCubemapSlots];
-		for (int i = 0; i < RenderingBatch::s_maxCubemapSlots; i++)
+		for (int i = 0; i < (int)RenderingBatch::s_maxCubemapSlots; i++)
 		{
 			samplersCubemap[i] = i + offset;
 		}
@@ -478,17 +474,17 @@ namespace AstralEngine
 		offset += RenderingBatch::s_maxCubemapSlots;
 
 		int* samplers2DShadowMap = new int[RenderingBatch::s_maxTexture2DShadowMapSlots];
-		for (int i = 0; i < RenderingBatch::s_maxTexture2DShadowMapSlots; i++)
+		for (unsigned int i = 0; i < RenderingBatch::s_maxTexture2DShadowMapSlots; i++)
 		{
-			samplers2DShadowMap[i] = i + offset;
+			samplers2DShadowMap[i] = (int)(i + offset);
 		}
 
 		offset += RenderingBatch::s_maxTexture2DShadowMapSlots;
 
 		int* samplersCubemapShadowMap = new int[RenderingBatch::s_maxCubemapShadowMapSlots];
-		for (int i = 0; i < RenderingBatch::s_maxCubemapShadowMapSlots; i++)
+		for (unsigned int i = 0; i < RenderingBatch::s_maxCubemapShadowMapSlots; i++)
 		{
-			samplersCubemapShadowMap[i] = i + offset;
+			samplersCubemapShadowMap[i] = (int)(i + offset);
 		}
 
 		s_shader = Shader::Create("assets/shaders/Shader2D.glsl");

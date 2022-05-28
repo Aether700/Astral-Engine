@@ -10,11 +10,11 @@ namespace AstralEngine
 {
 	Vector2::Vector2() : x(0.0f), y(0.0f) { }
 	Vector2::Vector2(float X, float Y) : x(X), y(Y) { }
-	Vector2::Vector2(const Vector2Int& v2i) : x(v2i.x), y(v2i.y) { }
+	Vector2::Vector2(const Vector2Int& v2i) : x((float)v2i.x), y((float)v2i.y) { }
 	Vector2::Vector2(const Vector3& v3) : x(v3.x), y(v3.y) { }
-	Vector2::Vector2(const Vector3Int& v3i) : x(v3i.x), y(v3i.y) { }
+	Vector2::Vector2(const Vector3Int& v3i) : x((float)v3i.x), y((float)v3i.y) { }
 	Vector2::Vector2(const Vector4& v4) : x(v4.x), y(v4.y) { }
-	Vector2::Vector2(const Vector4Int& v4i) : x(v4i.x), y(v4i.y) { }
+	Vector2::Vector2(const Vector4Int& v4i) : x((float)v4i.x), y((float)v4i.y) { }
 
 
 	Vector2::~Vector2() { }
@@ -77,6 +77,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return 0.0f;
 	}
 
 	float& Vector2::operator[](unsigned int index) 
@@ -91,6 +92,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return x;
 	}
 
 	const Vector2 operator*(float k, const Vector2& v) { return v * k; }

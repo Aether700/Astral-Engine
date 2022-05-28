@@ -60,17 +60,17 @@ namespace AstralEngine
 		decltype(auto) Get(const Entity e) const
 		{
 			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e));
+			AE_CORE_ASSERT(Contains(e), "");
 
 			if constexpr (sizeof... (Comp) == 1)
 			{
-				//need to unwrap the Type "packet" even if just one (I believe?)
+				//need to unwrap the Type "packet" even if just one
 				return (std::get<PoolType<Comp>*>(m_pools)->Get(e), ...);
 			}
 			else
 			{
 				//recursive call
-				return std::tuple<decltype(Get<Comp>({}))... > { Get<Comp>(e), ... };
+				return std::tuple<decltype(Get<Comp>({}))...> { Get<Comp>(e)... };
 			}
 		}
 
@@ -154,7 +154,6 @@ namespace AstralEngine
 			}
 		}
 
-
 		AIterator begin() const
 		{
 			return std::get<0>(m_pools)->ASparseSet<Entity>::begin();
@@ -211,7 +210,7 @@ namespace AstralEngine
 			auto it = std::make_tuple((std::get<PoolType<Strong>*>(m_pools)->end() - *m_length)...);
 			auto data = std::get<0>(m_pools)->SparseSet<Entity>::end() - *m_length;
 
-			for (size_t i = 0; i < *length; i++)
+			for (size_t i = 0; i < *m_length; i++)
 			{
 				if constexpr (std::is_invocable_v < Func, decltype(Get<Strong>({}))..., decltype(Get<Weak>({}))... > )
 				{

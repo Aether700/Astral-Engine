@@ -4,6 +4,16 @@
 
 namespace AstralEngine
 {
+	int Math::Abs(int v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0)
+		{
+			return -1 * v;
+		}
+		return v;
+	}
+
 	float Math::Abs(float v)
 	{
 		AE_PROFILE_FUNCTION();
@@ -58,6 +68,21 @@ namespace AstralEngine
 		return sqrt(v);
 	}
 
+	float Math::Log(float v)
+	{
+		return std::log(v);
+	}
+
+	int Math::Min(int i1, int i2)
+	{
+		if (i1 < i2)
+		{
+			return i1;
+		}
+
+		return i2;
+	}
+
 	float Math::Min(float f1, float f2) 
 	{
 		if (f1 < f2)
@@ -66,6 +91,16 @@ namespace AstralEngine
 		}
 
 		return f2;
+	}
+
+	int Math::Max(int i1, int i2)
+	{
+		if (i1 > i2)
+		{
+			return i1;
+		}
+
+		return i2;
 	}
 
 	float Math::Max(float f1, float f2)
@@ -80,7 +115,7 @@ namespace AstralEngine
 
 	float Math::Floor(float f)
 	{
-		return (int)f;
+		return (float)((long)f);
 	}
 
 	Vector2 Math::Floor(Vector2 v)
@@ -187,5 +222,4 @@ namespace AstralEngine
 	{
 		return (float)rand() / 32000.0f;
 	}
-
 }

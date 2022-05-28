@@ -49,7 +49,7 @@ namespace AstralEngine
 	private:
 		static std::string GetFileExtension(const std::string& filepath)
 		{
-			int lastDot = filepath.rfind('.');
+			size_t lastDot = filepath.rfind('.');
 
 			//no extension
 			if (lastDot == std::string::npos)

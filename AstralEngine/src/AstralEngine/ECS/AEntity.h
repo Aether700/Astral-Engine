@@ -1,6 +1,8 @@
 #pragma once
+#include "ECS Core/ECSUtils.h"
 #include "ECS Core/Registry.h"
 #include "Scene.h"
+#include "CoreComponents.h"
 
 namespace AstralEngine
 {
@@ -10,7 +12,7 @@ namespace AstralEngine
 	{
 		friend class NativeScript;
 	public:
-		AEntity() : m_id(Null), m_scene(nullptr) { }
+		constexpr AEntity() : m_id(Null), m_scene(nullptr) { }
 
 		AEntity(BaseEntity entity, Scene* scene) : m_id(entity), m_scene(scene) { }
 
@@ -25,12 +27,12 @@ namespace AstralEngine
 				
 				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackList>().AddCallback(&comp);
+					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 				else
 				{
 					CallbackList& list = EmplaceComponent<CallbackList>();
-					list.AddCallback(&comp);
+					list.AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 
 				if constexpr (std::is_base_of_v<NativeScript, Component>)
@@ -51,16 +53,16 @@ namespace AstralEngine
 		template<typename Component>
 		void AddComponent(const Component& c)
 		{
-			m_scene->m_registry.Add(*this, c);
+			m_scene->m_registry.EmplaceComponent<Component>(*this, c);
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				if (HasComponent<CallbackListComponent>())
+				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackListComponent>().AddCallback(&c);
+					GetComponent<CallbackList>().AddCallback(&c);
 				}
 				else
 				{
-					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					CallbackList& list = EmplaceComponent<CallbackList>();
 					list.AddCallback(&c);
 				}
 			}
@@ -75,7 +77,7 @@ namespace AstralEngine
 					"CallbackListComponent was not added to entity with a CallbackComponent");
 				CallbackList* list;
 				list = &GetComponent<CallbackList>();
-				list->RemoveCallback(&GetComponent<Component>());
+				list->RemoveCallback<Component>();
 
 				if (list->IsEmpty()) 
 				{
@@ -92,13 +94,13 @@ namespace AstralEngine
 			{
 				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
 					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackListComponent* list;
-				list = GetComponent<CallbackListComponent>();
+				CallbackList* list;
+				list = GetComponent<CallbackList>();
 				list->RemoveCallback(&comp);
 
 				if (list->IsEmpty())
 				{
-					RemoveComponent<CallbackListComponent>();
+					RemoveComponent<CallbackList>();
 				}
 			}
 			m_scene->m_registry.RemoveComponent<Component>(*this, comp);
@@ -146,6 +148,7 @@ namespace AstralEngine
 
 		BaseEntity GetID() const { return m_id; }
 
+
 		operator BaseEntity() const
 		{
 			return m_id;
@@ -168,4 +171,6 @@ namespace AstralEngine
 		BaseEntity m_id;
 		Scene* m_scene;
 	};
+	
+	inline constexpr AEntity NullEntity = AEntity();
 }

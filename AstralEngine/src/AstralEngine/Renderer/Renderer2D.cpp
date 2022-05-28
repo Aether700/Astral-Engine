@@ -17,8 +17,8 @@ namespace AstralEngine
 		Vector3 position;
 		Vector4 color;
 		Vector2 texCoord;
-		float textureIndex;
-		float tillingFactor;
+		float textureIndex = -1.0f;
+		float tillingFactor = 1.0f;
 		float ignoresCamPos = 0.0f;
 	};
 
@@ -173,7 +173,7 @@ namespace AstralEngine
 
 		CheckBatchCapacity();
 		int textureIndex = GetTextureIndex(texture);
-		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor);
+		UploadSimpleQuad(position, size, (float)textureIndex, tileFactor, tintColor);
 	}
 
 	void Renderer2D::DrawQuad(const Vector3& position, const Vector2& size, AReference<SubTexture2D> subTexture,
@@ -191,7 +191,7 @@ namespace AstralEngine
 			{ subTexture->GetMin().x, subTexture->GetMax().y }
 		};
 
-		UploadSimpleQuad(position, size, textureIndex, tileFactor, tintColor, textureCoordinates, ignoresCamPos);
+		UploadSimpleQuad(position, size, (float)textureIndex, tileFactor, tintColor, textureCoordinates, ignoresCamPos);
 	}
 
 	void Renderer2D::DrawQuad(const Mat4& transform, const Vector4& color, bool ignoresCamPos)
@@ -237,7 +237,7 @@ namespace AstralEngine
 			{ 0.0f, 1.0f }
 		};
 
-		float textureIndex = GetTextureIndex(texture);
+		float textureIndex = (float)GetTextureIndex(texture);
 
 		for (size_t i = 0; i < 4; i++)
 		{
@@ -268,7 +268,7 @@ namespace AstralEngine
 			{ subTexture->GetMin().x, subTexture->GetMax().y }
 		};
 
-		float textureIndex = GetTextureIndex(subTexture->GetTexture());
+		float textureIndex = (float)GetTextureIndex(subTexture->GetTexture());
 
 		for (size_t i = 0; i < 4; i++)
 		{
@@ -376,7 +376,8 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 
-		unsigned int dataSize = (unsigned char*)s_data.quadVertexPtr - (unsigned char*)s_data.quadVertexBuffer;
+		unsigned int dataSize = (unsigned int)((unsigned char*)s_data.quadVertexPtr 
+			- (unsigned char*)s_data.quadVertexBuffer);
 		s_data.vertexBuffer->SetData(s_data.quadVertexBuffer, dataSize);
 
 		for (unsigned int i = 0; i < s_data.textureSlotIndex; i++)
@@ -403,11 +404,11 @@ namespace AstralEngine
 
 		int textureIndex = 0;
 
-		for (int i = 1; i < s_data.textureSlotIndex; i++)
+		for (unsigned int i = 1; i < s_data.textureSlotIndex; i++)
 		{
 			if (*texture == *s_data.textureSlots[i])
 			{
-				textureIndex = i;
+				textureIndex = (int)i;
 				break;
 			}
 		}

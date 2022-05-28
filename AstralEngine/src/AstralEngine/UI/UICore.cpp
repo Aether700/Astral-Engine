@@ -110,8 +110,8 @@ namespace AstralEngine
 	{
 		AE_CORE_ASSERT(window->IsHovered(), "window being checked for resize is not hovered");
 		Vector2 displacement = mousePos - window->GetScreenCoords();
-		unsigned int halfWidth = window->GetScreenCoordsWidth() / 2;
-		unsigned int halfHeight = window->GetScreenCoordsHeight() / 2;
+		unsigned int halfWidth = (unsigned int)window->GetScreenCoordsWidth() / 2;
+		unsigned int halfHeight = (unsigned int)window->GetScreenCoordsHeight() / 2;
 
 		short xComponent = Math::Abs(displacement.x) > (halfWidth - s_windowResizeBorder) ? 1 : 0;
 		if (displacement.x < 0)
@@ -177,13 +177,15 @@ namespace AstralEngine
 
 		if (m_resizeDir.x != 0)
 		{
-			int newWidth = ((int)m_focusedWindow->GetScreenCoordsWidth()) + m_resizeDir.x * displacement.x;
+			int newWidth = ((int)m_focusedWindow->GetScreenCoordsWidth()) 
+				+ (size_t)((float)m_resizeDir.x * displacement.x);
+
 			if (newWidth < m_focusedWindow->GetMinResize().x)
 			{
 				//update displacement so it doesn't mess up the position of the window when resizing
 				displacement.x = (m_focusedWindow->GetMinResize().x - 
 					((int)m_focusedWindow->GetScreenCoordsWidth())) / m_resizeDir.x;
-				newWidth = m_focusedWindow->GetMinResize().x;
+				newWidth = (int)m_focusedWindow->GetMinResize().x;
 			}
 			
 			if (m_focusedWindow->GetScreenCoordsWidth() != m_focusedWindow->GetMinResize().x)
@@ -196,13 +198,14 @@ namespace AstralEngine
 
 		if (m_resizeDir.y != 0)
 		{
-			int newHeight = ((int)m_focusedWindow->GetScreenCoordsHeight()) + -1.0f * m_resizeDir.y * displacement.y;
+			int newHeight = ((int)m_focusedWindow->GetScreenCoordsHeight()) 
+				+ (size_t)(- 1.0f * (float)m_resizeDir.y * displacement.y);
 			if (newHeight < m_focusedWindow->GetMinResize().y)
 			{
 				//update displacement so it doesn't mess up the position of the window when resizing
 				displacement.y = (m_focusedWindow->GetMinResize().y -
 					((int)m_focusedWindow->GetScreenCoordsHeight())) / -m_resizeDir.y;
-				newHeight = m_focusedWindow->GetMinResize().y;
+				newHeight = (int)m_focusedWindow->GetMinResize().y;
 			}
 			
 			if (m_focusedWindow->GetScreenCoordsHeight() != m_focusedWindow->GetMinResize().y)
