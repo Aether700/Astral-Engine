@@ -131,8 +131,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AstralEngine.lib;GLFW.lib;Glad.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\GLFW\bin\Debug-windows-x86_64\GLFW;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\Glad\bin\Debug-windows-x86_64\GLAD;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AstralEngine.lib;GLFW.lib;Glad.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)AstralEngine\vendor\GLFW\bin\Debug-windows-x86_64\GLFW;$(SolutionDir)AstralEngine\vendor\Glad\bin\Debug-windows-x86_64\GLAD;$(SolutionDir)bin\Debug-windows-x86_64\AstralEngine</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,15 +145,15 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\vendor\GLFW\include;C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AstralEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Release-windows-x86_64\AstralEngine;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AstralEngine.lib;GLFW.lib;Glad.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)AstralEngine\vendor\Glad\bin\Release-windows-x86_64\Glad;$(SolutionDir)AstralEngine\vendor\GLFW\bin\Release-windows-x86_64\GLFW;$(SolutionDir)bin\Release-windows-x86_64\AstralEngine</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>

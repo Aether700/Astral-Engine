@@ -8,6 +8,7 @@
 
 #ifdef AE_DEBUG
 	#define AE_ENABLE_CORE_LOG
+	#define AE_ENABLE_APP_LOG
 #endif
 
 #ifdef AE_ENABLE_CORE_LOG
@@ -20,10 +21,15 @@
 	#define AE_CORE_ERROR(...)
 #endif
 
-#define AE_INFO(...) AstralEngine::Logger::Info("[APP] ", __VA_ARGS__)
-#define AE_WARN(...) AstralEngine::Logger::Warn("[APP] ", __VA_ARGS__)
-#define AE_ERROR(...) AstralEngine::Logger::Error("[APP] ", __VA_ARGS__)
-
+#ifdef AE_ENABLE_APP_LOG
+	#define AE_INFO(...) AstralEngine::Logger::Info("[APP] ", __VA_ARGS__)
+	#define AE_WARN(...) AstralEngine::Logger::Warn("[APP] ", __VA_ARGS__)
+	#define AE_ERROR(...) AstralEngine::Logger::Error("[APP] ", __VA_ARGS__)
+#else
+	#define AE_INFO(...)
+	#define AE_WARN(...)
+	#define AE_ERROR(...)
+#endif
 
 namespace AstralEngine
 {

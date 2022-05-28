@@ -123,7 +123,7 @@ namespace RogueLike
 		m_cam.GetTransform().position = Vector3(-0.5f, -0.5f, - 1.0f);
 	}
 
-	RogueLikeGame::RogueLikeGame() { AttachLayer(new GameLayer()); }
+	RogueLikeGame::RogueLikeGame() : Application("Goomba Run") { AttachLayer(new GameLayer()); }
 }
 
 AstralEngine::Application* CreateApp()
