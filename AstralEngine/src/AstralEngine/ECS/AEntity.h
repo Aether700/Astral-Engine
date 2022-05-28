@@ -7,6 +7,7 @@
 namespace AstralEngine
 {
 	class Transform;
+	class EntityLinkedComponent;
 
 	class AEntity
 	{

@@ -57,6 +57,55 @@ namespace AstralEngine
 		AEntity m_parent;
 	};
 
+	//Base class for any entity which needs to reference the AEntity object it is attached to
+	class EntityLinkedComponent
+	{
+		friend class AEntity;
+	public:
+		~EntityLinkedComponent() { }
+
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return entity.HasComponent<Component...>();
+		}
+
+		template<typename Component>
+		void RemoveComponent()
+		{
+			entity.RemoveComponent<Component>();
+		}
+
+		Transform& GetTransform() { return entity.GetTransform(); }
+		const Transform& GetTransform() const { return entity.GetTransform(); }
+
+		const std::string& GetName() const { return entity.GetName(); }
+		void SetName(const std::string& name) { entity.SetName(name); }
+
+		static void Destroy(AEntity& e) { e.Destroy(); }
+
+	protected:
+		AEntity entity;
+
+	private:
+		virtual void SetEntity(AEntity& e)
+		{
+			entity = e;
+		}
+	};
+	
 	struct Camera : public ToggleableComponent
 	{
 		SceneCamera camera;
@@ -75,7 +124,7 @@ namespace AstralEngine
 		}
 	};
 
-	class NativeScript : public CallbackComponent
+	class NativeScript : public CallbackComponent, public EntityLinkedComponent
 	{
 		friend class AEntity;
 	public:
@@ -94,12 +143,6 @@ namespace AstralEngine
 			return entity.GetComponent<Component...>();
 		}
 
-		Transform& GetTransform() { return entity.GetTransform(); }
-		const Transform& GetTransform() const { return entity.GetTransform(); }
-
-		const std::string& GetName() const { return entity.GetName(); }
-		void SetName(const std::string& name) { entity.SetName(name); }
-
 		void Destroy(AEntity& e) const { e.Destroy(); }
 		AEntity CreateAEntity() const { return entity.m_scene->CreateAEntity(); }
 
@@ -112,9 +155,6 @@ namespace AstralEngine
 		{
 			return !(*this == other);
 		}
-
-	protected:
-		AEntity entity;
 
 	private:
 		void SetEntity(AEntity& e)

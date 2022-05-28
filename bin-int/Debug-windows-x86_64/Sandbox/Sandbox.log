@@ -1,3 +1,0 @@
-﻿  LINK : ..\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe not found or not built by the last incremental link; performing full link
-LIBCMTD.lib(initializers.obj) : warning LNK4098: defaultlib 'libcmt.lib' conflicts with use of other libs; use /NODEFAULTLIB:library
-  Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe

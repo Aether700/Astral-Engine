@@ -103,7 +103,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <DisableSpecificWarnings>26812;26495</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;26495;6385</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

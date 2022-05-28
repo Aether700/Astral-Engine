@@ -4,6 +4,7 @@
 namespace AstralEngine
 {
 	class AEntity;
+	class Transform;
 
 	class ToggleableComponent
 	{
