@@ -58,7 +58,7 @@ namespace AstralEngine
 		//provides an estimate of how many entities are in the view
 		size_t GetCount() const
 		{
-			return std::min({ std::get<PoolType<Component>*>(m_pools)->GetCount()... });
+			return std::min<auto>({ std::get<PoolType<Component>*>(m_pools)->GetCount()... });
 		}
 
 		/* tries to checks if the view is empty
@@ -149,7 +149,7 @@ namespace AstralEngine
 		void ForEach(Func function)
 		{
 			//Get a type list which is not empty
-			using NonEmptyType = TypeListCat<std::conditional_t<std::is_empty_v<Component>, TypeList<>, TypeList<Component>>...>::Type;
+			using NonEmptyType = typename TypeListCat<std::conditional_t<std::is_empty_v<Component>, TypeList<>, TypeList<Component>>...>::Type;
 			Traverse<Comp>(std::move(function), NonEmptyType{});
 		}
 
@@ -185,7 +185,7 @@ namespace AstralEngine
 
 			ViewIterator& operator--()
 			{
-				while (--it != m_view->begin() && !IsValid())
+				while (--m_it != m_view->begin() && !IsValid())
 				{
 					/*while the current entity is not valid and that
 					  we have not reached the start of the view decrement the iterator
@@ -304,7 +304,7 @@ namespace AstralEngine
 			else
 			{
 				//here because of the constexpr, use else so that the compiler only picks one or the other of the statements
-				return cPoo->get(e);
+				return cPool->get(e);
 			}
 		}
 
@@ -326,7 +326,7 @@ namespace AstralEngine
 			{
 				auto it = std::get<PoolType<Comp>*>(m_pools)->begin();
 
-				for (const auto entity : static_cast<const SparseSet<Entity>&>(*std::get<PoolType<Comp>*>(m_pools)))
+				for (const auto entity : static_cast<const ASparseSet<Entity>&>(*std::get<PoolType<Comp>*>(m_pools)))
 				{
 					auto curr = it++;
 
@@ -335,7 +335,7 @@ namespace AstralEngine
 						&& (!std::get<PoolType<Exclude>*>(m_pools)->Contains(entity) && ...))
 					{
 						//if Func can be invoked with the provided types as arguments (the decltype(Get<Type>())...)
-						if constexpr (std:::is_invocable_v<Func, decltype(Get<Type>())...>)
+						if constexpr (std::is_invocable_v<Func, decltype(Get<Type>())...>)
 						{
 							function(Get<Comp, Type>(curr, std::get<PoolType<Type>*>(m_pools), entity)...);
 						}
@@ -350,7 +350,7 @@ namespace AstralEngine
 			else
 			{
 				//do same loop as above but call the function with different arguments
-				for (const auto entity : static_cast<const SparseSet<Entity>&>(*std::get<PoolType<Comp>*>(m_pools)))
+				for (const auto entity : static_cast<const ASparseSet<Entity>&>(*std::get<PoolType<Comp>*>(m_pools)))
 				{
 					if (((std::is_same_v<Comp, Component> || std::get<PoolType<Component>*>(m_pools)->Contains(entity)) && ...)
 						&& (!std::get<PoolType<Exclude>*>(m_pools)->Contains(entity) && ...))
@@ -395,15 +395,9 @@ namespace AstralEngine
 
 		AIterator end() const { return m_pool->ASparseSet<Entity>::end(); }
 
-		Entity operator[](size_t index) const
-		{
-			return *(begin() + index);
-		}
+		Entity operator[](size_t index) const { return *(begin() += index); }
 
-		bool Contains(const Entity e) const
-		{
-			return m_pool->Contains(e);
-		}
+		bool Contains(const Entity e) const { return m_pool->Contains(e); }
 
 		template<typename Comp = Component>
 		decltype(auto) Get(const Entity e) const
@@ -451,7 +445,7 @@ namespace AstralEngine
 					//call function with entity and component as arguments
 					for (const auto entity : *this)
 					{
-						function(entity, *(it++))
+						function(entity, *(it++));
 					}
 
 				}

@@ -63,7 +63,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<T>& operator=(AUniqueRef<T>& other)
+		AUniqueRef<T>& operator=(AUniqueRef<T>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -73,7 +73,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other>
-		AUniqueRef<T>& operator=(AUniqueRef<Other>& other)
+		AUniqueRef<T>& operator=(AUniqueRef<Other>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (T*) other.m_ptr;
@@ -83,7 +83,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other, typename Del>
-		AUniqueRef<T>& operator=(AUniqueRef<Other, Del>& other)
+		AUniqueRef<T>& operator=(AUniqueRef<Other, Del>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (T*)other.m_ptr;
@@ -168,7 +168,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<T[]>& operator=(AUniqueRef<T[]>& other)
+		AUniqueRef<T[]>& operator=(AUniqueRef<T[]>&& other)
 		{
 			delete[] m_ptr;
 			m_ptr = other.m_ptr;
@@ -177,7 +177,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		bool operator==(const AUniqueRef<T[]>& other) const
+		bool operator==(const AUniqueRef<T[]>&& other) const
 		{
 			return m_ptr == other.m_ptr;
 		}
@@ -259,7 +259,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<void>& operator=(AUniqueRef<void>& other)
+		AUniqueRef<void>& operator=(AUniqueRef<void>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -269,20 +269,20 @@ namespace AstralEngine
 		}
 
 		template<typename Other>
-		AUniqueRef<void>& operator=(AUniqueRef<Other>& other)
+		AUniqueRef<void>& operator=(AUniqueRef<Other>&& other)
 		{
 			delete m_ptr;
-			m_ptr = (T*)other.m_ptr;
+			m_ptr = other.m_ptr;
 			other.m_ptr = nullptr;
 
 			return *this;
 		}
 
 		template<typename Other, typename Del>
-		AUniqueRef<void>& operator=(AUniqueRef<Other, Del>& other)
+		AUniqueRef<void>& operator=(AUniqueRef<Other, Del>&& other)
 		{
 			delete m_ptr;
-			m_ptr = (T*)other.m_ptr;
+			m_ptr = other.m_ptr;
 			other.m_ptr = nullptr;
 
 			return *this;
@@ -381,7 +381,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<T, void(T*)>& other)
+		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<T, void(T*)>&& other)
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -394,7 +394,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other>
-		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<Other>& other)
+		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<Other>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (T*)other.m_ptr;
@@ -405,7 +405,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other, typename Del>
-		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<Other, Del>& other)
+		AUniqueRef<T, void(T*)>& operator=(AUniqueRef<Other, Del>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (T*)other.m_ptr;
@@ -496,13 +496,13 @@ namespace AstralEngine
 		}
 
 		template<typename Other>
-		AUniqueRef(AUniqueRef<Other>& other) : m_ptr((T*)other.m_ptr), m_del(DefaultDelete)
+		AUniqueRef(AUniqueRef<Other>& other) : m_ptr(other.m_ptr), m_del(DefaultDelete)
 		{
 			other.m_ptr = nullptr;
 		}
 
 		template<typename Other, typename Del>
-		AUniqueRef(AUniqueRef<Other, Del>& other) : m_ptr((T*)other.m_ptr), m_del([other](T* p) { other.m_del((Other*)p); })
+		AUniqueRef(AUniqueRef<Other, Del>& other) : m_ptr(other.m_ptr), m_del([other](void* p) { other.m_del((Other*)p); })
 		{
 			other.m_ptr = nullptr;
 			other.m_del = nullptr;
@@ -542,7 +542,7 @@ namespace AstralEngine
 			return *this;
 		}
 
-		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<void, DeleteFunc>& other)
+		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<void, DeleteFunc>&& other) noexcept
 		{
 			delete m_ptr;
 			m_ptr = other.m_ptr;
@@ -555,7 +555,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other>
-		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<Other>& other)
+		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<Other>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (void*)other.m_ptr;
@@ -566,7 +566,7 @@ namespace AstralEngine
 		}
 
 		template<typename Other, typename Del>
-		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<Other, Del>& other)
+		AUniqueRef<void, DeleteFunc>& operator=(AUniqueRef<Other, Del>&& other)
 		{
 			delete m_ptr;
 			m_ptr = (void*)other.m_ptr;

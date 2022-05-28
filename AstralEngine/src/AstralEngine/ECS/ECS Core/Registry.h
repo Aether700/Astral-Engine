@@ -71,15 +71,7 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
-
-			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-			{
-				Assure<AReference<CallbackComponent>>().RemoveComponent<Component>(*this, e);
-			}
-			else 
-			{
-				Assure<Component>().RemoveComponent<Component>(*this, e);
-			}
+			Assure<Component>().RemoveComponent<Component>(*this, e);
 		}
 
 		template<typename Component>
@@ -126,7 +118,7 @@ namespace AstralEngine
 			}
 			else
 			{
-				return std::forward_as_tuple(GetComponent<Component>(e), ...);
+				return std::forward_as_tuple(GetComponent<Component>(e)...);
 			}
 		}
 
@@ -169,7 +161,7 @@ namespace AstralEngine
 		{
 			return Assure<Component>().OnCreate();
 		}
-
+		
 		template<typename Component>
 		auto OnDestroy()
 		{
@@ -190,7 +182,7 @@ namespace AstralEngine
 			//assert at least one of the components is const
 			static_assert(std::conjunction_v<std::is_const_v<Component>...>);
 			//remove const from this and call the other GetView function
-			return const_cast<Registry*>(this)->GetView<Component...>(ExcludeList<Exclude...>);
+			return const_cast<Registry*>(this)->GetView<Component...>(exclude<Exclude...>);
 		}
 
 		template<typename... Owned, typename... Get, typename... Exclude>
@@ -230,12 +222,11 @@ namespace AstralEngine
 				AUniqueRef<void, void(void*)> ptr = AUniqueRef<void, void(void*)>(new HandlerType{}, [](void* instance) 
 					{ delete static_cast<HandlerType*>(instance); });
 				
-				GroupData candidate = {
-					size, ptr,
+				GroupData candidate = GroupData(size, std::move(ptr),
 					[](const unsigned int type) { return ((type == TypeInfo<std::decay_t<Owned>>::ID()) || ...); },
 					[](const unsigned int type) { return ((type == TypeInfo<std::decay_t<Get>>::ID()) || ...); },
 					[](const unsigned int type) { return ((type == TypeInfo<Exclude>::ID()) || ...); }
-				};
+				);
 
 				handler = static_cast<HandlerType*>(candidate.handler.Get());
 
@@ -273,21 +264,19 @@ namespace AstralEngine
 
 				//links the MaybeValidIf & DiscardIf so that a group is re-evaluated and updated when different 
 				//component types are being created and destroyed
-
-
 				(OnCreate<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
 				(OnCreate<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::MaybeValidIf<std::decay_t<Get>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Get>>>(handler)), ...);
 				(OnDestroy<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<Exclude>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 
 				(OnDestroy<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<std::decay_t<Owned>>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 				(OnDestroy<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::CheckValidityOnComponentDestroyed<std::decay_t<Get>>>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 				(OnCreate<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
 
 				if constexpr(sizeof...(Owned) == 0)
 				{
@@ -369,26 +358,16 @@ namespace AstralEngine
 			decltype(auto) Emplace(Registry<Entity>& owner, const Entity& e, Args... args)
 			{
 				AE_PROFILE_FUNCTION();
-
-				if constexpr (std::is_same_v<AReference<CallbackComponent>, Component>)
-				{
-					auto comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
-					m_create.CallDelagates(owner, e);
-					return comp;
-				}
-				else
-				{
-					auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
-					m_create.CallDelagates(owner, e);
-					return comp;
-				}
+				auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
+				m_create.CallDelagates(owner, e);
+				return comp;
 
 			}
 
 			void Remove(Registry<Entity>& owner, const Entity& e)
 			{
 				m_destroy(owner, e);
-				auto& list = Storage<Entity, Component>::Remove(e);
+				Storage<Entity, Component>::Remove(e);
 			}
 
 			template<typename Comp>
@@ -401,12 +380,6 @@ namespace AstralEngine
 			void RemoveComponent(Registry<Entity>& owner, const Entity& e, const Component& comp)
 			{
 				Storage<Entity, Component>::RemoveComponent(e, comp);
-
-				if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-				{
-					comp.OnDestroy();
-				}
-
 				m_destroy(owner, e);
 			}
 
@@ -426,29 +399,6 @@ namespace AstralEngine
 				std::is_same<Get, std::decay_t<Get>>..., std::is_same<Exclude, std::decay_t<Exclude>>...>);
 
 			std::conditional_t<sizeof...(Owned) == 0, ASparseSet<Entity>, size_t> current{};
-
-
-			/*calls MaybeValidIf or DiscardIf depending on whether the component destroyed 
-			  if the entity provided has no component of the destroyed type
-			  
-			  this functions is used to filter out the updating of groups when a component was 
-			  destroyed on an entity but that entity still has other components of the same type
-
-			  This functions is to be called when a component was destroyed
-			*/
-			template<typename Component>
-			void CheckValidityOnComponentDestroyed(Registry<Entity>& owner, const Entity e)
-			{
-				//excluded component destroyed
-				if constexpr ((std::is_same_v<Component, Exclude> || ...))
-				{
-					MaybeValidIf<Component>(owner, e);
-				}
-				else 
-				{
-					DiscardIf(owner, e);
-				}
-			}
 
 			/*manages the order of the entity/component pair to compact the data managed 
 			  by groups to optimize the iteration of them
@@ -531,6 +481,42 @@ namespace AstralEngine
 			bool (*get)(const unsigned int);
 			bool (*exclude)(const unsigned int);
 
+			GroupData() { }
+			GroupData(size_t s, AUniqueRef<void, void(void*)>&& ptr, bool (*ownedFunc)(const unsigned int),
+				bool (*getFunc)(const unsigned int), bool (*excludeFunc)(const unsigned int)) 
+				: size(s), handler(ptr), owned(ownedFunc), get(getFunc), exclude(excludeFunc)
+			{ }
+
+			GroupData(GroupData&& other) : size(other.size), owned(other.owned), get(other.get), exclude(other.exclude)
+			{
+				handler = std::move(other.handler);
+				other.owned = nullptr;
+				other.get = nullptr;
+				other.exclude = nullptr;
+				other.size = 0;
+			}
+
+			GroupData& operator=(const GroupData& other)
+			{
+				return *this;
+			}
+
+			GroupData& operator=(GroupData&& other)
+			{
+				size = other.size;
+				handler = std::move(other.handler);
+				owned = other.owned;
+				get = other.get;
+				exclude = other.exclude;
+
+				other.size = 0 - 1;
+				other.handler = nullptr;
+				other.owned = nullptr;
+				other.get = nullptr;
+				other.exclude = nullptr;
+				return *this;
+			}
+
 			bool operator==(const GroupData& other) const
 			{
 				return size == other.size && handler == other.handler;
@@ -555,7 +541,7 @@ namespace AstralEngine
 				{
 					//if not enough space for the index we reserve that space
 					m_pools.Reserve(index + 1);
-					m_pools.Insert(PoolData(), (size_t)index);
+					m_pools.EmplaceAt((size_t)index);
 				}
 
 				PoolData& data = m_pools[index];
@@ -576,7 +562,7 @@ namespace AstralEngine
 			}
 			else
 			{
-				SparseSet<Entity>* pool = nullptr;
+				ASparseSet<Entity>* pool = nullptr;
 
 				//check if there is a previously made pool for the component (pool list can be cleared)
 				for (PoolData& data : m_pools)
@@ -591,11 +577,11 @@ namespace AstralEngine
 				//if no pool has been made we create it
 				if (pool == nullptr)
 				{
-					AUniqueRef<SparseSet<Entity>> ptr = AUniqueRef<SparseSet<Entity>>::Create();
+					AUniqueRef<ASparseSet<Entity>> ptr = AUniqueRef<ASparseSet<Entity>>::Create();
 					unsigned int index = IndexProvider<Component>::GetIndex();
 					m_pools.EmplaceBack(PoolData{ index,
 						ptr, 
-						[](SparseSet<Entity> & pool, Registry<Entity> & owner, const Entity e)
+						[](ASparseSet<Entity> & pool, Registry<Entity> & owner, const Entity e)
 							{
 								static_cast<PoolHandler<Component>&>(pool).Remove(owner, e);
 							}
@@ -637,6 +623,23 @@ namespace AstralEngine
 			AUniqueRef<ASparseSet<Entity>> pool;
 
 			void (*remove)(ASparseSet<Entity>&, Registry<Entity>&, const Entity) {};
+
+			PoolData& operator=(const PoolData& other)
+			{
+				return *this;
+			}
+
+			PoolData& operator=(PoolData&& other) noexcept
+			{
+				index = other.index;
+				pool = std::move(other.pool);
+				remove = other.remove;
+
+				other.index = Null;
+				other.pool = nullptr;
+				other.remove = nullptr;
+				return *this;
+			}
 
 			bool operator==(const PoolData& other) const 
 			{

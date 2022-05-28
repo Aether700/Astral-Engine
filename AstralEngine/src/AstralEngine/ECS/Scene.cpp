@@ -81,12 +81,12 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetComponent<Transform>().position.z = -1.0f;
-		camera.EmplaceComponent<CameraComponent>();
+		camera.GetTransform().position.z = -1.0f;
+		camera.EmplaceComponent<Camera>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
-		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
+		AWindow* window = Application::GetWindow();
 		OnViewportResize(window->GetWidth(), window->GetHeight());
 	}
 
@@ -121,10 +121,10 @@ namespace AstralEngine
 
 		RuntimeCamera* mainCamera = nullptr;
 		Transform* cameraTransform;
-		auto camView = m_registry.GetView<CameraComponent, Transform>();
+		auto camView = m_registry.GetView<Camera, Transform>();
 		for (auto entity : camView)
 		{
-			auto[transform, camera] = camView.Get<Transform, CameraComponent>(entity);
+			auto[transform, camera] = camView.Get<Transform, Camera>(entity);
 
 			if (camera.primary)
 			{
@@ -163,6 +163,7 @@ namespace AstralEngine
 
 		//update Scripts
 		CallOnUpdate();
+		CallOnLateUpdate();
 
 		//destroy all entities enqueued for destruction this frame
 		DestroyEntitiesToDestroy();
@@ -173,10 +174,10 @@ namespace AstralEngine
 		m_viewportWidth = width;
 		m_viewportHeight = height;
 
-		auto& view = m_registry.GetView<CameraComponent>();
+		auto& view = m_registry.GetView<Camera>();
 		for (auto entity : view)
 		{
-			auto& cameraComponent = view.Get<CameraComponent>(entity);
+			auto& cameraComponent = view.Get<Camera>(entity);
 			if (!cameraComponent.fixedAspectRatio)
 			{
 				cameraComponent.camera.SetViewportSize(width, height);
@@ -197,10 +198,21 @@ namespace AstralEngine
 	void Scene::CallOnUpdate()
 	{
 		auto view = m_registry.GetView<CallbackList>();
+		
 		for (BaseEntity e : view)
 		{
 			auto& list = view.Get<CallbackList>(e);
 			list.CallOnUpdate();
+		}
+	}
+
+	void Scene::CallOnLateUpdate()
+	{
+		auto view = m_registry.GetView<CallbackList>();
+		for (BaseEntity e : view)
+		{
+			auto& list = view.Get<CallbackList>(e);
+			list.CallOnLateUpdate();
 		}
 	}
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "ADynArr.h"
+#include "ASinglyLinkedList.h"
 #include <type_traits>
 #include <tuple>
 #include <functional>
@@ -110,14 +110,6 @@ namespace AstralEngine
 				return Return(std::invoke(Function, std::forward<Args>(args)...));
 			};
 
-			return *this;
-		}
-
-		template<auto Function, typename Type>
-		ADelegate<Func>& BindFunction(Type& obj)
-		{
-			AE_PROFILE_FUNCTION();
-			ConnectFunction<Function, Type>(&obj);
 			return *this;
 		}
 
@@ -242,7 +234,7 @@ namespace AstralEngine
 		}
 
 	private:
-		ADynArr<DelegateType> m_delegates;
+		ASinglyLinkedList<DelegateType> m_delegates;
 	};
 
 

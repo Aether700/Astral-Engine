@@ -287,6 +287,20 @@ namespace AstralEngine
 
 		};
 
+		ResizableArr<T>& operator=(const ResizableArr<T>& other)
+		{
+			delete[] m_arr;
+			m_arr = new T[other.m_maxCount];
+			for (int i = 0; i < other.m_count; i++)
+			{
+				m_arr[i] = other.m_arr[i];
+			}
+
+			m_count = other.m_count;
+			m_maxCount = other.m_maxCount;
+			return *this;
+		}
+
 	private:
 		void CheckSize()
 		{
@@ -330,6 +344,9 @@ namespace AstralEngine
 		using AConstIterator = typename ADynArr<T>::AConstIterator;
 
 		ASparseSet(ToIntFunc func = ToIntFunc(&ToInt<T>)) : m_toInt(func) { }
+
+		ASparseSet(const ASparseSet<T>& other) 
+			: m_packed(other.m_packed), m_sparse(other.m_sparse), m_toInt(other.m_toInt) { }
 
 		virtual ~ASparseSet() { }
 
@@ -384,23 +401,25 @@ namespace AstralEngine
 		{
 			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(Contains(e), "Cannot remove an element that is not contained in the SparseSet");
-
+			
 			size_t page = Page(e);
 			size_t offset = Offset(e);
-
+			
 			/*move last element to the position of the element to remove
 			  so that removing the element is more efficient
 			  (also need to move the element in the sparse set)
 			*/
+			T lastElement = m_packed[m_packed.GetCount() - 1];
 
-			m_packed[m_toInt(m_sparse[page][offset])] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1])][Offset(m_packed[m_packed.GetCount() - 1])] = m_sparse[page][offset];
+			m_packed[m_toInt(m_sparse[page][offset])] = lastElement;
+			m_sparse[Page(lastElement)][Offset(lastElement)] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.RemoveAt(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const T e) const
 		{
+			AE_CORE_ASSERT(Contains(e), "Trying to get index of an object not in the sparse set");
 			return (size_t)m_sparse[Page(e)][Offset(e)];
 		}
 
@@ -417,8 +436,15 @@ namespace AstralEngine
 			return m_packed.GetData();
 		}
 
-	private:
+		ASparseSet<T>& operator=(const ASparseSet<T>& other)
+		{
+			m_sparse = other.m_sparse;
+			m_packed = other.m_packed;
+			m_toInt = other.m_toInt;
+			return *this;
+		}
 
+	private:
 		size_t Page(const T e) const
 		{
 			return size_t{ m_toInt(e) / ElementPerPage };
@@ -456,7 +482,6 @@ namespace AstralEngine
 	{
 		static constexpr auto ElementPerPage = AE_PAGE_SIZE / sizeof(T);
 		using PageType = typename AUniqueRef<K[]>;
-
 
 	public:
 		using AIterator = typename ADynArr<AKeyElementPair<K, T>>::AIterator;
@@ -526,14 +551,14 @@ namespace AstralEngine
 			  (will also need to move the element in the sparse set)
 			*/
 			m_packed[m_sparse[page][offset]] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1)].GetKey()][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
+			m_sparse[Page(m_packed[m_packed.GetCount() - 1].GetKey())][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.Remove(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const K key) const
 		{
-			return (size_t)m_sparse[Page(e)][Offset(e)];
+			return (size_t)m_sparse[Page(key)][Offset(key)];
 		}
 
 		void Swap(const K lhs, const K rhs)

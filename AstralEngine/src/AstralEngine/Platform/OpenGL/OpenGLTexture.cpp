@@ -159,7 +159,7 @@ namespace AstralEngine
 				AE_CORE_ERROR("Failed to load image \"%s\"", faceTextures[i]);
 			}
 
-			unsigned int size = Math::Min(width, height);
+			unsigned int size = (unsigned int)Math::Min(width, height);
 
 
 			if ((m_size != 0) && (size != m_size))

@@ -34,7 +34,9 @@ namespace AstralEngine
 		void operator+=(const Vector4Int& v);
 		void operator-=(const Vector4Int& v);
 		const Vector4Int operator*(int k) const;
+		const Vector4Int operator*(float k) const;
 		const Vector4Int operator/(int k) const;
+		const Vector4Int operator/(float k) const;
 		const int operator[](unsigned int index) const;
 		int& operator[](unsigned int index);
 
