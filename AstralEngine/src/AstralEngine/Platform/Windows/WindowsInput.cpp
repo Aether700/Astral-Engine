@@ -17,9 +17,28 @@ namespace AstralEngine
 
 	static AUnorderedMap<int, InputState> s_keyStates;
 	static ADynArr<int> s_keysToUpdate;
+	static bool s_isKeyPressed = false; // marks if a key was pressed, not repeated, this frame
+	static int s_numKeyDown = 0; 
 
 	static AUnorderedMap<int, InputState> s_mouseStates;
 	static ADynArr<int> s_mouseToUpdate(3);
+	
+	bool Input::GetKey(int keycode)
+	{
+		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
+		int status = glfwGetKey(window, keycode);
+		return status == GLFW_PRESS || status == GLFW_REPEAT;
+	}
+
+	bool Input::GetKey(KeyCode key)
+	{
+		return GetKey((int)key);
+	}
+
+	bool Input::GetAnyKey()
+	{ 
+		return s_numKeyDown > 0;
+	}
 
 	bool Input::GetKeyDown(int keycode)
 	{
@@ -35,16 +54,9 @@ namespace AstralEngine
 		return GetKeyDown((int)key);
 	}
 
-	bool Input::GetKey(int keycode)
+	bool Input::GetAnyKeyDown()
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
-		int status = glfwGetKey(window, keycode);
-		return status == GLFW_PRESS || status == GLFW_REPEAT;
-	}
-
-	bool Input::GetKey(KeyCode key)
-	{
-		return GetKey((int) key);
+		return s_isKeyPressed;
 	}
 
 	bool Input::GetMouseButton(int mouseButton)
@@ -116,6 +128,8 @@ namespace AstralEngine
 
 			s_mouseToUpdate.Clear();
 		}
+
+		s_isKeyPressed = false;
 	}
 
 	bool Input::OnKeyPressedEvent(KeyPressedEvent& keyPressed)
@@ -131,6 +145,8 @@ namespace AstralEngine
 			s_keyStates[keyCode].currentlyDown = true;
 		}
 		s_keysToUpdate.Add(keyCode);
+		s_numKeyDown++;
+		s_isKeyPressed = true;
 		return false;
 	}
 
@@ -147,6 +163,7 @@ namespace AstralEngine
 			s_keyStates[keyCode].currentlyDown = false;
 		}
 		s_keysToUpdate.Add(keyCode);
+		s_numKeyDown--;
 		return false;
 	}
 

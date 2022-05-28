@@ -229,7 +229,7 @@
     <ClInclude Include="src\AstralEngine\Data Struct\AHashSet.h" />
     <ClInclude Include="src\AstralEngine\UI\UICore.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
-    <ClInclude Include="src\AstralEngine\UI\UIText.h" />
+    <ClInclude Include="src\AstralEngine\ECS\CoreComponents.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -336,6 +336,8 @@
     <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
-    <ClCompile Include="src\AstralEngine\UI\UIText.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\Component.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
   </ItemGroup>
 </Project>

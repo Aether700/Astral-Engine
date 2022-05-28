@@ -3,3 +3,13 @@
 .vs/
 *.log
 *.obj
+*.pdb
+*.exe
+*.log
+*.tlog
+*.ilk
+*.idb
+*.json
+*.recipe
+*.pch
+*.lib

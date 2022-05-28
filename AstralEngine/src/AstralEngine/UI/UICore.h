@@ -50,7 +50,7 @@ namespace AstralEngine
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& mousePressed);
 
 		/*returns values between -1 and 1 for both components, 0 meaning the axis is left 
-		  unchanged ±1 indicating the border selected for resize
+		  unchanged ï¿½1 indicating the border selected for resize
 
 		  up is defined as (0, 1) and (0, -1) indicates down
 		*/
@@ -98,7 +98,7 @@ namespace AstralEngine
 
 		virtual ~UIElement() { }
 
-		const Vector2 GetScreenCoords() const 
+		Vector2 GetScreenCoords() const 
 		{ 
 			if (m_parentElement != nullptr)
 			{

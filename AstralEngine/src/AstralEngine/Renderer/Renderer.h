@@ -72,6 +72,9 @@ namespace AstralEngine
 		float ignoresCamera;
 		Material mat;
 
+		VertexData() : textureIndex(-1), tillingFactor(1.0f), 
+			uses3DTexture(0.0f), ignoresCamera(0.0f) { }
+
 		bool operator==(const VertexData& other) const
 		{
 			return position == other.position && textureCoords == other.textureCoords

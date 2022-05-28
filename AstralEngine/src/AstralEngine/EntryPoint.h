@@ -20,3 +20,12 @@ int main()
 	delete app;
 	AE_PROFILE_END_SESSION();
 }
+
+#ifndef AE_DEBUG
+	#ifdef AE_PLATFORM_WINDOWS
+		int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+		{
+			main();
+		}
+	#endif
+#endif

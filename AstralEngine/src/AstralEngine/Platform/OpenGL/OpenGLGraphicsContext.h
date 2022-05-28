@@ -1,7 +1,7 @@
 #pragma once
 #include "AstralEngine/Renderer/GraphicsContext.h"
 
-extern struct GLFWwindow;
+struct GLFWwindow;
 
 namespace AstralEngine
 {

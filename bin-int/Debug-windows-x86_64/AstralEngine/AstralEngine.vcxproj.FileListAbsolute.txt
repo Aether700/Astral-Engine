@@ -1,2 +1,0 @@
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.pdb
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin-int\Debug-windows-x86_64\AstralEngine\AstralEngine.pdb

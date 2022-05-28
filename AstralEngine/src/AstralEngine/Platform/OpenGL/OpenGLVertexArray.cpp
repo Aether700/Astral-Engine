@@ -63,7 +63,7 @@ namespace AstralEngine
 			glEnableVertexAttribArray(i);
 			glVertexAttribPointer(i, layout[i].GetComponentCount(), ADataTypeToOpenGLBaseType(layout[i].type),
 				layout[i].normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(), (const void*) offset);
+				layout.GetStride(), (const void*)(long long) offset);
 
 			offset += layout[i].size;
 		}

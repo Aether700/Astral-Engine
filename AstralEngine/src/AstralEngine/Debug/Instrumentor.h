@@ -8,8 +8,8 @@
 #include "AstralEngine/Core/Core.h"
 
 #ifdef AE_PROFILE
-	#define AE_PROFILE_BEGIN_SESSION(name, filepath) ::AstralEngine::Instrumentor::Get().BeginSession(name, filepath)
-	#define AE_PROFILE_END_SESSION() ::AstralEngine::Instrumentor::Get().EndSession()
+	#define AE_PROFILE_BEGIN_SESSION(name, filepath) ::AstralEngine::Instrumentor::BeginSession(name, filepath)
+	#define AE_PROFILE_END_SESSION() ::AstralEngine::Instrumentor::EndSession()
 	#define AE_PROFILE_SCOPE(name) ::AstralEngine::ATimer timer##__LINE__(name)
 	#define AE_PROFILE_FUNCTION() AE_PROFILE_SCOPE(__FUNCSIG__)
 #else
@@ -38,66 +38,68 @@ namespace AstralEngine
 	class Instrumentor
 	{
 	public:
-		Instrumentor() : m_currentSession(nullptr), m_profileCount(0) { }
 
-		void BeginSession(const std::string& name, const std::string& filepath = "results.json")
+		static void BeginSession(const std::string& name, const std::string& filepath = "results.json")
 		{
-			m_outputStream.open(filepath);
-			WriteHeader();
-			m_currentSession = new InstrumentationSession(name);
+			Get().m_outputStream.open(filepath);
+			Get().WriteHeader();
+			Get().m_currentSession = new InstrumentationSession(name);
 		}
 
-		void EndSession()
+		static void EndSession()
 		{
-			WriteFooter();
-			m_outputStream.close();
-			delete m_currentSession;
-			m_profileCount = 0;
+			Get().WriteFooter();
+			Get().m_outputStream.close();
+			delete Get().m_currentSession;
+			Get().m_profileCount = 0;
 		}
 
-		void WriteProfile(const ProfileResult& result)
+		static void WriteProfile(const ProfileResult& result)
 		{
-			if (m_profileCount > 0)
+			if (Get().m_profileCount > 0)
 			{
-				m_outputStream << ",";
+				Get().m_outputStream << ",";
 			}
-			m_profileCount++;
+			Get().m_profileCount++;
 
 			std::string name = result.name;
 			std::replace(name.begin(), name.end(), '"', '\'');
 
-			m_outputStream << "{\n";
-			m_outputStream << "\"cat\":\"function\",\n";
-			m_outputStream << "\"dur\":" << (result.end - result.start) << ",\n";
-			m_outputStream << "\"name\":\"" << name << "\",\n";
-			m_outputStream << "\"ph\":\"X\",\n";
-			m_outputStream << "\"pid\":0,\n";
-			m_outputStream << "\"tid\":" << result.threadID << ",\n";
-			m_outputStream << "\"ts\":" << result.start << "\n";
-			m_outputStream << "}\n";
+			Get().m_outputStream << "{\n";
+			Get().m_outputStream << "\"cat\":\"function\",\n";
+			Get().m_outputStream << "\"dur\":" << (result.end - result.start) << ",\n";
+			Get().m_outputStream << "\"name\":\"" << name << "\",\n";
+			Get().m_outputStream << "\"ph\":\"X\",\n";
+			Get().m_outputStream << "\"pid\":0,\n";
+			Get().m_outputStream << "\"tid\":" << result.threadID << ",\n";
+			Get().m_outputStream << "\"ts\":" << result.start << "\n";
+			Get().m_outputStream << "}\n";
 
-			m_outputStream.flush();
+			Get().m_outputStream.flush();
 		}
 
-		void WriteHeader()
+		static void WriteHeader()
 		{
-			m_outputStream << "[\n";//"{\"other data\": {}, \"trace events\":[";
-			m_outputStream.flush();
+			Get().m_outputStream << "[\n";
+			Get().m_outputStream.flush();
 		}
 
-		void WriteFooter()
+		static void WriteFooter()
 		{
-			m_outputStream << "]";//"]}";
-			m_outputStream.flush();
+			Get().m_outputStream << "]";
+			Get().m_outputStream.flush();
 		}
 
+
+	private:
+		Instrumentor() : m_currentSession(nullptr), m_profileCount(0) { }
+		
 		static Instrumentor& Get()
 		{
 			static Instrumentor* instance = new Instrumentor();
 			return *instance;
 		}
 
-	private:
 		InstrumentationSession* m_currentSession;
 		std::ofstream m_outputStream;
 		int m_profileCount;
@@ -126,8 +128,8 @@ namespace AstralEngine
 			long long start = std::chrono::time_point_cast<std::chrono::microseconds>(m_startPoint).time_since_epoch().count();
 			long long end = std::chrono::time_point_cast<std::chrono::microseconds>(endTime).time_since_epoch().count();
 
-			unsigned int threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
-			Instrumentor::Get().WriteProfile({ m_name, start, end, threadID });
+			unsigned int threadID = (unsigned int)std::hash<std::thread::id>{}(std::this_thread::get_id());
+			Instrumentor::WriteProfile({ m_name, start, end, threadID });
 
 			m_stopped = true;
 		}
