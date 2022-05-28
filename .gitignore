@@ -8,5 +8,5 @@
 *.log
 *.tlog
 *.ilk
-bin-int/Debug-windows-x86_64/Sandbox/vc143.idb
+*.idb
 *.json
