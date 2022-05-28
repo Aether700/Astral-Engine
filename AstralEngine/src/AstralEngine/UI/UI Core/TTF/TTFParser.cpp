@@ -84,6 +84,45 @@ namespace AstralEngine
 	};
 
 
-	//implement 'head' table next
+	struct HeaderTable
+	{
+		std::int16_t version;
+		std::int16_t fontRevision;
+		std::uint32_t checkSumAdjustment;
+		std::uint32_t magicNumber;
+		std::uint16_t flags;
+		std::uint16_t unitsPerEm;
+		std::int64_t created;
+		std::int64_t modified;
+		std::int16_t xMin;
+		std::int16_t yMin;
+		std::int16_t xMax;
+		std::int16_t yMax;
+		std::uint16_t macStyle;
+		std::uint16_t lowestRecPPEM;
+		std::int16_t fontDirectionHint;
+		std::int16_t indexToLocFormat;
+		std::int16_t glyphDataFormat;
+	};
+
+	struct HorizontalHeader
+	{
+		std::int16_t version;
+		std::int16_t ascent;
+		std::int16_t descent;
+		std::int16_t lineGap;
+		std::uint16_t advanceWidthMax;
+		std::int16_t minLeftSideBearing;
+		std::int16_t minRightSideBearing;
+		std::int16_t xMaxExtent;
+		std::int16_t caretSlopeRise;
+		std::int16_t caretSlopeRun;
+		std::int16_t caretOffset;
+		std::int64_t reserved; //set to 0
+		std::int16_t metricDataFormat; // 0 for current format
+		std::uint16_t numOfLongHorMetrics;
+	};
+
+	//do htmx table next
 
 }
