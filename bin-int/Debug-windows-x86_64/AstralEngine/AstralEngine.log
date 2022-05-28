@@ -1,69 +1,7 @@
-﻿  aepch.cpp
-  Application.cpp
-  LayerStack.cpp
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Core\LayerStack.cpp(27,31): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+﻿  Application.cpp
   Log.cpp
   Time.cpp
   AEntity.cpp
   Component.cpp
-  Scene.cpp
-  Mat3.cpp
-  Mat4.cpp
-  Utils.cpp
-  Vector2.cpp
-  Vector2Int.cpp
-  Vector3.cpp
-  Vector3Int.cpp
-  Vector4.cpp
-  Vector4Int.cpp
-  OpenGLFramebuffer.cpp
-  OpenGLGraphicsContext.cpp
-  OpenGLIndexBuffer.cpp
-  OpenGLRenderAPI.cpp
-  Generating Code...
-  Compiling...
-  OpenGLShader.cpp
-  OpenGLTexture.cpp
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLTexture.cpp(191,47): warning C4267: 'argument': conversion from 'size_t' to 'GLenum', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLTexture.cpp(242,47): warning C4267: 'argument': conversion from 'size_t' to 'GLenum', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLTexture.cpp(272,47): warning C4267: 'argument': conversion from 'size_t' to 'GLenum', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Platform\OpenGL\OpenGLTexture.cpp(317,47): warning C4267: 'argument': conversion from 'size_t' to 'GLenum', possible loss of data
-  OpenGLVertexArray.cpp
-  OpenGLVertexBuffer.cpp
-  WindowsInput.cpp
-  WindowsTime.cpp
-  WindowsWindow.cpp
-  Framebuffer.cpp
-  IndexBuffer.cpp
-  OrthographicCamera.cpp
-  OrthographicCameraController.cpp
-  RenderAPI.cpp
-  RenderCommand.cpp
-  Renderer.cpp
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(510,33): warning C4150: deletion of pointer to incomplete type 'AstralEngine::DirectionalLight'; no destructor called
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.h(16): message : see declaration of 'AstralEngine::DirectionalLight'
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(511,27): warning C4150: deletion of pointer to incomplete type 'AstralEngine::PointLight'; no destructor called
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.h(17): message : see declaration of 'AstralEngine::PointLight'
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Data Struct\ADynArr.h(242,1): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1059): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
-          with
-          [
-              T=AstralEngine::DrawCommand
-          ]
-C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\Renderer\Renderer.cpp(1058): message : see reference to function template instantiation 'T &AstralEngine::ADynArr<T>::EmplaceBack<const AstralEngine::Mat4&,const AstralEngine::Material&,AstralEngine::Vector3(&)[24],AstralEngine::Vector3(&)[24],unsigned __int64,unsigned int(&)[36],unsigned __int64,AstralEngine::AReference<AstralEngine::CubeMap>&,AstralEngine::Vector3(&)[24],float&,const AstralEngine::Vector4&,bool>(const AstralEngine::Mat4 &,const AstralEngine::Material &,AstralEngine::Vector3 (&)[24],AstralEngine::Vector3 (&)[24],unsigned __int64 &&,unsigned int (&)[36],unsigned __int64 &&,AstralEngine::AReference<AstralEngine::CubeMap> &,AstralEngine::Vector3 (&)[24],float &,const AstralEngine::Vector4 &,bool &&)' being compiled
-          with
-          [
-              T=AstralEngine::DrawCommand
-          ]
-  Renderer2D.cpp
-  SceneCamera.cpp
-  Shader.cpp
-  Texture.cpp
-  VertexArray.cpp
-  VertexBuffer.cpp
-  Generating Code...
-  Compiling...
-  UICore.cpp
-  stb_image.cpp
   Generating Code...
   AstralEngine.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\AstralEngine\AstralEngine.lib

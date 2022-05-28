@@ -1,1 +1,44 @@
-﻿  Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe
+﻿  SandboxApp.cpp
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Storage.h(33,80): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(359): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int,
+              Entity=AstralEngine::BaseEntity
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(361): message : see reference to function template instantiation 'Component &AstralEngine::Storage<AstralEngine::BaseEntity,Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(const Entity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int,
+              Entity=AstralEngine::BaseEntity
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\ECS Core\Registry.h(62): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::PoolHandler<Component>::Emplace<_Ty,_Ty,_Ty,_Ty>(AstralEngine::Registry<AstralEngine::BaseEntity> &,const AstralEngine::BaseEntity &,_Ty,_Ty,_Ty,_Ty)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(23): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\AstralEngine\src\AstralEngine\ECS\AEntity.h(49): message : see reference to function template instantiation 'Component &AstralEngine::Registry<AstralEngine::BaseEntity>::EmplaceComponent<Component,_Ty,_Ty,_Ty,_Ty>(const AstralEngine::BaseEntity &,_Ty &&,_Ty &&,_Ty &&,_Ty &&)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer,
+              _Ty=int
+          ]
+C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\Sandbox\src\SandboxApp.cpp(461): message : see reference to function template instantiation 'Component &AstralEngine::AEntity::EmplaceComponent<AstralEngine::SpriteRenderer,int,int,int,int>(int,int,int,int)' being compiled
+          with
+          [
+              Component=AstralEngine::SpriteRenderer
+          ]
+  Sandbox.vcxproj -> C:\Users\hanac\Desktop\Astral Engine\Astral Engine\AstralEngine\bin\Debug-windows-x86_64\Sandbox\Sandbox.exe
