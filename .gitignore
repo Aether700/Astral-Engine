@@ -10,3 +10,6 @@
 *.ilk
 *.idb
 *.json
+*.recipe
+*.pch
+*.lib
