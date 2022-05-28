@@ -19,14 +19,20 @@ namespace AstralEngine
 
 	Vector3::~Vector3() { }
 
-	const float Vector3::Length() const
+	const float Vector3::Magnitude() const
 	{
-		return Math::Sqrt((x * x) + (y * y) + (z * z)); 
+		return Math::Sqrt(SqrMagnitude()); 
+	}
+
+	const float Vector3::SqrMagnitude() const
+	{
+		return ((x * x) + (y * y) + (z * z));
 	}
 
 	const Vector3 Vector3::Normalize() const
 	{
-		return Vector3(x / Length(), y / Length(), z / Length()); 
+		float len = Magnitude();
+		return Vector3(x / len, y / len, z / len); 
 	}
 
 	const float* Vector3::Data() const { return &x; }

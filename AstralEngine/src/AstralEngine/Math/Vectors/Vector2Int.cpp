@@ -22,14 +22,19 @@ namespace AstralEngine
 
 	Vector2Int::~Vector2Int() { }
 
-	const float Vector2Int::Length() const
+	const float Vector2Int::Magnitude() const
 	{
-		return Math::Sqrt( ((float)x * (float)x) + ((float)y * (float)y) );
+		return Math::Sqrt(SqrMagnitude());
+	}
+
+	const float Vector2Int::SqrMagnitude() const
+	{
+		return ((float)x * (float)x) + ((float)y * (float)y);
 	}
 
 	const Vector2Int Vector2Int::Normalize() const
 	{
-		float len = Length();
+		float len = Magnitude();
 		return Vector2Int( (int)((float)x / len), (int)((float)y / len) );
 	}
 

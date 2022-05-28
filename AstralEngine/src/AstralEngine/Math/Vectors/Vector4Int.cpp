@@ -18,14 +18,19 @@ namespace AstralEngine
 
 	Vector4Int::~Vector4Int() { }
 
-	const float Vector4Int::Length() const
+	const float Vector4Int::Magnitude() const
 	{
-		return Math::Sqrt((float)((x * x) + (y * y) + (z * z) + (w * w)));
+		return Math::Sqrt(SqrMagnitude());
+	}
+
+	const float Vector4Int::SqrMagnitude() const
+	{
+		return ((float)((x * x) + (y * y) + (z * z) + (w * w)));
 	}
 
 	const Vector4Int Vector4Int::Normalize() const
 	{
-		float len = Length();
+		float len = Magnitude();
 		return Vector4Int( (int)((float)x / len), (int)((float)y / len), (int)((float)z / len), (int)((float)w / len) );
 	}
 

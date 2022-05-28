@@ -21,7 +21,8 @@ namespace AstralEngine
 
 		~Vector4Int();
 
-		const float Length() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
 		const Vector4Int Normalize() const;
 
 
