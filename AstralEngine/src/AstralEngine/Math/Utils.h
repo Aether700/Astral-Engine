@@ -17,6 +17,8 @@ namespace AstralEngine
 		static float ArcCos(float v);
 		static float Tan(float v);
 		static float ArcTan(float v);
+		static float ArcTan2(float x, float y);
+		static float ArcTan2(Vector2 v);
 
 		static float Sqrt(float v);
 		static float Log(float v);
@@ -25,7 +27,8 @@ namespace AstralEngine
 		static float Min(float f1, float f2);
 		static int Max(int i1, int i2);
 		static float Max(float f1, float f2);
-		static float Floor(float f);
+
+		static long double Pi();
 
 		static float DegreeToRadiants(float v);
 		
@@ -36,6 +39,7 @@ namespace AstralEngine
 		*/
 		static float Lerp(float a, float b, float t);
 
+		static float Floor(float f);
 		static Vector2 Floor(Vector2 v);
 		static float Ceiling(float f);
 		

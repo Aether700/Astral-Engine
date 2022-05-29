@@ -75,7 +75,8 @@ namespace AstralEngine
 	Vector3 Quaternion::AsEuler() const
 	{
 		Vector3 euler;
-		function needs atan2 so needs to research what atan2 does and make it in Math class
+		euler.x = Math::ArcTan2(2.0f * (m_w + m_v.y * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y));
+		make a copysign function in math?
 	}
 
 	Quaternion Quaternion::Identity()
