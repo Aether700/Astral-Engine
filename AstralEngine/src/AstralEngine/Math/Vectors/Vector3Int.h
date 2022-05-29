@@ -23,7 +23,6 @@ namespace AstralEngine
 
 		const float Magnitude() const;
 		const float SqrMagnitude() const;
-		const Vector3Int Normalize() const;
 
 		const int* Data() const;
 
@@ -68,5 +67,6 @@ namespace AstralEngine
 			int b;
 		};
 	};
-		Vector3Int operator*(float k, const Vector3Int& v);
+	
+	Vector3Int operator*(float k, const Vector3Int& v);
 }

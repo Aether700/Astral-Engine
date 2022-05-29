@@ -24,6 +24,20 @@ namespace AstralEngine
 		return v;
 	}
 
+	int Math::Clamp(int value, int min, int max)
+	{
+		AE_PROFILE_FUNCTION();
+		if (value < min)
+		{
+			return min;
+		}
+		else if (value > max)
+		{
+			return max;
+		}
+		return value;
+	}
+
 	float Math::Clamp(float value, float min, float max)
 	{
 		AE_PROFILE_FUNCTION();
@@ -44,16 +58,34 @@ namespace AstralEngine
 		return sin(v);
 	}
 
+	float Math::ArcSin(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return asin(v);
+	}
+
 	float Math::Cos(float v)
 	{
 		AE_PROFILE_FUNCTION();
 		return cos(v);
 	}
 
+	float Math::ArcCos(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return acos(v);
+	}
+
 	float Math::Tan(float v)
 	{
 		AE_PROFILE_FUNCTION();
 		return tan(v);
+	}
+
+	float Math::ArcTan(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return atan(v);
 	}
 
 	float Math::DegreeToRadiants(float degrees)
@@ -134,7 +166,7 @@ namespace AstralEngine
 			return a;
 		}
 
-		return (b - a) * t + a;
+		return a + t * (b - a);
 	}
 	
 	float Math::Ceiling(float f)

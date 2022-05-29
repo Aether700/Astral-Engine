@@ -29,10 +29,12 @@ namespace AstralEngine
 		return ((x * x) + (y * y) + (z * z));
 	}
 
-	const Vector3 Vector3::Normalize() const
+	void Vector3::Normalize()
 	{
 		float len = Magnitude();
-		return Vector3(x / len, y / len, z / len); 
+		x = x / len;
+		y = y / len;
+		z = z / len;
 	}
 
 	const float* Vector3::Data() const { return &x; }
@@ -46,6 +48,13 @@ namespace AstralEngine
 	const Vector3 Vector3::Zero() { return Vector3(); }
 
 
+	const Vector3 Vector3::Normalize(const Vector3& v)
+	{
+		Vector3 unit = v;
+		unit.Normalize();
+		return unit;
+	}
+
 	const float Vector3::DotProduct(const Vector3& v1, const Vector3& v2) { return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z + v2.z); }
 	const Vector3 Vector3::CrossProduct(const Vector3& v1, const Vector3& v2)
 	{
@@ -58,6 +67,16 @@ namespace AstralEngine
 		float zCoord = (v1.x * v2.y) - (v2.x * v1.y);
 
 		return Vector3(xCoord, yCoord, zCoord);
+	}
+
+	float Vector3::Angle(const Vector3& v1, const Vector3& v2)
+	{
+		return Math::ArcCos(DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()));
+	}
+
+	const Vector3 Vector3::Lerp(const Vector3& a, const Vector3& b, float t)
+	{
+		return Vector3(Math::Lerp(a.x, b.x, t), Math::Lerp(a.y, b.y, t), Math::Lerp(a.z, b.z, t));
 	}
 
 	const Vector3 Vector3::operator+(const Vector3& v) const 

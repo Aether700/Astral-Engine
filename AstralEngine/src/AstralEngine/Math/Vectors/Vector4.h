@@ -23,11 +23,13 @@ namespace AstralEngine
 
 		const float Magnitude() const;
 		const float SqrMagnitude() const;
-		const Vector4 Normalize() const;
+		void Normalize();
 
 		const float* Data() const;
 
 		static const Vector4 Zero();
+
+		static const Vector4 Normalize(const Vector4& v);
 
 		const Vector4 operator+(const Vector4& v) const;
 		const Vector4 operator-(const Vector4& v) const;
@@ -66,5 +68,6 @@ namespace AstralEngine
 			float a;
 		};
 	};
-		Vector4 operator*(float k, const Vector4& v);
+	
+	Vector4 operator*(float k, const Vector4& v);
 }

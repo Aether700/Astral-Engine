@@ -28,15 +28,25 @@ namespace AstralEngine
 		return ((x * x) + (y * y) + (z * z) + (w * w));
 	}
 
-	const Vector4 Vector4::Normalize() const
+	void Vector4::Normalize()
 	{
 		float len = Magnitude();
-		return Vector4(x / len, y / len, z / len, w / len);
+		x = x / len;
+		y = y / len;
+		z = z / len;
+		w = w / len;
 	}
 
 	const float* Vector4::Data() const { return &x; }
 
 	const Vector4 Vector4::Zero() { return Vector4(); }
+
+	const Vector4 Vector4::Normalize(const Vector4& v)
+	{
+		Vector4 unit = v;
+		unit.Normalize();
+		return unit;
+	}
 
 	const Vector4 Vector4::operator+(const Vector4& v) const { return Vector4(x + v.x, y + v.y, z + v.z, w + v.w); }
 	const Vector4 Vector4::operator-(const Vector4& v) const { return Vector4(x - v.x, y - v.y, z - v.z, w - v.w); }

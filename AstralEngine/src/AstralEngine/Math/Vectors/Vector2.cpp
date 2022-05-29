@@ -31,10 +31,11 @@ namespace AstralEngine
 		return (x * x) + (y * y);
 	}
 
-	const Vector2 Vector2::Normalize() const
+	void Vector2::Normalize()
 	{
 		float len = Magnitude();
-		return Vector2(x / len, y / len); 
+		x = x / len;
+		y = y / len;
 	}
 
 	const float* Vector2::Data() const
@@ -48,6 +49,12 @@ namespace AstralEngine
 	const Vector2 Vector2::Up() { return Vector2(0.0f, 1.0f); }
 	const Vector2 Vector2::Zero() { return Vector2(); }
 
+	const Vector2 Vector2::Normalize(const Vector2& v)
+	{
+		Vector2 unit = v;
+		unit.Normalize();
+		return unit;
+	}
 
 	const float Vector2::DotProduct(const Vector2& v1, const Vector2& v2) { return (v1.x * v2.x) + (v1.y * v2.y); }
 	Vector2 Vector2::Min(const Vector2& lhs, const Vector2& rhs) 
@@ -63,6 +70,11 @@ namespace AstralEngine
 	Vector2 Vector2::Clamp(const Vector2& v, const Vector2& min, const Vector2& max) 
 	{
 		return Vector2(Math::Clamp(v.x, min.x, max.x), Math::Clamp(v.y, min.y, max.y));
+	}
+
+	float Vector2::Angle(const Vector2& v1, const Vector2& v2)
+	{
+		return Math::ArcCos( DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()) );
 	}
 
 

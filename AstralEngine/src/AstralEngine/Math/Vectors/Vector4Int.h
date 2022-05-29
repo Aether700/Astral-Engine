@@ -23,7 +23,6 @@ namespace AstralEngine
 
 		const float Magnitude() const;
 		const float SqrMagnitude() const;
-		const Vector4Int Normalize() const;
 
 
 		static const Vector4Int Zero();

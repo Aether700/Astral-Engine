@@ -28,12 +28,6 @@ namespace AstralEngine
 		return ((float)x * (float)x) + ((float)y * (float)y) + ((float)z * (float)z);
 	}
 
-	const Vector3Int Vector3Int::Normalize() const
-	{
-		float len = Magnitude();
-		return Vector3Int( (int)((float)x / len), (int)((float)y / len), (int)((float)z / len) );
-	}
-
 	const int* Vector3Int::Data() const { return &x; }
 
 	const Vector3Int Vector3Int::Down() { return Vector3Int(0, -1, 0); }

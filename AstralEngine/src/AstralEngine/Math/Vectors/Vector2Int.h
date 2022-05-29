@@ -26,7 +26,6 @@ namespace AstralEngine
 
 		const float Magnitude() const;
 		const float SqrMagnitude() const;
-		const Vector2Int Normalize() const;
 
 		const int* Data() const;
 
@@ -65,7 +64,8 @@ namespace AstralEngine
 		Vector2Short(short _x, short _y) : x(_x), y(_y) { }
 		Vector2Short(const Vector2Int& other) :x ((short)other.x), y((short)other.y) { }
 
-		const float Length() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
 		const Vector2Short Normalize() const;
 
 		const short* Data() const;

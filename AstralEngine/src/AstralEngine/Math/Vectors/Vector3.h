@@ -23,7 +23,7 @@ namespace AstralEngine
 
 		const float Magnitude() const;
 		const float SqrMagnitude() const;
-		const Vector3 Normalize() const;
+		void Normalize();
 
 		const float* Data() const;
 
@@ -36,8 +36,11 @@ namespace AstralEngine
 		static const Vector3 Zero();
 
 
+		static const Vector3 Normalize(const Vector3& v);
 		static const float DotProduct(const Vector3& v1, const Vector3& v2);
 		static const Vector3 CrossProduct(const Vector3& v1, const Vector3& v2);
+		static float Angle(const Vector3& v1, const Vector3& v2);
+		static const Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
 
 		const Vector3 operator+(const Vector3& v) const;
 		const Vector3 operator-(const Vector3& v) const;
@@ -71,5 +74,5 @@ namespace AstralEngine
 			float b;
 		};
 	};
-	const Vector2 operator*(float k, const Vector2& v);
+	const Vector3 operator*(float k, const Vector3& v);
 }

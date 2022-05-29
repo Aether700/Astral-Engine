@@ -32,12 +32,6 @@ namespace AstralEngine
 		return ((float)x * (float)x) + ((float)y * (float)y);
 	}
 
-	const Vector2Int Vector2Int::Normalize() const
-	{
-		float len = Magnitude();
-		return Vector2Int( (int)((float)x / len), (int)((float)y / len) );
-	}
-
 	const int* Vector2Int::Data() const { return &x; }
 
 	const Vector2Int Vector2Int::Down() { return Vector2Int(0, -1); }
@@ -110,14 +104,19 @@ namespace AstralEngine
 
 	// Vector2Short //////////////////////////////////////////////////////////////////////////////
 	
-	const float Vector2Short::Length() const
+	const float Vector2Short::Magnitude() const
 	{
-		return Math::Sqrt( ((float)x * (float)x) + ((float)y * (float)y) );
+		return Math::Sqrt( SqrMagnitude() );
+	}
+
+	const float Vector2Short::SqrMagnitude() const
+	{
+		return ((float)x * (float)x) + ((float)y * (float)y);
 	}
 
 	const Vector2Short Vector2Short::Normalize() const
 	{
-		float len = Length();
+		float len = Magnitude();
 		return Vector2Short( (short)((float)x / len), (short)((float)y / len));
 	}
 
