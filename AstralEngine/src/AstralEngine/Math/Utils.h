@@ -8,6 +8,7 @@ namespace AstralEngine
 	public:
 		static int Abs(int v);
 		static float Abs(float v);
+		static double Abs(double v);
 		static int Clamp(int value, int min, int max);
 		static float Clamp(float value, float min, float max);
 		
@@ -17,7 +18,7 @@ namespace AstralEngine
 		static float ArcCos(float v);
 		static float Tan(float v);
 		static float ArcTan(float v);
-		static float ArcTan2(float x, float y);
+		static float ArcTan2(float y, float x);
 		static float ArcTan2(Vector2 v);
 
 		static float Sqrt(float v);

@@ -24,6 +24,16 @@ namespace AstralEngine
 		return v;
 	}
 
+	double Math::Abs(double v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0.0)
+		{
+			return -1.0 * v;
+		}
+		return v;
+	}
+
 	int Math::Clamp(int value, int min, int max)
 	{
 		AE_PROFILE_FUNCTION();
@@ -88,14 +98,14 @@ namespace AstralEngine
 		return atan(v);
 	}
 
-	float Math::ArcTan2(float x, float y)
+	float Math::ArcTan2(float y, float x)
 	{
 		return ArcTan(y / x);
 	}
 
 	float Math::ArcTan2(Vector2 v)
 	{
-		return ArcTan2(v.x, v.y);
+		return ArcTan2(v.y, v.x);
 	}
 
 	float Math::DegreeToRadiants(float degrees)

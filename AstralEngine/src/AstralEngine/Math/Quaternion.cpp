@@ -37,46 +37,45 @@ namespace AstralEngine
 	Mat4 Quaternion::GetRotationMatrix() const
 	{
 		return Mat4(
+			{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 
+					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
+			{ 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 2.0f * (m_w * m_w + m_v.y * m_v.y) - 1.0f, 
+					2.0f * (m_v.y * m_v.z + m_w * m_v.x), 0.0f },
+			{ 2.0f * (m_v.x * m_v.z + m_w * m_v.y), 2.0f * (m_v.y * m_v.z - m_w * m_v.x), 
+					2.0f * (m_w * m_w + m_v.z * m_v.z) - 1.0f, 0.0f },
+			{ 0.0f, 0.0f, 0.0f, 1.0f }
+		);
+
+		/*
+		return Mat4(
 				{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 
-						2.0f * (m_v.x * m_v.z + m_w * m_v.y), 0.0f },
+						2.0f * (m_v.x * m_v.z + m_w * m_v.y), 0.0f },	
 				{ 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 2.0f * (m_w * m_w + m_v.y * m_v.y) - 1.0f, 
 						2.0f * (m_v.y * m_v.z - m_w * m_v.x), 0.0f },
 				{ 2.0f * (m_v.x * m_v.z - m_w * m_v.y), 2.0f * (m_v.y * m_v.z + m_w * m_v.x), 
 						2.0f * (m_w * m_w + m_v.z * m_v.z) - 1.0f, 0.0f },
 				{ 0.0f, 0.0f, 0.0f, 1.0f }
 			);
+		*/
 	}
-
-	/* code to convert to euler:
-	EulerAngles ToEulerAngles(Quaternion q) {
-		EulerAngles angles;
-
-		// roll (x-axis rotation)
-		double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
-		double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-		angles.roll = std::atan2(sinr_cosp, cosr_cosp);
-
-		// pitch (y-axis rotation)
-		double sinp = 2 * (q.w * q.y - q.z * q.x);
-		if (std::abs(sinp) >= 1)
-		    angles.pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-		else
-		    angles.pitch = std::asin(sinp);
-
-		// yaw (z-axis rotation)
-		double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-		double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-		angles.yaw = std::atan2(siny_cosp, cosy_cosp);
-
-		return angles;
-	}
-	*/
 
 	Vector3 Quaternion::AsEuler() const
 	{
 		Vector3 euler;
-		euler.x = Math::ArcTan2(2.0f * (m_w + m_v.y * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y));
-		make a copysign function in math?
+		euler.x = Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y));
+		
+		double yIntermediate = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
+		if (Math::Abs(yIntermediate) >= 1.0)
+		{
+			euler.y = (float)(Math::Pi() / 2.0 * (Math::Abs(yIntermediate) / yIntermediate));
+		}
+		else
+		{
+			euler.y = Math::ArcSin((float)yIntermediate);
+		}
+
+		euler.z = Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y), 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z));
+		return euler;
 	}
 
 	Quaternion Quaternion::Identity()
@@ -147,6 +146,19 @@ namespace AstralEngine
 		return Quaternion(m_w * k, m_v * k);
 	}
 	
+	Vector3 Quaternion::operator*(const Vector3& v) const
+	{
+		return 2.0f * Vector3::DotProduct(m_v, v) * m_v
+			+ (m_w * m_w - Vector3::DotProduct(m_v, m_v)) * v
+			+ 2.0f * m_w * Vector3::CrossProduct(m_v, v);
+
+		/*
+		Quaternion q = Quaternion(0.0f, v);
+		Quaternion result = *this * q * Conjugate();
+		return result.m_v;
+		*/
+	}
+
 	Quaternion operator*(float k, const Quaternion& q)
 	{
 		return q * k;

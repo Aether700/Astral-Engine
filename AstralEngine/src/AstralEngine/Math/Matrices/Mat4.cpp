@@ -133,7 +133,7 @@ namespace AstralEngine
 	const Mat4 Mat4::Rotate(const Mat4& m, float angle, const Vector3& axis)
 	{
 		AE_PROFILE_FUNCTION();
-		Vector3 normalizedAxis = axis.Normalize();
+		Vector3 normalizedAxis = Vector3::Normalize(axis);
 		float cosVal = Math::Cos(angle);
 		float sinVal = Math::Sin(angle);
 		Vector3 temp = normalizedAxis * (1.0f - cosVal);

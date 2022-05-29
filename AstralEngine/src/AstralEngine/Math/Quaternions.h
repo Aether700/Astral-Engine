@@ -35,6 +35,7 @@ namespace AstralEngine
 		Quaternion operator-(const Quaternion& q) const;
 		Quaternion operator*(const Quaternion& q) const;
 		Quaternion operator*(float k) const;
+		Vector3 operator*(const Vector3& v) const;
 		Quaternion operator/(float k) const;
 
 		bool operator==(const Quaternion& other) const;
