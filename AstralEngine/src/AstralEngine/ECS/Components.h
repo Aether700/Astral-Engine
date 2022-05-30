@@ -50,7 +50,7 @@ namespace AstralEngine
 		bool operator!=(const Transform& other) const;
 
 		Vector3 position;
-		Vector3 rotation;
+		Vector3 rotation; // rotation is in radians
 		Vector3 scale;
 
 	private:

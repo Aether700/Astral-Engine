@@ -7,6 +7,11 @@ namespace AstralEngine
 	Quaternion::Quaternion(float w, const Vector3& v) : m_w(w), m_v(v) { }
 	Quaternion::Quaternion(float w, float x, float y, float z) : m_w(w), m_v(x, y, z) {	}
 
+	float Quaternion::GetW() const { return m_w; }
+	float Quaternion::GetX() const { return m_v.x; }
+	float Quaternion::GetY() const { return m_v.y; }
+	float Quaternion::GetZ() const { return m_v.z; }
+
 	Quaternion Quaternion::Conjugate() const
 	{
 		return Quaternion(m_w, -1.0f * m_v);
@@ -75,7 +80,7 @@ namespace AstralEngine
 		*/
 	}
 
-	Vector3 Quaternion::AsEuler() const
+	Vector3 Quaternion::EulerAngles () const
 	{
 		Vector3 euler;
 		euler.x = Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y));
@@ -99,19 +104,30 @@ namespace AstralEngine
 		return Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
 	}
 
-	Quaternion Quaternion::FromEuler(const Vector3& euler)
+	Quaternion Quaternion::EulerToQuaternion(const Vector3& euler)
 	{
-		return FromEuler(euler.x, euler.y, euler.z);
+		return EulerToQuaternion(euler.x, euler.y, euler.z);
 	}
 
-	Quaternion Quaternion::FromEuler(float x, float y, float z)
+	Quaternion Quaternion::EulerToQuaternion(float x, float y, float z)
 	{
-		AE_CORE_WARN("Quaternion::FromEuler can be optimized by caching values");
+		float halfX = x * 0.5f;
+		float halfY = y * 0.5f;
+		float halfZ = z * 0.5f;
+
+		float cosX = Math::Cos(halfX);
+		float cosY = Math::Cos(halfY);
+		float cosZ = Math::Cos(halfZ);
+
+		float sinX = Math::Sin(halfX);
+		float sinY = Math::Sin(halfY);
+		float sinZ = Math::Sin(halfZ);
+
 		return Quaternion(
-			Math::Cos(x) * Math::Cos(y) * Math::Cos(z) + Math::Sin(x) * Math::Sin(y) * Math::Sin(z),
-			Math::Sin(x) * Math::Cos(y) * Math::Cos(z) - Math::Cos(x) * Math::Sin(y) * Math::Sin(z),
-			Math::Cos(x) * Math::Sin(y) * Math::Cos(z) + Math::Sin(x) * Math::Cos(y) * Math::Sin(z),
-			Math::Cos(x) * Math::Cos(y) * Math::Sin(z) - Math::Sin(x) * Math::Sin(y) * Math::Cos(z)
+			cosX * cosY * cosZ + sinX * sinY * sinZ,
+			sinX * cosY * cosZ - cosX * sinY * sinZ,
+			cosX * sinY * cosZ + sinX * cosY * sinZ,
+			cosX * cosY * sinZ - sinX * sinY * cosZ
 		);
 	}
 

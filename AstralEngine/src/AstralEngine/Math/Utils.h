@@ -31,7 +31,8 @@ namespace AstralEngine
 
 		static long double Pi();
 
-		static float DegreeToRadiants(float v);
+		static float DegreeToRadiants(float degrees);
+		static float RadiantsToDegree(float radians);
 		
 		/*linearly interpolates from a to b using t (t must be between 0 and 1)
 			if t >= 0, returns a

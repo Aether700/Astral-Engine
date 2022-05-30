@@ -4,12 +4,18 @@
 
 namespace AstralEngine
 {
+	// rotations are stores as radians not degrees
 	class Quaternion
 	{
 	public:
 		Quaternion();
 		Quaternion(float w, const Vector3& v);
 		Quaternion(float w, float x, float y, float z);
+
+		float GetW() const;
+		float GetX() const;
+		float GetY() const;
+		float GetZ() const;
 
 		Quaternion Conjugate() const;
 		float Magnitude() const;
@@ -19,11 +25,11 @@ namespace AstralEngine
 		Quaternion Inverse() const;
 
 		Mat4 GetRotationMatrix() const;
-		Vector3 AsEuler() const;
+		Vector3 EulerAngles() const;
 		
 		static Quaternion Identity();
-		static Quaternion FromEuler(const Vector3& euler);
-		static Quaternion FromEuler(float x, float y, float z);
+		static Quaternion EulerToQuaternion(const Vector3& euler);
+		static Quaternion EulerToQuaternion(float x, float y, float z);
 
 		static Quaternion Normalize(const Quaternion& q);
 		static float DotProduct(const Quaternion& q1, const Quaternion& q2);
