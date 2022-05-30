@@ -407,6 +407,34 @@ private:
 	float curr;
 };
 
+class QuaternionTester : public AstralEngine::NativeScript
+{
+public:
+	void OnCreate()
+	{
+		float angle = AstralEngine::Math::DegreeToRadiants(45.0f);
+		m_q = AstralEngine::Quaternion::FromEuler(0.0f, 0.0f, angle);
+		AstralEngine::Vector3 euler = m_q.AsEuler();
+	}
+
+	void OnUpdate()
+	{
+		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
+		AstralEngine::Renderer::DrawQuad(m_q.GetRotationMatrix());
+		AstralEngine::Renderer::EndScene();
+	}
+
+	void SetScene(AstralEngine::Scene* s)
+	{
+		m_camera = AstralEngine::AEntity((AstralEngine::BaseEntity)0, s);
+	}
+
+
+private:
+	AstralEngine::Quaternion m_q;
+	AstralEngine::AEntity m_camera;
+};
+
 void OnButtonClicked()
 {
 	static int count = 0;
@@ -459,31 +487,18 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-		m_entity.EmplaceComponent<ColorSwitcher>();
-		
-		m_entity.EmplaceComponent<EntityController>();
-		m_entity.EmplaceComponent<TestComponent>();
-		AstralEngine::AEntity spriteRemover = m_scene->CreateAEntity();
-		spriteRemover.EmplaceComponent<SpriteRemover>();
+		m_entity.GetTransform().position = { 1.5f, 0, 0 };
+		m_entity.GetTransform().rotation = { 0, 0, AstralEngine::Math::DegreeToRadiants(45.0f)};
 
-		
-		AstralEngine::AEntity e = m_scene->CreateAEntity();
-		e.EmplaceComponent<PerlinNoiseTest>();
-		e.GetComponent<AstralEngine::Transform>().scale.x = 5.0f;
-		e.GetComponent<AstralEngine::Transform>().scale.y = 5.0f;
-		e.GetComponent<AstralEngine::Transform>().position.y = 5.0f;
-
-		AstralEngine::AEntity texturedQuad = m_scene->CreateAEntity();
-		texturedQuad.GetTransform().position.x = -5.0f;
-		AstralEngine::SpriteRenderer& spriteRenderer 
-			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRenderer>();
-		spriteRenderer.SetSprite(AstralEngine::Texture2D::Create("assets/textures/septicHanzo.PNG"));
-		texturedQuad.EmplaceComponent<InputTest>();
+		AstralEngine::AEntity quaternionTester = m_scene->CreateAEntity();
+		QuaternionTester& q = quaternionTester.EmplaceComponent<QuaternionTester>();
+		q.SetScene(m_scene.Get());
 	}
 
 	void OnUpdate() override
 	{
 		m_scene->OnUpdate();
+		
 
 		/*
 		m_cameraController->OnUpdate();

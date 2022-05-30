@@ -36,6 +36,22 @@ namespace AstralEngine
 
 	Mat4 Quaternion::GetRotationMatrix() const
 	{
+		AE_CORE_WARN("Quaternion::GetRotation can be optimized by caching the multiplications and re-using them");
+		
+		/*
+		return Mat4(
+			{ 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z), 2.0f * (m_v.x * m_v.y + m_w * m_v.z),
+					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
+			{ 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.z * m_v.z),
+					2.0f * (m_v.y * m_v.z + m_w * m_v.x), 0.0f },
+			{ 2.0f * (m_v.x * m_v.z + m_w * m_v.y), 2.0f * (m_v.y * m_v.z - m_w * m_v.x),
+					1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y), 0.0f },
+			{ 0.0f, 0.0f, 0.0f, 1.0f }
+		);
+		*/
+
+		/*
+		*/
 		return Mat4(
 			{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 
 					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
@@ -90,6 +106,7 @@ namespace AstralEngine
 
 	Quaternion Quaternion::FromEuler(float x, float y, float z)
 	{
+		AE_CORE_WARN("Quaternion::FromEuler can be optimized by caching values");
 		return Quaternion(
 			Math::Cos(x) * Math::Cos(y) * Math::Cos(z) + Math::Sin(x) * Math::Sin(y) * Math::Sin(z),
 			Math::Sin(x) * Math::Cos(y) * Math::Cos(z) - Math::Cos(x) * Math::Sin(y) * Math::Sin(z),

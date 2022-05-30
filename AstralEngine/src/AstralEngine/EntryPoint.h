@@ -7,19 +7,6 @@ extern AstralEngine::Application* CreateApp();
 
 int main()
 {
-	using namespace AstralEngine;
-
-	Transform t = Transform({ 0, 0, 0 }, { 0, 90, 0 }, {1, 1, 1});
-	Mat4 m = t.GetTransformMatrix();
-
-	Quaternion q = Quaternion::FromEuler(0, 90, 0);
-	Mat4 m2 = q.GetRotationMatrix();
-	bool equal = m == m2;
-
-
-	
-
-	/*
 	AE_PROFILE_BEGIN_SESSION("Startup", "AstralEngine-Startup.json");
 	AstralEngine::Logger::Init();
 	AstralEngine::Application* app = CreateApp();
@@ -32,7 +19,6 @@ int main()
 	AE_PROFILE_BEGIN_SESSION("Shutdown", "AstralEngine-Shutdown.json");
 	delete app;
 	AE_PROFILE_END_SESSION();
-	*/
 }
 
 #ifndef AE_DEBUG
