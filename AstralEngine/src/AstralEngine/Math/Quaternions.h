@@ -4,7 +4,7 @@
 
 namespace AstralEngine
 {
-	// rotations are stores as radians not degrees
+	// Internally stores the data as radians but the API is in degrees
 	class Quaternion
 	{
 	public:
@@ -25,14 +25,19 @@ namespace AstralEngine
 		Quaternion Inverse() const;
 
 		Mat4 GetRotationMatrix() const;
+		// returns euler angles in degrees
 		Vector3 EulerAngles() const;
 		
 		static Quaternion Identity();
+
+		// takes euler angles as degrees and outputs a unit Quaternion object
 		static Quaternion EulerToQuaternion(const Vector3& euler);
 		static Quaternion EulerToQuaternion(float x, float y, float z);
 
 		static Quaternion Normalize(const Quaternion& q);
 		static float DotProduct(const Quaternion& q1, const Quaternion& q2);
+
+		// returns an angle in degrees
 		static float Angle(const Quaternion& q1, const Quaternion& q2);
 		static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
 		static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t);
@@ -48,6 +53,7 @@ namespace AstralEngine
 		bool operator!=(const Quaternion& other) const;
 
 	private:
+		// rotations are stores as radians not degrees
 		float m_w;
 		Vector3 m_v; // axis of rotation
 	};

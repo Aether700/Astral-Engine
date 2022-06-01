@@ -83,19 +83,21 @@ namespace AstralEngine
 	Vector3 Quaternion::EulerAngles () const
 	{
 		Vector3 euler;
-		euler.x = Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y));
+		euler.x = Math::RadiantsToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
+			1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
 		
 		double yIntermediate = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
 		if (Math::Abs(yIntermediate) >= 1.0)
 		{
-			euler.y = (float)(Math::Pi() / 2.0 * (Math::Abs(yIntermediate) / yIntermediate));
+			euler.y = Math::RadiantsToDegree((float)(Math::Pi() / 2.0 * (Math::Abs(yIntermediate) / yIntermediate)));
 		}
 		else
 		{
-			euler.y = Math::ArcSin((float)yIntermediate);
+			euler.y = Math::RadiantsToDegree(Math::ArcSin((float)yIntermediate));
 		}
 
-		euler.z = Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y), 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z));
+		euler.z = Math::RadiantsToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
+			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
 		return euler;
 	}
 
@@ -111,9 +113,9 @@ namespace AstralEngine
 
 	Quaternion Quaternion::EulerToQuaternion(float x, float y, float z)
 	{
-		float halfX = x * 0.5f;
-		float halfY = y * 0.5f;
-		float halfZ = z * 0.5f;
+		float halfX = Math::DegreeToRadiants(x) * 0.5f;
+		float halfY = Math::DegreeToRadiants(y) * 0.5f;
+		float halfZ = Math::DegreeToRadiants(z) * 0.5f;
 
 		float cosX = Math::Cos(halfX);
 		float cosY = Math::Cos(halfY);
@@ -123,12 +125,12 @@ namespace AstralEngine
 		float sinY = Math::Sin(halfY);
 		float sinZ = Math::Sin(halfZ);
 
-		return Quaternion(
+		return Normalize(Quaternion(
 			cosX * cosY * cosZ + sinX * sinY * sinZ,
 			sinX * cosY * cosZ - cosX * sinY * sinZ,
 			cosX * sinY * cosZ + sinX * cosY * sinZ,
 			cosX * cosY * sinZ - sinX * sinY * cosZ
-		);
+		));
 	}
 
 	Quaternion Quaternion::Normalize(const Quaternion& q)
@@ -143,9 +145,16 @@ namespace AstralEngine
 		return q1.m_w * q2.m_w + Vector3::DotProduct(q1.m_v, q2.m_v);
 	}
 
+	/* taken from forum:
+	Just NOTE: acos(dot) is very not stable from numerical point of view.
+	as was said previos, q = q1^-1 * q2 and than angle = 2*atan2(q.vec.length(), q.w)
+	*/
+
 	float Quaternion::Angle(const Quaternion& q1, const Quaternion& q2)
 	{
-		return Math::ArcCos( DotProduct(q1, q2) / (q1.Magnitude() * q2.Magnitude()) );
+		Quaternion q = q1.Inverse() * q2;
+		return Math::ArcTan2(q.EulerAngles().Magnitude(), q.m_w);
+		//return Math::ArcCos( DotProduct(q1, q2) / (q1.Magnitude() * q2.Magnitude()) );
 	}
 
 	Quaternion Quaternion::Lerp(const Quaternion& a, const Quaternion& b, float t)

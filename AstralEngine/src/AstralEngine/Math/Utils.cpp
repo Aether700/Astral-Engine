@@ -65,37 +65,37 @@ namespace AstralEngine
 	float Math::Sin(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sin(v);
+		return std::sin(v);
 	}
 
 	float Math::ArcSin(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return asin(v);
+		return std::asin(v);
 	}
 
 	float Math::Cos(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return cos(v);
+		return std::cos(v);
 	}
 
 	float Math::ArcCos(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return acos(v);
+		return std::acos(v);
 	}
 
 	float Math::Tan(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return tan(v);
+		return std::tan(v);
 	}
 
 	float Math::ArcTan(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return atan(v);
+		return std::atan(v);
 	}
 
 	float Math::ArcTan2(float y, float x)
@@ -121,7 +121,7 @@ namespace AstralEngine
 	float Math::Sqrt(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sqrt(v);
+		return std::sqrt(v);
 	}
 
 	float Math::Log(float v)

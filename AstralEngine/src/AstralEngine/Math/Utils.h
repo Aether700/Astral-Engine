@@ -12,6 +12,7 @@ namespace AstralEngine
 		static int Clamp(int value, int min, int max);
 		static float Clamp(float value, float min, float max);
 		
+		// Uses Radians
 		static float Sin(float v);
 		static float ArcSin(float v);
 		static float Cos(float v);

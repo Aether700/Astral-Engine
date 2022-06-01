@@ -412,14 +412,17 @@ class QuaternionTester : public AstralEngine::NativeScript
 public:
 	void OnCreate()
 	{
-		m_q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, AstralEngine::Math::DegreeToRadiants(30.0f));
+		m_q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 30.0f);
+		AstralEngine::Quaternion q2 = AstralEngine::Quaternion::EulerToQuaternion(0, 0, 10.0f);
 		AE_INFO("w: %f x: %f y: %f z: %f", m_q.GetW(), m_q.GetX(), m_q.GetY(), m_q.GetZ());
-		//m_q.Normalize();
-		//AE_INFO("w: %f x: %f y: %f z: %f", m_q.GetW(), m_q.GetX(), m_q.GetY(), m_q.GetZ());
+		AE_INFO("w: %f x: %f y: %f z: %f", q2.GetW(), q2.GetX(), q2.GetY(), q2.GetZ());
+		AstralEngine::Quaternion result = m_q * q2;
+		debugging multiplication between two quaternions
+		AE_INFO("w: %f x: %f y: %f z: %f", result.GetW(), result.GetX(), result.GetY(), result.GetZ());
 		AstralEngine::Vector3 euler = m_q.EulerAngles();
-		AE_INFO("x: %f y: %f z: %f", AstralEngine::Math::RadiantsToDegree(euler.x), 
-			AstralEngine::Math::RadiantsToDegree(euler.y), AstralEngine::Math::RadiantsToDegree(euler.z));
-		AstralEngine::Vector3 temp;
+		AE_INFO("x: %f y: %f z: %f", euler.x, euler.y, euler.z);
+		float angle = AstralEngine::Quaternion::Angle(m_q, q2);
+		AE_INFO("angle: %f", angle);
 	}
 
 	void OnUpdate()
