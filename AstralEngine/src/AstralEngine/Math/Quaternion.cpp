@@ -50,10 +50,27 @@ namespace AstralEngine
 		return Conjugate() / SqrMagnitude();
 	}
 
-	Mat4 Quaternion::GetRotationMatrix() const
-	{
-		AE_CORE_WARN("Quaternion::GetRotation can be optimized by caching the multiplications and re-using them");
-		
+	Mat3 Quaternion::ComputeRotationMatrix() const
+	{		
+		float twoX = m_v.x * 2.0f;
+		float twoY = m_v.y * 2.0f;
+		float twoZ = m_v.z * 2.0f;
+		float x2 = m_v.x * twoX;
+		float y2 = m_v.y * twoY;
+		float z2 = m_v.z * twoZ;
+		float xy = m_v.x * twoY;
+		float xz = m_v.x * twoZ;
+		float yz = m_v.y * twoZ;
+		float xw = twoX * m_w;
+		float yw = twoY * m_w;
+		float zw = twoZ * m_w;
+
+		return Mat3(
+			{ 1.0f - y2 - z2, xy + zw, xz - yw },
+			{ xy - zw, 1.0f - x2 - z2, yz + xw },
+			{ xz + yw, yz - xw, 1.0f - x2 - y2 }
+		);
+
 		/*
 		return Mat4(
 			{ 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z), 2.0f * (m_v.x * m_v.y + m_w * m_v.z),
@@ -67,7 +84,6 @@ namespace AstralEngine
 		*/
 
 		/*
-		*/
 		return Mat4(
 			{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 
 					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
@@ -77,6 +93,7 @@ namespace AstralEngine
 					2.0f * (m_w * m_w + m_v.z * m_v.z) - 1.0f, 0.0f },
 			{ 0.0f, 0.0f, 0.0f, 1.0f }
 		);
+		*/
 
 		/*
 		return Mat4(
@@ -136,12 +153,22 @@ namespace AstralEngine
 		float sinY = Math::Sin(halfY);
 		float sinZ = Math::Sin(halfZ);
 
+		AE_CORE_WARN("Quaternion::EulerToQuaternion can still be optimized by batching into variables repeating computations");
+
+		/*
 		return Normalize(Quaternion(
 			cosX * cosY * cosZ + sinX * sinY * sinZ,
 			sinX * cosY * cosZ - cosX * sinY * sinZ,
 			cosX * sinY * cosZ + sinX * cosY * sinZ,
 			cosX * cosY * sinZ - sinX * sinY * cosZ
 		));
+		*/
+		return Quaternion(
+			cosX * cosY * cosZ + sinX * sinY * sinZ,
+			sinX * cosY * cosZ - cosX * sinY * sinZ,
+			cosX * sinY * cosZ + sinX * cosY * sinZ,
+			cosX * cosY * sinZ - sinX * sinY * cosZ
+		);
 	}
 
 	Quaternion Quaternion::Normalize(const Quaternion& q)
@@ -156,16 +183,14 @@ namespace AstralEngine
 		return q1.m_w * q2.m_w + Vector3::DotProduct(q1.m_v, q2.m_v);
 	}
 
-	/* taken from forum:
-	Just NOTE: acos(dot) is very not stable from numerical point of view.
-	as was said previos, q = q1^-1 * q2 and than angle = 2*atan2(q.vec.length(), q.w)
-	*/
-
 	float Quaternion::Angle(const Quaternion& q1, const Quaternion& q2)
 	{
-		Quaternion q = q1.Inverse() * q2;
-		return Math::ArcTan2(q.EulerAngles().Magnitude(), q.m_w);
-		//return Math::ArcCos( DotProduct(q1, q2) / (q1.Magnitude() * q2.Magnitude()) );
+		float dotProd = DotProduct(q1, q2);
+		if (dotProd >= 1.0f)
+		{
+			return 0.0f;
+		}
+		return Math::RadiantsToDegree(2.0f * Math::ArcCos(dotProd));
 	}
 
 	Quaternion Quaternion::Lerp(const Quaternion& a, const Quaternion& b, float t)
@@ -176,6 +201,39 @@ namespace AstralEngine
 	Quaternion Quaternion::Slerp(const Quaternion& a, const Quaternion& b, float t)
 	{
 		return Normalize(a + t * (b - a));
+	}
+
+	/* solution from forum: https://gamedev.stackexchange.com/questions/53129/quaternion-look-at-with-up-vector
+		void SceneElement::look_at(const mx::Vector3f& target, const mx::Vector3f& up)
+		{
+		    mx::Vector3f forward_l = mx::normalize(target - position);
+		    mx::Vector3f forward_w(1, 0, 0);
+		    mx::Vector3f axis  = forward_l % forward_w;
+		    float        angle = mx::rad_to_deg(acos(forward_l * forward_w));
+		
+		    mx::Vector3f third = axis % forward_w;
+		    if (third * forward_l < 0)
+		    {
+		        angle = - angle;
+		    }
+		    mx::Quaternionf q1 = mx::axis_angle_to_quaternion(angle, axis);
+		
+		    mx::Vector3f up_l  = mx::transform(q1, mx::normalize(up));
+		    mx::Vector3f right = mx::normalize(forward_l % up);
+		    mx::Vector3f up_w  = mx::normalize(right % forward_l);
+		
+		    mx::Vector3f axis2  = up_l % up_w;
+		    float        angle2 = mx::rad_to_deg(acos(up_l * up_w));
+		
+		    mx::Quaternionf q2 = mx::axis_angle_to_quaternion(angle2, axis2);
+		
+		    orientation = q2 * q1;
+		}
+	*/
+
+	Quaternion Quaternion::LookRotation(const Vector3& lookDir, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f))
+	{
+		not finished
 	}
 
 	Quaternion Quaternion::operator+(const Quaternion& q) const
@@ -201,49 +259,11 @@ namespace AstralEngine
 	{
 		return Quaternion(m_w * k, m_v * k);
 	}
-	
-	//from unity, method has been mentioned on this post-> https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion:
-	/*
-		public static Vector3 operator *(Quaternion rotation, Vector3 point)
-        {
-            float num = rotation.x * 2f;
-            float num2 = rotation.y * 2f;
-            float num3 = rotation.z * 2f;
-            float num4 = rotation.x * num;
-            float num5 = rotation.y * num2;
-            float num6 = rotation.z * num3;
-            float num7 = rotation.x * num2;
-            float num8 = rotation.x * num3;
-            float num9 = rotation.y * num3;
-            float num10 = rotation.w * num;
-            float num11 = rotation.w * num2;
-            float num12 = rotation.w * num3;
-            Vector3 result = default(Vector3);
-            result.x = (1f - (num5 + num6)) * point.x + (num7 - num12) * point.y + (num8 + num11) * point.z;
-            result.y = (num7 + num12) * point.x + (1f - (num4 + num6)) * point.y + (num9 - num10) * point.z;
-            result.z = (num8 - num11) * point.x + (num9 + num10) * point.y + (1f - (num4 + num5)) * point.z;
-            return result;
-        }*/
 
 	Vector3 Quaternion::operator*(const Vector3& v) const
 	{
-		/*
-		return 2.0f * Vector3::DotProduct(m_v, v) * m_v
-			+ (m_w * m_w - Vector3::DotProduct(m_v, m_v)) * v
-			+ 2.0f * m_w * Vector3::CrossProduct(m_v, v);
-		*/
-		/*
-		Quaternion q = Quaternion(0.0f, v);
-		Quaternion result = *this * q * Conjugate();
-		return result.m_v;
-		*/
-
-		/*
-		Vector3 t = 2.0f * Vector3::CrossProduct(m_v, v);
-		return v + m_w * t + Vector3::CrossProduct(m_v, t);
-		*/
-
-		return v + 2.0f * Vector3::CrossProduct(m_v, (m_w * v + Vector3::CrossProduct(m_v, v)));
+		Mat4 rotationMatrix = ComputeRotationMatrix();
+		return (Vector3)(rotationMatrix * Vector4(v.x, v.y, v.z, 1.0f));
 	}
 
 	Quaternion operator*(float k, const Quaternion& q)

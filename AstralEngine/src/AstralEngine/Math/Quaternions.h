@@ -30,7 +30,8 @@ namespace AstralEngine
 		void Normalize();
 		Quaternion Inverse() const;
 
-		Mat4 GetRotationMatrix() const;
+		Mat3 ComputeRotationMatrix() const;
+
 		// returns euler angles in degrees
 		Vector3 EulerAngles() const;
 		
@@ -47,6 +48,8 @@ namespace AstralEngine
 		static float Angle(const Quaternion& q1, const Quaternion& q2);
 		static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
 		static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t);
+
+		static Quaternion LookRotation(const Vector3& lookDir, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f));
 
 		Quaternion operator+(const Quaternion& q) const;
 		Quaternion operator-(const Quaternion& q) const;

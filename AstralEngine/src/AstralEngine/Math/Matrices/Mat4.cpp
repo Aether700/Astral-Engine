@@ -1,7 +1,6 @@
 #include "aepch.h"
 #include "AstralEngine/Math/Utils.h"
 #include "Mat4.h"
-#include "Mat3.h"
 
 namespace AstralEngine
 {
@@ -19,6 +18,14 @@ namespace AstralEngine
 		m_vectors[1] = v2;
 		m_vectors[2] = v3;
 		m_vectors[3] = v4;
+	}
+
+	Mat4::Mat4(const Mat3& m)
+	{
+		m_vectors[0] = Vector4(m[0].x, m[0].y, m[0].z, 0.0f);
+		m_vectors[1] = Vector4(m[1].x, m[1].y, m[1].z, 0.0f);
+		m_vectors[2] = Vector4(m[2].x, m[2].y, m[2].z, 0.0f);
+		m_vectors[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	Mat4::Mat4(const Mat4& other)

@@ -412,19 +412,28 @@ class QuaternionTester : public AstralEngine::NativeScript
 public:
 	void OnCreate()
 	{
-		m_q = AstralEngine::Quaternion(0.3f, 0.2f, 0.2f, 0.3f);
-		AstralEngine::Vector3 v = AstralEngine::Vector3(3.0f, 2.0f, 5.0f);
-		AE_INFO("w: %f x: %f y: %f z: %f", m_q.GetW(), m_q.GetX(), m_q.GetY(), m_q.GetZ());
-		AE_INFO("x: %f y: %f z: %f", v.x, v.y, v.z);
-		testing quaternion vector multiplication
-		AstralEngine::Vector3 result = m_q * v;
-		AE_INFO("x: %f y: %f z: %f", result.x, result.y, result.z);
+		m_q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 0.0f);
+		m_q2 = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 359.0f);
+		AstralEngine::Quaternion a = AstralEngine::Quaternion(1.0f, 2.0f, 5.0f, 1.0f);
+		AstralEngine::Quaternion normalized = AstralEngine::Quaternion::Normalize(a);
+		AE_INFO("w: %f, x: %f, y: %f, z: %f", normalized.GetW(), normalized.GetX(), normalized.GetY(), normalized.GetZ());
+
+		AstralEngine::Quaternion q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 30.0f);
+		AstralEngine::Quaternion q2 = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 10.0f);
+		AE_INFO("dot: %f", AstralEngine::Quaternion::DotProduct(q, q2));
+		float angle = AstralEngine::Quaternion::Angle(q, q2);
+		AE_INFO("angle: %f", angle);
+
 	}
 
 	void OnUpdate()
 	{
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
+		{
+			m_q = AstralEngine::Quaternion::Slerp(m_q, m_q2, AstralEngine::Time::GetDeltaTime());
+		}
 		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
-		AstralEngine::Renderer::DrawQuad(m_q.GetRotationMatrix());
+		AstralEngine::Renderer::DrawQuad(m_q.ComputeRotationMatrix());
 		AstralEngine::Renderer::EndScene();
 	}
 
@@ -436,6 +445,7 @@ public:
 
 private:
 	AstralEngine::Quaternion m_q;
+	AstralEngine::Quaternion m_q2;
 	AstralEngine::AEntity m_camera;
 };
 
@@ -492,7 +502,7 @@ public:
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
 		m_entity.GetTransform().position = { 1.5f, 0, 0 };
-		m_entity.GetTransform().rotation = { 0, 0, AstralEngine::Math::DegreeToRadiants(90.0f)};
+		m_entity.GetTransform().rotation = { 0, 0, AstralEngine::Math::DegreeToRadiants(30.0f)};
 
 		AstralEngine::AEntity quaternionTester = m_scene->CreateAEntity();
 		QuaternionTester& q = quaternionTester.EmplaceComponent<QuaternionTester>();
