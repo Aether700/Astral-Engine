@@ -16,6 +16,12 @@ namespace AstralEngine
 		float GetX() const;
 		float GetY() const;
 		float GetZ() const;
+		
+		void SetW(float w);
+		void SetX(float x);
+		void SetY(float y);
+		void SetZ(float z);
+		void Set(float w, float x, float y, float z);
 
 		Quaternion Conjugate() const;
 		float Magnitude() const;

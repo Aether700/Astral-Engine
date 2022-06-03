@@ -12,6 +12,17 @@ namespace AstralEngine
 	float Quaternion::GetY() const { return m_v.y; }
 	float Quaternion::GetZ() const { return m_v.z; }
 
+	void Quaternion::SetW(float w) { m_w = w; }
+	void Quaternion::SetX(float x) { m_v.x = x; }
+	void Quaternion::SetY(float y) { m_v.y = y; }
+	void Quaternion::SetZ(float z) { m_v.z = z; }
+	
+	void Quaternion::Set(float w, float x, float y, float z)
+	{
+		m_w = w;
+		m_v = Vector3(x, y, z);
+	}
+
 	Quaternion Quaternion::Conjugate() const
 	{
 		return Quaternion(m_w, -1.0f * m_v);
@@ -179,8 +190,11 @@ namespace AstralEngine
 
 	Quaternion Quaternion::operator*(const Quaternion& q) const
 	{
-		return Quaternion(m_w * q.m_w - Vector3::DotProduct(m_v, q.m_v),
-			m_w * q.m_v + q.m_w * m_v + Vector3::CrossProduct(m_v, q.m_v));
+		return Quaternion(
+			m_w * q.m_w - m_v.x * q.m_v.x - m_v.y * q.m_v.y - m_v.z * q.m_v.z,
+			m_w * q.m_v.x + q.m_w * m_v.x + m_v.y * q.m_v.z - q.m_v.y * m_v.z,
+			m_w * q.m_v.y + q.m_w * m_v.y + m_v.z * q.m_v.x - q.m_v.z * m_v.x,
+			m_w * q.m_v.z + q.m_w * m_v.z + m_v.x * q.m_v.y - q.m_v.x * m_v.y);
 	}
 
 	Quaternion Quaternion::operator*(float k) const
@@ -188,17 +202,48 @@ namespace AstralEngine
 		return Quaternion(m_w * k, m_v * k);
 	}
 	
+	//from unity, method has been mentioned on this post-> https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion:
+	/*
+		public static Vector3 operator *(Quaternion rotation, Vector3 point)
+        {
+            float num = rotation.x * 2f;
+            float num2 = rotation.y * 2f;
+            float num3 = rotation.z * 2f;
+            float num4 = rotation.x * num;
+            float num5 = rotation.y * num2;
+            float num6 = rotation.z * num3;
+            float num7 = rotation.x * num2;
+            float num8 = rotation.x * num3;
+            float num9 = rotation.y * num3;
+            float num10 = rotation.w * num;
+            float num11 = rotation.w * num2;
+            float num12 = rotation.w * num3;
+            Vector3 result = default(Vector3);
+            result.x = (1f - (num5 + num6)) * point.x + (num7 - num12) * point.y + (num8 + num11) * point.z;
+            result.y = (num7 + num12) * point.x + (1f - (num4 + num6)) * point.y + (num9 - num10) * point.z;
+            result.z = (num8 - num11) * point.x + (num9 + num10) * point.y + (1f - (num4 + num5)) * point.z;
+            return result;
+        }*/
+
 	Vector3 Quaternion::operator*(const Vector3& v) const
 	{
+		/*
 		return 2.0f * Vector3::DotProduct(m_v, v) * m_v
 			+ (m_w * m_w - Vector3::DotProduct(m_v, m_v)) * v
 			+ 2.0f * m_w * Vector3::CrossProduct(m_v, v);
-
+		*/
 		/*
 		Quaternion q = Quaternion(0.0f, v);
 		Quaternion result = *this * q * Conjugate();
 		return result.m_v;
 		*/
+
+		/*
+		Vector3 t = 2.0f * Vector3::CrossProduct(m_v, v);
+		return v + m_w * t + Vector3::CrossProduct(m_v, t);
+		*/
+
+		return v + 2.0f * Vector3::CrossProduct(m_v, (m_w * v + Vector3::CrossProduct(m_v, v)));
 	}
 
 	Quaternion operator*(float k, const Quaternion& q)

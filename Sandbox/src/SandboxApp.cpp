@@ -412,17 +412,13 @@ class QuaternionTester : public AstralEngine::NativeScript
 public:
 	void OnCreate()
 	{
-		m_q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 30.0f);
-		AstralEngine::Quaternion q2 = AstralEngine::Quaternion::EulerToQuaternion(0, 0, 10.0f);
+		m_q = AstralEngine::Quaternion(0.3f, 0.2f, 0.2f, 0.3f);
+		AstralEngine::Vector3 v = AstralEngine::Vector3(3.0f, 2.0f, 5.0f);
 		AE_INFO("w: %f x: %f y: %f z: %f", m_q.GetW(), m_q.GetX(), m_q.GetY(), m_q.GetZ());
-		AE_INFO("w: %f x: %f y: %f z: %f", q2.GetW(), q2.GetX(), q2.GetY(), q2.GetZ());
-		AstralEngine::Quaternion result = m_q * q2;
-		debugging multiplication between two quaternions
-		AE_INFO("w: %f x: %f y: %f z: %f", result.GetW(), result.GetX(), result.GetY(), result.GetZ());
-		AstralEngine::Vector3 euler = m_q.EulerAngles();
-		AE_INFO("x: %f y: %f z: %f", euler.x, euler.y, euler.z);
-		float angle = AstralEngine::Quaternion::Angle(m_q, q2);
-		AE_INFO("angle: %f", angle);
+		AE_INFO("x: %f y: %f z: %f", v.x, v.y, v.z);
+		testing quaternion vector multiplication
+		AstralEngine::Vector3 result = m_q * v;
+		AE_INFO("x: %f y: %f z: %f", result.x, result.y, result.z);
 	}
 
 	void OnUpdate()
