@@ -3,7 +3,7 @@
 
 namespace AstralEngine
 {
-	Quaternion::Quaternion() : m_w(0.0f) { }
+	Quaternion::Quaternion() : m_w(1.0f) { }
 	Quaternion::Quaternion(float w, const Vector3& v) : m_w(w), m_v(v) { }
 	Quaternion::Quaternion(float w, float x, float y, float z) : m_w(w), m_v(x, y, z) {	}
 
@@ -231,9 +231,132 @@ namespace AstralEngine
 		}
 	*/
 
+	/* from forum: https://answers.unity.com/questions/467614/what-is-the-source-code-of-quaternionlookrotation.html
+		private static Quaternion QuaternionLookRotation(Vector3 forward, Vector3 up)
+		{
+		    forward.Normalize();
+		
+		    Vector3 vector = Vector3.Normalize(forward);
+		    Vector3 vector2 = Vector3.Normalize(Vector3.Cross(up, vector));
+		    Vector3 vector3 = Vector3.Cross(vector, vector2);
+		    var m00 = vector2.x;
+		    var m01 = vector2.y;
+		    var m02 = vector2.z;
+		    var m10 = vector3.x;
+		    var m11 = vector3.y;
+		    var m12 = vector3.z;
+		    var m20 = vector.x;
+		    var m21 = vector.y;
+		    var m22 = vector.z;
+		
+		
+		    float num8 = (m00 + m11) + m22;
+		    var quaternion = new Quaternion();
+		    if (num8 > 0f)
+		    {
+		        var num = (float)Math.Sqrt(num8 + 1f);
+		        quaternion.w = num * 0.5f;
+		        num = 0.5f / num;
+		        quaternion.x = (m12 - m21) * num;
+		        quaternion.y = (m20 - m02) * num;
+		        quaternion.z = (m01 - m10) * num;
+		        return quaternion;
+		    }
+		    if ((m00 >= m11) && (m00 >= m22))
+		    {
+		        var num7 = (float)Math.Sqrt(((1f + m00) - m11) - m22);
+		        var num4 = 0.5f / num7;
+		        quaternion.x = 0.5f * num7;
+		        quaternion.y = (m01 + m10) * num4;
+		        quaternion.z = (m02 + m20) * num4;
+		        quaternion.w = (m12 - m21) * num4;
+		        return quaternion;
+		    }
+		    if (m11 > m22)
+		    {
+		        var num6 = (float)Math.Sqrt(((1f + m11) - m00) - m22);
+		        var num3 = 0.5f / num6;
+		        quaternion.x = (m10+ m01) * num3;
+		        quaternion.y = 0.5f * num6;
+		        quaternion.z = (m21 + m12) * num3;
+		        quaternion.w = (m20 - m02) * num3;
+		        return quaternion; 
+		    }
+		    var num5 = (float)Math.Sqrt(((1f + m22) - m00) - m11);
+		    var num2 = 0.5f / num5;
+		    quaternion.x = (m20 + m02) * num2;
+		    quaternion.y = (m21 + m12) * num2;
+		    quaternion.z = 0.5f * num5;
+		    quaternion.w = (m01 - m10) * num2;
+		    return quaternion;
+		}
+	*/
+
 	Quaternion Quaternion::LookRotation(const Vector3& lookDir, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f))
 	{
-		not finished
+		/*forward.Normalize();
+		
+		    Vector3 vector = Vector3.Normalize(forward);
+		    Vector3 vector2 = Vector3.Normalize(Vector3.Cross(up, vector));
+		    Vector3 vector3 = Vector3.Cross(vector, vector2);
+		    var m00 = vector2.x;
+		    var m01 = vector2.y;
+		    var m02 = vector2.z;
+		    var m10 = vector3.x;
+		    var m11 = vector3.y;
+		    var m12 = vector3.z;
+		    var m20 = vector.x;
+		    var m21 = vector.y;
+		    var m22 = vector.z;
+		
+		
+		    float num8 = (m00 + m11) + m22;
+		    var quaternion = new Quaternion();
+		    if (num8 > 0f)
+		    {
+		        var num = (float)Math.Sqrt(num8 + 1f);
+		        quaternion.w = num * 0.5f;
+		        num = 0.5f / num;
+		        quaternion.x = (m12 - m21) * num;
+		        quaternion.y = (m20 - m02) * num;
+		        quaternion.z = (m01 - m10) * num;
+		        return quaternion;
+		    }
+		    if ((m00 >= m11) && (m00 >= m22))
+		    {
+		        var num7 = (float)Math.Sqrt(((1f + m00) - m11) - m22);
+		        var num4 = 0.5f / num7;
+		        quaternion.x = 0.5f * num7;
+		        quaternion.y = (m01 + m10) * num4;
+		        quaternion.z = (m02 + m20) * num4;
+		        quaternion.w = (m12 - m21) * num4;
+		        return quaternion;
+		    }
+		    if (m11 > m22)
+		    {
+		        var num6 = (float)Math.Sqrt(((1f + m11) - m00) - m22);
+		        var num3 = 0.5f / num6;
+		        quaternion.x = (m10+ m01) * num3;
+		        quaternion.y = 0.5f * num6;
+		        quaternion.z = (m21 + m12) * num3;
+		        quaternion.w = (m20 - m02) * num3;
+		        return quaternion; 
+		    }
+		    var num5 = (float)Math.Sqrt(((1f + m22) - m00) - m11);
+		    var num2 = 0.5f / num5;
+		    quaternion.x = (m20 + m02) * num2;
+		    quaternion.y = (m21 + m12) * num2;
+		    quaternion.z = 0.5f * num5;
+		    quaternion.w = (m01 - m10) * num2;
+		    return quaternion;
+		*/
+
+
+		Vector3 forward = Vector3::Normalize(lookDir);
+		Vector3 right = Vector3::Normalize(Vector3::CrossProduct(up, forward));
+		Vector3 localUp = Vector3::CrossProduct(forward, right);
+
+		return FromRotationMatrix(Mat3(right, localUp, forward));
 	}
 
 	Quaternion Quaternion::operator+(const Quaternion& q) const
@@ -284,6 +407,24 @@ namespace AstralEngine
 	bool Quaternion::operator!=(const Quaternion& other) const
 	{
 		return !(*this == other);
+	}
+
+	Quaternion Quaternion::FromRotationMatrix(const Mat3& rotationMatrix)
+	{
+		//https://math.stackexchange.com/questions/893984/conversion-of-rotation-matrix-to-quaternion
+
+		float trace = rotationMatrix.Trace();
+		Quaternion quaternion = Quaternion();
+		if (trace > 0.0f)
+		{
+			float num = (float)Math::Sqrt(trace + 1.0f);
+			quaternion.m_w = num * 0.5f;
+			num = 0.5f / num;
+			quaternion.m_v.x = (rotationMatrix[1][2] - rotationMatrix[2][1]) * num;
+			quaternion.m_v.y = (rotationMatrix[2][0] - rotationMatrix[0][2]) * num;
+			quaternion.m_v.z = (rotationMatrix[0][1] - rotationMatrix[1][0]) * num;
+			return quaternion;
+		}
 	}
 
 }

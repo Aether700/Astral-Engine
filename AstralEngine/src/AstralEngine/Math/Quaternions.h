@@ -62,9 +62,11 @@ namespace AstralEngine
 		bool operator!=(const Quaternion& other) const;
 
 	private:
+		static Quaternion FromRotationMatrix(const Mat3& rotationMatrix);
+		
 		// rotations are stores as radians not degrees
 		float m_w;
-		Vector3 m_v; // axis of rotation
+		Vector3 m_v; // can be visualized as axis of rotation while w is the angle of rotation
 	};
 
 	Quaternion operator*(float k, const Quaternion& q);
