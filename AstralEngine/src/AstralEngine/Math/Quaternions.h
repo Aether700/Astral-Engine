@@ -61,8 +61,8 @@ namespace AstralEngine
 		bool operator==(const Quaternion& other) const;
 		bool operator!=(const Quaternion& other) const;
 
-	private:
 		static Quaternion FromRotationMatrix(const Mat3& rotationMatrix);
+	private:
 		
 		// rotations are stores as radians not degrees
 		float m_w;

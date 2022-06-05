@@ -89,14 +89,16 @@ namespace AstralEngine
 		return Vector3(x - v.x, y - v.y, z - v.z); 
 	}
 	
-	const Vector3 Vector3::operator+=(const Vector3& v) const
+	const Vector3& Vector3::operator+=(const Vector3& v)
 	{
-		return *this + v; 
+		*this = *this + v; 
+		return *this;
 	}
 	
-	const Vector3 Vector3::operator-=(const Vector3& v) const
+	const Vector3& Vector3::operator-=(const Vector3& v)
 	{
-		return *this - v;
+		*this = *this - v;
+		return *this;
 	}
 	
 	const Vector3 Vector3::operator*(float k) const { return Vector3(x * k, y * k, z * k); }

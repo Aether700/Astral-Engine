@@ -7,446 +7,189 @@
 ////////
 
 //Scripts////////////////////////////////////////////////////////////////////////
-class InputTest : public AstralEngine::NativeScript
-{
-public:
-	void OnUpdate()
-	{
-		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Right))
-		{
-			if (m_currTimerVal >= m_timer)
-			{
-				Destroy(entity);
-			}
-			else
-			{
-				m_currTimerVal += AstralEngine::Time::GetDeltaTime();
-				return;
-			}
-		}
-		else if (AstralEngine::Input::GetMouseButtonDown(AstralEngine::MouseButtonCode::Left))
-		{
-			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 0, 0, 1);
-			m_currTimerVal = 0.0f;
-		}
-		else
-		{
-			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 1, 1, 1);
-			m_currTimerVal = 0.0f;
-		}
-	}
-
-private:
-	float m_timer = 1.0f;
-	float m_currTimerVal = 0.0f;
-};
-
-class PerlinNoiseTest : public AstralEngine::NativeScript
-{
-public:
-	void OnCreate() override
-	{
-		GenerateTexture();
-		entity.EmplaceComponent<AstralEngine::SpriteRenderer>(m_texture);
-	}
-
-private:
-
-	void GenerateTexture()
-	{
-		unsigned char* data = (unsigned char*) malloc(sizeof(unsigned char) * size * size * 4);
-		
-		for (size_t y = 0; y < size; y++)
-		{
-			for (size_t x = 0; x < size; x++)
-			{
-				float c = AstralEngine::Math::PerlinNoise((((float)x / ((float)size))) * scale, 
-					(((float)y / ((float)size))) * scale);
-				unsigned char result = (unsigned char)(c * 255.0f);
-				data[(x + size * y) * 4] = result;
-				data[(x + size * y) * 4 + 1] = result;
-				data[(x + size * y) * 4 + 2] = result;
-				data[(x + size * y) * 4 + 3] = 255;
-			}
-		}
-
-		m_texture = AstralEngine::Texture2D::Create(size, size, data, size * size * 4);
-		delete data;
-	}
-
-	unsigned int size = 256;
-	float scale = 20.0f;
-	AstralEngine::AReference<AstralEngine::Texture2D> m_texture;
-};
-
-class TestComponent : public AstralEngine::NativeScript
-{
-public:
-	void OnCreate() override
-	{
-		AE_INFO("Test component created");
-	}
-
-	void OnStart() override
-	{
-		print = false;
-		curr = 0.0f;
-		delay = 0.3f;
-	}
-
-	void OnUpdate() override
-	{
-		if (print)
-		{
-			AE_INFO("TestComponent::OnUpdate called");
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::P) && curr >= delay)
-		{
-			print = !print;
-			curr = 0.0f;
-		}
-
-		if (curr < delay)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-	}
-
-	void OnDestroy()
-	{
-		AE_INFO("TestComponent Destroyed");
-	}
-
-	void OnEnable() override
-	{
-		AE_INFO("TestComponent enabled");
-	}
-
-	void OnDisable() override
-	{
-		AE_INFO("TestComponent disabled");
-	}
-
-private:
-	bool print;
-	float curr;
-	float delay;
-};
-
-class ColorSwitcher : public AstralEngine::NativeScript
-{
-public:
-
-	void OnCreate() override 
-	{
-		AE_WARN("OnCreate called");
-	}
-
-	void OnStart() override
-	{
-		curr = 0.0f;
-		delay = 0.3f;
-	}
-
-	void OnUpdate() override
-	{
-		AstralEngine::SpriteRenderer& sprite = GetComponent<AstralEngine::SpriteRenderer>();
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::C))
-		{
-			sprite.SetColor(0, 1, 0, 1);
-		}
-		else
-		{
-			sprite.SetColor(1, 0, 0, 1);
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::X))
-		{
-			Destroy(entity);
-		}
-		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
-		{
-			TestComponent& test = GetComponent<TestComponent>();
-			test.SetActive(!test.IsActive());
-			curr = 0.0f;
-		}
-		
-		if (curr < delay)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-	}
-
-	void OnDestroy() override
-	{
-		AE_WARN("Square destroyed");
-	}
-
-	void OnEnable() override
-	{
-		AE_WARN("Enabled");
-	}
-
-	void OnDisable() override
-	{
-		AE_WARN("Disabled");
-	}
-
-private:
-	float curr;
-	float delay;
-};
-
-class EntityController : public AstralEngine::NativeScript
-{
-public:
-
-	void OnStart() override
-	{
-		switcher = &GetComponent<ColorSwitcher>();
-	}
-
-	void OnUpdate() override
-	{
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::T) && curr >= delay)
-		{
-			switcher->SetActive(!switcher->IsActive());
-			curr = 0.0f;
-		}
-
-		if (curr < delay)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-	}
-
-private:
-	ColorSwitcher* switcher;
-	float curr = 0.0f;
-	float delay = 0.5f;
-};
-
-class SpriteRemover : public AstralEngine::NativeScript
-{
-public:
-
-	void OnStart() override
-	{
-		if (!entity.HasComponent<AstralEngine::SpriteRenderer>())
-		{
-			AddSprite();
-		}
-
-		GetTransform().position = { 5, 0, 0 };
-		curr = timer;
-	}
-
-	void OnUpdate() override
-	{
-		if (curr < timer)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::B) && curr >= timer)
-		{
-			ToggleSprite();
-			curr = 0.0f;
-		}
-	}
-
-
-private:
-
-	void ToggleSprite()
-	{
-		if (m_hasSprite)
-		{
-			RemoveSprite();
-		}
-		else
-		{
-			AddSprite();
-		}
-	}
-
-	void AddSprite()
-	{
-		AstralEngine::SpriteRenderer& sprite = entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
-		sprite.SetColor(0, 1, 0, 1);
-		m_hasSprite = true;
-	}
-
-	void RemoveSprite()
-	{
-		entity.RemoveComponent<AstralEngine::SpriteRenderer>();
-		m_hasSprite = false;
-	}
-
-	bool m_hasSprite;
-	float timer = 0.5f;
-	float curr;
-};
-
-class SpriteStack : public AstralEngine::NativeScript
-{
-public:
-	void OnUpdate() override
-	{
-		if (curr < timer)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-
-		if (curr >= timer)
-		{
-			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
-			{
-				AddSprite();
-				curr = 0.0f;
-			}
-			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
-			{
-				RemoveSprite();
-				curr = 0.0f;
-			}
-		}
-	}
-private:
-
-	void AddSprite()
-	{
-		entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
-		AE_INFO("Added a sprite");
-	}
-
-	void RemoveSprite()
-	{
-		if (entity.HasComponent<AstralEngine::SpriteRenderer>())
-		{
-			entity.RemoveComponent<AstralEngine::SpriteRenderer>();
-			AE_INFO("Removed a sprite");
-		}
-		else
-		{
-			AE_INFO("entity has no sprite component to remove");
-		}
-	}
-
-	AstralEngine::AStack<AstralEngine::SpriteRenderer> stack;
-
-	float timer = 0.3f;
-	float curr;
-};
-
-class MultiComponent : public AstralEngine::NativeScript
-{
-public:
-	void OnCreate() override
-	{
-		AE_INFO("MultiComponent created");
-	}
-
-	void OnDestroy() override
-	{
-		AE_INFO("MultiComponent destroyed");
-	}
-
-
-};
-
-class MultiComponentController : public AstralEngine::NativeScript
-{
-public:
-
-	void OnStart() //override
-	{
-		curr = timer;
-	}
-
-	void OnUpdate() //override
-	{
-		if (curr < timer)
-		{
-			curr += AstralEngine::Time::GetDeltaTime();
-		}
-
-		if (curr >= timer)
-		{
-			if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
-			{
-				CreateMulti();
-				curr = 0.0f;
-			}
-			else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
-			{
-				DeleteMulti();
-				curr = 0.0f;
-			}
-		}
-	}
-
-private:
-	void CreateMulti()
-	{
-		entity.EmplaceComponent<MultiComponent>();
-	}
-
-	void DeleteMulti()
-	{
-		if (!entity.HasComponent<MultiComponent>())
-		{
-			AE_INFO("Entity has no multi component component");
-			return;
-		}
-		entity.RemoveComponent<MultiComponent>();
-	}
-
-	float timer = 0.3f;
-	float curr;
-};
 
 class QuaternionTester : public AstralEngine::NativeScript
 {
 public:
 	void OnCreate()
 	{
-		m_q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 0.0f);
-		m_q2 = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 359.0f);
-		AstralEngine::Quaternion a = AstralEngine::Quaternion(1.0f, 2.0f, 5.0f, 1.0f);
-		AstralEngine::Quaternion normalized = AstralEngine::Quaternion::Normalize(a);
-		AE_INFO("w: %f, x: %f, y: %f, z: %f", normalized.GetW(), normalized.GetX(), normalized.GetY(), normalized.GetZ());
+		m_q = AstralEngine::Quaternion::EulerToQuaternion(50.0f, 10.0f, 5.0f);
 
-		AstralEngine::Quaternion q = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 30.0f);
-		AstralEngine::Quaternion q2 = AstralEngine::Quaternion::EulerToQuaternion(0.0f, 0.0f, 10.0f);
-		AE_INFO("dot: %f", AstralEngine::Quaternion::DotProduct(q, q2));
-		float angle = AstralEngine::Quaternion::Angle(q, q2);
-		AE_INFO("angle: %f", angle);
+		AstralEngine::Quaternion q = AstralEngine::Quaternion::FromRotationMatrix(m_q.ComputeRotationMatrix());
+		PrintQuaternion(m_q);
+		PrintQuaternion(q);
+		AE_INFO("%f", AstralEngine::Math::CopySign(5.5f, -3.3f));
 
 	}
 
-	void OnUpdate()
+	void OnUpdate() override
 	{
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
-		{
-			m_q = AstralEngine::Quaternion::Slerp(m_q, m_q2, AstralEngine::Time::GetDeltaTime());
-		}
+		test LookRotation some more
+		m_q = AstralEngine::Quaternion::LookRotation(m_target.GetTransform().position - GetTransform().position);
+		AE_INFO("x: %f, y: %f, z: %f", m_target.GetTransform().position.x, m_target.GetTransform().position.y, m_target.GetTransform().position.z);
+	}
+
+	void OnLateUpdate()
+	{
 		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
 		AstralEngine::Renderer::DrawQuad(m_q.ComputeRotationMatrix());
 		AstralEngine::Renderer::EndScene();
 	}
 
-	void SetScene(AstralEngine::Scene* s)
+	void SetCam(AstralEngine::AEntity cam)
 	{
-		m_camera = AstralEngine::AEntity((AstralEngine::BaseEntity)0, s);
+		m_camera = cam;
+	}
+
+	void SetTarget(AstralEngine::AEntity e)
+	{
+		m_target = e;
 	}
 
 
 private:
+	void PrintQuaternion(const AstralEngine::Quaternion& q)
+	{
+		AE_INFO("w: %f, x: %f, y: %f, z: %f", q.GetW(), q.GetX(), q.GetY(), q.GetZ());
+	}
+
 	AstralEngine::Quaternion m_q;
-	AstralEngine::Quaternion m_q2;
 	AstralEngine::AEntity m_camera;
+	AstralEngine::AEntity m_target;
+
+};
+
+class CamControls : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate()
+	{
+		Move();
+		Rotate();
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
+		{
+			Reset();
+		}
+	}
+
+private:
+	void Move()
+	{
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
+		{
+			GetTransform().position.z -= m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
+		{
+			GetTransform().position.z += m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
+		{
+			GetTransform().position.x -= m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
+		{
+			GetTransform().position.x += m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
+		{
+			GetTransform().position.y += m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
+		{
+			GetTransform().position.y -= m_moveSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+	}
+	void Rotate()
+	{
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
+		{
+			GetTransform().rotation.y += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
+		{
+			GetTransform().rotation.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+		}
+	}
+
+	void Reset()
+	{
+		GetTransform().position = AstralEngine::Vector3(0.0f, 0.0f, 8.0f);
+		GetTransform().rotation = AstralEngine::Vector3(0.0f, 0.0f, 0.0f);
+	}
+
+	float m_moveSpeed = 5.0f;
+	float m_rotSpeed = 3.0f;
+};
+
+class TargetMover : public AstralEngine::NativeScript
+{
+public:
+	void OnCreate()
+	{
+		GetTransform().position = AstralEngine::Vector3(
+			AstralEngine::Random::GetFloat() * (m_bounds.x * 2.0f) - m_bounds.x,
+			AstralEngine::Random::GetFloat() * (m_bounds.y * 2.0f) - m_bounds.y,
+			AstralEngine::Random::GetFloat() * (m_bounds.z * 2.0f) - m_bounds.z
+		);
+	}
+
+	void OnUpdate()
+	{
+		GetTransform().position += m_speed * m_velocity * AstralEngine::Time::GetDeltaTime();
+		CheckBounds();
+	}
+
+private:
+	void CheckBounds()
+	{
+		if (GetTransform().position.x > m_bounds.x)
+		{
+			GetTransform().position.x = m_bounds.x;
+			m_velocity.x *= -1.0f;
+		}
+
+		if (GetTransform().position.x < -m_bounds.x)
+		{
+			GetTransform().position.x = -m_bounds.x;
+			m_velocity.x *= -1.0f;
+		}
+
+		if (GetTransform().position.y > m_bounds.y)
+		{
+			GetTransform().position.y = m_bounds.y;
+			m_velocity.y *= -1.0f;
+		}
+
+		if (GetTransform().position.y < -m_bounds.y)
+		{
+			GetTransform().position.y = -m_bounds.y;
+			m_velocity.y *= -1.0f;
+		}
+
+		if (GetTransform().position.z > m_bounds.z)
+		{
+			GetTransform().position.z = m_bounds.z;
+			m_velocity.z *= -1.0f;
+		}
+
+		if (GetTransform().position.z < -m_bounds.z)
+		{
+			GetTransform().position.z = -m_bounds.z;
+			m_velocity.z *= -1.0f;
+		}
+	}
+
+	AstralEngine::Vector3 m_bounds = AstralEngine::Vector3(5.0f, 5.0f, 5.0f);
+	AstralEngine::Vector3 m_velocity = AstralEngine::Vector3(1.0f, 0.5f, 0.2f);
+	float m_speed = 2.0f;
 };
 
 void OnButtonClicked()
@@ -500,19 +243,29 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
-		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-		m_entity.GetTransform().position = { 1.5f, 0, 0 };
-		m_entity.GetTransform().rotation = { 0, 0, AstralEngine::Math::DegreeToRadiants(30.0f)};
+		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+		m_entity.EmplaceComponent<TargetMover>();
 
+		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
+		m_scene->DestroyAEntity(cam);
+		cam = m_scene->CreateAEntity();
+		cam.GetTransform().position = AstralEngine::Vector3(0, 0, 8);
+		cam.EmplaceComponent<CamControls>();
+		auto& camComponent = cam.EmplaceComponent<AstralEngine::Camera>();
+		camComponent.primary = true;
+		camComponent.camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		
 		AstralEngine::AEntity quaternionTester = m_scene->CreateAEntity();
 		QuaternionTester& q = quaternionTester.EmplaceComponent<QuaternionTester>();
-		q.SetScene(m_scene.Get());
+		q.SetCam(cam);
+		q.SetTarget(m_entity);
 	}
 
 	void OnUpdate() override
 	{
 		m_scene->OnUpdate();
-		
+		auto* window = AstralEngine::Application::GetWindow();
+		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
 		/*
 		m_cameraController->OnUpdate();

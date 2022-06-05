@@ -42,8 +42,17 @@ namespace AstralEngine
 		return Vector4Int(x - v.x, y - v.y, z - v.z, w - v.w); 
 	}
 	
-	const Vector4Int Vector4Int::operator+=(const Vector4Int& v) const { return *this + v; }
-	const Vector4Int Vector4Int::operator-=(const Vector4Int& v) const { return *this - v; }
+	const Vector4Int& Vector4Int::operator+=(const Vector4Int& v) 
+	{ 
+		*this = *this + v;
+		return *this;
+	}
+
+	const Vector4Int& Vector4Int::operator-=(const Vector4Int& v) 
+	{ 
+		*this = *this - v;
+		return *this;
+	}
 	
 	const Vector4Int Vector4Int::operator*(int k) const { return *this * (float)k; }
 	

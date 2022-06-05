@@ -169,6 +169,15 @@ namespace AstralEngine
 		return f2;
 	}
 
+	float Math::CopySign(float magnitude, float sign)
+	{
+		if (sign == 0.0f)
+		{
+			return Abs(magnitude);
+		}
+		return Abs(magnitude) * Abs(sign) / sign;
+	}
+
 	long double Math::Pi()
 	{
 		return 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;

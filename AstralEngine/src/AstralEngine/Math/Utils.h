@@ -30,6 +30,8 @@ namespace AstralEngine
 		static int Max(int i1, int i2);
 		static float Max(float f1, float f2);
 
+		static float CopySign(float magnitude, float sign);
+
 		static long double Pi();
 
 		static float DegreeToRadiants(float degrees);

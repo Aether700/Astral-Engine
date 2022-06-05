@@ -37,8 +37,8 @@ namespace AstralEngine
 
 		const Vector2Int operator+(const Vector2Int& v) const;
 		const Vector2Int operator-(const Vector2Int& v) const;
-		const Vector2Int operator+=(const Vector2Int& v) const;
-		const Vector2Int operator-=(const Vector2Int& v) const;
+		const Vector2Int& operator+=(const Vector2Int& v);
+		const Vector2Int& operator-=(const Vector2Int& v);
 		const Vector2Int operator*(int k) const;
 		const Vector2Int operator*(float k) const;
 		const Vector2Int operator/(int k) const;
