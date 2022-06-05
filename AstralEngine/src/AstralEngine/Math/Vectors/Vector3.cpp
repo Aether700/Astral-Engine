@@ -47,6 +47,17 @@ namespace AstralEngine
 	const Vector3 Vector3::Forward() { return Vector3(0.0f, 0.0f, 1.0f); }
 	const Vector3 Vector3::Zero() { return Vector3(); }
 
+	void Vector3::OrthoNormalize(Vector3* normal, Vector3* tangeant)
+	{
+		if (normal == nullptr || tangeant == nullptr)
+		{
+			return;
+		}
+
+		normal->Normalize();
+		Vector3 temp = (Vector3::DotProduct(*normal, *tangeant) / normal->SqrMagnitude()) * *tangeant;
+		*tangeant = Vector3::Normalize(temp);
+	}
 
 	const Vector3 Vector3::Normalize(const Vector3& v)
 	{

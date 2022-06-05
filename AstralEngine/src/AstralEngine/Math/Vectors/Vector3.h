@@ -35,7 +35,9 @@ namespace AstralEngine
 		static const Vector3 Forward();
 		static const Vector3 Zero();
 
-
+		// orthonormalizes the tangeant using gram schmit based on the normal vector. 
+		// If one or both of the vectors is nullptr the provided vectors will be left untouched
+		static void OrthoNormalize(Vector3* normal, Vector3* tangeant);
 		static const Vector3 Normalize(const Vector3& v);
 		static const float DotProduct(const Vector3& v1, const Vector3& v2);
 		static const Vector3 CrossProduct(const Vector3& v1, const Vector3& v2);

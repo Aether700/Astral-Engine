@@ -135,6 +135,13 @@ namespace AstralEngine
 		);
 	}
 
+	Quaternion Quaternion::AngleAxisToQuaternion(float angle, const Vector3& axis)
+	{
+		float halfAngle = Math::DegreeToRadiants(angle) * 0.5f;
+		Quaternion q = Quaternion(Math::Cos(halfAngle), Math::Sin(halfAngle) * axis);
+		return Normalize(q);
+	}
+
 	Quaternion Quaternion::Normalize(const Quaternion& q)
 	{
 		Quaternion unit = q;
@@ -258,11 +265,52 @@ namespace AstralEngine
 
 	Quaternion Quaternion::LookRotation(const Vector3& lookDir, const Vector3& up)
 	{
+		/*
+		Vector3 normalizedDir = Vector3::Normalize(lookDir);
+		Vector3 b = Vector3::CrossProduct(Vector3::Forward(), normalizedDir);
+		Vector3 a = Vector3::Normalize(b);
+		float angle = Vector3::Angle(Vector3::Forward(), normalizedDir);
+		if (Vector3::DotProduct(b, normalizedDir) < 0.0f)
+		{
+			angle *= -1.0f;
+		}
+
+		angle *= 0.5f;
+
+		return Quaternion(Math::Cos(angle), a * angle);
+		*/
+
+		/*
 		Vector3 forward = Vector3::Normalize(lookDir);
 		Vector3 right = Vector3::Normalize(Vector3::CrossProduct(up, forward));
 		Vector3 localUp = Vector3::CrossProduct(forward, right);
 
 		return FromRotationMatrix(Mat3(right, localUp, forward));
+		*/
+
+		wanted to try https://gist.github.com/gszauer/5718447 Quaternion::LookRotation(Vector& lookAt, Vector& upDirection)
+
+		Vector3 forward = Vector3::Normalize(lookDir);
+		float dot = Vector3::DotProduct(Vector3::Forward(), forward);
+
+		if (Math::Abs(dot - (-1.0f)) < 0.000001f)
+		{
+			return Quaternion(Math::Pi(), up);
+		}
+		else if (Math::Abs(dot - (1.0f)) < 0.000001f)
+		{
+			return Quaternion::Identity();
+		}
+
+		float angle = Math::ArcCos(dot);
+		Vector3 axis = Vector3::CrossProduct(Vector3::Forward(), forward);
+		axis = Vector3::Normalize(axis);
+
+		return AngleAxisToQuaternion(Math::RadiantsToDegree(angle), axis);
+		/*
+		return AngleAxisToQuaternion(Vector3::Angle(Vector3::Forward(), forward), 
+			Vector3::Normalize(Vector3::CrossProduct(Vector3::Forward(), forward)));
+		*/
 	}
 
 	Quaternion Quaternion::operator+(const Quaternion& q) const

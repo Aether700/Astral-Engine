@@ -41,6 +41,10 @@ namespace AstralEngine
 		static Quaternion EulerToQuaternion(const Vector3& euler);
 		static Quaternion EulerToQuaternion(float x, float y, float z);
 
+		// returns a normalized quaternion which has the specified angle of rotation around the provided axis. 
+		// The angle is in degrees
+		static Quaternion AngleAxisToQuaternion(float angle, const Vector3& axis);
+
 		static Quaternion Normalize(const Quaternion& q);
 		static float DotProduct(const Quaternion& q1, const Quaternion& q2);
 
