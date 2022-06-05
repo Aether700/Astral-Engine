@@ -24,15 +24,56 @@ public:
 
 	void OnUpdate() override
 	{
-		test LookRotation some more
-		m_q = AstralEngine::Quaternion::LookRotation(m_target.GetTransform().position - GetTransform().position);
+		auto dir = m_target.GetTransform().position - GetTransform().position;
+		dir.Normalize();
+		m_q = AstralEngine::Quaternion::LookRotation(dir);
+		AE_INFO("norm: %f", m_q.Magnitude());
+		if (dir == AstralEngine::Vector3::Up() || dir == AstralEngine::Vector3::Down())
+		{
+			m_target.GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 0, 0, 1);
+		}
+		else
+		{
+			m_target.GetComponent<AstralEngine::SpriteRenderer>().SetColor(0, 1, 0, 1);
+		}
 		AE_INFO("x: %f, y: %f, z: %f", m_target.GetTransform().position.x, m_target.GetTransform().position.y, m_target.GetTransform().position.z);
 	}
 
 	void OnLateUpdate()
 	{
+		AstralEngine::Vector3 pos[] = {
+			AstralEngine::Vector3::Zero(),
+			AstralEngine::Vector3(0, 0, 0.1f),
+			m_q * AstralEngine::Vector3::Forward() * m_target.GetTransform().position.Magnitude()
+		};
+
+		AstralEngine::Vector3 normal[] = {
+			{0, 0, 1},
+			{0, 0, 1},
+			{0, 0, 1}
+		};
+
+		unsigned int indices[] = {
+			0, 1, 2
+		};
+
+		AstralEngine::Vector3 texCoords[] = {
+			{0, 0, 0},
+			{0, 0, 0},
+			{0, 0, 0}
+		};
+
+
 		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
 		AstralEngine::Renderer::DrawQuad(m_q.ComputeRotationMatrix());
+		
+		AstralEngine::Renderer::DrawVertexData(AstralEngine::RenderingPrimitive::Triangles,
+			AstralEngine::Mat4::Identity(), (const AstralEngine::Vector3*)pos, (unsigned int)3, 
+			(const AstralEngine::Vector3*)normal, (unsigned int*)indices, (unsigned int)3,
+			AstralEngine::Renderer::GetDefaultWhiteTexture(),
+			(const AstralEngine::Vector3*)texCoords, 1.0f, 
+			(const AstralEngine::Vector4)AstralEngine::Vector4{1, 0, 1, 1});
+		
 		AstralEngine::Renderer::EndScene();
 	}
 
@@ -45,7 +86,6 @@ public:
 	{
 		m_target = e;
 	}
-
 
 private:
 	void PrintQuaternion(const AstralEngine::Quaternion& q)

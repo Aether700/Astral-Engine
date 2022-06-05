@@ -70,42 +70,6 @@ namespace AstralEngine
 			{ xy - zw, 1.0f - x2 - z2, yz + xw },
 			{ xz + yw, yz - xw, 1.0f - x2 - y2 }
 		);
-
-		/*
-		return Mat4(
-			{ 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z), 2.0f * (m_v.x * m_v.y + m_w * m_v.z),
-					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
-			{ 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 1.0f - 2.0f * (m_v.x * m_v.x + m_v.z * m_v.z),
-					2.0f * (m_v.y * m_v.z + m_w * m_v.x), 0.0f },
-			{ 2.0f * (m_v.x * m_v.z + m_w * m_v.y), 2.0f * (m_v.y * m_v.z - m_w * m_v.x),
-					1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y), 0.0f },
-			{ 0.0f, 0.0f, 0.0f, 1.0f }
-		);
-		*/
-
-		/*
-		return Mat4(
-			{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 
-					2.0f * (m_v.x * m_v.z - m_w * m_v.y), 0.0f },
-			{ 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 2.0f * (m_w * m_w + m_v.y * m_v.y) - 1.0f, 
-					2.0f * (m_v.y * m_v.z + m_w * m_v.x), 0.0f },
-			{ 2.0f * (m_v.x * m_v.z + m_w * m_v.y), 2.0f * (m_v.y * m_v.z - m_w * m_v.x), 
-					2.0f * (m_w * m_w + m_v.z * m_v.z) - 1.0f, 0.0f },
-			{ 0.0f, 0.0f, 0.0f, 1.0f }
-		);
-		*/
-
-		/*
-		return Mat4(
-				{ 2.0f * (m_w * m_w + m_v.x * m_v.x) - 1.0f, 2.0f * (m_v.x * m_v.y - m_w * m_v.z), 
-						2.0f * (m_v.x * m_v.z + m_w * m_v.y), 0.0f },	
-				{ 2.0f * (m_v.x * m_v.y + m_w * m_v.z), 2.0f * (m_w * m_w + m_v.y * m_v.y) - 1.0f, 
-						2.0f * (m_v.y * m_v.z - m_w * m_v.x), 0.0f },
-				{ 2.0f * (m_v.x * m_v.z - m_w * m_v.y), 2.0f * (m_v.y * m_v.z + m_w * m_v.x), 
-						2.0f * (m_w * m_w + m_v.z * m_v.z) - 1.0f, 0.0f },
-				{ 0.0f, 0.0f, 0.0f, 1.0f }
-			);
-		*/
 	}
 
 	Vector3 Quaternion::EulerAngles () const
@@ -358,6 +322,19 @@ namespace AstralEngine
 		// trace is positive so we have a quick and easy conversion
 		if (rot.Trace() > 0.0f)
 		{
+			/*
+			     if (num8 > 0f)
+				 {
+				     var num = (float)Math.Sqrt(num8 + 1f);
+				     quaternion.w = num * 0.5f;
+				     num = 0.5f / num;
+				     quaternion.x = (m12 - m21) * num;
+				     quaternion.y = (m20 - m02) * num;
+				     quaternion.z = (m01 - m10) * num;
+				     return quaternion;
+				 }
+			*/
+
 			// compute from w
 			float temp = Math::Sqrt(rot.Trace() + 1.0f);
 			q.m_w = temp * 0.5f;
@@ -366,8 +343,21 @@ namespace AstralEngine
 			q.m_v.y = (rot[2][0] - rot[0][2]) * temp;
 			q.m_v.z = (rot[0][1] - rot[1][0]) * temp;
 		}
-		else if (rot[0][0] > rot[1][1] && rot[0][0] > rot[2][2]) // m00 is the leading term on the main diagonal
+		else if (rot[0][0] >= rot[1][1] && rot[0][0] >= rot[2][2]) // m00 is the leading term on the main diagonal
 		{
+			/*
+			if ((m00 >= m11) && (m00 >= m22))
+		    {
+		        var num7 = (float)Math.Sqrt(((1f + m00) - m11) - m22);
+		        var num4 = 0.5f / num7;
+		        quaternion.x = 0.5f * num7;
+		        quaternion.y = (m01 + m10) * num4;
+		        quaternion.z = (m02 + m20) * num4;
+		        quaternion.w = (m12 - m21) * num4;
+		        return quaternion;
+		    }
+			*/
+
 			// compute from x
 			float temp = Math::Sqrt(((1.0f + rot[0][0]) - rot[1][1]) - rot[2][2]);
 			q.m_v.x = 0.5f * temp;
@@ -378,6 +368,19 @@ namespace AstralEngine
 		}
 		else if (rot[1][1] > rot[2][2]) // m11 is the leading term on the main diagonal
 		{
+			/*
+			if (m11 > m22)
+		    {
+		        var num6 = (float)Math.Sqrt(((1f + m11) - m00) - m22);
+		        var num3 = 0.5f / num6;
+		        quaternion.x = (m10+ m01) * num3;
+		        quaternion.y = 0.5f * num6;
+		        quaternion.z = (m21 + m12) * num3;
+		        quaternion.w = (m20 - m02) * num3;
+		        return quaternion; 
+		    }
+			*/
+
 			// compute from y
 			float temp = Math::Sqrt(((1.0f + rot[1][1]) - rot[0][0]) - rot[2][2]);
 			q.m_v.y = 0.5f * temp;
@@ -388,6 +391,16 @@ namespace AstralEngine
 		}
 		else // m22 is the leading term on the main diagonal
 		{
+			/*
+			var num5 = (float)Math.Sqrt(((1f + m22) - m00) - m11);
+		    var num2 = 0.5f / num5;
+		    quaternion.x = (m20 + m02) * num2;
+		    quaternion.y = (m21 + m12) * num2;
+		    quaternion.z = 0.5f * num5;
+		    quaternion.w = (m01 - m10) * num2;
+		    return quaternion;
+			*/
+
 			float temp = Math::Sqrt(((1.0f + rot[2][2]) - rot[0][0]) - rot[1][1]);
 			q.m_v.z = 0.5f * temp;
 			temp = 0.5f / temp;
@@ -396,6 +409,7 @@ namespace AstralEngine
 			q.m_w = (rot[0][1] - rot[1][0]) * temp;
 		}
 
+		q.Normalize();
 		return q;
 	}
 
