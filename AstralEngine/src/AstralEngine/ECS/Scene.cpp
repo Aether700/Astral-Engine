@@ -36,33 +36,37 @@ namespace AstralEngine
 		void OnUpdate() override
 		{
 			AE_PROFILE_FUNCTION();
+			Transform& t = GetTransform();
+			Vector3 forward = t.Forward();
+			Vector3 right = t.Right();
+
 			if (Input::GetKey(KeyCode::A))
 			{
-				GetTransform().position.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.position -= right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::GetKey(KeyCode::D))
 			{
-				GetTransform().position.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.position += right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 
 			if (Input::GetKey(KeyCode::W))
 			{
-				GetTransform().position.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.position += forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			else if (Input::GetKey(KeyCode::S))
 			{
-				GetTransform().position.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.position -= forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::GetKey(KeyCode::Q))
 				{
-					GetTransform().rotation.z += m_camRotSpeed * Time::GetDeltaTime();
+					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
 				}
 				else if (Input::GetKey(KeyCode::E))
 				{
-					GetTransform().rotation.z -= m_camRotSpeed * Time::GetDeltaTime();
+					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
 				}
 			}
 		}

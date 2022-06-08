@@ -38,19 +38,23 @@ namespace AstralEngine
 	{
 	public:
 		Transform();
-		Transform(Vector3 translation);
-		Transform(Vector3 pos, Vector3 rotation, Vector3 scale);
+		Transform(const Vector3& translation);
+		Transform(const Vector3& pos, const Quaternion& rotation, const Vector3& scale);
 
 		Mat4 GetTransformMatrix() const;
 
 		AEntity GetParent() const { return m_parent; }
 		void SetParent(AEntity parent);
 
+		Vector3 Forward() const;
+		Vector3 Right() const;
+		Vector3 Up() const;
+
 		bool operator==(const Transform& other) const;
 		bool operator!=(const Transform& other) const;
 
 		Vector3 position;
-		Vector3 rotation;
+		Quaternion rotation;
 		Vector3 scale;
 
 	private:

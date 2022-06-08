@@ -21,8 +21,9 @@ namespace AstralEngine
 
 		~Vector3();
 
-		const float Length() const;
-		const Vector3 Normalize() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
+		void Normalize();
 
 		const float* Data() const;
 
@@ -34,14 +35,21 @@ namespace AstralEngine
 		static const Vector3 Forward();
 		static const Vector3 Zero();
 
-
+		// orthonormalizes the tangeant using gram schmit based on the normal vector. 
+		// If one or both of the vectors is nullptr the provided vectors will be left untouched
+		static void OrthoNormalize(Vector3* normal, Vector3* tangeant);
+		static const Vector3 Normalize(const Vector3& v);
 		static const float DotProduct(const Vector3& v1, const Vector3& v2);
 		static const Vector3 CrossProduct(const Vector3& v1, const Vector3& v2);
 
+		// returns the angle between both vectors in degrees
+		static float Angle(const Vector3& v1, const Vector3& v2);
+		static const Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
+
 		const Vector3 operator+(const Vector3& v) const;
 		const Vector3 operator-(const Vector3& v) const;
-		void operator+=(const Vector3& v);
-		void operator-=(const Vector3& v);
+		const Vector3& operator+=(const Vector3& v);
+		const Vector3& operator-=(const Vector3& v);
 		const Vector3 operator*(float k) const;
 		const Vector3 operator/(float k) const;
 		const float operator[](unsigned int index) const;
@@ -70,5 +78,5 @@ namespace AstralEngine
 			float b;
 		};
 	};
-	const Vector2 operator*(float k, const Vector2& v);
+	const Vector3 operator*(float k, const Vector3& v);
 }

@@ -98,25 +98,23 @@ namespace AstralEngine
 	// Transform //////////////////////////////////////////////////////
 
 	Transform::Transform() : scale(1.0f, 1.0f, 1.0f) { }
-	Transform::Transform(Vector3 translation)
+	Transform::Transform(const Vector3& translation)
 		: position(translation), scale(1.0f, 1.0f, 1.0f) { }
 
-	Transform::Transform(Vector3 pos, Vector3 rotation, Vector3 scale)
+	Transform::Transform(const Vector3& pos, const Quaternion& rotation, const Vector3& scale)
 		: position(pos), rotation(rotation), scale(scale) { }
 
 
 	Mat4 Transform::GetTransformMatrix() const
 	{
 		Mat4 transformMatrix;
-		if (rotation == Vector3::Zero())
+		if (rotation == Quaternion::Identity())
 		{
 			transformMatrix = Mat4::Translate(Mat4::Identity(), position) * Mat4::Scale(Mat4::Identity(), scale);
 		}
 		else
 		{
-			Mat4 rotationMatrix = Mat4::Rotate(Mat4::Identity(), rotation.x, { 1, 0, 0 })
-				* Mat4::Rotate(Mat4::Identity(), rotation.y, { 0, 1, 0 })
-				* Mat4::Rotate(Mat4::Identity(), rotation.z, { 0, 0, 1 });
+			Mat4 rotationMatrix = rotation.ComputeRotationMatrix();
 			transformMatrix = Mat4::Translate(Mat4::Identity(), position)
 				* rotationMatrix * Mat4::Scale(Mat4::Identity(), scale);
 		}
@@ -132,6 +130,21 @@ namespace AstralEngine
 	void Transform::SetParent(AEntity parent)
 	{
 		m_parent = parent;
+	}
+
+	Vector3 Transform::Forward() const
+	{
+		return rotation * Vector3::Forward();
+	}
+
+	Vector3 Transform::Right() const
+	{
+		return rotation * Vector3::Right();
+	}
+
+	Vector3 Transform::Up() const
+	{
+		return rotation * Vector3::Up();
 	}
 
 	bool Transform::operator==(const Transform& other) const

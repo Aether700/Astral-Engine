@@ -45,5 +45,6 @@ namespace AstralEngine
 		static Application* s_instance;
 	};
 
-	Application* CreateApp();
 }
+
+AstralEngine::Application* CreateApp();

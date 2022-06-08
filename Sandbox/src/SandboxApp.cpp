@@ -89,6 +89,26 @@ private:
 	float rotationSpeed = 0.5f;
 };
 
+void OnButtonClicked()
+{
+	static int count = 0;
+
+	if (count == 5)
+	{
+		AE_INFO("next button click the application will close");
+		count++;
+	}
+	else if (count == 6)
+	{
+		AstralEngine::Application::Exit();
+	}
+	else
+	{
+		AE_INFO("Application detected the button click %d times", ++count);
+	}
+}
+
+
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -130,6 +150,28 @@ public:
 	void OnUpdate() override
 	{
 		m_scene->OnUpdate();
+		auto* window = AstralEngine::Application::GetWindow();
+		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
+
+		/*
+		m_cameraController->OnUpdate();
+
+
+		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		AstralEngine::RenderCommand::Clear();
+		AstralEngine::Renderer::BeginScene(m_cameraController->GetCamera());
+
+		AstralEngine::Application::GetUIContext()->TempUpdate();
+
+		/*
+		AstralEngine::Renderer2D::DrawQuad(AstralEngine::Mat4::Identity(), { 1, 1, 1, 1 });
+		AstralEngine::Renderer::DrawQuad(AstralEngine::Mat4::Identity());
+		//AstralEngine::Renderer2D::DrawUIWindow(m_uiWindow);
+
+
+		AstralEngine::Renderer::EndScene();
+		*/
+
 		AstralEngine::Renderer::ResetStats();
 	}
 

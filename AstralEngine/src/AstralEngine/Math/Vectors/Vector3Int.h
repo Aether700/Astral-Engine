@@ -21,8 +21,8 @@ namespace AstralEngine
 
 		~Vector3Int();
 
-		const float Length() const;
-		const Vector3Int Normalize() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
 
 		const int* Data() const;
 
@@ -36,8 +36,8 @@ namespace AstralEngine
 
 		const Vector3Int operator+(const Vector3Int& v) const;
 		const Vector3Int operator-(const Vector3Int& v) const;
-		void operator+=(const Vector3Int& v);
-		void operator-=(const Vector3Int& v);
+		const Vector3Int& operator+=(const Vector3Int& v);
+		const Vector3Int& operator-=(const Vector3Int& v);
 		const Vector3Int operator*(int k) const;
 		const Vector3Int operator*(float k) const;
 		const Vector3Int operator/(int k) const;
@@ -67,5 +67,6 @@ namespace AstralEngine
 			int b;
 		};
 	};
-		Vector3Int operator*(float k, const Vector3Int& v);
+	
+	Vector3Int operator*(float k, const Vector3Int& v);
 }

@@ -321,7 +321,7 @@ namespace AstralEngine
 
 	void Renderer2D::DrawRotatedQuad(const Transform& transform, const SpriteRenderer& sprite)
 	{
-		DrawRotatedQuad(transform.position, transform.rotation.z, transform.scale, sprite);
+		DrawRotatedQuad(transform.position, transform.rotation.EulerAngles().z, transform.scale, sprite);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const Vector2& position, float rotation, const Vector2& size, AReference<Texture2D> texture,

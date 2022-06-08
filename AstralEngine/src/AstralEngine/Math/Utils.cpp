@@ -24,6 +24,30 @@ namespace AstralEngine
 		return v;
 	}
 
+	double Math::Abs(double v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0.0)
+		{
+			return -1.0 * v;
+		}
+		return v;
+	}
+
+	int Math::Clamp(int value, int min, int max)
+	{
+		AE_PROFILE_FUNCTION();
+		if (value < min)
+		{
+			return min;
+		}
+		else if (value > max)
+		{
+			return max;
+		}
+		return value;
+	}
+
 	float Math::Clamp(float value, float min, float max)
 	{
 		AE_PROFILE_FUNCTION();
@@ -41,37 +65,63 @@ namespace AstralEngine
 	float Math::Sin(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sin(v);
+		return std::sin(v);
+	}
+
+	float Math::ArcSin(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return std::asin(v);
 	}
 
 	float Math::Cos(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return cos(v);
+		return std::cos(v);
+	}
+
+	float Math::ArcCos(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return std::acos(v);
 	}
 
 	float Math::Tan(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return tan(v);
+		return std::tan(v);
+	}
+
+	float Math::ArcTan(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return std::atan(v);
+	}
+
+	float Math::ArcTan2(float y, float x)
+	{
+		return ArcTan(y / x);
+	}
+
+	float Math::ArcTan2(Vector2 v)
+	{
+		return ArcTan2(v.y, v.x);
 	}
 
 	float Math::DegreeToRadiants(float degrees)
 	{
-		AE_PROFILE_FUNCTION();
 		return degrees * 0.01745329251994329576923690768489f;
 	}
 
 	float Math::RadiantsToDegree(float radians)
 	{
-		AE_PROFILE_FUNCTION();
-		return radians / 0.01745329251994329576923690768489f;
+		return radians * 57.295779513082320876798154814105f;
 	}
 
 	float Math::Sqrt(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sqrt(v);
+		return std::sqrt(v);
 	}
 
 	float Math::Log(float v)
@@ -119,14 +169,18 @@ namespace AstralEngine
 		return f2;
 	}
 
-	float Math::Floor(float f)
+	float Math::CopySign(float magnitude, float sign)
 	{
-		return (float)((long)f);
+		if (sign == 0.0f)
+		{
+			return Abs(magnitude);
+		}
+		return Abs(magnitude) * Abs(sign) / sign;
 	}
 
-	Vector2 Math::Floor(Vector2 v)
+	long double Math::Pi()
 	{
-		return Vector2(Math::Floor(v.x), Math::Floor(v.y));
+		return 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;
 	}
 
 	float Math::Lerp(float a, float b, float t)
@@ -140,7 +194,17 @@ namespace AstralEngine
 			return a;
 		}
 
-		return (b - a) * t + a;
+		return a + t * (b - a);
+	}
+
+	float Math::Floor(float f)
+	{
+		return (float)((long)f);
+	}
+
+	Vector2 Math::Floor(Vector2 v)
+	{
+		return Vector2(Math::Floor(v.x), Math::Floor(v.y));
 	}
 	
 	float Math::Ceiling(float f)

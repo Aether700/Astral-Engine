@@ -233,6 +233,7 @@
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collider2D.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
+    <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -345,5 +346,6 @@
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collider2D.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp" />
+    <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
   </ItemGroup>
 </Project>

@@ -18,15 +18,14 @@ namespace AstralEngine
 
 	Vector3Int::~Vector3Int() { }
 
-	const float Vector3Int::Length() const
+	const float Vector3Int::Magnitude() const
 	{
-		return Math::Sqrt(((float)x * (float)x) + ((float)y * (float)y) + ((float)z * (float)z));
+		return Math::Sqrt(SqrMagnitude());
 	}
 	
-	const Vector3Int Vector3Int::Normalize() const
+	const float Vector3Int::SqrMagnitude() const
 	{
-		float len = Length();
-		return Vector3Int( (int)((float)x / len), (int)((float)y / len), (int)((float)z / len) );
+		return ((float)x * (float)x) + ((float)y * (float)y) + ((float)z * (float)z);
 	}
 
 	const int* Vector3Int::Data() const { return &x; }
@@ -93,16 +92,18 @@ namespace AstralEngine
 		return *this;
 	}
 
-	void Vector3Int::operator+=(const Vector3Int& v) 
+	const Vector3Int& Vector3Int::operator+=(const Vector3Int& v) 
 	{ 
 		*this = *this + v;
-	}
-
-	void Vector3Int::operator-=(const Vector3Int& v) 
-	{ 
-		*this = *this - v;
+		return *this;
 	}
 	
+	const Vector3Int& Vector3Int::operator-=(const Vector3Int& v)
+	{
+		*this = *this - v;
+		return *this;
+	}
+
 	Vector3Int operator*(float k, const Vector3Int& v) { return v * k; }
 
 	bool Vector3Int::operator==(const Vector3Int& other) const 
