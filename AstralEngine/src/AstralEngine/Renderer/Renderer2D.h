@@ -68,7 +68,6 @@ namespace AstralEngine
 			const SpriteRenderer& sprite);
 
 		static void DrawRotatedQuad(const Transform& transform, const SpriteRenderer& sprite);
-
 		static void DrawRotatedQuad(const Vector2& position, float rotation, const Vector2& size, AReference<Texture2D> texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 		static void DrawRotatedQuad(const Vector3& position, float rotation, const Vector2& size, AReference<Texture2D> texture,

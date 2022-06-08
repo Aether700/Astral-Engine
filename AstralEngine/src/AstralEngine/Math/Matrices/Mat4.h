@@ -1,6 +1,7 @@
 #pragma once
 #include "AstralEngine/Math/Vectors/Vector4.h"
 #include "AstralEngine/Math/Vectors/Vector3.h"
+#include "Mat3.h"
 
 namespace AstralEngine
 {
@@ -9,6 +10,11 @@ namespace AstralEngine
 	public:
 		Mat4();
 		Mat4(const Vector4& v1, const Vector4& v2, const Vector4& v3, const Vector4& v4);
+
+		// takes the provided mat3 and inserts it into an identity matrix so the top left of 
+		//the identity matrix is the mat3 provided
+		Mat4(const Mat3& m);
+
 		Mat4(const Mat4& other);
 		~Mat4();
 

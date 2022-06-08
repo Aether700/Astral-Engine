@@ -179,6 +179,7 @@
     <ClInclude Include="src\AstralEngine\Math\AMath.h" />
     <ClInclude Include="src\AstralEngine\Math\Matrices\Mat3.h" />
     <ClInclude Include="src\AstralEngine\Math\Matrices\Mat4.h" />
+    <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
     <ClInclude Include="src\AstralEngine\Math\Utils.h" />
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector2.h" />
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector2Int.h" />
@@ -226,6 +227,7 @@
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat3.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat4.cpp" />
+    <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Utils.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector2.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector2Int.cpp" />

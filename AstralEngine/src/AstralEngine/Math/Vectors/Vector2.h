@@ -21,8 +21,9 @@ namespace AstralEngine
 		Vector2(const Vector4Int& v4i);
 		~Vector2();
 
-		const float Length() const;
-		const Vector2 Normalize() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
+		void Normalize();
 
 		const float* Data() const;
 
@@ -32,7 +33,7 @@ namespace AstralEngine
 		static const Vector2 Up();
 		static const Vector2 Zero();
 
-
+		static const Vector2 Normalize(const Vector2& v);
 		static const float DotProduct(const Vector2& v1, const Vector2& v2);
 		
 		//returns a vector with the min x and y value of the two vectors provided
@@ -43,11 +44,12 @@ namespace AstralEngine
 
 		//clamps the x and y values respectively using the x and y values of the min/max vectors
 		static Vector2 Clamp(const Vector2& v, const Vector2& min, const Vector2& max);
+		static float Angle(const Vector2& v1, const Vector2& v2);
 
 		const Vector2 operator+(const Vector2& v) const;
 		const Vector2 operator-(const Vector2& v) const;
-		const Vector2 operator+=(const Vector2& v) const;
-		const Vector2 operator-=(const Vector2& v) const;
+		const Vector2& operator+=(const Vector2& v);
+		const Vector2& operator-=(const Vector2& v);
 		const Vector2 operator*(float k) const;
 		const Vector2 operator/(float k) const;
 		const float operator[](unsigned int index) const;
