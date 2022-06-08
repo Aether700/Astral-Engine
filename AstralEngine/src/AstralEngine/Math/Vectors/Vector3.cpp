@@ -77,12 +77,13 @@ namespace AstralEngine
 		float yCoord = (v1.x * v2.z) - (v2.x * v1.z);
 		float zCoord = (v1.x * v2.y) - (v2.x * v1.y);
 
-		return Vector3(xCoord, yCoord, zCoord);
+		//return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+		return Vector3((v1.y * v2.z) - (v2.y * v1.z), -(v1.x * v2.z) + (v2.x * v1.z), (v1.x * v2.y) - (v2.x * v1.y));
 	}
 
 	float Vector3::Angle(const Vector3& v1, const Vector3& v2)
 	{
-		return Math::ArcCos(DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()));
+		return Math::RadiantsToDegree(Math::ArcCos(DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude())));
 	}
 
 	const Vector3 Vector3::Lerp(const Vector3& a, const Vector3& b, float t)

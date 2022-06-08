@@ -32,9 +32,11 @@ namespace AstralEngine
 
 		Mat3 ComputeRotationMatrix() const;
 
-		// returns euler angles in degrees
+		// all euler angles are in degrees
 		Vector3 EulerAngles() const;
-		
+		void SetEulerAngles(const Vector3& euler);
+		void SetEulerAngles(float x, float y, float z);
+
 		static Quaternion Identity();
 
 		// takes euler angles as degrees and outputs a unit Quaternion object
@@ -53,7 +55,9 @@ namespace AstralEngine
 		static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
 		static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t);
 
+		// returns the identity if either vector is the vector 0
 		static Quaternion LookRotation(const Vector3& lookDir, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f));
+		static Quaternion FromToRotation(const Vector3& from, const Vector3& to);
 
 		Quaternion operator+(const Quaternion& q) const;
 		Quaternion operator-(const Quaternion& q) const;
@@ -65,9 +69,7 @@ namespace AstralEngine
 		bool operator==(const Quaternion& other) const;
 		bool operator!=(const Quaternion& other) const;
 
-		static Quaternion FromRotationMatrix(const Mat3& rotationMatrix);
 	private:
-		
 		// rotations are stores as radians not degrees
 		float m_w;
 		Vector3 m_v; // can be visualized as axis of rotation while w is the angle of rotation

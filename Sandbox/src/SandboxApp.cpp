@@ -13,39 +13,38 @@ class QuaternionTester : public AstralEngine::NativeScript
 public:
 	void OnCreate()
 	{
-		m_q = AstralEngine::Quaternion::EulerToQuaternion(50.0f, 10.0f, 5.0f);
+		m_q.SetEulerAngles(50.0f, 10.0f, 5.0f);
+		
+		auto euler = m_q.EulerAngles();
+		AE_INFO("x: %f, y: %f, z: %f", euler.x, euler.y, euler.z);
 
-		AstralEngine::Quaternion q = AstralEngine::Quaternion::FromRotationMatrix(m_q.ComputeRotationMatrix());
-		PrintQuaternion(m_q);
-		PrintQuaternion(q);
-		AE_INFO("%f", AstralEngine::Math::CopySign(5.5f, -3.3f));
-
-	}
-
-	void OnUpdate() override
-	{
-		auto dir = m_target.GetTransform().position - GetTransform().position;
-		dir.Normalize();
-		m_q = AstralEngine::Quaternion::LookRotation(dir);
-		AE_INFO("norm: %f", m_q.Magnitude());
-		if (dir == AstralEngine::Vector3::Up() || dir == AstralEngine::Vector3::Down())
-		{
-			m_target.GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 0, 0, 1);
-		}
-		else
-		{
-			m_target.GetComponent<AstralEngine::SpriteRenderer>().SetColor(0, 1, 0, 1);
-		}
-		AE_INFO("x: %f, y: %f, z: %f", m_target.GetTransform().position.x, m_target.GetTransform().position.y, m_target.GetTransform().position.z);
 	}
 
 	void OnLateUpdate()
 	{
-		AstralEngine::Vector3 pos[] = {
-			AstralEngine::Vector3::Zero(),
-			AstralEngine::Vector3(0, 0, 0.1f),
-			m_q * AstralEngine::Vector3::Forward() * m_target.GetTransform().position.Magnitude()
-		};
+
+		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
+		AstralEngine::Renderer::DrawQuad(m_q.ComputeRotationMatrix());
+		AstralEngine::Renderer::EndScene();
+	}
+
+	void SetCam(AstralEngine::AEntity cam)
+	{
+		m_camera = cam;
+	}
+
+	void SetTarget(AstralEngine::AEntity e)
+	{
+		m_target = e;
+	}
+
+private:
+
+	void RenderLine(const AstralEngine::Vector3& from, const AstralEngine::Vector3& to, const AstralEngine::Vector4& color)
+	{
+		AstralEngine::Vector3 pos[] = { from, from + AstralEngine::Vector3(0, 0, 0.1f), to };
+
+		m_q = AstralEngine::Quaternion::Identity();
 
 		AstralEngine::Vector3 normal[] = {
 			{0, 0, 1},
@@ -64,30 +63,14 @@ public:
 		};
 
 
-		AstralEngine::Renderer::BeginScene(m_camera.GetComponent<AstralEngine::Camera>().camera, m_camera.GetTransform());
-		AstralEngine::Renderer::DrawQuad(m_q.ComputeRotationMatrix());
-		
 		AstralEngine::Renderer::DrawVertexData(AstralEngine::RenderingPrimitive::Triangles,
-			AstralEngine::Mat4::Identity(), (const AstralEngine::Vector3*)pos, (unsigned int)3, 
+			AstralEngine::Mat4::Identity(), (const AstralEngine::Vector3*)pos, (unsigned int)3,
 			(const AstralEngine::Vector3*)normal, (unsigned int*)indices, (unsigned int)3,
 			AstralEngine::Renderer::GetDefaultWhiteTexture(),
-			(const AstralEngine::Vector3*)texCoords, 1.0f, 
-			(const AstralEngine::Vector4)AstralEngine::Vector4{1, 0, 1, 1});
-		
-		AstralEngine::Renderer::EndScene();
+			(const AstralEngine::Vector3*)texCoords, 1.0f,
+			(const AstralEngine::Vector4)color);
 	}
 
-	void SetCam(AstralEngine::AEntity cam)
-	{
-		m_camera = cam;
-	}
-
-	void SetTarget(AstralEngine::AEntity e)
-	{
-		m_target = e;
-	}
-
-private:
 	void PrintQuaternion(const AstralEngine::Quaternion& q)
 	{
 		AE_INFO("w: %f, x: %f, y: %f, z: %f", q.GetW(), q.GetX(), q.GetY(), q.GetZ());

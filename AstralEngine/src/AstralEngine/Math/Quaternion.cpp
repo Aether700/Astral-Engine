@@ -93,6 +93,16 @@ namespace AstralEngine
 		return euler;
 	}
 
+	void Quaternion::SetEulerAngles(const Vector3& euler)
+	{
+		SetEulerAngles(euler.x, euler.y, euler.z);
+	}
+
+	void Quaternion::SetEulerAngles(float x, float y, float z)
+	{
+		*this = EulerToQuaternion(x, y, z);
+	}
+
 	Quaternion Quaternion::Identity()
 	{
 		return Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
@@ -117,22 +127,15 @@ namespace AstralEngine
 		float sinY = Math::Sin(halfY);
 		float sinZ = Math::Sin(halfZ);
 
-		AE_CORE_WARN("Quaternion::EulerToQuaternion can still be optimized by batching into variables repeating computations");
+		float cXY = cosX * cosY;
+		float sXY = sinX * sinY;
 
-		/*
 		return Normalize(Quaternion(
-			cosX * cosY * cosZ + sinX * sinY * sinZ,
+			cXY * cosZ + sXY * sinZ,
 			sinX * cosY * cosZ - cosX * sinY * sinZ,
 			cosX * sinY * cosZ + sinX * cosY * sinZ,
-			cosX * cosY * sinZ - sinX * sinY * cosZ
+			cXY * sinZ - sXY * cosZ
 		));
-		*/
-		return Quaternion(
-			cosX * cosY * cosZ + sinX * sinY * sinZ,
-			sinX * cosY * cosZ - cosX * sinY * sinZ,
-			cosX * sinY * cosZ + sinX * cosY * sinZ,
-			cosX * cosY * sinZ - sinX * sinY * cosZ
-		);
 	}
 
 	Quaternion Quaternion::AngleAxisToQuaternion(float angle, const Vector3& axis)
@@ -174,131 +177,26 @@ namespace AstralEngine
 		return Normalize(a + t * (b - a));
 	}
 
-	/* solution from forum: https://gamedev.stackexchange.com/questions/53129/quaternion-look-at-with-up-vector
-		void SceneElement::look_at(const mx::Vector3f& target, const mx::Vector3f& up)
-		{
-		    mx::Vector3f forward_l = mx::normalize(target - position);
-		    mx::Vector3f forward_w(1, 0, 0);
-		    mx::Vector3f axis  = forward_l % forward_w;
-		    float        angle = mx::rad_to_deg(acos(forward_l * forward_w));
-		
-		    mx::Vector3f third = axis % forward_w;
-		    if (third * forward_l < 0)
-		    {
-		        angle = - angle;
-		    }
-		    mx::Quaternionf q1 = mx::axis_angle_to_quaternion(angle, axis);
-		
-		    mx::Vector3f up_l  = mx::transform(q1, mx::normalize(up));
-		    mx::Vector3f right = mx::normalize(forward_l % up);
-		    mx::Vector3f up_w  = mx::normalize(right % forward_l);
-		
-		    mx::Vector3f axis2  = up_l % up_w;
-		    float        angle2 = mx::rad_to_deg(acos(up_l * up_w));
-		
-		    mx::Quaternionf q2 = mx::axis_angle_to_quaternion(angle2, axis2);
-		
-		    orientation = q2 * q1;
-		}
-	*/
-
-	/* from forum: https://answers.unity.com/questions/467614/what-is-the-source-code-of-quaternionlookrotation.html
-		private static Quaternion QuaternionLookRotation(Vector3 forward, Vector3 up)
-		{
-		    forward.Normalize();
-		
-		    Vector3 vector = Vector3.Normalize(forward);
-		    Vector3 vector2 = Vector3.Normalize(Vector3.Cross(up, vector));
-		    Vector3 vector3 = Vector3.Cross(vector, vector2);
-		    var m00 = vector2.x;
-		    var m01 = vector2.y;
-		    var m02 = vector2.z;
-		    var m10 = vector3.x;
-		    var m11 = vector3.y;
-		    var m12 = vector3.z;
-		    var m20 = vector.x;
-		    var m21 = vector.y;
-		    var m22 = vector.z;
-		
-		
-		    float num8 = (m00 + m11) + m22;
-		    var quaternion = new Quaternion();
-		    if (num8 > 0f)
-		    {
-		        var num = (float)Math.Sqrt(num8 + 1f);
-		        quaternion.w = num * 0.5f;
-		        num = 0.5f / num;
-		        quaternion.x = (m12 - m21) * num;
-		        quaternion.y = (m20 - m02) * num;
-		        quaternion.z = (m01 - m10) * num;
-		        return quaternion;
-		    }
-		    if ((m00 >= m11) && (m00 >= m22))
-		    {
-		        var num7 = (float)Math.Sqrt(((1f + m00) - m11) - m22);
-		        var num4 = 0.5f / num7;
-		        quaternion.x = 0.5f * num7;
-		        quaternion.y = (m01 + m10) * num4;
-		        quaternion.z = (m02 + m20) * num4;
-		        quaternion.w = (m12 - m21) * num4;
-		        return quaternion;
-		    }
-		    if (m11 > m22)
-		    {
-		        var num6 = (float)Math.Sqrt(((1f + m11) - m00) - m22);
-		        var num3 = 0.5f / num6;
-		        quaternion.x = (m10+ m01) * num3;
-		        quaternion.y = 0.5f * num6;
-		        quaternion.z = (m21 + m12) * num3;
-		        quaternion.w = (m20 - m02) * num3;
-		        return quaternion; 
-		    }
-		    var num5 = (float)Math.Sqrt(((1f + m22) - m00) - m11);
-		    var num2 = 0.5f / num5;
-		    quaternion.x = (m20 + m02) * num2;
-		    quaternion.y = (m21 + m12) * num2;
-		    quaternion.z = 0.5f * num5;
-		    quaternion.w = (m01 - m10) * num2;
-		    return quaternion;
-		}
-	*/
-
 	Quaternion Quaternion::LookRotation(const Vector3& lookDir, const Vector3& up)
-	{
-		/*
-		Vector3 normalizedDir = Vector3::Normalize(lookDir);
-		Vector3 b = Vector3::CrossProduct(Vector3::Forward(), normalizedDir);
-		Vector3 a = Vector3::Normalize(b);
-		float angle = Vector3::Angle(Vector3::Forward(), normalizedDir);
-		if (Vector3::DotProduct(b, normalizedDir) < 0.0f)
+	{	
+		if (lookDir == Vector3::Zero() || up == Vector3::Zero())
 		{
-			angle *= -1.0f;
+			return Identity();
 		}
-
-		angle *= 0.5f;
-
-		return Quaternion(Math::Cos(angle), a * angle);
-		*/
-
-		/*
-		Vector3 forward = Vector3::Normalize(lookDir);
-		Vector3 right = Vector3::Normalize(Vector3::CrossProduct(up, forward));
-		Vector3 localUp = Vector3::CrossProduct(forward, right);
-
-		return FromRotationMatrix(Mat3(right, localUp, forward));
-		*/
-
-		wanted to try https://gist.github.com/gszauer/5718447 Quaternion::LookRotation(Vector& lookAt, Vector& upDirection)
 
 		Vector3 forward = Vector3::Normalize(lookDir);
 		float dot = Vector3::DotProduct(Vector3::Forward(), forward);
 
+		// if the dot product == -1 the look direction is the direct opposite direction to the Vector3::Forward 
+		// vector therefore we return a rotation around the world up vector of 180 degrees (pi)
 		if (Math::Abs(dot - (-1.0f)) < 0.000001f)
 		{
 			return Quaternion(Math::Pi(), up);
 		}
-		else if (Math::Abs(dot - (1.0f)) < 0.000001f)
+		else if (Math::Abs(dot - (1.0f)) < 0.000001f) 
 		{
+			// if the dot product == 1 the forward vector and the look direction are the same therefore
+			// we don't need any rotation
 			return Quaternion::Identity();
 		}
 
@@ -307,10 +205,18 @@ namespace AstralEngine
 		axis = Vector3::Normalize(axis);
 
 		return AngleAxisToQuaternion(Math::RadiantsToDegree(angle), axis);
-		/*
-		return AngleAxisToQuaternion(Vector3::Angle(Vector3::Forward(), forward), 
-			Vector3::Normalize(Vector3::CrossProduct(Vector3::Forward(), forward)));
-		*/
+	}
+
+	Quaternion Quaternion::FromToRotation(const Vector3& from, const Vector3& to)
+	{
+		if (from == Vector3::Zero() || to == Vector3::Zero())
+		{
+			return Quaternion::Identity();
+		}
+
+		Vector3 axis = Vector3::Normalize(Vector3::CrossProduct(to, from));
+		float angle = Vector3::Angle(from, to);
+		return AngleAxisToQuaternion(angle, axis);
 	}
 
 	Quaternion Quaternion::operator+(const Quaternion& q) const
@@ -362,103 +268,4 @@ namespace AstralEngine
 	{
 		return !(*this == other);
 	}
-
-	Quaternion Quaternion::FromRotationMatrix(const Mat3& rot)
-	{	
-		Quaternion q;
-
-		// trace is positive so we have a quick and easy conversion
-		if (rot.Trace() > 0.0f)
-		{
-			/*
-			     if (num8 > 0f)
-				 {
-				     var num = (float)Math.Sqrt(num8 + 1f);
-				     quaternion.w = num * 0.5f;
-				     num = 0.5f / num;
-				     quaternion.x = (m12 - m21) * num;
-				     quaternion.y = (m20 - m02) * num;
-				     quaternion.z = (m01 - m10) * num;
-				     return quaternion;
-				 }
-			*/
-
-			// compute from w
-			float temp = Math::Sqrt(rot.Trace() + 1.0f);
-			q.m_w = temp * 0.5f;
-			temp = 0.5f / temp;
-			q.m_v.x = (rot[1][2] - rot[2][1]) * temp;
-			q.m_v.y = (rot[2][0] - rot[0][2]) * temp;
-			q.m_v.z = (rot[0][1] - rot[1][0]) * temp;
-		}
-		else if (rot[0][0] >= rot[1][1] && rot[0][0] >= rot[2][2]) // m00 is the leading term on the main diagonal
-		{
-			/*
-			if ((m00 >= m11) && (m00 >= m22))
-		    {
-		        var num7 = (float)Math.Sqrt(((1f + m00) - m11) - m22);
-		        var num4 = 0.5f / num7;
-		        quaternion.x = 0.5f * num7;
-		        quaternion.y = (m01 + m10) * num4;
-		        quaternion.z = (m02 + m20) * num4;
-		        quaternion.w = (m12 - m21) * num4;
-		        return quaternion;
-		    }
-			*/
-
-			// compute from x
-			float temp = Math::Sqrt(((1.0f + rot[0][0]) - rot[1][1]) - rot[2][2]);
-			q.m_v.x = 0.5f * temp;
-			temp = 0.5f / temp;
-			q.m_w = (rot[1][2] - rot[2][1]) * temp;
-			q.m_v.y = (rot[0][1] + rot[1][0]) * temp;
-			q.m_v.z = (rot[0][2] + rot[2][0]) * temp;
-		}
-		else if (rot[1][1] > rot[2][2]) // m11 is the leading term on the main diagonal
-		{
-			/*
-			if (m11 > m22)
-		    {
-		        var num6 = (float)Math.Sqrt(((1f + m11) - m00) - m22);
-		        var num3 = 0.5f / num6;
-		        quaternion.x = (m10+ m01) * num3;
-		        quaternion.y = 0.5f * num6;
-		        quaternion.z = (m21 + m12) * num3;
-		        quaternion.w = (m20 - m02) * num3;
-		        return quaternion; 
-		    }
-			*/
-
-			// compute from y
-			float temp = Math::Sqrt(((1.0f + rot[1][1]) - rot[0][0]) - rot[2][2]);
-			q.m_v.y = 0.5f * temp;
-			temp = 0.5f / temp;
-			q.m_v.x = (rot[1][0] + rot[0][1]) * temp;
-			q.m_v.z = (rot[2][1] + rot[1][2]) * temp;
-			q.m_w = (rot[2][0] - rot[0][2]) * temp;
-		}
-		else // m22 is the leading term on the main diagonal
-		{
-			/*
-			var num5 = (float)Math.Sqrt(((1f + m22) - m00) - m11);
-		    var num2 = 0.5f / num5;
-		    quaternion.x = (m20 + m02) * num2;
-		    quaternion.y = (m21 + m12) * num2;
-		    quaternion.z = 0.5f * num5;
-		    quaternion.w = (m01 - m10) * num2;
-		    return quaternion;
-			*/
-
-			float temp = Math::Sqrt(((1.0f + rot[2][2]) - rot[0][0]) - rot[1][1]);
-			q.m_v.z = 0.5f * temp;
-			temp = 0.5f / temp;
-			q.m_v.x = (rot[2][0] + rot[0][2]) * temp;
-			q.m_v.y = (rot[2][1] + rot[1][2]) * temp;
-			q.m_w = (rot[0][1] - rot[1][0]) * temp;
-		}
-
-		q.Normalize();
-		return q;
-	}
-
 }
