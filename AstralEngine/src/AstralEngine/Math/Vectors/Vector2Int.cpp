@@ -22,15 +22,14 @@ namespace AstralEngine
 
 	Vector2Int::~Vector2Int() { }
 
-	const float Vector2Int::Length() const
+	const float Vector2Int::Magnitude() const
 	{
-		return Math::Sqrt( ((float)x * (float)x) + ((float)y * (float)y) );
+		return Math::Sqrt(SqrMagnitude());
 	}
 
-	const Vector2Int Vector2Int::Normalize() const
+	const float Vector2Int::SqrMagnitude() const
 	{
-		float len = Length();
-		return Vector2Int( (int)((float)x / len), (int)((float)y / len) );
+		return ((float)x * (float)x) + ((float)y * (float)y);
 	}
 
 	const int* Vector2Int::Data() const { return &x; }
@@ -96,8 +95,18 @@ namespace AstralEngine
 		return *this;
 	}
 
-	const Vector2Int Vector2Int::operator+=(const Vector2Int& v) const { return *this + v; }
-	const Vector2Int Vector2Int::operator-=(const Vector2Int& v) const { return *this - v; }
+	const Vector2Int& Vector2Int::operator+=(const Vector2Int& v) 
+	{ 
+		*this = *this + v;
+		return *this;
+	}
+
+	const Vector2Int& Vector2Int::operator-=(const Vector2Int& v) 
+	{ 
+		*this = *this - v;
+		return *this;
+	}
+	
 	Vector2Int operator*(float k, const Vector2Int& v) { return v * k; }
 
 	bool Vector2Int::operator==(const Vector2Int& other) const { return x == other.x && y == other.y; }
@@ -105,14 +114,19 @@ namespace AstralEngine
 
 	// Vector2Short //////////////////////////////////////////////////////////////////////////////
 	
-	const float Vector2Short::Length() const
+	const float Vector2Short::Magnitude() const
 	{
-		return Math::Sqrt( ((float)x * (float)x) + ((float)y * (float)y) );
+		return Math::Sqrt( SqrMagnitude() );
+	}
+
+	const float Vector2Short::SqrMagnitude() const
+	{
+		return ((float)x * (float)x) + ((float)y * (float)y);
 	}
 
 	const Vector2Short Vector2Short::Normalize() const
 	{
-		float len = Length();
+		float len = Magnitude();
 		return Vector2Short( (short)((float)x / len), (short)((float)y / len));
 	}
 

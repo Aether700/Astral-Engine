@@ -673,7 +673,7 @@ namespace AstralEngine
 		DrawVoxel(transform, s_defaultMaterial, texture, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 		const Material& mat, AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
 	{
 		Transform t = Transform(position, rotation, scale);
@@ -681,7 +681,7 @@ namespace AstralEngine
 	}
 
 
-	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 		AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
 	{
 		Transform t = Transform(position, rotation, scale);
@@ -698,13 +698,13 @@ namespace AstralEngine
 		DrawVoxel(transform, GetDefaultWhiteCubeMap(), 1, color);
 	}
 
-	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation,
+	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Material& mat, const Vector4& color)
 	{
 		DrawVoxel(position, rotation, scale, mat, GetDefaultWhiteCubeMap(), 1, color);
 	}
 
-	void Renderer::DrawVoxel(const Vector3& position, const Vector3& rotation,
+	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Vector4& color)
 	{
 		DrawVoxel(position, rotation, scale, GetDefaultWhiteCubeMap(), 1, color);
@@ -722,16 +722,16 @@ namespace AstralEngine
 		UploadQuad(transform, s_defaultMaterial, texture, tileFactor, tintColor, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-		const Material& mat, const AReference<Texture2D>& texture, float tileFactor,
+	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
+		const Material& mat, AReference<Texture2D> texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
 		Transform t = Transform(position, rotation, scale);
 		DrawQuad(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
-		const AReference<Texture2D>& texture, float tileFactor,
+	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
+		AReference<Texture2D> texture, float tileFactor,
 		const Vector4& tintColor, bool ignoresCam)
 	{
 		Transform t = Transform(position, rotation, scale);
@@ -748,13 +748,13 @@ namespace AstralEngine
 		DrawQuad(transform, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation,
+	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Material& mat, const Vector4& color, bool ignoresCam)
 	{
 		DrawQuad(position, rotation, scale, mat, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, const Vector3& rotation,
+	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Vector4& color, bool ignoresCam)
 	{
 		DrawQuad(position, rotation, scale, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
@@ -763,14 +763,14 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, 
 		const AReference<Texture2D>& texture, float tilingFactor, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, Vector3(0, 0, rotation), Vector3(scale.x, scale.y, 1), 
+		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), 
 			texture, tilingFactor, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector3& scale,
 		const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, Vector3(0, 0, rotation), Vector3(scale.x, scale.y, 1), color, ignoresCam);
+		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector3& scale, 
@@ -796,7 +796,7 @@ namespace AstralEngine
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Vector3& rotation,
+	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Vector3* vertices, unsigned int numVertices, const Vector3* normals, 
 		unsigned int* indices, unsigned int indexCount, const AReference<Texture2D>& texture, const Vector3* textureCoords,
 		float tileFactor, const Vector4& tintColor)
@@ -874,7 +874,7 @@ namespace AstralEngine
 	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)
 	{
 		Vector3 worldPos = (Vector3)element.GetWorldPos();
-		DrawQuad(worldPos, Vector3::Zero(), Vector3(element.GetWorldWidth(),
+		DrawQuad(worldPos, Quaternion::Identity(), Vector3(element.GetWorldWidth(),
 			element.GetWorldHeight(), 1), color, true);
 	}
 

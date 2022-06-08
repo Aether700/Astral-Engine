@@ -18,17 +18,15 @@ namespace AstralEngine
 
 	Vector4Int::~Vector4Int() { }
 
-	const float Vector4Int::Length() const
+	const float Vector4Int::Magnitude() const
 	{
-		return Math::Sqrt((float)((x * x) + (y * y) + (z * z) + (w * w)));
+		return Math::Sqrt(SqrMagnitude());
 	}
 
-	const Vector4Int Vector4Int::Normalize() const
+	const float Vector4Int::SqrMagnitude() const
 	{
-		float len = Length();
-		return Vector4Int( (int)((float)x / len), (int)((float)y / len), (int)((float)z / len), (int)((float)w / len) );
+		return ((float)((x * x) + (y * y) + (z * z) + (w * w)));
 	}
-
 
 	const Vector4Int Vector4Int::Zero() { return Vector4Int(); }
 
@@ -44,8 +42,17 @@ namespace AstralEngine
 		return Vector4Int(x - v.x, y - v.y, z - v.z, w - v.w); 
 	}
 	
-	const Vector4Int Vector4Int::operator+=(const Vector4Int& v) const { return *this + v; }
-	const Vector4Int Vector4Int::operator-=(const Vector4Int& v) const { return *this - v; }
+	const Vector4Int& Vector4Int::operator+=(const Vector4Int& v) 
+	{ 
+		*this = *this + v;
+		return *this;
+	}
+
+	const Vector4Int& Vector4Int::operator-=(const Vector4Int& v) 
+	{ 
+		*this = *this - v;
+		return *this;
+	}
 	
 	const Vector4Int Vector4Int::operator*(int k) const { return *this * (float)k; }
 	

@@ -233,6 +233,7 @@
     <ClInclude Include="src\AstralEngine\UI\UIText.h" />
     <ClInclude Include="src\AstralEngine\UI\UI Core\TTF\TTFParser.h" />
     <ClInclude Include="src\AstralEngine\UI\UI Core\TTF\TTFGlyph.h" />
+    <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -344,5 +345,6 @@
     <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UIText.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UI Core\TTF\TTFParser.cpp" />
+    <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
   </ItemGroup>
 </Project>
