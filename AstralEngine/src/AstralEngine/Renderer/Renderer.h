@@ -197,11 +197,11 @@ namespace AstralEngine
 		static void DrawVoxel(const Mat4& transform, AReference<CubeMap> texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 });
 
-		static void DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Material& mat, AReference<CubeMap> texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 });
 
-		static void DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			AReference<CubeMap> texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 });
 
@@ -211,10 +211,10 @@ namespace AstralEngine
 		static void DrawVoxel(const Mat4& transform,
 			const Vector4& color = { 1, 1, 1, 1 });
 
-		static void DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Material& mat, const Vector4& tintColor = { 1, 1, 1, 1 });
 
-		static void DrawVoxel(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		//squares
@@ -224,11 +224,11 @@ namespace AstralEngine
 		static void DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
 			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Material& mat, AReference<Texture2D> texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			AReference<Texture2D> texture, float tileFactor = 1.0f,
 			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
@@ -237,10 +237,10 @@ namespace AstralEngine
 
 		static void DrawQuad(const Mat4& transform, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Material& mat, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
-		static void DrawQuad(const Vector3& position, const Vector3& rotation, const Vector3& scale,
+		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
 
 		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture, 
@@ -254,7 +254,7 @@ namespace AstralEngine
 			unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, 
 			AReference<Texture2D> texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor);
 
-		static void DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Vector3& rotation,
+		static void DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Quaternion& rotation,
 			const Vector3& scale, const Vector3* vertices, unsigned int numVertices, const Vector3* normals, 
 			unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
 			float tileFactor, const Vector4& tintColor);
