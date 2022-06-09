@@ -8,6 +8,66 @@
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class Controller : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		AstralEngine::Transform& t = GetTransform();
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
+		{
+			t.position.y += speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
+		{
+			t.position.y -= speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
+		{
+			t.position.x += speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
+		{
+			t.position.x -= speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::R))
+		{
+			t.position = AstralEngine::Vector3::Zero();
+		}
+	}
+
+private:
+
+	float speed = 0.05f;
+};
+
+class LookAtTester : public AstralEngine::NativeScript
+{
+public:
+	void OnLateUpdate() override
+	{
+		if (m_target.IsValid())
+		{
+			GetTransform().LookAt(m_target.GetTransform());
+		}
+	}
+
+	void SetTarget(AstralEngine::AEntity target) 
+	{ 
+		auto& pos = GetTransform().position;
+		auto& targetPos = target.GetTransform().position;
+		GetTransform().position = target.GetTransform().position + AstralEngine::Vector3(0, 0, 8);
+		m_target = target; 
+	}
+
+private:
+	AstralEngine::AEntity m_target;
+};
+
 void OnButtonClicked()
 {
 	static int count = 0;
@@ -60,6 +120,14 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+		m_entity.EmplaceComponent<Controller>();
+
+		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
+		m_scene->DestroyAEntity(cam);
+		cam = m_scene->CreateAEntity();
+		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		cam.GetTransform().position.z = 8.0f;
+		cam.EmplaceComponent<LookAtTester>().SetTarget(m_entity);
 	}
 
 	void OnUpdate() override

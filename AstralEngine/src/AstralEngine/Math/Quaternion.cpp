@@ -191,7 +191,7 @@ namespace AstralEngine
 		// vector therefore we return a rotation around the world up vector of 180 degrees (pi)
 		if (Math::Abs(dot - (-1.0f)) < 0.000001f)
 		{
-			return Quaternion(Math::Pi(), up);
+			return Normalize(Quaternion(Math::Pi(), up));
 		}
 		else if (Math::Abs(dot - (1.0f)) < 0.000001f) 
 		{

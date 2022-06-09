@@ -132,6 +132,16 @@ namespace AstralEngine
 		m_parent = parent;
 	}
 
+	void Transform::LookAt(const Transform& target, const Vector3& up)
+	{
+		LookAt(target.position, up);
+	}
+
+	void Transform::LookAt(const Vector3& target, const Vector3& up)
+	{
+		rotation = Quaternion::LookRotation(target - position, up);
+	}
+
 	Vector3 Transform::Forward() const
 	{
 		return rotation * Vector3::Forward();
