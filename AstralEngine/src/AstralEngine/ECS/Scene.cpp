@@ -20,7 +20,7 @@ namespace AstralEngine
 		void OnStart() override
 		{
 			m_zoomLevel = 1.0f;
-			m_camRotSpeed = Math::DegreeToRadiants(180.0f);
+			m_camRotSpeed = Math::DegreeToRadians(180.0f);
 			m_camMoveSpeed = 4.5f;
 			m_zoomSpeed = 0.25f; 
 			m_minZoom = 0.25f; 

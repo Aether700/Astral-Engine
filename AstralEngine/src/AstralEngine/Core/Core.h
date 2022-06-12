@@ -1,6 +1,12 @@
 #pragma once
 #include "Log.h"
 
+//#define LEFT_HANDED_COORD_SYS
+
+#ifndef LEFT_HANDED_COORD_SYS
+	#define RIGHT_HANDED_COORD_SYS
+#endif
+
 #ifndef AE_PLATFORM_WINDOWS
 	#error "Astral Engine only supports Windows for now"
 #endif

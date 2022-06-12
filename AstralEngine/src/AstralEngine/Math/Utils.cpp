@@ -62,6 +62,20 @@ namespace AstralEngine
 		return value;
 	}
 
+	double Math::Clamp(double value, double min, double max)
+	{
+		AE_PROFILE_FUNCTION();
+		if (value < min)
+		{
+			return min;
+		}
+		else if (value > max)
+		{
+			return max;
+		}
+		return value;
+	}
+
 	float Math::Sin(float v)
 	{
 		AE_PROFILE_FUNCTION();
@@ -100,6 +114,7 @@ namespace AstralEngine
 
 	float Math::ArcTan2(float y, float x)
 	{
+		AE_CORE_ASSERT(x != 0, "Second argument provided to ArcTan2 was 0 which leads to a division by 0");
 		return ArcTan(y / x);
 	}
 
@@ -108,12 +123,12 @@ namespace AstralEngine
 		return ArcTan2(v.y, v.x);
 	}
 
-	float Math::DegreeToRadiants(float degrees)
+	float Math::DegreeToRadians(float degrees)
 	{
 		return degrees * 0.01745329251994329576923690768489f;
 	}
 
-	float Math::RadiantsToDegree(float radians)
+	float Math::RadiansToDegree(float radians)
 	{
 		return radians * 57.295779513082320876798154814105f;
 	}

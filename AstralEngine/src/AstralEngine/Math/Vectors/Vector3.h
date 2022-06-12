@@ -46,6 +46,7 @@ namespace AstralEngine
 		static float Angle(const Vector3& v1, const Vector3& v2);
 		static const Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
 
+		const Vector3 operator-() const;
 		const Vector3 operator+(const Vector3& v) const;
 		const Vector3 operator-(const Vector3& v) const;
 		const Vector3& operator+=(const Vector3& v);

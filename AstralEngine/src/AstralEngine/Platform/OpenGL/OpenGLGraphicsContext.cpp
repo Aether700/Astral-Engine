@@ -46,6 +46,13 @@ namespace AstralEngine
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		
+		#ifdef LEFT_HANDED_COORD_SYS
+				// set opengl to be left handed instead of the default right handed
+				glDepthRange(1.0, 0.0);
+				glFrontFace(GL_CW);
+				glDepthFunc(GL_GEQUAL);
+		#endif
+
 		AE_CORE_INFO("OpenGL Info:");
 		AE_CORE_INFO("   Vendor: %s", glGetString(GL_VENDOR));
 		AE_CORE_INFO("   Renderer: %s", glGetString(GL_RENDERER));
