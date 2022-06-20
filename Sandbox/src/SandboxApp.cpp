@@ -53,13 +53,17 @@ public:
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
 		{
 			auto euler = t.rotation.EulerAngles();
+			AE_INFO("Right");
+			PrintEuler(euler);
 			euler.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+			PrintEuler(euler);
 			t.rotation.SetEulerAngles(euler);
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
 		{
 			auto euler = t.rotation.EulerAngles();
+			AE_INFO("Left");
 			PrintEuler(euler);
 			euler.y += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
 			PrintEuler(euler);
@@ -82,7 +86,7 @@ private:
 	}
 
 	float m_speed = 5.0f;
-	float m_rotSpeed = 20.0f;
+	float m_rotSpeed = 5 * 30.0f;
 
 	AstralEngine::Vector3 m_startPos;
 };

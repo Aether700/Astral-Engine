@@ -74,6 +74,7 @@ namespace AstralEngine
 
 	Vector3 Quaternion::EulerAngles () const
 	{
+		/*
 		Vector3 euler;
 		float magnitude = Magnitude();
 
@@ -102,12 +103,13 @@ namespace AstralEngine
 			euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z),
 				1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
 			euler.y = Math::RadiansToDegree(Math::ArcSin(2.0f * test / magnitude));
-			euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
-				1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
-
 		}
+		euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
+			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
 
 		return euler;
+		*/
+
 		/*
 		Vector3 euler;
 		euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
@@ -120,9 +122,8 @@ namespace AstralEngine
 		*/
 		
 
-		/*
 		Vector3 euler;
-		euler.x = Math::RadiantsToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
+		euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
 			1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
 		
 		double sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
@@ -131,17 +132,16 @@ namespace AstralEngine
 		if (Math::Abs(sinYRot) >= 1.0)
 		{
 			// if out of range set rotation to 90 degrees
-			euler.y = Math::RadiantsToDegree(Math::CopySign((float)Math::Pi() / 2.0f, sinYRot));
+			euler.y = Math::RadiansToDegree(Math::CopySign((float)Math::Pi() / 2.0f, sinYRot));
 		}
 		else
 		{
-			euler.y = Math::RadiantsToDegree(Math::ArcSin((float)sinYRot));
+			euler.y = Math::RadiansToDegree(Math::ArcSin((float)sinYRot));
 		}
 
 		euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
 			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
 		return euler;
-		*/
 	}
 
 	void Quaternion::SetEulerAngles(const Vector3& euler)
@@ -166,6 +166,10 @@ namespace AstralEngine
 
 	Quaternion Quaternion::EulerToQuaternion(float x, float y, float z)
 	{
+		return Normalize(AngleAxisToQuaternion(z, Vector3::Forward()) 
+			* AngleAxisToQuaternion(y, Vector3::Up()) 
+			* AngleAxisToQuaternion(x, Vector3::Right()));
+		/*
 		float halfX = Math::DegreeToRadians(x) * 0.5f;
 		float halfY = Math::DegreeToRadians(y) * 0.5f;
 		float halfZ = Math::DegreeToRadians(z) * 0.5f;
@@ -187,6 +191,7 @@ namespace AstralEngine
 			cosX * sinY * cosZ + sinX * cosY * sinZ,
 			cXY * sinZ - sXY * cosZ
 		));
+		*/
 	}
 
 	Quaternion Quaternion::AngleAxisToQuaternion(float angle, const Vector3& axis)

@@ -114,8 +114,20 @@ namespace AstralEngine
 
 	float Math::ArcTan2(float y, float x)
 	{
-		AE_CORE_ASSERT(x != 0, "Second argument provided to ArcTan2 was 0 which leads to a division by 0");
-		return ArcTan(y / x);
+		AE_CORE_ASSERT(!(x == 0 && y == 0), "Arguments to ArcTan2 cannot be both 0.0f");
+		if (x > 0.0f)
+		{
+			return ArcTan(y / x);
+		}
+		else if (y > 0.0f)
+		{
+			return ((float)Pi() / 2.0f) - ArcTan(x / y);
+		}
+		else if (y < 0.0f)
+		{
+			return -((float)Pi() / 2.0f) - ArcTan(x / y);
+		}
+		return ArcTan(y / x) + (float)Pi();
 	}
 
 	float Math::ArcTan2(Vector2 v)
