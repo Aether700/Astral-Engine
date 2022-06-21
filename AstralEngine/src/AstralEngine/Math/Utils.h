@@ -11,6 +11,7 @@ namespace AstralEngine
 		static double Abs(double v);
 		static int Clamp(int value, int min, int max);
 		static float Clamp(float value, float min, float max);
+		static double Clamp(double value, double min, double max);
 		
 		// Uses Radians
 		static float Sin(float v);
@@ -34,8 +35,8 @@ namespace AstralEngine
 
 		static long double Pi();
 
-		static float DegreeToRadiants(float degrees);
-		static float RadiantsToDegree(float radians);
+		static float DegreeToRadians(float degrees);
+		static float RadiansToDegree(float radians);
 		
 		/*linearly interpolates from a to b using t (t must be between 0 and 1)
 			if t >= 0, returns a

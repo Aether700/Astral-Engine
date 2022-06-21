@@ -32,6 +32,8 @@ namespace AstralEngine
 
 	const int* Vector4Int::Data() const { return &x; }
 
+	const Vector4Int Vector4Int::operator-() const { return Vector4Int(-x, -y, -z, -w); }
+
 	const Vector4Int Vector4Int::operator+(const Vector4Int& v) const 
 	{ 
 		return Vector4Int(x + v.x, y + v.y, z + v.z, w + v.w); 

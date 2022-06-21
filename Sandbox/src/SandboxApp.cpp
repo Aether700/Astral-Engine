@@ -8,6 +8,145 @@
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class CamController : public AstralEngine::NativeScript
+{
+public:
+	void OnStart() override
+	{
+		m_startPos = GetTransform().position;
+	}
+	
+	void OnUpdate() override
+	{
+		auto& t = GetTransform();
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
+		{
+			t.position += t.Forward() * m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
+		{
+			t.position -= t.Forward() * m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
+		{
+			t.position += t.Right() * m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
+		{
+			t.position -= t.Right() * m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
+		{
+			t.position.y += m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
+		{
+			t.position.y -= m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
+		{
+			auto euler = t.rotation.EulerAngles();
+			euler.y += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+			t.rotation.SetEulerAngles(euler);
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
+		{
+			auto euler = t.rotation.EulerAngles();
+			euler.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+			t.rotation.SetEulerAngles(euler);
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
+		{
+			t.position = m_startPos;
+			t.rotation = AstralEngine::Quaternion::Identity();
+		}
+
+	}
+
+private:
+	void PrintEuler(const AstralEngine::Vector3& euler)
+	{
+		AE_INFO("x: %f  y: %f  z: %f", euler.x, euler.y, euler.z);
+	}
+
+	float m_speed = 5.0f;
+	float m_rotSpeed = 5 * 30.0f;
+
+	AstralEngine::Vector3 m_startPos;
+};
+
+class Controller : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		AstralEngine::Transform& t = GetTransform();
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
+		{
+			t.position.y += speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
+		{
+			t.position.y -= speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
+		{
+			t.position.x += speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
+		{
+			t.position.x -= speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::R))
+		{
+			t.position = AstralEngine::Vector3::Zero();
+		}
+	}
+
+private:
+
+	float speed = 0.05f;
+};
+
+class RotateAroundTester : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		if (m_target.IsValid())
+		{
+			auto& t = GetTransform();
+			auto& targetTransform = m_target.GetTransform();
+			float angle = m_rotationSpeed * AstralEngine::Time::GetDeltaTime();
+
+			t.RotateAround(targetTransform.position, angle, AstralEngine::Vector3::Up());
+			t.LookAt(targetTransform);
+		}
+	}
+
+
+	void SetTarget(AstralEngine::AEntity e)
+	{
+		m_target = e;
+	}
+private:
+	AstralEngine::AEntity m_target;
+	float m_rotationSpeed = 30.0f;
+};
+
 void OnButtonClicked()
 {
 	static int count = 0;
@@ -60,6 +199,25 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+		m_entity.EmplaceComponent<Controller>();
+		
+		/*
+		auto e = m_scene->CreateAEntity();
+		e.EmplaceComponent<TargetMover>();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 1, 1);
+		*/
+
+		//m_entity.EmplaceComponent<LookAtTester>().SetTarget(e);
+
+		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
+		//cam.GetComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		m_scene->DestroyAEntity(cam);
+		cam = m_scene->CreateAEntity();
+		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		cam.GetTransform().position.z = -8.0f;
+		cam.EmplaceComponent<CamController>();
+		cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
+		m_entity = cam;
 	}
 
 	void OnUpdate() override
@@ -67,6 +225,10 @@ public:
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
+
+		AstralEngine::Renderer::BeginScene((AstralEngine::RuntimeCamera&)m_entity.GetComponent<AstralEngine::Camera>(), m_entity.GetTransform());
+		AstralEngine::Renderer::DrawQuad({ 3, 0, 3 }, AstralEngine::Quaternion::Identity(), { 3 ,3, 3 });
+		AstralEngine::Renderer::EndScene();
 
 		/*
 		m_cameraController->OnUpdate();

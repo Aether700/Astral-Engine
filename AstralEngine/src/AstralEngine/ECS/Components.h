@@ -46,6 +46,13 @@ namespace AstralEngine
 		AEntity GetParent() const { return m_parent; }
 		void SetParent(AEntity parent);
 
+		void LookAt(const Transform& target, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f));
+		void LookAt(const Vector3& target, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f));
+
+		// rotates the transform around the point by the angle provided around the specified axis. 
+		// Note that this function does not affect the internal rotation of the transform
+		void RotateAround(const Vector3& point, float angle, const Vector3& axis);
+
 		Vector3 Forward() const;
 		Vector3 Right() const;
 		Vector3 Up() const;

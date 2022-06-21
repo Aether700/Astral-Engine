@@ -40,6 +40,7 @@ namespace AstralEngine
 	const Vector2Int Vector2Int::Up() { return Vector2Int(0, 1); }
 	const Vector2Int Vector2Int::Zero() { return Vector2Int(); }
 
+	const Vector2Int Vector2Int::operator-() const { return Vector2Int(-x, -y); }
 	const Vector2Int Vector2Int::operator+(const Vector2Int& v) const { return Vector2Int(x + v.x, y + v.y); }
 	const Vector2Int Vector2Int::operator-(const Vector2Int& v) const { return Vector2Int(x - v.x, y - v.y); }
 	
