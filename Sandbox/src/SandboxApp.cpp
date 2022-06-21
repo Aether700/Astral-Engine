@@ -121,90 +121,30 @@ private:
 	float speed = 0.05f;
 };
 
-class TargetMover : public AstralEngine::NativeScript
+class RotateAroundTester : public AstralEngine::NativeScript
 {
 public:
 	void OnUpdate() override
 	{
-		auto& t = GetTransform();
-		t.position += m_velocity * AstralEngine::Time::GetDeltaTime();
-
-		if (t.position.x > m_bounds.x)
-		{
-			t.position.x = m_bounds.x;
-			m_velocity.x *= -1.0f;
-		}
-		
-		if (t.position.x < -m_bounds.x)
-		{
-			t.position.x = -m_bounds.x;
-			m_velocity.x *= -1.0f;
-		}
-
-		if (t.position.y > m_bounds.y)
-		{
-			t.position.y = m_bounds.y;
-			m_velocity.y *= -1.0f;
-		}
-
-		if (t.position.y < -m_bounds.y)
-		{
-			t.position.y = -m_bounds.y;
-			m_velocity.y *= -1.0f;
-		}
-
-		if (t.position.z > m_bounds.z)
-		{
-			t.position.z = m_bounds.z;
-			m_velocity.z *= -1.0f;
-		}
-
-		if (t.position.z < -m_bounds.z)
-		{
-			t.position.z = -m_bounds.z;
-			m_velocity.z *= -1.0f;
-		}
-	}
-
-private:
-	AstralEngine::Vector3 m_velocity = AstralEngine::Vector3(10.5f, 5.3f, 2.0f);
-	AstralEngine::Vector3 m_bounds = AstralEngine::Vector3(3.0f, 3.0f, 3.0f);
-
-};
-
-class LookAtTester : public AstralEngine::NativeScript
-{
-public:
-	void OnUpdate() override
-	{
-		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::T))
-		{
-			m_isActive = !m_isActive;
-		}
-	}
-
-	void OnLateUpdate() override
-	{
-		if (m_target.IsValid() && m_isActive)
+		if (m_target.IsValid())
 		{
 			auto& t = GetTransform();
-			auto& target = m_target.GetTransform();
-			t.LookAt(m_target.GetTransform());
-			AE_INFO("y: %f", t.rotation.EulerAngles().y);
+			auto& targetTransform = m_target.GetTransform();
+			float angle = m_rotationSpeed * AstralEngine::Time::GetDeltaTime();
+
+			t.RotateAround(targetTransform.position, angle, AstralEngine::Vector3::Up());
+			t.LookAt(targetTransform);
 		}
 	}
 
-	void SetTarget(AstralEngine::AEntity target) 
-	{ 
-		auto& pos = GetTransform().position;
-		auto& targetPos = target.GetTransform().position;
-		GetTransform().position = target.GetTransform().position + AstralEngine::Vector3(0, 0, -8);
-		m_target = target; 
-	}
 
+	void SetTarget(AstralEngine::AEntity e)
+	{
+		m_target = e;
+	}
 private:
 	AstralEngine::AEntity m_target;
-	bool m_isActive = false;
+	float m_rotationSpeed = 30.0f;
 };
 
 void OnButtonClicked()
@@ -276,7 +216,7 @@ public:
 		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
 		cam.GetTransform().position.z = -8.0f;
 		cam.EmplaceComponent<CamController>();
-		cam.EmplaceComponent<LookAtTester>().SetTarget(m_entity);
+		cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 	}
 

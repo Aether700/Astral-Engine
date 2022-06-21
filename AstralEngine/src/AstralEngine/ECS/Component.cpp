@@ -142,6 +142,14 @@ namespace AstralEngine
 		rotation = Quaternion::LookRotation(target - position, up);
 	}
 
+	void Transform::RotateAround(const Vector3& point, float angle, const Vector3& axis)
+	{
+		Vector3 pivotSpacePos = position - point;
+		Quaternion rotation = Quaternion::AngleAxisToQuaternion(angle, axis);
+		Vector3 resultPosPivotSpace = rotation * pivotSpacePos;
+		position = resultPosPivotSpace + point;
+	}
+
 	Vector3 Transform::Forward() const
 	{
 		return rotation * Vector3::Forward();
