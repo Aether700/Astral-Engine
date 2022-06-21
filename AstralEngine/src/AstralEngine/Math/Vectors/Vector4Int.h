@@ -29,6 +29,7 @@ namespace AstralEngine
 
 		const int* Data() const;
 
+		const Vector4Int operator-() const;
 		const Vector4Int operator+(const Vector4Int& v) const;
 		const Vector4Int operator-(const Vector4Int& v) const;
 		const Vector4Int& operator+=(const Vector4Int& v);

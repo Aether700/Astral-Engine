@@ -34,6 +34,7 @@ namespace AstralEngine
 		static const Vector3Int Forward();
 		static const Vector3Int Zero();
 
+		const Vector3Int operator-() const;
 		const Vector3Int operator+(const Vector3Int& v) const;
 		const Vector3Int operator-(const Vector3Int& v) const;
 		const Vector3Int& operator+=(const Vector3Int& v);

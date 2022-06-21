@@ -48,6 +48,7 @@ namespace AstralEngine
 		return unit;
 	}
 
+	const Vector4 Vector4::operator-() const { return Vector4(-x, -y, -z, -w); }
 	const Vector4 Vector4::operator+(const Vector4& v) const { return Vector4(x + v.x, y + v.y, z + v.z, w + v.w); }
 	const Vector4 Vector4::operator-(const Vector4& v) const { return Vector4(x - v.x, y - v.y, z - v.z, w - v.w); }
 	

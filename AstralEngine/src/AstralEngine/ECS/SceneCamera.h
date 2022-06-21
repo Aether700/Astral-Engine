@@ -72,7 +72,7 @@ namespace AstralEngine
 		float m_orthographicSize = 10.0f;
 		float m_orthographicNear = -1.0f, m_orthographicFar = 1.0f;
 
-		float m_perspectiveFOV = Math::DegreeToRadiants(45.0f);
+		float m_perspectiveFOV = Math::DegreeToRadians(45.0f);
 		float m_perspectiveNear = 0.01f, m_perspectiveFar = 1000.0f;
 
 		float m_aspectRatio = 0.0f;

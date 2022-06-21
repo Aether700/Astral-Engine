@@ -35,6 +35,7 @@ namespace AstralEngine
 		static const Vector2Int Up();
 		static const Vector2Int Zero();
 
+		const Vector2Int operator-() const;
 		const Vector2Int operator+(const Vector2Int& v) const;
 		const Vector2Int operator-(const Vector2Int& v) const;
 		const Vector2Int& operator+=(const Vector2Int& v);

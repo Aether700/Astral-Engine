@@ -46,6 +46,7 @@ namespace AstralEngine
 		static Vector2 Clamp(const Vector2& v, const Vector2& min, const Vector2& max);
 		static float Angle(const Vector2& v1, const Vector2& v2);
 
+		const Vector2 operator-() const;
 		const Vector2 operator+(const Vector2& v) const;
 		const Vector2 operator-(const Vector2& v) const;
 		const Vector2& operator+=(const Vector2& v);
