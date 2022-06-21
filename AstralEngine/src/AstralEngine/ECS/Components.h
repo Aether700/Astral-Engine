@@ -50,7 +50,7 @@ namespace AstralEngine
 		void LookAt(const Vector3& target, const Vector3& up = Vector3(0.0f, 1.0f, 0.0f));
 
 		// rotates the transform around the point by the angle provided around the specified axis. 
-		// Note that this function does not affect the internal rotation of the transform
+		// Note that this function does affects both the internal rotation of the transform and it's position
 		void RotateAround(const Vector3& point, float angle, const Vector3& axis);
 
 		Vector3 Forward() const;

@@ -133,7 +133,6 @@ public:
 			float angle = m_rotationSpeed * AstralEngine::Time::GetDeltaTime();
 
 			t.RotateAround(targetTransform.position, angle, AstralEngine::Vector3::Up());
-			t.LookAt(targetTransform);
 		}
 	}
 
