@@ -31,6 +31,7 @@ namespace AstralEngine
 
 		static const Vector4 Normalize(const Vector4& v);
 
+		const Vector4 operator-() const;
 		const Vector4 operator+(const Vector4& v) const;
 		const Vector4 operator-(const Vector4& v) const;
 		const Vector4& operator+=(const Vector4& v);

@@ -38,6 +38,7 @@ namespace AstralEngine
 	const Vector3Int Vector3Int::Forward() { return Vector3Int(0, 0, 1); }
 	const Vector3Int Vector3Int::Zero() { return Vector3Int(); }
 
+	const Vector3Int Vector3Int::operator-() const { return Vector3Int(-x, -y, -z); }
 	const Vector3Int Vector3Int::operator+(const Vector3Int& v) const { return Vector3Int(x + v.x, y + v.y, z + v.z); }
 	const Vector3Int Vector3Int::operator-(const Vector3Int& v) const { return Vector3Int(x - v.x, y - v.y, z - v.z); }
 	

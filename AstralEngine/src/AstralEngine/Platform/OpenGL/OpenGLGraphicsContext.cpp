@@ -50,6 +50,12 @@ namespace AstralEngine
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		// set opengl to be left handed instead of the default right handed
+		glDepthRange(1.0, 0.0);
+		glFrontFace(GL_CW);
+		glDepthFunc(GL_GEQUAL);
+		glClearDepth(0.0);
+
 		AE_CORE_INFO("OpenGL Info:");
 		AE_CORE_INFO("   Vendor: %s", glGetString(GL_VENDOR));
 		AE_CORE_INFO("   Renderer: %s", glGetString(GL_RENDERER));

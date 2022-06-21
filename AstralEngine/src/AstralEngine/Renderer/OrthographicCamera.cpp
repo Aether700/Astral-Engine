@@ -59,7 +59,7 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		Mat4 transform = Mat4::Translate(Mat4::Identity(), m_position) * 
-			Mat4::Rotate(Mat4::Identity(), Math::DegreeToRadiants(m_rotationOnZ), Vector3(0, 0, 1));
+			Mat4::Rotate(Mat4::Identity(), Math::DegreeToRadians(m_rotationOnZ), Vector3(0, 0, 1));
 
 		m_viewMatrix = transform.Inverse();
 		m_viewProjMatrix = m_projMatrix * m_viewMatrix;
