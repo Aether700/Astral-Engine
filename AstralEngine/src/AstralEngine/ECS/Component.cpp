@@ -145,8 +145,9 @@ namespace AstralEngine
 	void Transform::RotateAround(const Vector3& point, float angle, const Vector3& axis)
 	{
 		Vector3 pivotSpacePos = position - point;
-		Quaternion rotation = Quaternion::AngleAxisToQuaternion(angle, axis);
-		Vector3 resultPosPivotSpace = rotation * pivotSpacePos;
+		Quaternion rot = Quaternion::AngleAxisToQuaternion(angle, axis);
+		Vector3 resultPosPivotSpace = rot * pivotSpacePos;
+		rotation = rot * rotation;
 		position = resultPosPivotSpace + point;
 	}
 
