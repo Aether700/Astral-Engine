@@ -518,7 +518,7 @@ namespace AstralEngine
 
 		s_shader->Bind();
 		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", cam.GetPosition());
+		//s_shader->SetFloat3("u_camPos", cam.GetPosition());
 
 		s_directionalLightIndex = 0;
 		s_pointLightIndex = 0;
@@ -531,7 +531,7 @@ namespace AstralEngine
 
 		s_shader->Bind();
 		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", Vector3::Zero());
+		//s_shader->SetFloat3("u_camPos", Vector3::Zero());
 
 		s_directionalLightIndex = 0;
 		s_pointLightIndex = 0;
@@ -543,7 +543,7 @@ namespace AstralEngine
 
 		s_shader->Bind();
 		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		s_shader->SetFloat3("u_camPos", transform.position);
+		//s_shader->SetFloat3("u_camPos", transform.position);
 
 		s_directionalLightIndex = 0;
 		s_pointLightIndex = 0;
@@ -569,7 +569,7 @@ namespace AstralEngine
 		else
 		{
 			s_shader->Bind();
-			s_shader->SetInt("u_useShadows", 0);
+			//s_shader->SetInt("u_useShadows", 0);
 			FlushBatch();
 		}
 		s_drawCommands.Clear();

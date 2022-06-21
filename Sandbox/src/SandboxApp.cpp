@@ -8,6 +8,68 @@
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class GimbleLockTester : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		m_currRot += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
+		m_currRot = NormalizeAngle(m_currRot);
+
+		auto& t = GetTransform();
+		auto euler = t.rotation.EulerAngles();
+
+		float returnedAngle = NormalizeAngle(euler.y);
+
+		/*
+		if (euler.x != 0.0f || euler.z != 0.0f)
+		{
+			AE_WARN("x = %f and z = %f", euler.x, euler.z);
+			t.rotation.EulerAngles();
+		}
+		else if (returnedAngle != m_currRot)
+		{
+			AE_INFO("returned = %f, curr = %f", returnedAngle, m_currRot);
+		}
+		*/
+		euler.y = m_currRot;
+		PrintEuler(euler);
+
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
+		{
+			m_currRot = 0.0f;
+		}
+
+
+		t.rotation = AstralEngine::Quaternion::EulerToQuaternion(euler);
+		//GetTransform().rotation = AstralEngine::Quaternion::EulerToQuaternion(0.0f, m_currRot, 0.0f);
+	}
+
+private:
+	float NormalizeAngle(float a)
+	{
+		while (a > 360.0f)
+		{
+			a -= 360.0f;
+		}
+
+		while (a < 0.0f)
+		{
+			a += 360.0f;
+		}
+		return a;
+	}
+
+	void PrintEuler(const AstralEngine::Vector3& euler)
+	{
+		AE_INFO("x: %f  y: %f  z: %f", euler.x, euler.y, euler.z);
+	}
+
+	float m_currRot = 0.0f;
+	float m_rotSpeed = 30.0f;
+};
+
 class CamController : public AstralEngine::NativeScript
 {
 public:
@@ -256,6 +318,7 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
+		/*
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
 		//m_entity.EmplaceComponent<Controller>();
 		
@@ -273,6 +336,30 @@ public:
 		cam.GetTransform().position.z = 8.0f;
 		cam.EmplaceComponent<CamController>();
 		//cam.EmplaceComponent<LookAtTester>().SetTarget(m_entity);
+		*/
+
+		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+
+		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
+		m_scene->DestroyAEntity(cam);
+		cam = m_scene->CreateAEntity();
+		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		cam.GetTransform().position.z = 5.0f;
+		cam.EmplaceComponent<GimbleLockTester>();
+
+		auto e = m_scene->CreateAEntity();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
+		e.GetTransform().position = { 5, 0, 5 };
+		e.GetTransform().rotation = AstralEngine::Quaternion::AngleAxisToQuaternion(90.0f, AstralEngine::Vector3::Up());
+
+		e = m_scene->CreateAEntity();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 0, 1, 1);
+		e.GetTransform().position = { -5, 0, 5 };
+		e.GetTransform().rotation = AstralEngine::Quaternion::AngleAxisToQuaternion(90.0f, AstralEngine::Vector3::Up());
+
+		e = m_scene->CreateAEntity();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 1, 1);
+		e.GetTransform().position = { 0, 0, 10 };
 	}
 
 	void OnUpdate() override

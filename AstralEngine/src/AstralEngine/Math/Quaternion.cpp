@@ -75,6 +75,28 @@ namespace AstralEngine
 	Vector3 Quaternion::EulerAngles () const
 	{
 		/*
+		Mat3 rotMat = ComputeRotationMatrix();
+		Vector3 euler;
+
+		float sinY = Math::Sqrt(rotMat[0][0] * rotMat[0][0] + rotMat[1][0] * rotMat[1][0]);
+
+		if (sinY < 1e-6)
+		{
+			// in a singularity case
+			euler.x = 0.0f;
+			euler.y = Math::ArcTan2(-rotMat[2][0], sinY);
+			euler.z = Math::ArcTan2(-rotMat[1][2], rotMat[1][1]);
+		}
+		else
+		{
+			euler.x = Math::ArcTan2(rotMat[1][0], rotMat[0][0]);
+			euler.y = Math::ArcTan2(rotMat[2][0], sinY);
+			euler.z = Math::ArcTan2(rotMat[2][1], rotMat[2][2]);
+		}
+
+		return euler;
+		*/
+
 		Vector3 euler;
 		float magnitude = Magnitude();
 
@@ -83,32 +105,48 @@ namespace AstralEngine
 		float y2 = m_v.y * m_v.y;
 		float z2 = m_v.z * m_v.z;
 
-		//float test = m_v.x * m_v.y + m_v.z * m_w;
-		float test = m_w * m_v.y - m_v.z * m_v.x;
+		float test = m_v.x * m_v.y + m_v.z * m_w;
+		//float test = m_w * m_v.y - m_v.z * m_v.x;
 
 		float approxHalfMagnitude = 0.499f * magnitude;
 
 		if (test > approxHalfMagnitude) // singularity at north pole of the unit sphere
 		{
 			euler.x = Math::RadiansToDegree(2.0f * Math::ArcTan2(m_v.x, m_w));
-			euler.y = Math::RadiansToDegree((float)Math::Pi() / 2.0f);
+			euler.y = 90.0f;
+			euler.z = 0.0f;
 		}
 		else if (test < -approxHalfMagnitude) // singularity at south pole of the unit sphere
 		{
 			euler.x = Math::RadiansToDegree(-2.0f * Math::ArcTan2(m_v.x, m_w));
-			euler.y = Math::RadiansToDegree(-(float)Math::Pi() / 2.0f);
+			euler.y = -90.0f;
+			euler.z = 0.0f;
 		}
 		else
 		{
+
+			// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+			// heading = x
+			// attitude = y
+			// bank = z
+			// code is right above "Derivation of Equations"
+
+			euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * m_v.y * m_w - 2.0f * m_v.x * m_v.z, m_v.x * m_v.x - 
+				m_v.y * m_v.y - m_v.z * m_v.z + m_w * m_w));
+			euler.y = Math::RadiansToDegree(Math::ArcSin(2.0f * test / magnitude));
+			euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * m_v.x * m_w - 2.0f * m_v.y * m_v.z, -m_v.x * m_v.x + m_v.y * m_v.y - 
+				m_v.z * m_v.z + m_w * m_w));
+
+			/*
 			euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z),
 				1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
 			euler.y = Math::RadiansToDegree(Math::ArcSin(2.0f * test / magnitude));
+			euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
+				1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
+			*/
 		}
-		euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
-			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
 
 		return euler;
-		*/
 
 		/*
 		Vector3 euler;
@@ -121,13 +159,13 @@ namespace AstralEngine
 		euler.y = Math::RadiansToDegree(Math::ArcSin((float)sinYRot));
 		*/
 		
-
+		/*
 		Vector3 euler;
 		euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
 			1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
 		
 		double sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
-		sinYRot =Math::Clamp(sinYRot, -1.0, 1.0);
+		sinYRot = Math::Clamp(sinYRot, -1.0, 1.0);
 
 		if (Math::Abs(sinYRot) >= 1.0)
 		{
@@ -142,6 +180,33 @@ namespace AstralEngine
 		euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
 			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
 		return euler;
+		*/
+
+		/*
+		Vector3 euler;
+		
+		float sinXCosY = 2.0f * (m_w * m_v.x + m_v.y * m_v.z);
+		float cosXCosY = 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y);
+
+		euler.x = Math::RadiansToDegree(Math::ArcTan2(sinXCosY, cosXCosY));
+
+		float sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
+
+		if (Math::Abs(sinYRot) >= 1.0f)
+		{
+			// if out of range set rotation to 90 degrees
+			euler.y = Math::CopySign(90.0f, sinYRot);
+		}
+		else
+		{
+			euler.y = Math::RadiansToDegree(Math::ArcSin(sinYRot));
+		}
+
+		float sinZCosY = 2.0f * (m_w * m_v.z + m_v.x * m_v.y);
+		float cosZCosY = 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z);
+		euler.z = Math::RadiansToDegree(Math::ArcTan2(sinZCosY, cosZCosY));
+		return euler;
+		*/
 	}
 
 	void Quaternion::SetEulerAngles(const Vector3& euler)
