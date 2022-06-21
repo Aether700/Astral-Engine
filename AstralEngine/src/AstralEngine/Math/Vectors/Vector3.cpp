@@ -45,6 +45,7 @@ namespace AstralEngine
 	const Vector3 Vector3::Right() { return Vector3(1.0f, 0.0f, 0.0f); }
 	const Vector3 Vector3::Back() { return Vector3(0.0f, 0.0f, -1.0f); }
 	const Vector3 Vector3::Forward() { return Vector3(0.0f, 0.0f, 1.0f); }
+	
 	const Vector3 Vector3::Zero() { return Vector3(); }
 
 	void Vector3::OrthoNormalize(Vector3* normal, Vector3* tangeant)

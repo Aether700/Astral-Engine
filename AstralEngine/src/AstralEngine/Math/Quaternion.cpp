@@ -72,143 +72,46 @@ namespace AstralEngine
 		);
 	}
 
-	Vector3 Quaternion::EulerAngles () const
+	Vector3 Quaternion::EulerAngles() const
 	{
-		/*
-		Mat3 rotMat = ComputeRotationMatrix();
 		Vector3 euler;
-
-		float sinY = Math::Sqrt(rotMat[0][0] * rotMat[0][0] + rotMat[1][0] * rotMat[1][0]);
-
-		if (sinY < 1e-6)
-		{
-			// in a singularity case
-			euler.x = 0.0f;
-			euler.y = Math::ArcTan2(-rotMat[2][0], sinY);
-			euler.z = Math::ArcTan2(-rotMat[1][2], rotMat[1][1]);
-		}
-		else
-		{
-			euler.x = Math::ArcTan2(rotMat[1][0], rotMat[0][0]);
-			euler.y = Math::ArcTan2(rotMat[2][0], sinY);
-			euler.z = Math::ArcTan2(rotMat[2][1], rotMat[2][2]);
-		}
-
-		return euler;
-		*/
-
-		Vector3 euler;
-		float magnitude = Magnitude();
-
 		float w2 = m_w * m_w;
 		float x2 = m_v.x * m_v.x;
 		float y2 = m_v.y * m_v.y;
 		float z2 = m_v.z * m_v.z;
 
-		float test = m_v.x * m_v.y + m_v.z * m_w;
-		//float test = m_w * m_v.y - m_v.z * m_v.x;
+		float unit = w2 + x2 + y2 + z2;
 
-		float approxHalfMagnitude = 0.499f * magnitude;
+		float test = m_v.x * m_v.y + m_v.z * m_w;
+
+		float approxHalfMagnitude = 0.499f * unit;
 
 		if (test > approxHalfMagnitude) // singularity at north pole of the unit sphere
 		{
-			euler.x = Math::RadiansToDegree(2.0f * Math::ArcTan2(m_v.x, m_w));
-			euler.y = 90.0f;
-			euler.z = 0.0f;
+			euler.y = Math::RadiansToDegree(2.0f * atan2(m_v.x, m_w));
+			euler.z = 90.0f;
+			euler.x = 0.0f;
 		}
 		else if (test < -approxHalfMagnitude) // singularity at south pole of the unit sphere
 		{
-			euler.x = Math::RadiansToDegree(-2.0f * Math::ArcTan2(m_v.x, m_w));
-			euler.y = -90.0f;
-			euler.z = 0.0f;
+			euler.y = Math::RadiansToDegree(-2.0f * atan2(m_v.x, m_w));
+			euler.z = -90.0f;
+			euler.x = 0.0f;
 		}
 		else
 		{
-
-			// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-			// heading = x
-			// attitude = y
-			// bank = z
-			// code is right above "Derivation of Equations"
-
-			euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * m_v.y * m_w - 2.0f * m_v.x * m_v.z, m_v.x * m_v.x - 
-				m_v.y * m_v.y - m_v.z * m_v.z + m_w * m_w));
-			euler.y = Math::RadiansToDegree(Math::ArcSin(2.0f * test / magnitude));
-			euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * m_v.x * m_w - 2.0f * m_v.y * m_v.z, -m_v.x * m_v.x + m_v.y * m_v.y - 
-				m_v.z * m_v.z + m_w * m_w));
-
-			/*
-			euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z),
-				1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
-			euler.y = Math::RadiansToDegree(Math::ArcSin(2.0f * test / magnitude));
-			euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
-				1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
-			*/
+			euler.y = Math::RadiansToDegree(atan2(2.0f * m_v.y * m_w - 2.0f * m_v.x * m_v.z, x2 - y2 - z2 + w2));
+			euler.z = Math::RadiansToDegree(Math::ArcSin(2.0f * test / unit));
+			euler.x = Math::RadiansToDegree(atan2(2.0f * m_v.x * m_w - 2.0f * m_v.y * m_v.z, -x2 + y2 - z2 + w2));
 		}
-
 		return euler;
-
-		/*
-		Vector3 euler;
-		euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
-			1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
-		
-		double sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
-		sinYRot = Math::Clamp(sinYRot, -1.0, 1.0);
-
-		euler.y = Math::RadiansToDegree(Math::ArcSin((float)sinYRot));
-		*/
-		
-		/*
-		Vector3 euler;
-		euler.x = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.x + m_v.y * m_v.z), 
-			1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y)));
-		
-		double sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
-		sinYRot = Math::Clamp(sinYRot, -1.0, 1.0);
-
-		if (Math::Abs(sinYRot) >= 1.0)
-		{
-			// if out of range set rotation to 90 degrees
-			euler.y = Math::RadiansToDegree(Math::CopySign((float)Math::Pi() / 2.0f, sinYRot));
-		}
-		else
-		{
-			euler.y = Math::RadiansToDegree(Math::ArcSin((float)sinYRot));
-		}
-
-		euler.z = Math::RadiansToDegree(Math::ArcTan2(2.0f * (m_w * m_v.z + m_v.x * m_v.y),
-			1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z)));
-		return euler;
-		*/
-
-		/*
-		Vector3 euler;
-		
-		float sinXCosY = 2.0f * (m_w * m_v.x + m_v.y * m_v.z);
-		float cosXCosY = 1.0f - 2.0f * (m_v.x * m_v.x + m_v.y * m_v.y);
-
-		euler.x = Math::RadiansToDegree(Math::ArcTan2(sinXCosY, cosXCosY));
-
-		float sinYRot = 2.0f * (m_w * m_v.y - m_v.z * m_v.x);
-
-		if (Math::Abs(sinYRot) >= 1.0f)
-		{
-			// if out of range set rotation to 90 degrees
-			euler.y = Math::CopySign(90.0f, sinYRot);
-		}
-		else
-		{
-			euler.y = Math::RadiansToDegree(Math::ArcSin(sinYRot));
-		}
-
-		float sinZCosY = 2.0f * (m_w * m_v.z + m_v.x * m_v.y);
-		float cosZCosY = 1.0f - 2.0f * (m_v.y * m_v.y + m_v.z * m_v.z);
-		euler.z = Math::RadiansToDegree(Math::ArcTan2(sinZCosY, cosZCosY));
-		return euler;
-		*/
 	}
 
+
+
+
+
+	
 	void Quaternion::SetEulerAngles(const Vector3& euler)
 	{
 		SetEulerAngles(euler.x, euler.y, euler.z);
@@ -231,10 +134,6 @@ namespace AstralEngine
 
 	Quaternion Quaternion::EulerToQuaternion(float x, float y, float z)
 	{
-		return Normalize(AngleAxisToQuaternion(z, Vector3::Forward()) 
-			* AngleAxisToQuaternion(y, Vector3::Up()) 
-			* AngleAxisToQuaternion(x, Vector3::Right()));
-		/*
 		float halfX = Math::DegreeToRadians(x) * 0.5f;
 		float halfY = Math::DegreeToRadians(y) * 0.5f;
 		float halfZ = Math::DegreeToRadians(z) * 0.5f;
@@ -256,7 +155,6 @@ namespace AstralEngine
 			cosX * sinY * cosZ + sinX * cosY * sinZ,
 			cXY * sinZ - sXY * cosZ
 		));
-		*/
 	}
 
 	Quaternion Quaternion::AngleAxisToQuaternion(float angle, const Vector3& axis)
@@ -300,7 +198,6 @@ namespace AstralEngine
 
 	Quaternion Quaternion::LookRotation(const Vector3& lookDir, const Vector3& up)
 	{	
-
 		Vector3 forward = Vector3::Normalize(lookDir);
 		Vector3 right = Vector3::Normalize(Vector3::CrossProduct(up, forward));
 		Vector3 localUp = Vector3::CrossProduct(forward, right);
@@ -354,34 +251,6 @@ namespace AstralEngine
 			q.m_w = (m01 - m10) * num2;
 		}
 		return q;
-		/*
-		if (lookDir == Vector3::Zero() || up == Vector3::Zero())
-		{
-			return Identity();
-		}
-
-		Vector3 forward = Vector3::Normalize(lookDir);
-		float dot = Vector3::DotProduct(Vector3::Forward(), forward);
-
-		// if the dot product == -1 the look direction is the direct opposite direction to the Vector3::Forward 
-		// vector therefore we return a rotation around the world up vector of 180 degrees (pi)
-		if (Math::Abs(dot - (-1.0f)) < 0.000001f)
-		{
-			return Normalize(Quaternion(Math::Pi(), up));
-		}
-		else if (Math::Abs(dot - (1.0f)) < 0.000001f) 
-		{
-			// if the dot product == 1 the forward vector and the look direction are the same therefore
-			// we don't need any rotation
-			return Quaternion::Identity();
-		}
-
-		float angle = Math::ArcCos(dot);
-		Vector3 axis = Vector3::CrossProduct(Vector3::Forward(), forward);
-		axis = Vector3::Normalize(axis);
-
-		return AngleAxisToQuaternion(Math::RadiantsToDegree(angle), axis);
-		*/
 	}
 
 	Quaternion Quaternion::FromToRotation(const Vector3& from, const Vector3& to)
@@ -445,4 +314,5 @@ namespace AstralEngine
 	{
 		return !(*this == other);
 	}
+
 }

@@ -128,6 +128,7 @@ namespace AstralEngine
 			return -((float)Pi() / 2.0f) - ArcTan(x / y);
 		}
 		return ArcTan(y / x) + (float)Pi();
+		//return atan2(y, x);
 	}
 
 	float Math::ArcTan2(Vector2 v)

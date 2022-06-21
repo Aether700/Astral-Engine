@@ -199,15 +199,7 @@ namespace AstralEngine
 		Mat4 result = Mat4::Identity();
 		result[0][0] = 2.0f / (right - left);
 		result[1][1] = 2.0f / (top - bottom);
-		
-		#ifdef LEFT_HANDED_COORD_SYS
-			result[2][2] = 2.0f / (farVal - nearVal);
-		#else
-			#ifdef RIGHT_HANDED_COORD_SYS
-				result[2][2] = -2.0f / (farVal - nearVal);
-			#endif
-		#endif
-		
+		result[2][2] = 2.0f / (farVal - nearVal);
 		result[3][0] = -(right + left) / (right - left);
 		result[3][1] = -(top + bottom) / (top - bottom);
 		result[3][2] = -(farVal + nearVal) / (farVal - nearVal);
@@ -225,19 +217,10 @@ namespace AstralEngine
 
 		result[0][0] = 1.0f / (aspect * tanHalfFov);
 		result[1][1] = 1.0f / tanHalfFov;
-
-		#ifdef LEFT_HANDED_COORD_SYS
-			result[2][2] = (farVal + nearVal) / (farVal - nearVal);
-			result[2][3] = 1.0f;
-		#else
-			#ifdef RIGHT_HANDED_COORD_SYS
-				result[2][2] = -(farVal + nearVal) / (farVal - nearVal);
-				result[2][3] = -1.0f;
-			#else
-				#error coordinate system macros are not properly defined 
-			#endif
-		#endif
+		result[2][2] = (farVal + nearVal) / (farVal - nearVal);
+		result[2][3] = 1.0f;
 		result[3][2] = -(2.0f * farVal * nearVal) / (farVal - nearVal);
+
 		return result;
 	}
 
