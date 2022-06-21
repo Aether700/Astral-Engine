@@ -520,7 +520,7 @@ namespace AstralEngine
 	void Renderer::BeginScene(const Mat4& viewProjMatrix, const Vector3& camPos)
 	{
 		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
+		s_shader->SetMat4("u_viewProjMatrix", viewProjMatrix);
 		//s_shader->SetFloat3("u_camPos", cam.GetPosition());
 
 		s_directionalLightIndex = 0;
@@ -789,7 +789,7 @@ namespace AstralEngine
 		const AReference<Texture2D>& texture, const Vector2* textureCoords, float tilingFactor, 
 		const Vector4& tintColor, bool ignoresCam)
 	{
-		Transform t = Transform(position, Vector3(0, 0, rotation), scale);
+		Transform t = Transform(position, Quaternion::EulerToQuaternion(0, 0, rotation), scale);
 		const Vector3 textureCoords3D[] = { 
 			Vector3(textureCoords[0].x, textureCoords[0].y, 0.0f),
 			Vector3(textureCoords[1].x, textureCoords[1].y, 0.0f),
