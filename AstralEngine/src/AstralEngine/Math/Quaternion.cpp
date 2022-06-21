@@ -291,8 +291,9 @@ namespace AstralEngine
 
 	Vector3 Quaternion::operator*(const Vector3& v) const
 	{
-		Mat4 rotationMatrix = ComputeRotationMatrix();
-		return (Vector3)(rotationMatrix * Vector4(v.x, v.y, v.z, 1.0f));
+		Quaternion vQuat = Quaternion(0.0f, v);
+		Quaternion result = *this * vQuat * Conjugate();
+		return result.m_v;
 	}
 
 	Quaternion operator*(float k, const Quaternion& q)
