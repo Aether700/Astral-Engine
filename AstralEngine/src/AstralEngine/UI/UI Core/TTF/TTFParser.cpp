@@ -85,7 +85,7 @@ namespace AstralEngine
 	};
 
 
-	struct HeaderTable
+	struct HeaderTable // head
 	{
 		std::int16_t version;
 		std::int16_t fontRevision;
@@ -106,7 +106,7 @@ namespace AstralEngine
 		std::int16_t glyphDataFormat;
 	};
 
-	struct HorizontalHeader
+	struct HorizontalHeader // hhea
 	{
 		std::int16_t version;
 		std::int16_t ascent;
@@ -126,37 +126,35 @@ namespace AstralEngine
 
 	//do hmtx table next
 
-	/*
-	struct OffsetSubtable
+	TableDirectory ReadTableDir(std::ifstream& file)
 	{
-		std::uint32_t scalerType;
-		std::uint16_t numTables;
-		std::uint16_t searchRange;
-		std::uint16_t entrySelector;
-		std::uint16_t rangeShift;
-	};
-	*/
+		TableDirectory dir;
+		std::uint32_t data;
+		file.read((char*)&data, sizeof(data));
+		AssertDataEndianness(&data, &dir.tag, sizeof(data), Endianness::BigEndian);
 
-	
-	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
-	{
-		OffsetSubtable subtable;
+		file.read((char*)&data, sizeof(data));
+		AssertDataEndianness(&data, &dir.checkSum, sizeof(data), Endianness::BigEndian);
 
-		return subtable;
+		file.read((char*)&data, sizeof(data));
+		AssertDataEndianness(&data, &dir.offset, sizeof(data), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(data));
+		AssertDataEndianness(&data, &dir.length, sizeof(data), Endianness::BigEndian);
+
+		return dir;
 	}
 
 	template<typename T>
 	T ReadDataFromTTFFile(std::ifstream& file)
 	{
 		constexpr size_t dataSize = sizeof(T);
-		std::uint8_t* data = new std::uint8_t[dataSize];
+		std::uint8_t data[dataSize];
 		file.read((char*) data, dataSize);
-		std::uint8_t* assertedEndiannessData = new std::uint8_t[dataSize];
+		std::uint8_t assertedEndiannessData[dataSize];
 		// TTF files are always in big endian
 		AssertDataEndianness(data, assertedEndiannessData, dataSize, Endianness::BigEndian); 
 		T dataObj = *(T*)assertedEndiannessData;
-		delete[] data;
-		delete[] assertedEndiannessData;
 		return dataObj;
 	}
 
@@ -172,6 +170,23 @@ namespace AstralEngine
 		}
 
 		OffsetSubtable offsetSubtable = ReadDataFromTTFFile<OffsetSubtable>(file);
+		TableDirectory glyphOffsetTableDir = ReadDataFromTTFFile<TableDirectory>(file);
+
+		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
+		{
+			TableDirectory dir = ReadDataFromTTFFile<TableDirectory>(file);
+			//TableDirectory dir = ReadTableDir(file);
+			char tableID[5];
+			memcpy(tableID, (std::uint32_t*)&dir.tag, 4);
+			tableID[4] = '\0';
+			size_t oldPos = file.tellg();
+
+			if (strcmp(tableID, "head") == 0)
+			{
+				file.seekg(dir.offset);
+				HeaderTable head = ReadDataFromTTFFile<HeaderTable>(file);
+			}
+		}
 
 		// temp
 		return nullptr;
