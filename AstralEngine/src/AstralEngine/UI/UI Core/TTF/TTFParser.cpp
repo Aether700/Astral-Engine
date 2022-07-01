@@ -3,6 +3,7 @@
 
 namespace AstralEngine
 {
+	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
 	{
 		std::uint32_t scalerType;
@@ -123,6 +124,57 @@ namespace AstralEngine
 		std::uint16_t numOfLongHorMetrics;
 	};
 
-	//do htmx table next
+	//do hmtx table next
+
+	/*
+	struct OffsetSubtable
+	{
+		std::uint32_t scalerType;
+		std::uint16_t numTables;
+		std::uint16_t searchRange;
+		std::uint16_t entrySelector;
+		std::uint16_t rangeShift;
+	};
+	*/
+
+	
+	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
+	{
+		OffsetSubtable subtable;
+
+		return subtable;
+	}
+
+	template<typename T>
+	T ReadDataFromTTFFile(std::ifstream& file)
+	{
+		constexpr size_t dataSize = sizeof(T);
+		std::uint8_t* data = new std::uint8_t[dataSize];
+		file.read((char*) data, dataSize);
+		std::uint8_t* assertedEndiannessData = new std::uint8_t[dataSize];
+		// TTF files are always in big endian
+		AssertDataEndianness(data, assertedEndiannessData, dataSize, Endianness::BigEndian); 
+		T dataObj = *(T*)assertedEndiannessData;
+		delete[] data;
+		delete[] assertedEndiannessData;
+		return dataObj;
+	}
+
+	// TTFParser //////////////////////////////////////////////////////////
+
+	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
+	{
+		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
+		if (!file)
+		{
+			AE_CORE_WARN("Could not open file %S", filepath);
+			return nullptr;
+		}
+
+		OffsetSubtable offsetSubtable = ReadDataFromTTFFile<OffsetSubtable>(file);
+
+		// temp
+		return nullptr;
+	}
 
 }

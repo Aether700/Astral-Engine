@@ -8,6 +8,12 @@ namespace AstralEngine
 {
 	class UIContext;
 
+	enum class Endianness
+	{
+		LittleEndian, // for 10 store -> 01
+		BigEndian // for 10 store -> 10
+	};
+
 	class Application
 	{
 	public:
@@ -27,11 +33,15 @@ namespace AstralEngine
 
 		static void Exit() { GetApp()->m_isRunning = false; }
 
+		static Endianness SystemEndianness();
+
 	private:
 		static Application* GetApp();
 
 		bool OnWindowCloseEvent(WindowCloseEvent& close);
 		bool OnWindowResizeEvent(WindowResizeEvent& resize);
+
+		void RetrieveSystemEndianess();
 
 		bool m_isRunning;
 		LayerStack m_layerStack;
@@ -39,8 +49,14 @@ namespace AstralEngine
 		UIContext* m_uiContext;
 		bool m_minimized;
 
+		Endianness m_systemEndianness;
+
 		static Application* s_instance;
 	};
+
+	// copies the data provided into the destination provided in the system endianness assuming the data 
+	// is in the provided endianness. The dataSize is in bytes
+	void AssertDataEndianness(void* data, void* dest, size_t dataSize, Endianness endiannessBeingRead);
 
 }
 

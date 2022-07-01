@@ -5,6 +5,7 @@
 //temp
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/UI/UIText.h"
+#include "AstralEngine/UI/UI Core/TTF/TTFParser.h"
 ////////
 
 
@@ -515,6 +516,8 @@ public:
 			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		spriteRenderer.SetSprite(m_texture);
 		texturedQuad.EmplaceComponent<InputTest>();
+
+		AstralEngine::TTFParser::LoadFont("assets/fonts/The Giant and the Mouse.ttf");
 	}
 
 	void OnUpdate() override

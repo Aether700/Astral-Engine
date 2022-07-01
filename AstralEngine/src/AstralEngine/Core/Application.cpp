@@ -18,6 +18,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT((s_instance == nullptr), "Creating Duplicate Application Instance.");
 
 		s_instance = this;
+		RetrieveSystemEndianess();
 		m_window = AWindow::Create(windowTitle, width, height);
 		m_uiContext = new UIContext();
 
@@ -35,6 +36,28 @@ namespace AstralEngine
 		AE_PROFILE_FUNCTION();
 		Renderer::Shutdown();
 		delete m_window;
+	}
+	
+	void Application::Run()
+	{
+		AE_PROFILE_FUNCTION();
+		while(m_isRunning)
+		{
+			AE_PROFILE_SCOPE("Run loop");
+
+			if (!m_minimized)
+			{
+				AE_PROFILE_SCOPE("Updating layers (OnUpdate)");
+				Time::UpdateTime();
+				for (int i = 0; i < m_layerStack.GetCount(); i++)
+				{
+					m_layerStack[i]->OnUpdate();
+				}
+			}
+
+			Input::OnUpdate();
+			m_window->OnUpdate();
+		}
 	}
 
 	void Application::OnEvent(AEvent& e)
@@ -88,27 +111,11 @@ namespace AstralEngine
 		GetApp()->m_layerStack.DetachLayer(l);
 	}
 
-	void Application::Run()
+	Endianness Application::SystemEndianness()
 	{
-		AE_PROFILE_FUNCTION();
-		while(m_isRunning)
-		{
-			AE_PROFILE_SCOPE("Run loop");
-
-			if (!m_minimized)
-			{
-				AE_PROFILE_SCOPE("Updating layers (OnUpdate)");
-				Time::UpdateTime();
-				for (int i = 0; i < m_layerStack.GetCount(); i++)
-				{
-					m_layerStack[i]->OnUpdate();
-				}
-			}
-
-			Input::OnUpdate();
-			m_window->OnUpdate();
-		}
+		return GetApp()->m_systemEndianness;
 	}
+
 
 	Application* Application::GetApp()
 	{
@@ -134,4 +141,36 @@ namespace AstralEngine
 		return false;
 	}
 
+	void Application::RetrieveSystemEndianess()
+	{
+		std::uint16_t data = 1;
+		std::uint8_t* byte = (std::uint8_t*) &data;
+		if ( *byte == 0 )
+		{
+			m_systemEndianness = Endianness::BigEndian;
+		}
+		else
+		{
+			m_systemEndianness = Endianness::LittleEndian;
+		}
+	}
+
+
+
+	void AssertDataEndianness(void* data, void* dest, size_t dataSize, Endianness endiannessBeingRead)
+	{
+		if (Application::SystemEndianness() == endiannessBeingRead)
+		{
+			memcpy(dest, data, dataSize);
+			return;
+		}
+
+		std::uint8_t* dataBytes = reinterpret_cast<std::uint8_t*>(data);
+		std::uint8_t* destBytes = reinterpret_cast<std::uint8_t*>(dest);
+
+		for (size_t i = 0; i < dataSize; i++)
+		{
+			destBytes[i] = dataBytes[dataSize - 1 - i];
+		}
+	}
 }
