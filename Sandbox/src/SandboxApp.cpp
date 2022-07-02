@@ -517,7 +517,8 @@ public:
 		spriteRenderer.SetSprite(m_texture);
 		texturedQuad.EmplaceComponent<InputTest>();
 
-		AstralEngine::TTFParser::LoadFont("assets/fonts/The Giant and the Mouse.ttf");
+		//AstralEngine::TTFParser::LoadFont("assets/fonts/The Giant and the Mouse.ttf");
+		AstralEngine::TTFParser::LoadFont("assets/fonts/arial.ttf");
 	}
 
 	void OnUpdate() override

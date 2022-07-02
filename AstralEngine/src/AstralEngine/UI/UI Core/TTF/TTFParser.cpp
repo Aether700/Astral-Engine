@@ -126,6 +126,28 @@ namespace AstralEngine
 
 	//do hmtx table next
 
+	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
+	{
+		OffsetSubtable offset;
+		std::uint32_t data;
+		file.read((char*)&data, sizeof(offset.scalerType));
+		AssertDataEndianness(&data, &offset.scalerType, sizeof(offset.scalerType), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(offset.numTables));
+		AssertDataEndianness(&data, &offset.numTables, sizeof(offset.numTables), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(offset.searchRange));
+		AssertDataEndianness(&data, &offset.searchRange, sizeof(offset.searchRange), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(offset.entrySelector));
+		AssertDataEndianness(&data, &offset.entrySelector, sizeof(offset.entrySelector), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(offset.rangeShift));
+		AssertDataEndianness(&data, &offset.rangeShift, sizeof(offset.rangeShift), Endianness::BigEndian);
+
+		return offset;
+	}
+
 	TableDirectory ReadTableDir(std::ifstream& file)
 	{
 		TableDirectory dir;
@@ -158,6 +180,22 @@ namespace AstralEngine
 		return dataObj;
 	}
 
+	// returns true if the check sum test was correct, false otherwise
+	// do not use this function to validate the "head" table
+	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
+	{
+		std::uint32_t calculatedCheckSum = 0;
+		std::uint32_t numLongsInTable = (tableSize + 3) / 4;
+		while (numLongsInTable > 0)
+		{
+			numLongsInTable--;
+			calculatedCheckSum += *table;
+			table++;
+		}
+
+		return calculatedCheckSum == targetCheckSum;
+	}
+
 	// TTFParser //////////////////////////////////////////////////////////
 
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
@@ -169,13 +207,29 @@ namespace AstralEngine
 			return nullptr;
 		}
 
-		OffsetSubtable offsetSubtable = ReadDataFromTTFFile<OffsetSubtable>(file);
-		TableDirectory glyphOffsetTableDir = ReadDataFromTTFFile<TableDirectory>(file);
+		//OffsetSubtable offsetSubtable = ReadDataFromTTFFile<OffsetSubtable>(file);
+		OffsetSubtable offsetSubtable = ReadOffsetSubtable(file);
+		//TableDirectory glyphOffsetTableDir = ReadDataFromTTFFile<TableDirectory>(file);
+		TableDirectory glyphOffsetTableDir = ReadTableDir(file);
+		if (!ValidateCheckSum((std::uint32_t*) &glyphOffsetTableDir, 
+			sizeof(glyphOffsetTableDir), glyphOffsetTableDir.checkSum))
+		{
+			AE_CORE_WARN("Invalid checksum detected for the glyph offset table directory in TTFParser::LoadFont");
+			return nullptr;
+		}
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
-			TableDirectory dir = ReadDataFromTTFFile<TableDirectory>(file);
-			//TableDirectory dir = ReadTableDir(file);
+			//TableDirectory dir = ReadDataFromTTFFile<TableDirectory>(file);
+			TableDirectory dir = ReadTableDir(file);
+
+			if (!ValidateCheckSum((std::uint32_t*)&dir,
+				sizeof(dir), dir.checkSum))
+			{
+				AE_CORE_WARN("Invalid checksum detected in TTFParser::LoadFont");
+				return nullptr;
+			}
+
 			char tableID[5];
 			memcpy(tableID, (std::uint32_t*)&dir.tag, 4);
 			tableID[4] = '\0';
@@ -185,6 +239,7 @@ namespace AstralEngine
 			{
 				file.seekg(dir.offset);
 				HeaderTable head = ReadDataFromTTFFile<HeaderTable>(file);
+				__debugbreak();
 			}
 		}
 
