@@ -6,6 +6,58 @@
 
 namespace AstralEngine
 {
+#ifdef UNICODE
+	typedef std::wstring WindowsStr;
+	typedef wchar_t WindowsChar;
+#else
+	typedef std::string WindowsStr;
+	typedef char WindowsChar;
+#endif
+
+	// Object responsible for registering the WindowsWindow class with windows
+	class WindowsClass
+	{
+	public:
+		static WindowsStr GetWindowsClassName();
+
+	private:
+		static WindowsClass& GetInstance();
+		static WindowsClass Initialize();
+
+		WindowsStr m_className;
+	};
+
+
+	class WindowsWindow : public AWindow
+	{
+	public:
+		WindowsWindow(const std::string& title, unsigned int width, unsigned int height);
+		WindowsWindow(const std::string& title, unsigned int x, unsigned int y, 
+			unsigned int width, unsigned int height);
+
+		~WindowsWindow();
+
+		virtual void* GetNativeWindow() override { return m_handle; }
+		virtual unsigned int GetWidth() const override;
+		virtual unsigned int GetHeight() const override;
+		virtual std::string GetTitle() const override;
+		std::wstring GetTitleWStr() const;
+
+		virtual void OnUpdate() override;
+
+		virtual void SetVSync(bool enabled) override;
+		virtual void SetEventCallback(AEventCallback callback) override;
+
+		virtual void SetVisible(bool isVisible) override;
+		virtual bool IsVisible() const override;
+
+	private:
+		WindowsStr GetTitleWindowsStr() const;
+		RECT GetRect() const;
+
+		HWND m_handle;
+	};
+	/*
 	class WindowsWindow : public AWindow
 	{
 	public:
@@ -47,4 +99,5 @@ namespace AstralEngine
 
 		static bool s_glfwInitialized;
 	};
+	*/
 }

@@ -88,8 +88,16 @@ namespace AstralEngine
 					ss << va_arg(args, int);
 					break;
 
+				case 'l':
+					ss << va_arg(args, long);
+					break;
+
 				case 'u':
 					ss << va_arg(args, size_t);
+					break;
+
+				case 'L':
+					ss << va_arg(args, unsigned long);
 					break;
 
 				case 'f':

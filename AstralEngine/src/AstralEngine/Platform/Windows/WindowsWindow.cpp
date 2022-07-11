@@ -6,6 +6,190 @@
 
 namespace AstralEngine
 {
+	// Helpers //////////////////////////////////////////////////////////////////////////////////
+
+	WindowsStr StrToWindowsStr(const std::string& str)
+	{
+		#ifdef UNICODE
+			// fill wstring with space character then copy str to wstr
+			std::wstring wstr = std::wstring(str.length(), ' ');
+			std::copy(str.begin(), str.end(), wstr.begin());
+			return wstr;
+		#else
+			return str;
+		#endif
+	}
+
+	std::string WindowsStrToStr(const WindowsStr& windowStr)
+	{
+		#ifdef UNICODE
+			// fill wstring with space character then copy str to wstr
+			std::string str = std::string(windowStr.length(), ' ');
+			std::copy(windowStr.begin(), windowStr.end(), str.begin());
+			return str;
+		#else
+			return str;
+		#endif
+	}
+
+	std::wstring WindowsStrToWStr(const WindowsStr& windowStr)
+	{
+		#ifdef UNICODE
+			return windowStr;
+		#else
+			std::wstring wstr = std::wstring(windowStr.length, ' ');
+			std::copy(windowStr.begin(), windowStr.end(), wstr.begin());
+			return wstr;
+		#endif
+	}
+
+	AWindow* AWindow::Create(const std::string& title, unsigned int width, unsigned int height)
+	{
+		return new WindowsWindow(title, width, height);
+	}
+
+	// WindowsClass /////////////////////////////////////////////////////////////
+
+	WindowsStr WindowsClass::GetWindowsClassName()
+	{
+		return GetInstance().m_className;
+	}
+
+	WindowsClass& WindowsClass::GetInstance()
+	{
+		static WindowsClass instance = Initialize();
+		return instance;
+	}
+
+	WindowsClass WindowsClass::Initialize()
+	{
+		WindowsClass win;
+		win.m_className = StrToWindowsStr("WindowsWindow");
+
+		HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+		WNDCLASSEX wc = { 0 };
+		wc.cbSize = sizeof(wc);
+		wc.style = CS_OWNDC;
+		wc.lpfnWndProc = DefWindowProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = hInstance;
+		wc.hIcon = nullptr;
+		wc.hCursor = nullptr;
+		wc.hbrBackground = nullptr;
+		wc.lpszMenuName = nullptr;
+		wc.lpszClassName = win.m_className.c_str();
+		wc.hIconSm = nullptr;
+		RegisterClassEx(&wc);
+
+		return win;
+	}
+
+
+	WindowsWindow::WindowsWindow(const std::string& title, unsigned int width, unsigned int height) 
+		: WindowsWindow(title, 0, 0, width, height)
+	{
+	}
+
+	WindowsWindow::WindowsWindow(const std::string& title, unsigned int x, unsigned int y, 
+		unsigned int width, unsigned int height)
+	{
+		m_handle = CreateWindowEx(
+			0, WindowsClass::GetWindowsClassName().c_str(),
+			StrToWindowsStr("AstralEngine").c_str(),
+			WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
+			x, y, width, height,
+			nullptr, nullptr, GetModuleHandle(nullptr), nullptr
+		);
+
+		SetVisible(true);
+	}
+
+	WindowsWindow::~WindowsWindow()
+	{
+		int result = DestroyWindow(m_handle);
+		if (result == 0)
+		{
+			AE_CORE_ERROR("WindowsWindow could not be properly destroyed. Error code %L", GetLastError());
+		}
+	}
+
+	unsigned int WindowsWindow::GetWidth() const
+	{
+		RECT r = GetRect();
+		return r.right - r.left;
+	}
+
+	unsigned int WindowsWindow::GetHeight() const
+	{
+		RECT r = GetRect();
+		return r.bottom - r.top;
+	}
+
+	std::string WindowsWindow::GetTitle() const 
+	{
+		return WindowsStrToStr(GetTitleWindowsStr());
+	}
+
+	std::wstring WindowsWindow::GetTitleWStr() const
+	{
+		return WindowsStrToWStr(GetTitleWindowsStr());
+	}
+
+
+	void WindowsWindow::OnUpdate()
+	{
+
+	}
+
+	void WindowsWindow::SetVSync(bool enabled)
+	{
+
+	}
+
+	void WindowsWindow::SetEventCallback(AEventCallback callback)
+	{
+
+	}
+
+	void WindowsWindow::SetVisible(bool visible)
+	{
+		int cmd = visible ? SW_SHOW : SW_HIDE;
+		ShowWindow(m_handle, cmd);
+	}
+	
+	bool WindowsWindow::IsVisible() const
+	{
+		return IsWindowVisible(m_handle) != 0;
+	}
+
+	RECT WindowsWindow::GetRect() const
+	{
+		RECT r;
+		int result = GetWindowRect(m_handle, &r);
+
+		if (result == 0)
+		{
+			AE_CORE_ERROR("Could not retrieve WindowsWindow RECT. Error code %L", GetLastError());
+		}
+		return r;
+	}
+
+	WindowsStr WindowsWindow::GetTitleWindowsStr() const
+	{
+		WindowsChar buffer[128];
+		int result = GetWindowText(m_handle, buffer, 128);
+
+		if (result == 0)
+		{
+			AE_CORE_ERROR("Could not retrieve WindowsWindow's title. Error code: %L", GetLastError());
+		}
+		return WindowsStr(buffer, result + 1);
+	}
+
+
+	/*
 	bool WindowsWindow::s_glfwInitialized = false;
 
 	static void GLFWErrorCallback(int error, const char* description)
@@ -179,4 +363,5 @@ namespace AstralEngine
 		AE_PROFILE_FUNCTION();
 		glfwDestroyWindow(m_window);
 	}
+	*/
 }
