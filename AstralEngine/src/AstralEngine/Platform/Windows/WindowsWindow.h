@@ -55,7 +55,10 @@ namespace AstralEngine
 		WindowsStr GetTitleWindowsStr() const;
 		RECT GetRect() const;
 
+		void SetVSyncOpenGL(bool enabled);
+
 		HWND m_handle;
+		AEventCallback m_callback;
 	};
 	/*
 	class WindowsWindow : public AWindow

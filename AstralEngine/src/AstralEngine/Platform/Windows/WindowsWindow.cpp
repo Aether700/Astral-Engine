@@ -1,6 +1,7 @@
 #include "aepch.h"
 #include "WindowsWindow.h"
 #include "AstralEngine/Core/Application.h"
+#include "Renderer/RenderAPI.h"
 
 #include <glad/glad.h>
 
@@ -42,6 +43,38 @@ namespace AstralEngine
 			return wstr;
 		#endif
 	}
+
+	bool CheckIfOpenGLExtensionIsSupported(const char* extensionName)
+	{
+		// function which returns a list of the supported extensions
+		static const char* (*getSupportedExtensionStr)()
+			= (const char* (*)())wglGetProcAddress("wglGetExtensionsStringEXT");
+
+		if (getSupportedExtensionStr == nullptr)
+		{
+			AE_CORE_ERROR("WindowsWindow could not retrieve \"wglGetExtensionsStringEXT\"");
+			return false;
+		}
+
+		// check if the extention name is in the list
+		return std::strstr(getSupportedExtensionStr(), extensionName) != nullptr;
+	}
+
+	template<typename Return, typename... Args>
+	ADelegate<Return(Args...)> RetrieveOpenGLExtensionFunction(const char* functionName)
+	{
+		Return(*func)(Args...) = (Return(*)(Args...))wglGetProcAddress(functionName);
+		if (func == nullptr)
+		{
+			AE_CORE_ERROR("Could not retrieve opengl function %s. Error Code: %L",
+				functionName, GetLastError());
+			return nullptr;
+		}
+
+		return ADelegate<Return(Args...)>(func);
+	}
+
+	// AWindow::Create function
 
 	AWindow* AWindow::Create(const std::string& title, unsigned int width, unsigned int height)
 	{
@@ -145,12 +178,25 @@ namespace AstralEngine
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		switch(RenderAPI::GetAPI())
+		{
+			case RenderAPI::API::OpenGL:
+				SetVSyncOpenGL(enabled);
+				break;
 
+			case RenderAPI::API::None:
+				AE_CORE_WARN("Setting VSync. No RenderAPI selected");
+				return;
+
+			default:
+				AE_CORE_ERROR("Unknown RenderAPI detected");
+				break;
+		}
 	}
 
 	void WindowsWindow::SetEventCallback(AEventCallback callback)
 	{
-
+		m_callback = callback;
 	}
 
 	void WindowsWindow::SetVisible(bool visible)
@@ -162,18 +208,6 @@ namespace AstralEngine
 	bool WindowsWindow::IsVisible() const
 	{
 		return IsWindowVisible(m_handle) != 0;
-	}
-
-	RECT WindowsWindow::GetRect() const
-	{
-		RECT r;
-		int result = GetWindowRect(m_handle, &r);
-
-		if (result == 0)
-		{
-			AE_CORE_ERROR("Could not retrieve WindowsWindow RECT. Error code %L", GetLastError());
-		}
-		return r;
 	}
 
 	WindowsStr WindowsWindow::GetTitleWindowsStr() const
@@ -188,6 +222,45 @@ namespace AstralEngine
 		return WindowsStr(buffer, result + 1);
 	}
 
+	RECT WindowsWindow::GetRect() const
+	{
+		RECT r;
+		int result = GetWindowRect(m_handle, &r);
+
+		if (result == 0)
+		{
+			AE_CORE_ERROR("Could not retrieve WindowsWindow RECT. Error code %L", GetLastError());
+		}
+		return r;
+	}
+
+	void WindowsWindow::SetVSyncOpenGL(bool enabled)
+	{
+		AE_CORE_WARN("\n\n\nSetVSyncOpenGL not properly implemented yet. See function in the code for details\n\n");
+		if (!CheckIfOpenGLExtensionIsSupported("WGL_EXT_swap_control"))
+		{
+			AE_CORE_WARN("Trying to enable/disable VSync but VSync is not supported on this machine");
+			return;
+		}
+
+		ADelegate<bool(int)> swapIntervalFunc
+			= RetrieveOpenGLExtensionFunction<bool, int>((const char*)"wglSwapIntervalEXT");
+		if (swapIntervalFunc != nullptr)
+		{
+
+
+			// need to retrieve the window associated with the current context, change the window of the 
+			//current context to be this window, swapIntervals and finally change the window of 
+			//the current context to be the old window 
+
+			int swapInterval = enabled ? 1 : 0;
+			if (!swapIntervalFunc(swapInterval))
+			{
+				AE_CORE_ERROR("Could not enable/disable VSync. ErrorCode %L", GetLastError());
+				return;
+			}
+		}
+	}
 
 	/*
 	bool WindowsWindow::s_glfwInitialized = false;
