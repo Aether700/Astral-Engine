@@ -54,8 +54,10 @@ int main()
 	ShowWindow(hWnd, SW_SHOW);
 	*/
 	WindowsWindow w = WindowsWindow("AstralEngine", 200, 200, 640, 480);
-	w.SetVSync(true);
-	while (true);
+	while (true)
+	{
+		w.OnUpdate();
+	}
 
 	/*
 	AE_PROFILE_BEGIN_SESSION("Startup", "AstralEngine-Startup.json");

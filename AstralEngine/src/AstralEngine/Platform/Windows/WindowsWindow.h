@@ -52,8 +52,13 @@ namespace AstralEngine
 		virtual bool IsVisible() const override;
 
 	private:
+		friend LRESULT WindowProceedure(HWND window, UINT message,
+			WPARAM wParam, LPARAM lParam);
+
 		WindowsStr GetTitleWindowsStr() const;
 		RECT GetRect() const;
+
+		static void ProcessEvents();
 
 		void SetVSyncOpenGL(bool enabled);
 

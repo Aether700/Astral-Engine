@@ -81,6 +81,48 @@ namespace AstralEngine
 		return new WindowsWindow(title, width, height);
 	}
 
+	// WindowProceedure /////////////////////////////////////////////////////////
+
+	LRESULT WindowProceedure(HWND window, UINT message,
+		WPARAM wParam, LPARAM lParam)
+	{
+		WindowsWindow* windowObj = nullptr;
+		if (message != WM_CREATE)
+		{
+			windowObj = (WindowsWindow*)GetWindowLongPtr(window, GWLP_USERDATA);
+		}
+
+		switch (message)
+		{
+			case WM_CREATE:
+				// Setup user data when creating the window
+				CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
+				int* userData = reinterpret_cast<int*>(createStruct->lpCreateParams);
+				SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)userData);
+				break;
+
+			case WM_SIZE:
+				constexpr size_t wordSize = sizeof(LPARAM) / 2;
+				
+				if (windowObj->m_callback == nullptr)
+				{
+					break;
+				}
+
+				std::uint64_t lowerWord;
+				std::uint64_t higherWord;
+				memcpy(&lowerWord, &lParam, wordSize);
+				memcpy(&higherWord, (&lParam) + wordSize, wordSize);
+				WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord, (unsigned int)higherWord);
+				windowObj->m_callback(resizeEvent);
+				break;
+
+
+		}
+
+		return DefWindowProc(window, message, wParam, lParam);
+	}
+
 	// WindowsClass /////////////////////////////////////////////////////////////
 
 	WindowsStr WindowsClass::GetWindowsClassName()
@@ -104,7 +146,7 @@ namespace AstralEngine
 		WNDCLASSEX wc = { 0 };
 		wc.cbSize = sizeof(wc);
 		wc.style = CS_OWNDC;
-		wc.lpfnWndProc = DefWindowProc;
+		wc.lpfnWndProc = WindowProceedure;
 		wc.cbClsExtra = 0;
 		wc.cbWndExtra = 0;
 		wc.hInstance = hInstance;
@@ -128,15 +170,16 @@ namespace AstralEngine
 	WindowsWindow::WindowsWindow(const std::string& title, unsigned int x, unsigned int y, 
 		unsigned int width, unsigned int height)
 	{
+		CREATESTRUCT createStruct;
+		createStruct.lpCreateParams = this;
+
 		m_handle = CreateWindowEx(
 			0, WindowsClass::GetWindowsClassName().c_str(),
-			StrToWindowsStr("AstralEngine").c_str(),
-			WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
+			StrToWindowsStr(title).c_str(),
+			WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_VISIBLE,
 			x, y, width, height,
-			nullptr, nullptr, GetModuleHandle(nullptr), nullptr
+			nullptr, nullptr, GetModuleHandle(nullptr), (void*)&createStruct
 		);
-
-		SetVisible(true);
 	}
 
 	WindowsWindow::~WindowsWindow()
@@ -170,10 +213,9 @@ namespace AstralEngine
 		return WindowsStrToWStr(GetTitleWindowsStr());
 	}
 
-
 	void WindowsWindow::OnUpdate()
 	{
-
+		ProcessEvents();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
@@ -234,6 +276,17 @@ namespace AstralEngine
 		return r;
 	}
 
+	void WindowsWindow::ProcessEvents()
+	{
+		MSG message;
+		while (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE) != 0)
+		{
+			TranslateMessage(&message);
+			DispatchMessage(&message); // call window proceedure function for the window who generated the message
+		}
+
+	}
+
 	void WindowsWindow::SetVSyncOpenGL(bool enabled)
 	{
 		AE_CORE_WARN("\n\n\nSetVSyncOpenGL not properly implemented yet. See function in the code for details\n\n");
@@ -247,11 +300,9 @@ namespace AstralEngine
 			= RetrieveOpenGLExtensionFunction<bool, int>((const char*)"wglSwapIntervalEXT");
 		if (swapIntervalFunc != nullptr)
 		{
-
-
 			// need to retrieve the window associated with the current context, change the window of the 
-			//current context to be this window, swapIntervals and finally change the window of 
-			//the current context to be the old window 
+			//current context to be this window, swapIntervals and finally change the window to be the old  
+			//current context window 
 
 			int swapInterval = enabled ? 1 : 0;
 			if (!swapIntervalFunc(swapInterval))
