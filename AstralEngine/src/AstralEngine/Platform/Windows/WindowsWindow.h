@@ -1,19 +1,12 @@
 #pragma once
 #include "AstralEngine/Core/AWindow.h"
-#include "AstralEngine/Platform/OpenGL/OpenGLGraphicsContext.h"
+#include "AstralEngine/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
+#include "WindowsUtil.h"
 
 namespace AstralEngine
 {
-#ifdef UNICODE
-	typedef std::wstring WindowsStr;
-	typedef wchar_t WindowsChar;
-#else
-	typedef std::string WindowsStr;
-	typedef char WindowsChar;
-#endif
-
 	// Object responsible for registering the WindowsWindow class with windows
 	class WindowsClass
 	{
@@ -64,6 +57,7 @@ namespace AstralEngine
 
 		HWND m_handle;
 		AEventCallback m_callback;
+		AReference<GraphicsContext> m_context;
 	};
 	/*
 	class WindowsWindow : public AWindow

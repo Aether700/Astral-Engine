@@ -231,6 +231,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
     <ClInclude Include="src\AstralEngine\ECS\CoreComponents.h" />
     <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
+    <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -341,5 +342,7 @@
     <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
+    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsUtil.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\GraphicsContext.cpp" />
   </ItemGroup>
 </Project>

@@ -53,13 +53,15 @@ int main()
 	// show the damn window
 	ShowWindow(hWnd, SW_SHOW);
 	*/
+	
+	/*
 	WindowsWindow w = WindowsWindow("AstralEngine", 200, 200, 640, 480);
 	while (true)
 	{
 		w.OnUpdate();
 	}
+	*/
 
-	/*
 	AE_PROFILE_BEGIN_SESSION("Startup", "AstralEngine-Startup.json");
 	AstralEngine::Logger::Init();
 	AstralEngine::Application* app = CreateApp();
@@ -72,7 +74,6 @@ int main()
 	AE_PROFILE_BEGIN_SESSION("Shutdown", "AstralEngine-Shutdown.json");
 	delete app;
 	AE_PROFILE_END_SESSION();
-	*/
 }
 
 #ifndef AE_DEBUG

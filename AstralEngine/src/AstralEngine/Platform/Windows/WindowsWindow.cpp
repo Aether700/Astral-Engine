@@ -7,73 +7,6 @@
 
 namespace AstralEngine
 {
-	// Helpers //////////////////////////////////////////////////////////////////////////////////
-
-	WindowsStr StrToWindowsStr(const std::string& str)
-	{
-		#ifdef UNICODE
-			// fill wstring with space character then copy str to wstr
-			std::wstring wstr = std::wstring(str.length(), ' ');
-			std::copy(str.begin(), str.end(), wstr.begin());
-			return wstr;
-		#else
-			return str;
-		#endif
-	}
-
-	std::string WindowsStrToStr(const WindowsStr& windowStr)
-	{
-		#ifdef UNICODE
-			// fill wstring with space character then copy str to wstr
-			std::string str = std::string(windowStr.length(), ' ');
-			std::copy(windowStr.begin(), windowStr.end(), str.begin());
-			return str;
-		#else
-			return str;
-		#endif
-	}
-
-	std::wstring WindowsStrToWStr(const WindowsStr& windowStr)
-	{
-		#ifdef UNICODE
-			return windowStr;
-		#else
-			std::wstring wstr = std::wstring(windowStr.length, ' ');
-			std::copy(windowStr.begin(), windowStr.end(), wstr.begin());
-			return wstr;
-		#endif
-	}
-
-	bool CheckIfOpenGLExtensionIsSupported(const char* extensionName)
-	{
-		// function which returns a list of the supported extensions
-		static const char* (*getSupportedExtensionStr)()
-			= (const char* (*)())wglGetProcAddress("wglGetExtensionsStringEXT");
-
-		if (getSupportedExtensionStr == nullptr)
-		{
-			AE_CORE_ERROR("WindowsWindow could not retrieve \"wglGetExtensionsStringEXT\"");
-			return false;
-		}
-
-		// check if the extention name is in the list
-		return std::strstr(getSupportedExtensionStr(), extensionName) != nullptr;
-	}
-
-	template<typename Return, typename... Args>
-	ADelegate<Return(Args...)> RetrieveOpenGLExtensionFunction(const char* functionName)
-	{
-		Return(*func)(Args...) = (Return(*)(Args...))wglGetProcAddress(functionName);
-		if (func == nullptr)
-		{
-			AE_CORE_ERROR("Could not retrieve opengl function %s. Error Code: %L",
-				functionName, GetLastError());
-			return nullptr;
-		}
-
-		return ADelegate<Return(Args...)>(func);
-	}
-
 	// AWindow::Create function
 
 	AWindow* AWindow::Create(const std::string& title, unsigned int width, unsigned int height)
@@ -86,35 +19,46 @@ namespace AstralEngine
 	LRESULT WindowProceedure(HWND window, UINT message,
 		WPARAM wParam, LPARAM lParam)
 	{
-		WindowsWindow* windowObj = nullptr;
-		if (message != WM_CREATE)
-		{
-			windowObj = (WindowsWindow*)GetWindowLongPtr(window, GWLP_USERDATA);
-		}
+		WindowsWindow* windowObj = (WindowsWindow*)GetWindowLongPtr(window, GWLP_USERDATA);
 
 		switch (message)
 		{
 			case WM_CREATE:
-				// Setup user data when creating the window
-				CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
-				int* userData = reinterpret_cast<int*>(createStruct->lpCreateParams);
-				SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)userData);
+				{
+					// Setup user data when creating the window
+					CREATESTRUCT* createStruct = reinterpret_cast<CREATESTRUCT*>(lParam);
+					WindowsWindow* userData = reinterpret_cast<WindowsWindow*>(createStruct->lpCreateParams);
+					
+					SetLastError(0);
+					if (SetWindowLongPtr(window, GWLP_USERDATA, (LONG_PTR)userData) == 0)
+					{
+						DWORD errorCode = GetLastError();
+						if (errorCode != 0)
+						{
+							AE_CORE_ERROR("Could not set window user data. Error code: %L", errorCode);
+							return false;
+						}
+					}
+				}
 				break;
 
 			case WM_SIZE:
-				constexpr size_t wordSize = sizeof(LPARAM) / 2;
-				
-				if (windowObj->m_callback == nullptr)
 				{
-					break;
-				}
+					constexpr size_t wordSize = sizeof(LPARAM) / 2;
 
-				std::uint64_t lowerWord;
-				std::uint64_t higherWord;
-				memcpy(&lowerWord, &lParam, wordSize);
-				memcpy(&higherWord, (&lParam) + wordSize, wordSize);
-				WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord, (unsigned int)higherWord);
-				windowObj->m_callback(resizeEvent);
+					if (windowObj->m_callback == nullptr)
+					{
+						break;
+					}
+
+					std::uint64_t lowerWord;
+					std::uint64_t higherWord;
+					memcpy(&lowerWord, &lParam, wordSize);
+					memcpy(&higherWord, (&lParam) + wordSize, wordSize);
+					WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord, 
+						(unsigned int)higherWord);
+					windowObj->m_callback(resizeEvent);
+				}
 				break;
 
 
@@ -170,16 +114,16 @@ namespace AstralEngine
 	WindowsWindow::WindowsWindow(const std::string& title, unsigned int x, unsigned int y, 
 		unsigned int width, unsigned int height)
 	{
-		CREATESTRUCT createStruct;
-		createStruct.lpCreateParams = this;
-
 		m_handle = CreateWindowEx(
 			0, WindowsClass::GetWindowsClassName().c_str(),
 			StrToWindowsStr(title).c_str(),
 			WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_SIZEBOX | WS_VISIBLE,
 			x, y, width, height,
-			nullptr, nullptr, GetModuleHandle(nullptr), (void*)&createStruct
+			nullptr, nullptr, GetModuleHandle(nullptr), this
 		);
+
+		m_context = GraphicsContext::Create(this);
+		m_context->Init();
 	}
 
 	WindowsWindow::~WindowsWindow()

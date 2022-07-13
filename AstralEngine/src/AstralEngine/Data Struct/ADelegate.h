@@ -179,6 +179,16 @@ namespace AstralEngine
 			return HasFunction();
 		}
 
+		bool operator==(std::nullptr_t) const
+		{
+			return !HasFunction();
+		}
+
+		bool operator!=(std::nullptr_t) const
+		{
+			return !(*this == nullptr);
+		}
+
 	private:
 
 		InternalFunc* m_func;

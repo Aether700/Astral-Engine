@@ -217,6 +217,7 @@
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexArray.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexBuffer.h" />
     <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsTime.h" />
+    <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsUtil.h" />
     <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Framebuffer.h" />
     <ClInclude Include="src\AstralEngine\Renderer\GraphicsContext.h" />
@@ -266,8 +267,10 @@
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsTime.cpp" />
+    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsUtil.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Framebuffer.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\IndexBuffer.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\OrthographicCameraController.cpp" />
