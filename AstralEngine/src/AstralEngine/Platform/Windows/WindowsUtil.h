@@ -17,6 +17,8 @@ namespace AstralEngine
 
 	std::wstring WindowsStrToWStr(const WindowsStr& windowStr);
 
+	void* RetrieveOpenGLFunction(const char* functionName);
+	
 	bool CheckIfOpenGLExtensionIsSupported(const char* extensionName);
 
 	template<typename Return, typename... Args>

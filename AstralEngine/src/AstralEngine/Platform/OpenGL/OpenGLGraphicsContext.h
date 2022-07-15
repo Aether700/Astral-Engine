@@ -3,6 +3,8 @@
 
 class AWindow;
 
+#include <wingdi.h>
+
 namespace AstralEngine
 {
 #ifdef AE_PLATFORM_WINDOWS
@@ -21,6 +23,9 @@ namespace AstralEngine
 		void SwapBuffers() override;
 
 	private:
+		NativeOpenGLContext CreateNativeContext(AWindow* window) const;
+		void MakeContextCurrent() const;
+
 		AWindow* m_window;
 		NativeOpenGLContext m_nativeContext;
 	};
