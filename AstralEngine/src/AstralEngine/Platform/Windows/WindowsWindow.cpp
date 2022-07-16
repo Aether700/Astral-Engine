@@ -46,25 +46,90 @@
 					break;
 	
 				case WM_SIZE:
-					{
-						constexpr size_t wordSize = sizeof(LPARAM) / 2;
-	
-						if (windowObj->m_callback == nullptr)
+					{	
+						if (windowObj->m_callback != nullptr)
 						{
-							break;
+							std::uint32_t doubleWord = (std::uint32_t)lParam;
+							std::uint16_t& lowerWord = GetLowOrderWord(doubleWord);
+							std::uint16_t& higherWord = GetHighOrderWord(doubleWord);
+							WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord,
+								(unsigned int)higherWord);
+							windowObj->m_callback(resizeEvent);
 						}
-	
-						std::uint64_t lowerWord;
-						std::uint64_t higherWord;
-						memcpy(&lowerWord, &lParam, wordSize);
-						memcpy(&higherWord, (&lParam) + wordSize, wordSize);
-						WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord, 
-							(unsigned int)higherWord);
-						windowObj->m_callback(resizeEvent);
+						return 0;
+					}
+					break;
+
+				case WM_CLOSE:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							WindowCloseEvent close;
+							windowObj->m_callback(close);
+						}
+						return 0;
 					}
 					break;
 	
+				case WM_SETFOCUS:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							WindowFocusEvent focus;
+							windowObj->m_callback(focus);
+						}
+						return 0;
+					}
+					break;
 	
+				case WM_KILLFOCUS:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							WindowLostFocusEvent focus;
+							windowObj->m_callback(focus);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_MOVE:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t doubleWord = (std::uint32_t)lParam;
+							std::int16_t& x = reinterpret_cast<std::int16_t&>(GetLowOrderWord(doubleWord));
+							std::int16_t& y = reinterpret_cast<std::int16_t&>(GetHighOrderWord(doubleWord));
+							WindowMovedEvent move = WindowMovedEvent(x, y);
+							windowObj->m_callback(move);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_KEYDOWN:
+				case WM_SYSKEYDOWN:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							constexpr std::uint32_t previousStateMask = 0x20000000;
+							constexpr std::uint32_t previousStateMask = 0x20000000;
+							bool wasPressed = lParam & previousStateMask;
+							KeyCode key = WindowsKeyCodesToInternalKeyCode(wParam);
+							if (wasPressed)
+							{
+								KeyPressedEvent pressed = KeyPressedEvent(key);
+								windowObj->m_callback(pressed);
+							}
+							else
+							{
+								KeyRepeatedEvent repeated = KeyRepeatedEvent(key);
+								windowObj->m_callback(repeated);
+							}
+						}
+						return 0;
+					}
+					break;
 			}
 	
 			return DefWindowProc(window, message, wParam, lParam);
@@ -170,6 +235,7 @@
 		void WindowsWindow::OnUpdate()
 		{
 			ProcessEvents();
+			m_context->SwapBuffers();
 		}
 	
 		void WindowsWindow::SetVSync(bool enabled)

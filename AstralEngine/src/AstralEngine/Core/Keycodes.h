@@ -17,7 +17,6 @@
 #define AE_KEY_8                  56
 #define AE_KEY_9                  57
 #define AE_KEY_SEMICOLON          59  /* ; */
-#define AE_KEY_EQUAL              61  /* = */
 #define AE_KEY_A                  65
 #define AE_KEY_B                  66
 #define AE_KEY_C                  67
@@ -47,8 +46,6 @@
 #define AE_KEY_LEFT_BRACKET       91  /* [ */
 #define AE_KEY_BACKSLASH          92  /* \ */
 #define AE_KEY_RIGHT_BRACKET      93  /* ] */
-#define AE_KEY_GRAVE_ACCENT       96  /* ` */
-#define AE_KEY_WORLD_1            161 
 
 #define AE_KEY_ESC	              256
 #define AE_KEY_ENTER              257
@@ -147,7 +144,6 @@ namespace AstralEngine
 		D9 = AE_KEY_0,
 		
 		Semicolon = AE_KEY_SEMICOLON,   
-		Equal = AE_KEY_EQUAL,       
 		
 		A = AE_KEY_A,           
 		B = AE_KEY_B,           
@@ -179,8 +175,6 @@ namespace AstralEngine
 		LeftBracket = AE_KEY_LEFT_BRACKET,
 		BackSlash = AE_KEY_BACKSLASH, 
 		RightBracket = AE_KEY_RIGHT_BRACKET,
-		GraveAccent = AE_KEY_GRAVE_ACCENT,
-		World1 = AE_KEY_WORLD_1,
 		
 		Esc = AE_KEY_ESC,	       
 		Enter = AE_KEY_ENTER,  

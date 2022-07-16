@@ -26,6 +26,7 @@ namespace AstralEngine
 		WindowsStr tempClassName = StrToWindowsStr("Temporary Window");
 
 		WNDCLASSEX wc = { 0 };
+		
 		wc.cbSize = sizeof(wc);
 		wc.style = CS_OWNDC;
 		wc.lpfnWndProc = DefWindowProc;
@@ -38,6 +39,7 @@ namespace AstralEngine
 		wc.lpszMenuName = nullptr;
 		wc.lpszClassName = tempClassName.c_str();
 		wc.hIconSm = nullptr;
+		
 		RegisterClassEx(&wc);
 
 		HWND tempWindow = CreateWindowEx(
@@ -66,7 +68,7 @@ namespace AstralEngine
 		{
 			sizeof(PIXELFORMATDESCRIPTOR),
 			1,
-			PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_SWAP_LAYER_BUFFERS,
+			PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_SWAP_LAYER_BUFFERS,
 			PFD_TYPE_RGBA, 24,
 			0, 0, 0, 0, 0, 0, // ignore color bits
 			0, 0, // no alpha bit or shift
@@ -276,8 +278,8 @@ namespace AstralEngine
 		
 
 			int openGLAttrib[] = {
-				WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-				WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+				WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+				WGL_CONTEXT_MINOR_VERSION_ARB, 5,
 				WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 				0 // marks the end of the attributes
 			};

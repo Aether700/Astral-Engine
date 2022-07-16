@@ -250,6 +250,21 @@ public:
 
 		AstralEngine::Renderer::ResetStats();
 	}
+	
+	bool OnEvent(AstralEngine::AEvent& e) override
+	{
+		AstralEngine::WindowMovedEvent* eventPtr = dynamic_cast<AstralEngine::WindowMovedEvent*>(&e);
+
+		if (eventPtr != nullptr)
+		{
+			AE_WARN("x: %d   y: %d", (int)eventPtr->GetXPos(), (int)eventPtr->GetYPos());
+			if (eventPtr->GetXPos() < 30.0f && eventPtr->GetYPos() < 30.0f)
+			{
+				AstralEngine::Application::Exit();
+			}
+		}
+		return false;
+	}
 
 	/*
 	bool OnEvent(AstralEngine::AEvent& e) override

@@ -1,5 +1,6 @@
 #pragma once
 #include "AstralEngine/Data Struct/ADelegate.h"
+#include "Core/Keycodes.h"
 
 namespace AstralEngine
 {
@@ -34,4 +35,12 @@ namespace AstralEngine
 
 		return ADelegate<Return(Args...)>(func);
 	}
+
+	std::uint16_t& GetLowOrderWord(std::uint32_t& i);
+	std::uint32_t& GetLowOrderWord(std::uint64_t& i);
+	
+	std::uint16_t& GetHighOrderWord(std::uint32_t& i);
+	std::uint32_t& GetHighOrderWord(std::uint64_t& i);
+
+	KeyCode WindowsKeyCodesToInternalKeyCode(int windowKeyCode);
 }
