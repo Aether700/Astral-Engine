@@ -237,6 +237,7 @@
     <ClInclude Include="src\aepch.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
     <ClInclude Include="src\AstralEngine\UI\UICore.h" />
+    <ClInclude Include="vendor\OpenGL\wglext.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>

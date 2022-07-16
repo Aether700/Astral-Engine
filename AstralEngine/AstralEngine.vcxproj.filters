@@ -232,6 +232,7 @@
     <ClInclude Include="src\AstralEngine\ECS\CoreComponents.h" />
     <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
     <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsUtil.h" />
+    <ClInclude Include="vendor\OpenGL\wglext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
