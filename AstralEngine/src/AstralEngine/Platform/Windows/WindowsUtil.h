@@ -1,6 +1,6 @@
 #pragma once
 #include "AstralEngine/Data Struct/ADelegate.h"
-#include "Core/Keycodes.h"
+#include "AstralEngine/Core/Keycodes.h"
 
 namespace AstralEngine
 {

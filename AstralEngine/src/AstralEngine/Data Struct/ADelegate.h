@@ -211,12 +211,12 @@ namespace AstralEngine
 		using DelegateType = ADelegate<Return(Args...)>;
 	public:
 
-		void AddDelegate(DelegateType d)
+		void AddDelegate(const DelegateType& d)
 		{
 			m_delegates.Add(d);
 		}
 
-		void RemoveDelegate(DelegateType d)
+		void RemoveDelegate(const DelegateType& d)
 		{
 			m_delegates.Remove(d);
 		}

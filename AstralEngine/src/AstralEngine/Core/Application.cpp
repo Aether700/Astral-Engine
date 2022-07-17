@@ -46,6 +46,8 @@ namespace AstralEngine
 			(function<&Application::OnWindowCloseEvent>, this));
 		dispatcher.HandleAEvent<WindowResizeEvent>(ADelegate<bool(WindowResizeEvent&)>
 			(function<&Application::OnWindowResizeEvent>, this));
+		
+		Input::OnEvent(e);
 		dispatcher.HandleAEvent<KeyPressedEvent>(ADelegate<bool(KeyPressedEvent&)>
 			(&Input::OnKeyPressedEvent));
 		dispatcher.HandleAEvent<KeyReleasedEvent>(ADelegate<bool(KeyReleasedEvent&)>

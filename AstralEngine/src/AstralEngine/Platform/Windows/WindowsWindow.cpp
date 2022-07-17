@@ -23,7 +23,7 @@
 			WPARAM wParam, LPARAM lParam)
 		{
 			WindowsWindow* windowObj = (WindowsWindow*)GetWindowLongPtr(window, GWLP_USERDATA);
-	
+
 			switch (message)
 			{
 				case WM_CREATE:
@@ -112,19 +112,38 @@
 					{
 						if (windowObj->m_callback != nullptr)
 						{
-							constexpr std::uint32_t previousStateMask = 0x20000000;
-							constexpr std::uint32_t previousStateMask = 0x20000000;
-							bool wasPressed = lParam & previousStateMask;
 							KeyCode key = WindowsKeyCodesToInternalKeyCode(wParam);
-							if (wasPressed)
+							if (key != KeyCode::Count)
 							{
-								KeyPressedEvent pressed = KeyPressedEvent(key);
-								windowObj->m_callback(pressed);
+								constexpr std::uint32_t previousStateMask = 0x20000000;
+								bool wasPressed = lParam & previousStateMask;
+								
+								if (wasPressed)
+								{
+									KeyRepeatedEvent repeated = KeyRepeatedEvent(key);
+									windowObj->m_callback(repeated);
+								}
+								else
+								{
+									KeyPressedEvent pressed = KeyPressedEvent(key);
+									windowObj->m_callback(pressed);
+								}
 							}
-							else
+						}
+						return 0;
+					}
+					break;
+
+				case WM_KEYUP:
+				case WM_SYSKEYUP:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							KeyCode key = WindowsKeyCodesToInternalKeyCode(wParam);
+							if (key != KeyCode::Count)
 							{
-								KeyRepeatedEvent repeated = KeyRepeatedEvent(key);
-								windowObj->m_callback(repeated);
+								KeyReleasedEvent released = KeyReleasedEvent(key);
+								windowObj->m_callback(released);
 							}
 						}
 						return 0;

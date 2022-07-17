@@ -60,7 +60,8 @@ namespace AstralEngine
 	public:
 		virtual ~Time() { }
 
-		static float GetTime() 
+		// returns the time since the application started in seconds
+		static double GetTime() 
 		{
 			return s_instance->GetTimeImpl();
 		}
@@ -72,27 +73,22 @@ namespace AstralEngine
 			UpdateTimers();
 		}
 		
-		static float GetDeltaTime() 
+		static double GetDeltaTime() 
 		{
 			return s_instance->GetDeltaTimeImpl(); 
 		}
 
-		static float GetDeltaTimeMs() 
+		static double GetDeltaTimeMs() 
 		{
 			return s_instance->GetDeltaTimeMsImpl();
 		}
 
 	protected:
-		virtual float GetDeltaTimeImpl() = 0;
-		
-		virtual float GetDeltaTimeMsImpl() 
-		{
-			return s_instance->GetDeltaTimeImpl() * 1000.0f; 
-		}
-		
+		virtual double GetDeltaTimeImpl() = 0;
+		virtual double GetDeltaTimeMsImpl() = 0;
 		virtual void UpdateTimeImpl() = 0;
 
-		virtual float GetTimeImpl() = 0;
+		virtual double GetTimeImpl() = 0;
 
 	private:
 		static void AddTimer(Timer* t)
@@ -113,7 +109,7 @@ namespace AstralEngine
 			}
 		}
 
-		ADoublyLinkedList<Timer*> m_timers;
+		ASinglyLinkedList<Timer*> m_timers;
 		static AReference<Time> s_instance;
 	};
 }

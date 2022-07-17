@@ -345,5 +345,6 @@
     <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsUtil.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\GraphicsContext.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Input.cpp" />
   </ItemGroup>
 </Project>

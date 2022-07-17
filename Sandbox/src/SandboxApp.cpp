@@ -90,6 +90,7 @@ public:
 	void OnUpdate() override
 	{
 		AstralEngine::Transform& t = GetTransform();
+		AE_WARN("%f",AstralEngine::Time::GetTime());
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
 			t.position.y += speed * AstralEngine::Time::GetDeltaTime();
@@ -118,7 +119,7 @@ public:
 
 private:
 
-	float speed = 0.05f;
+	float speed = 10.0f;//0.05f;
 };
 
 class RotateAroundTester : public AstralEngine::NativeScript
@@ -253,6 +254,7 @@ public:
 	
 	bool OnEvent(AstralEngine::AEvent& e) override
 	{
+		/*
 		AstralEngine::WindowMovedEvent* eventPtr = dynamic_cast<AstralEngine::WindowMovedEvent*>(&e);
 
 		if (eventPtr != nullptr)
@@ -263,6 +265,7 @@ public:
 				AstralEngine::Application::Exit();
 			}
 		}
+		*/
 		return false;
 	}
 

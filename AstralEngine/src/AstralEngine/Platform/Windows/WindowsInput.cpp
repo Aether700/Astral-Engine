@@ -15,6 +15,8 @@ namespace AstralEngine
 		bool previouslyDown = false;
 	};
 
+	Keyboard Input::s_keyboard;
+
 	static AUnorderedMap<int, InputState> s_keyStates;
 	static ADynArr<int> s_keysToUpdate;
 	static bool s_isKeyPressed = false; // marks if a key was pressed, not repeated, this frame
@@ -23,54 +25,68 @@ namespace AstralEngine
 	static AUnorderedMap<int, InputState> s_mouseStates;
 	static ADynArr<int> s_mouseToUpdate(3);
 	
+	/*
 	bool Input::GetKey(int keycode)
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
-		int status = glfwGetKey(window, keycode);
-		return status == GLFW_PRESS || status == GLFW_REPEAT;
+		//GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
+		//int status = glfwGetKey(window, keycode);
+		//return status == GLFW_PRESS || status == GLFW_REPEAT;
+		//return s_keyStates[keycode].currentlyDown;
+		return GetKey((KeyCode)keycode);
 	}
+	*/
 
 	bool Input::GetKey(KeyCode key)
 	{
-		return GetKey((int)key);
+		return s_keyboard.GetKey(key);
 	}
 
 	bool Input::GetAnyKey()
 	{ 
-		return s_numKeyDown > 0;
+		//return s_numKeyDown > 0;
+		return s_keyboard.GetAnyKey();
 	}
-
+	/*
 	bool Input::GetKeyDown(int keycode)
 	{
+		/*
 		if (!s_keyStates.ContainsKey(keycode))
 		{
 			return false;
 		}
 		return s_keyStates[keycode].currentlyDown && !s_keyStates[keycode].previouslyDown;
+		/
+		return GetKeyDown((KeyCode)keycode);
 	}
+	*/
 
 	bool Input::GetKeyDown(KeyCode key)
 	{
-		return GetKeyDown((int)key);
+		return s_keyboard.GetKeyDown(key);
 	}
 
 	bool Input::GetAnyKeyDown()
 	{
-		return s_isKeyPressed;
+		//return s_isKeyPressed;
+		return s_keyboard.GetAnyKeyDown();
 	}
 
+	/*
 	bool Input::GetMouseButton(int mouseButton)
 	{
 		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
 		int status = glfwGetMouseButton(window, mouseButton);
 		return status == GLFW_PRESS || status == GLFW_REPEAT;
 	}
+	*/
 	
 	bool Input::GetMouseButton(MouseButtonCode mouseButton)
 	{
-		return GetMouseButton((int) mouseButton);
+		//return GetMouseButton((int) mouseButton);
+		return false;
 	}
 
+	/*
 	bool Input::GetMouseButtonDown(int mouseButton)
 	{
 		if (!s_mouseStates.ContainsKey(mouseButton))
@@ -80,10 +96,13 @@ namespace AstralEngine
 		return s_mouseStates[mouseButton].currentlyDown 
 			&& !s_mouseStates[mouseButton].previouslyDown;
 	}
+	*/
+
 
 	bool Input::GetMouseButtonDown(MouseButtonCode mouseButton)
 	{
-		return GetMouseButtonDown((int)mouseButton);
+		//return GetMouseButtonDown((int)mouseButton);
+		return false;
 	}
 
 	Vector2 Input::GetMousePosition() 
@@ -109,6 +128,7 @@ namespace AstralEngine
 
 	void Input::OnUpdate()
 	{
+		/*
 		if (!s_keysToUpdate.IsEmpty())
 		{
 			for (int key : s_keysToUpdate)
@@ -130,15 +150,18 @@ namespace AstralEngine
 		}
 
 		s_isKeyPressed = false;
+		*/
+
+		s_keyboard.OnUpdate();
 	}
 
 	bool Input::OnKeyPressedEvent(KeyPressedEvent& keyPressed)
 	{
-		int keyCode = keyPressed.GetKeyCode();
+		int keyCode = (int)keyPressed.GetKeyCode();
 		if (!s_keyStates.ContainsKey(keyCode))
 		{
 			InputState state = { true, false };
-			s_keyStates.Add(keyCode, state);
+			s_keyStates.Add((int)keyCode, state);
 		}
 		else
 		{
@@ -152,7 +175,7 @@ namespace AstralEngine
 
 	bool Input::OnKeyReleasedEvent(KeyReleasedEvent& keyReleased)
 	{
-		int keyCode = keyReleased.GetKeyCode();
+		int keyCode = (int)keyReleased.GetKeyCode();
 		if (!s_keyStates.ContainsKey(keyCode))
 		{
 			InputState state = { false, true };

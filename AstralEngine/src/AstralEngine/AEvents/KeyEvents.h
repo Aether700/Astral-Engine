@@ -1,6 +1,6 @@
 #pragma once
 #include "AEvent.h"
-#include "Core/Keycodes.h"
+#include "AstralEngine/Core/Keycodes.h"
 #include <sstream>
 
 namespace AstralEngine

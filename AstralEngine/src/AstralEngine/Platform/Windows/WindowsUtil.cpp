@@ -114,6 +114,7 @@ namespace AstralEngine
 		return *(&reinterpret_cast<std::uint32_t&>(i) + 1);
 	}
 
+	//returns KeyCode::Count if the key could not be found/mapped
 	KeyCode WindowsKeyCodesToInternalKeyCode(int windowKeyCode)
 	{
 		switch(windowKeyCode)
@@ -137,6 +138,7 @@ namespace AstralEngine
 			case 0x39: return KeyCode::D9;
 			
 			case VK_OEM_1: return KeyCode::Semicolon;
+			case VK_OEM_3: return KeyCode::Tilda;
 
 			case 0x41: return KeyCode::A;
 			case 0x42: return KeyCode::B;
@@ -214,38 +216,38 @@ namespace AstralEngine
 			case VK_F23: return KeyCode::F23;
 			case VK_F24: return KeyCode::F24;
 
-			https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+			case VK_NUMPAD0: return KeyCode::KeyPad0;
+			case VK_NUMPAD1: return KeyCode::KeyPad1;
+			case VK_NUMPAD2: return KeyCode::KeyPad2;
+			case VK_NUMPAD3: return KeyCode::KeyPad3;
+			case VK_NUMPAD4: return KeyCode::KeyPad4;
+			case VK_NUMPAD5: return KeyCode::KeyPad5;
+			case VK_NUMPAD6: return KeyCode::KeyPad6;
+			case VK_NUMPAD7: return KeyCode::KeyPad7;
+			case VK_NUMPAD8: return KeyCode::KeyPad8;
+			case VK_NUMPAD9: return KeyCode::KeyPad9;
+	
+			case VK_DECIMAL: return KeyCode::KeyPadDecimal;
+			case VK_MULTIPLY: return KeyCode::KeyPadMultiply;
+			case VK_SUBTRACT: return KeyCode::KeyPadSubstract;
+			case VK_ADD: return KeyCode::KeyPadAdd;
 
-			KP0 = AE_KEY_KP_0,
-			KP1 = AE_KEY_KP_1,
-			KP2 = AE_KEY_KP_2,
-			KP3 = AE_KEY_KP_3,
-			KP4 = AE_KEY_KP_4,
-			KP5 = AE_KEY_KP_5,
-			KP6 = AE_KEY_KP_6,
-			KP7 = AE_KEY_KP_7,
-			KP8 = AE_KEY_KP_8,
-			KP9 = AE_KEY_KP_9,
+			case VK_SHIFT:
+			case VK_LSHIFT: return KeyCode::LeftShift;
 
-			KPDecimal = AE_KEY_KP_DECIMAL,
-			KPDivide = AE_KEY_KP_DIVIDE,
-			KPMultiply = AE_KEY_KP_MULTIPLY,
-			KPSubstract = AE_KEY_KP_SUBTRACT,
-			KPAdd = AE_KEY_KP_ADD,
-			KPEnter = AE_KEY_KP_ENTER,
-			KPEqual = AE_KEY_KP_EQUAL,
 
-			LeftShift = AE_KEY_LEFT_SHIFT,
-			LeftCtr = AE_KEY_LEFT_CONTROL,
-			LeftAlt = AE_KEY_LEFT_ALT,
-			LeftSuper = AE_KEY_LEFT_SUPER,
-			RightShift = AE_KEY_RIGHT_SHIFT,
-			RightCtr = AE_KEY_RIGHT_CONTROL,
-			RightAlt = AE_KEY_RIGHT_ALT,
-			RightSuper = AE_KEY_RIGHT_SUPER,
-			Menu = AE_KEY_MENU,
+			case VK_CONTROL:
+			case VK_LCONTROL: return KeyCode::LeftCtrl;
 
-			Last = AE_KEY_LAST
+			case VK_LMENU: return KeyCode::LeftAlt;
+			case VK_LWIN: return KeyCode::LeftSystem;
+			case VK_RSHIFT: return KeyCode::RightShift;
+			case VK_RCONTROL: return KeyCode::RightCtrl;
+			case VK_RMENU: return KeyCode::RightAlt;
+			case VK_RWIN: return KeyCode::RightSystem;
+			case VK_MENU: return KeyCode::Menu;
 		}
+		
+		return KeyCode::Count;
 	}
 }
