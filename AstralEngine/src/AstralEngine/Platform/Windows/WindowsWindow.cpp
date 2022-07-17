@@ -149,6 +149,148 @@
 						return 0;
 					}
 					break;
+
+				case WM_MOUSEMOVE:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t& doubleWord = (std::uint32_t&)lParam;
+							std::int16_t& x = reinterpret_cast<std::int16_t&>(GetLowOrderWord(doubleWord));
+							std::int16_t& y = reinterpret_cast<std::int16_t&>(GetHighOrderWord(doubleWord));
+							MouseMovedEvent move = MouseMovedEvent(x, y);
+							windowObj->m_callback(move);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_MOUSEWHEEL:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t& doubleWord = (std::uint32_t&)wParam;
+							std::int16_t& deltaY = reinterpret_cast<std::int16_t&>(GetHighOrderWord(doubleWord));
+							MouseScrolledEvent scrolled = MouseScrolledEvent(0, deltaY / WHEEL_DELTA);
+							windowObj->m_callback(scrolled);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_MOUSEHWHEEL:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t& doubleWord = (std::uint32_t&)wParam;
+							std::int16_t& deltaX = reinterpret_cast<std::int16_t&>(GetHighOrderWord(doubleWord));
+							MouseScrolledEvent scrolled = MouseScrolledEvent(deltaX / WHEEL_DELTA, 0);
+							windowObj->m_callback(scrolled);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_LBUTTONDOWN:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonPressedEvent pressed = MouseButtonPressedEvent(MouseButtonCode::Left);
+							windowObj->m_callback(pressed);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_LBUTTONUP:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonReleasedEvent released = MouseButtonReleasedEvent(MouseButtonCode::Left);
+							windowObj->m_callback(released);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_RBUTTONDOWN:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonPressedEvent pressed = MouseButtonPressedEvent(MouseButtonCode::Right);
+							windowObj->m_callback(pressed);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_RBUTTONUP:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonReleasedEvent released = MouseButtonReleasedEvent(MouseButtonCode::Right);
+							windowObj->m_callback(released);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_MBUTTONDOWN:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonPressedEvent pressed = MouseButtonPressedEvent(MouseButtonCode::Middle);
+							windowObj->m_callback(pressed);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_MBUTTONUP:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							MouseButtonReleasedEvent released = MouseButtonReleasedEvent(MouseButtonCode::Middle);
+							windowObj->m_callback(released);
+						}
+						return 0;
+					}
+					break;
+
+				case WM_XBUTTONDOWN:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t& doubleWord = (std::uint32_t&)wParam;
+							MouseButtonCode button 
+								= WindowsMouseCodesToInternalMouseCode(GetHighOrderWord(doubleWord));
+
+							if (button != MouseButtonCode::Count)
+							{
+								MouseButtonPressedEvent pressed = MouseButtonPressedEvent(button);
+								windowObj->m_callback(pressed);
+							}
+						}
+						return 0;
+					}
+					break;
+
+				case WM_XBUTTONUP:
+					{
+						if (windowObj->m_callback != nullptr)
+						{
+							std::uint32_t& doubleWord = (std::uint32_t&)wParam;
+							MouseButtonCode button
+								= WindowsMouseCodesToInternalMouseCode(GetHighOrderWord(doubleWord));
+
+							if (button != MouseButtonCode::Count)
+							{
+								MouseButtonReleasedEvent released = MouseButtonReleasedEvent(button);
+								windowObj->m_callback(released);
+							}
+						}
+						return 0;
+					}
+					break;
 			}
 	
 			return DefWindowProc(window, message, wParam, lParam);

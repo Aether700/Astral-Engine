@@ -90,7 +90,6 @@ public:
 	void OnUpdate() override
 	{
 		AstralEngine::Transform& t = GetTransform();
-		AE_WARN("%f",AstralEngine::Time::GetTime());
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
 			t.position.y += speed * AstralEngine::Time::GetDeltaTime();
@@ -114,6 +113,12 @@ public:
 		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::R))
 		{
 			t.position = AstralEngine::Vector3::Zero();
+		}
+
+		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Left))
+		{
+			AstralEngine::Vector2Int pos = AstralEngine::Input::GetMousePosition();
+			AE_WARN("Left mouse button is down. Mouse Pos: %d, %d", pos.x, pos.y);
 		}
 	}
 
@@ -255,14 +260,23 @@ public:
 	bool OnEvent(AstralEngine::AEvent& e) override
 	{
 		/*
-		AstralEngine::WindowMovedEvent* eventPtr = dynamic_cast<AstralEngine::WindowMovedEvent*>(&e);
+		using E = AstralEngine::MouseButtonPressedEvent;
+		E* eventPtr = dynamic_cast<E*>(&e);
 
 		if (eventPtr != nullptr)
 		{
-			AE_WARN("x: %d   y: %d", (int)eventPtr->GetXPos(), (int)eventPtr->GetYPos());
-			if (eventPtr->GetXPos() < 30.0f && eventPtr->GetYPos() < 30.0f)
+			static int count = 0;
+			if (eventPtr->GetButtonKeycode() == AstralEngine::MouseButtonCode::Left)
 			{
-				AstralEngine::Application::Exit();
+				count++;
+				if (count == 3)
+				{
+					AstralEngine::Application::Exit();
+				}
+			}
+			else
+			{
+				count--;
 			}
 		}
 		*/

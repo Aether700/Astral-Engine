@@ -1,5 +1,6 @@
 #pragma once
 #include "AEvent.h"
+#include "AstralEngine/Core/MouseButtonCodes.h"
 #include <sstream>
 
 namespace AstralEngine
@@ -7,11 +8,11 @@ namespace AstralEngine
 	class MouseMovedEvent : public AEvent
 	{
 	public:
-		MouseMovedEvent(float xPos, float yPos) : m_xPos(xPos), m_yPos(yPos) {	}
+		MouseMovedEvent(int xPos, int yPos) : m_xPos(xPos), m_yPos(yPos) {	}
 		~MouseMovedEvent() { }
 
-		inline float GetXPos() const { return m_xPos; }
-		inline float GetYPos() const { return m_yPos; }
+		inline int GetXPos() const { return m_xPos; }
+		inline int GetYPos() const { return m_yPos; }
 
 		std::string ToString() const override
 		{
@@ -23,17 +24,17 @@ namespace AstralEngine
 		DEF_AEVENT_TYPE(MouseMoved);
 		DEF_AEVENT_CATEGORY((AEventCategory) (AEventCategory::AEventCategoryInput | AEventCategory::AEventCategoryMouse));
 	private:
-		float m_xPos, m_yPos;
+		int m_xPos, m_yPos;
 	};
 
 	class MouseScrolledEvent : public AEvent
 	{
 	public:
-		MouseScrolledEvent(float offsetX, float offsetY) : m_offsetX(offsetX), m_offsetY(offsetY) { }
+		MouseScrolledEvent(int offsetX, int offsetY) : m_offsetX(offsetX), m_offsetY(offsetY) { }
 		~MouseScrolledEvent() { }
 
-		inline float GetOffsetX() const { return m_offsetX; }
-		inline float GetOffsetY() const { return m_offsetY; }
+		inline int GetOffsetX() const { return m_offsetX; }
+		inline int GetOffsetY() const { return m_offsetY; }
 
 		std::string ToString() const override
 		{
@@ -52,28 +53,28 @@ namespace AstralEngine
 	class MouseButtonEvent : public AEvent
 	{
 	public:
-		MouseButtonEvent(int keycode) : m_keycode(keycode) { }
+		MouseButtonEvent(MouseButtonCode keycode) : m_keycode(keycode) { }
 		virtual ~MouseButtonEvent() { }
 
-		inline int GetButtonKeycode() const { return m_keycode; }
+		inline MouseButtonCode GetButtonKeycode() const { return m_keycode; }
 
 		DEF_AEVENT_CATEGORY((AEventCategory) (AEventCategory::AEventCategoryInput |
 			AEventCategory::AEventCategoryMouseButton | AEventCategory::AEventCategoryMouse));
 
 	private:
-		int m_keycode;
+		MouseButtonCode m_keycode;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(int keycode) : MouseButtonEvent(keycode) { }
+		MouseButtonPressedEvent(MouseButtonCode keycode) : MouseButtonEvent(keycode) { }
 		~MouseButtonPressedEvent() { }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonPressed Keycode: " << GetButtonKeycode();
+			ss << "MouseButtonPressed Keycode: " << (int)GetButtonKeycode();
 			return ss.str();
 		}
 
@@ -83,13 +84,13 @@ namespace AstralEngine
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(int keycode) : MouseButtonEvent(keycode) { }
+		MouseButtonReleasedEvent(MouseButtonCode keycode) : MouseButtonEvent(keycode) { }
 		~MouseButtonReleasedEvent() { }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonReleasedG Keycode: " << GetButtonKeycode();
+			ss << "MouseButtonReleasedG Keycode: " << (int)GetButtonKeycode();
 			return ss.str();
 		}
 

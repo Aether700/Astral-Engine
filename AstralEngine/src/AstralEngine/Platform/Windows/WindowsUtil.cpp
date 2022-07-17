@@ -250,4 +250,17 @@ namespace AstralEngine
 		
 		return KeyCode::Count;
 	}
+
+	MouseButtonCode WindowsMouseCodesToInternalMouseCode(int windowMouseCode)
+	{
+		switch(windowMouseCode)
+		{
+			case VK_LBUTTON: return MouseButtonCode::Left;
+			case VK_RBUTTON: return MouseButtonCode::Right;
+			case VK_MBUTTON: return MouseButtonCode::Middle;
+			case VK_XBUTTON1: return MouseButtonCode::B4;
+			case VK_XBUTTON2: return MouseButtonCode::B5;
+		}
+		return MouseButtonCode::Count;
+	}
 }

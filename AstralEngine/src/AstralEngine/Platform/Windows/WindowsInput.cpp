@@ -16,6 +16,7 @@ namespace AstralEngine
 	};
 
 	Keyboard Input::s_keyboard;
+	Mouse Input::s_mouse;
 
 	static AUnorderedMap<int, InputState> s_keyStates;
 	static ADynArr<int> s_keysToUpdate;
@@ -82,8 +83,7 @@ namespace AstralEngine
 	
 	bool Input::GetMouseButton(MouseButtonCode mouseButton)
 	{
-		//return GetMouseButton((int) mouseButton);
-		return false;
+		return s_mouse.GetButton(mouseButton);
 	}
 
 	/*
@@ -101,29 +101,22 @@ namespace AstralEngine
 
 	bool Input::GetMouseButtonDown(MouseButtonCode mouseButton)
 	{
-		//return GetMouseButtonDown((int)mouseButton);
-		return false;
+		return s_mouse.GetButtonDown(mouseButton);
 	}
 
-	Vector2 Input::GetMousePosition() 
+	Vector2Int Input::GetMousePosition() 
 	{
-		GLFWwindow* window = (GLFWwindow*)Application::GetWindow()->GetNativeWindow();
-		double xPos, yPos;
-		glfwGetCursorPos(window, &xPos, &yPos);
-
-		return { (float) xPos, (float) yPos };
+		return s_mouse.GetMousePos();
 	}
 	
-	float Input::GetMouseXPos() 
+	int Input::GetMouseXPos() 
 	{
-		Vector2 position = GetMousePosition();
-		return position.x;
+		return s_mouse.GetMousePosX();
 	}
 
-	float Input::GetMouseYPos() 
+	int Input::GetMouseYPos() 
 	{
-		Vector2 position = GetMousePosition();
-		return position.y;
+		return s_mouse.GetMousePosY();
 	}
 
 	void Input::OnUpdate()
@@ -153,6 +146,7 @@ namespace AstralEngine
 		*/
 
 		s_keyboard.OnUpdate();
+		s_mouse.OnUpdate();
 	}
 
 	bool Input::OnKeyPressedEvent(KeyPressedEvent& keyPressed)
@@ -192,7 +186,7 @@ namespace AstralEngine
 
 	bool Input::OnMousePressedEvent(MouseButtonPressedEvent& mousePressed)
 	{
-		int buttonCode = mousePressed.GetButtonKeycode();
+		int buttonCode = (int)mousePressed.GetButtonKeycode();
 		if (!s_mouseStates.ContainsKey(buttonCode))
 		{
 			InputState state = { true, false };
@@ -208,7 +202,7 @@ namespace AstralEngine
 
 	bool Input::OnMouseReleasedEvent(MouseButtonReleasedEvent& mouseReleased)
 	{
-		int buttonCode = mouseReleased.GetButtonKeycode();
+		int buttonCode = (int)mouseReleased.GetButtonKeycode();
 		if (!s_mouseStates.ContainsKey(buttonCode))
 		{
 			InputState state = { false, true };

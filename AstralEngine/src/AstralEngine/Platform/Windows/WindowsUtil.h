@@ -1,6 +1,7 @@
 #pragma once
 #include "AstralEngine/Data Struct/ADelegate.h"
 #include "AstralEngine/Core/Keycodes.h"
+#include "AstralEngine/Core/MouseButtonCodes.h"
 
 namespace AstralEngine
 {
@@ -43,4 +44,5 @@ namespace AstralEngine
 	std::uint32_t& GetHighOrderWord(std::uint64_t& i);
 
 	KeyCode WindowsKeyCodesToInternalKeyCode(int windowKeyCode);
+	MouseButtonCode WindowsMouseCodesToInternalMouseCode(int windowMouseCode);
 }

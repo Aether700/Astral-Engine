@@ -15,7 +15,6 @@ namespace AstralEngine
 
 	double WindowsTime::GetTimeImpl()
 	{
-		//return (float)glfwGetTime();
 		std::int64_t currTime;
 		QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
 		return (double)(currTime - m_appStartTime) / (double)m_frequency;

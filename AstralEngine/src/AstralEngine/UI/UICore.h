@@ -354,7 +354,7 @@ namespace AstralEngine
 		
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& pressed)
 		{
-			if (pressed.GetButtonKeycode() == AE_MOUSE_BUTTON_LEFT)
+			if (pressed.GetButtonKeycode() == MouseButtonCode::Left)
 			{
 				if (IsHovered())
 				{
@@ -367,7 +367,7 @@ namespace AstralEngine
 
 		bool OnMouseButtonReleased(MouseButtonReleasedEvent& pressed)
 		{
-			if (pressed.GetButtonKeycode() == AE_MOUSE_BUTTON_LEFT)
+			if (pressed.GetButtonKeycode() == MouseButtonCode::Left)
 			{
 				if (s_clickedButton == this && IsHovered())
 				{

@@ -64,6 +64,42 @@ namespace AstralEngine
 		size_t m_numKeysDown;
 	};
 
+	class Mouse : public InputDevice
+	{
+	public:
+		Mouse();
+
+		bool GetButton(MouseButtonCode button) const;
+		bool GetButtonDown(MouseButtonCode button) const;
+		bool GetAnyButton(MouseButtonCode button) const;
+		bool GetAnyButtonDown(MouseButtonCode button) const;
+
+		const Vector2Int& GetMousePos() const;
+		int GetMousePosX() const;
+		int GetMousePosY() const;
+
+		void Clear();
+
+		virtual void OnUpdate() override;
+		virtual void OnEvent(AEvent& e) override;
+
+	private:
+		struct MouseButtonState
+		{
+			bool isDown;
+			bool wasJustPressed;
+
+			MouseButtonState();
+			void Reset();
+		};
+
+		Vector2Int m_mousePos;
+		AUnorderedMap<MouseButtonCode, MouseButtonState> m_buttonStates;
+		ASinglyLinkedList<MouseButtonCode> m_toUpdate;
+		bool m_anyJustPressed;
+		size_t m_numButtonsDown;
+	};
+
 	class Input
 	{
 		friend class Application;
@@ -77,15 +113,16 @@ namespace AstralEngine
 		static bool GetMouseButton(MouseButtonCode mouseButton);
 		static bool GetMouseButtonDown(MouseButtonCode mouseButton);
 		
-		static Vector2 GetMousePosition();
-		static float GetMouseXPos();
-		static float GetMouseYPos();
+		static Vector2Int GetMousePosition();
+		static int GetMouseXPos();
+		static int GetMouseYPos();
 
 	private:
 		static void OnUpdate();
 		static void OnEvent(AEvent& e)
 		{
 			s_keyboard.OnEvent(e);
+			s_mouse.OnEvent(e);
 		}
 		static bool OnKeyPressedEvent(KeyPressedEvent& keyPressed);
 		static bool OnKeyReleasedEvent(KeyReleasedEvent& keyReleased);
@@ -93,6 +130,7 @@ namespace AstralEngine
 		static bool OnMouseReleasedEvent(MouseButtonReleasedEvent& mouseReleased);
 
 		static Keyboard s_keyboard;
+		static Mouse s_mouse;
 	};
 
 }
