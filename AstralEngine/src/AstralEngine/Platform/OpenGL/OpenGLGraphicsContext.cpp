@@ -3,7 +3,6 @@
 #include "Core/AWindow.h"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 #ifdef AE_PLATFORM_WINDOWS
 	#include "Platform/Windows/WindowsUtil.h"
@@ -55,8 +54,8 @@ namespace AstralEngine
 			return;
 		}
 
-		HDC tempWindowDeviceContext = GetDC(tempWindow);
-		if (tempWindowDeviceContext == nullptr)
+		HDC tempDeviceContext = GetDC(tempWindow);
+		if (tempDeviceContext == nullptr)
 		{
 			AE_CORE_ERROR("Could not Create Windows OpenGL Context. Error Code %L", GetLastError());
 			return;
@@ -80,27 +79,27 @@ namespace AstralEngine
 			0, 0, 0 // no masks
 		};
 
-		int tempPixelFormat = ChoosePixelFormat(tempWindowDeviceContext, &formatDescriptor);
+		int tempPixelFormat = ChoosePixelFormat(tempDeviceContext, &formatDescriptor);
 		if (tempPixelFormat == 0)
 		{
 			AE_CORE_ERROR("Could not find proper pixel format. Error Code: %L", GetLastError());
 			return;
 		}
 
-		if (!SetPixelFormat(tempWindowDeviceContext, tempPixelFormat, &formatDescriptor))
+		if (!SetPixelFormat(tempDeviceContext, tempPixelFormat, &formatDescriptor))
 		{
 			AE_CORE_ERROR("Could not set pixel format. Error Code: %L", GetLastError());
 			return;
 		}
 
-		HGLRC tempOpenglContext = wglCreateContext(tempWindowDeviceContext);
+		HGLRC tempOpenglContext = wglCreateContext(tempDeviceContext);
 		if (tempOpenglContext == nullptr)
 		{
 			AE_CORE_ERROR("Could not create graphics context. Error Code: %L", GetLastError());
 			return;
 		}
 
-		if (!wglMakeCurrent(tempWindowDeviceContext, tempOpenglContext))
+		if (!wglMakeCurrent(tempDeviceContext, tempOpenglContext))
 		{
 			AE_CORE_ERROR("Could not make context current. Error Code: %L", GetLastError());
 			return;
@@ -125,9 +124,9 @@ namespace AstralEngine
 			return;
 		}
 
-		wglMakeCurrent(tempWindowDeviceContext, nullptr);
+		wglMakeCurrent(tempDeviceContext, nullptr);
 		wglDeleteContext(tempOpenglContext);
-		ReleaseDC(tempWindow, tempWindowDeviceContext);
+		ReleaseDC(tempWindow, tempDeviceContext);
 		DestroyWindow(tempWindow);
 	}
 #endif

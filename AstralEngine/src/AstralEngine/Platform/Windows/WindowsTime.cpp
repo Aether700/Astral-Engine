@@ -1,8 +1,6 @@
 #include "aepch.h"
 #include "WindowsTime.h"
 
-#include <GLFW/glfw3.h>
-
 namespace AstralEngine
 {
 	AReference<Time> Time::s_instance = AReference<WindowsTime>::Create();
