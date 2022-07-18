@@ -38,6 +38,18 @@ namespace AstralEngine
 		#endif
 	}
 
+	WindowsStr WStrToWindowsStr(const std::wstring& wstr)
+	{
+		#ifdef UNICODE
+			return wstr;
+		#else
+			// fill string with space character then copy wstr to str
+			std::string str = std::string(wstr.length(), ' ');
+			std::copy(wstr.begin(), wstr.end(), str.begin());
+			return str;
+		#endif
+	}
+
 	std::string WindowsStrToStr(const WindowsStr& windowStr)
 	{
 		#ifdef UNICODE

@@ -36,7 +36,9 @@
 			virtual unsigned int GetWidth() const override;
 			virtual unsigned int GetHeight() const override;
 			virtual std::string GetTitle() const override;
-			std::wstring GetTitleWStr() const;
+			virtual std::wstring GetTitleWStr() const override;
+			virtual void SetTitle(const std::string& title) override;
+			virtual void SetTitle(const std::wstring& title) override;
 	
 			virtual void OnUpdate() override;
 	
@@ -46,13 +48,32 @@
 			virtual void SetVisible(bool isVisible) override;
 			virtual bool IsVisible() const override;
 	
+			virtual void SetMaximize(bool isMaximized) override;
+			virtual bool IsMaximized() const override;
+
+			virtual void SetMinimize(bool isMinimized) override;
+			virtual bool IsMinimized() const override;
+
+			virtual void SetFullscreen(bool isFullscreen) override;
+			virtual bool IsFullscreen() const override;
+
 		private:
+
+			// information used to restore a full screen window to it's previous style/format
+			struct WindowFullscreenInfo
+			{
+				DWORD style;
+				WINDOWPLACEMENT placement;
+			};
+
 			friend LRESULT WindowProceedure(HWND window, UINT message,
 				WPARAM wParam, LPARAM lParam);
 	
 			WindowsStr GetTitleWindowsStr() const;
 			RECT GetRect() const;
 	
+			WINDOWPLACEMENT RetrieveWindowPlacement() const;
+
 			static void ProcessEvents();
 	
 			void SetVSyncOpenGL(bool enabled);
@@ -60,6 +81,8 @@
 			HWND m_handle;
 			AEventCallback m_callback;
 			AReference<GraphicsContext> m_context;
+			WindowFullscreenInfo* m_fullscreenInfo;
+			bool m_isFullscreen;
 		};
 		/*
 		class WindowsWindow : public AWindow

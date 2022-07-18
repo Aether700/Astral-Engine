@@ -115,7 +115,7 @@
 							KeyCode key = WindowsKeyCodesToInternalKeyCode(wParam);
 							if (key != KeyCode::Count)
 							{
-								constexpr std::uint32_t previousStateMask = 0x20000000;
+								constexpr std::uint32_t previousStateMask = 1 << 30;
 								bool wasPressed = lParam & previousStateMask;
 								
 								if (wasPressed)
@@ -341,7 +341,7 @@
 		}
 	
 		WindowsWindow::WindowsWindow(const std::string& title, unsigned int x, unsigned int y,
-			unsigned int width, unsigned int height)
+			unsigned int width, unsigned int height) : m_isFullscreen(false), m_fullscreenInfo(nullptr)
 		{
 			m_handle = CreateWindowEx(
 				0, WindowsClass::GetWindowsClassName().c_str(),
@@ -364,6 +364,7 @@
 	
 		WindowsWindow::~WindowsWindow()
 		{
+			delete m_fullscreenInfo;
 			int result = DestroyWindow(m_handle);
 			if (result == 0)
 			{
@@ -391,6 +392,22 @@
 		std::wstring WindowsWindow::GetTitleWStr() const
 		{
 			return WindowsStrToWStr(GetTitleWindowsStr());
+		}
+
+		void WindowsWindow::SetTitle(const std::string& title)
+		{
+			if (SetWindowText(m_handle, StrToWindowsStr(title).c_str()) == 0)
+			{
+				AE_CORE_ERROR("Could not change the window title. Error code %L", GetLastError());
+			}
+		}
+
+		void WindowsWindow::SetTitle(const std::wstring& title)
+		{
+			if (SetWindowText(m_handle, WStrToWindowsStr(title).c_str()) == 0)
+			{
+				AE_CORE_ERROR("Could not change the window title. Error code %L", GetLastError());
+			}
 		}
 	
 		void WindowsWindow::OnUpdate()
@@ -433,6 +450,87 @@
 			return IsWindowVisible(m_handle) != 0;
 		}
 	
+		void WindowsWindow::SetMaximize(bool isMaximized)
+		{
+			if (isMaximized && !IsMaximized())
+			{
+				ShowWindow(m_handle, SW_MAXIMIZE);
+			}
+			else if (!isMaximized && IsMaximized())
+			{ 
+				ShowWindow(m_handle, SW_RESTORE);
+			}
+		}
+
+		bool WindowsWindow::IsMaximized() const 
+		{
+			WINDOWPLACEMENT placement = RetrieveWindowPlacement();
+			return placement.showCmd == SW_MAXIMIZE;
+		}
+		
+		void WindowsWindow::SetMinimize(bool isMinimized)
+		{
+			if (isMinimized && !IsMinimized())
+			{
+				ShowWindow(m_handle, SW_MINIMIZE);
+			}
+			else if (!isMinimized && IsMinimized())
+			{
+				ShowWindow(m_handle, SW_RESTORE);
+			}
+		}
+
+		bool WindowsWindow::IsMinimized() const 
+		{
+			WINDOWPLACEMENT placement = RetrieveWindowPlacement();
+			return placement.showCmd == SW_MINIMIZE;
+		}
+
+		void WindowsWindow::SetFullscreen(bool isFullscreen)
+		{
+			if (isFullscreen && !IsFullscreen())
+			{
+				m_fullscreenInfo = new WindowFullscreenInfo();
+				m_fullscreenInfo->style = GetWindowLong(m_handle, GWL_STYLE);
+
+				if (GetWindowPlacement(m_handle, &m_fullscreenInfo->placement) == 0)
+				{
+					AE_CORE_ERROR("Could not retrieve window information. Error Code: %L", GetLastError());
+					return;
+				}
+
+				HMONITOR monitorHandle = MonitorFromWindow(m_handle, MONITOR_DEFAULTTOPRIMARY);
+				MONITORINFO monitorInfo = { sizeof(MONITORINFO) };
+				if (GetMonitorInfo(monitorHandle, &monitorInfo) == 0)
+				{
+					AE_CORE_ERROR("Could not retrieve monitor information.");
+					return;
+				}
+				
+				SetWindowLong(m_handle, GWL_STYLE, m_fullscreenInfo->style & ~WS_OVERLAPPEDWINDOW);
+				SetWindowPos(m_handle, nullptr, monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top,
+					monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+					monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+					SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+				m_isFullscreen = true;
+			}
+			else if (!isFullscreen && IsFullscreen())
+			{
+				AE_CORE_ASSERT(m_fullscreenInfo != nullptr, "");
+				SetWindowLong(m_handle, GWL_STYLE, m_fullscreenInfo->style);
+				SetWindowPlacement(m_handle, &m_fullscreenInfo->placement);
+				SetWindowPos(m_handle, nullptr, 0, 0, 0, 0,
+					SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+					SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+				m_isFullscreen = false;
+				delete m_fullscreenInfo;
+				m_fullscreenInfo = nullptr;
+			}
+		}
+
+		bool WindowsWindow::IsFullscreen() const { return m_isFullscreen; }
+
 		WindowsStr WindowsWindow::GetTitleWindowsStr() const
 		{
 			WindowsChar buffer[128];
@@ -457,6 +555,16 @@
 			return r;
 		}
 	
+		WINDOWPLACEMENT WindowsWindow::RetrieveWindowPlacement() const
+		{
+			WINDOWPLACEMENT placement = { sizeof(WINDOWPLACEMENT) };
+			if (GetWindowPlacement(m_handle, &placement) == 0)
+			{
+				AE_CORE_ERROR("Could not retrieve window information. Error Code: %L", GetLastError());
+			}
+			return placement;
+		}
+
 		void WindowsWindow::ProcessEvents()
 		{
 			MSG message;

@@ -13,10 +13,10 @@ namespace AstralEngine
 		typedef char WindowsChar;
 	#endif
 
+
 	WindowsStr StrToWindowsStr(const std::string& str);
-
+	WindowsStr WStrToWindowsStr(const std::wstring& str);
 	std::string WindowsStrToStr(const WindowsStr& windowStr);
-
 	std::wstring WindowsStrToWStr(const WindowsStr& windowStr);
 
 	void* RetrieveOpenGLFunction(const char* functionName);

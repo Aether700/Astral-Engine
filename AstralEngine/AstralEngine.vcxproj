@@ -267,7 +267,6 @@
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
-    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsTime.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsUtil.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsWindow.cpp" />

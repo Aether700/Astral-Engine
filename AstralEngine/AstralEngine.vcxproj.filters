@@ -289,9 +289,6 @@
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexBuffer.cpp">
       <Filter>src\AstralEngine\Platform\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsInput.cpp">
-      <Filter>src\AstralEngine\Platform\Windows</Filter>
-    </ClCompile>
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsTime.cpp">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
     </ClCompile>
