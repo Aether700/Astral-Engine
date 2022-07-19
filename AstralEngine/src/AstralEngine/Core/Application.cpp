@@ -16,9 +16,8 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		AE_CORE_ASSERT((s_instance == nullptr), "Creating Duplicate Application Instance.");
-
+		RetrieveSystemEndianness();
 		s_instance = this;
-		RetrieveSystemEndianess();
 		m_window = AWindow::Create(windowTitle, width, height);
 		m_uiContext = new UIContext();
 
@@ -141,21 +140,20 @@ namespace AstralEngine
 		return false;
 	}
 
-	void Application::RetrieveSystemEndianess()
+	void Application::RetrieveSystemEndianness()
 	{
-		std::uint16_t data = 1;
-		std::uint8_t* byte = (std::uint8_t*) &data;
-		if ( *byte == 0 )
-		{
-			m_systemEndianness = Endianness::BigEndian;
-		}
-		else
+		constexpr std::uint16_t val = 1;
+		const std::uint8_t* ptr = reinterpret_cast<const std::uint8_t*>(&val);
+
+		if (*ptr == 1)
 		{
 			m_systemEndianness = Endianness::LittleEndian;
 		}
+		else
+		{
+			m_systemEndianness = Endianness::BigEndian;
+		}
 	}
-
-
 
 	void AssertDataEndianness(void* data, void* dest, size_t dataSize, Endianness endiannessBeingRead)
 	{

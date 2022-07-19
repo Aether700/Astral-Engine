@@ -167,6 +167,64 @@ namespace AstralEngine
 		return dir;
 	}
 
+	HeaderTable ReadHeaderTable(std::ifstream& file)
+	{
+		HeaderTable head;
+		std::uint64_t data;
+		file.read((char*) &data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.version, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.fontRevision, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &head.checkSumAdjustment, sizeof(std::uint32_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &head.magicNumber, sizeof(std::uint32_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &head.flags, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &head.unitsPerEm, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint64_t));
+		AssertDataEndianness(&data, &head.created, sizeof(std::uint64_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint64_t));
+		AssertDataEndianness(&data, &head.modified, sizeof(std::uint64_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.xMin, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.yMin, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.xMax, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.yMax, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &head.macStyle, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &head.lowestRecPPEM, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.fontDirectionHint, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.indexToLocFormat, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &head.glyphDataFormat, sizeof(std::int16_t), Endianness::BigEndian);
+
+		return head;
+	}
+
 	// returns true if the check sum test was correct, false otherwise
 	// do not use this function to validate the "head" table
 	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
@@ -212,27 +270,14 @@ namespace AstralEngine
 			return nullptr;
 		}
 
-		//OffsetSubtable offsetSubtable = ReadDataFromTTFFile<OffsetSubtable>(file);
 		OffsetSubtable offsetSubtable = ReadOffsetSubtable(file);
-		//TableDirectory glyphOffsetTableDir = ReadDataFromTTFFile<TableDirectory>(file);
 		TableDirectory glyphOffsetTableDir = ReadTableDir(file);
-		if (!ValidateCheckSum((std::uint32_t*) &glyphOffsetTableDir, 
-			sizeof(glyphOffsetTableDir), glyphOffsetTableDir.checkSum))
-		{
-			AE_CORE_WARN("Invalid checksum detected for the glyph offset table directory in TTFParser::LoadFont");
-			//return nullptr;
-		}
+
+		HeaderTable head;
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
 			TableDirectory dir = ReadTableDir(file);
-
-			if (!ValidateCheckSum((std::uint32_t*)&dir,
-				sizeof(dir), dir.checkSum))
-			{
-				AE_CORE_WARN("Invalid checksum detected in TTFParser::LoadFont");
-				//return nullptr;
-			}
 
 			char tableID[5];
 			memcpy(tableID, (std::uint32_t*)&dir.tag, 4);
@@ -242,7 +287,7 @@ namespace AstralEngine
 			if (strcmp(tableID, "head") == 0)
 			{
 				file.seekg(dir.offset);
-				HeaderTable head;
+				head = ReadHeaderTable(file);
 			}
 			else
 			{

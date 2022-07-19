@@ -14,6 +14,8 @@ namespace AstralEngine
 		BigEndian // for 10 store -> 10
 	};
 
+	constexpr Endianness Test() { return Endianness::LittleEndian; }
+
 	class Application
 	{
 	public:
@@ -41,7 +43,7 @@ namespace AstralEngine
 		bool OnWindowCloseEvent(WindowCloseEvent& close);
 		bool OnWindowResizeEvent(WindowResizeEvent& resize);
 
-		void RetrieveSystemEndianess();
+		void RetrieveSystemEndianness();
 
 		bool m_isRunning;
 		LayerStack m_layerStack;
