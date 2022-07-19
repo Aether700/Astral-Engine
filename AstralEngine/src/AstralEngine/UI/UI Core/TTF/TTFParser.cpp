@@ -129,6 +129,7 @@ namespace AstralEngine
 	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
 	{
 		OffsetSubtable offset;
+
 		std::uint32_t data;
 		file.read((char*)&data, sizeof(offset.scalerType));
 		AssertDataEndianness(&data, &offset.scalerType, sizeof(offset.scalerType), Endianness::BigEndian);
@@ -151,10 +152,9 @@ namespace AstralEngine
 	TableDirectory ReadTableDir(std::ifstream& file)
 	{
 		TableDirectory dir;
-		std::uint32_t data;
-		file.read((char*)&data, sizeof(data));
-		AssertDataEndianness(&data, &dir.tag, sizeof(data), Endianness::BigEndian);
+		file.read((char*)&dir.tag, sizeof(dir.tag));
 
+		std::uint32_t data;
 		file.read((char*)&data, sizeof(data));
 		AssertDataEndianness(&data, &dir.checkSum, sizeof(data), Endianness::BigEndian);
 
@@ -163,21 +163,8 @@ namespace AstralEngine
 
 		file.read((char*)&data, sizeof(data));
 		AssertDataEndianness(&data, &dir.length, sizeof(data), Endianness::BigEndian);
-
+		
 		return dir;
-	}
-
-	template<typename T>
-	T ReadDataFromTTFFile(std::ifstream& file)
-	{
-		constexpr size_t dataSize = sizeof(T);
-		std::uint8_t data[dataSize];
-		file.read((char*) data, dataSize);
-		std::uint8_t assertedEndiannessData[dataSize];
-		// TTF files are always in big endian
-		AssertDataEndianness(data, assertedEndiannessData, dataSize, Endianness::BigEndian); 
-		T dataObj = *(T*)assertedEndiannessData;
-		return dataObj;
 	}
 
 	// returns true if the check sum test was correct, false otherwise
@@ -198,6 +185,24 @@ namespace AstralEngine
 
 	// TTFParser //////////////////////////////////////////////////////////
 
+	//temp//////////////
+	template<typename T>
+	T ReadData(std::uint8_t* data, size_t& offset)
+	{
+		T obj;
+		memcpy(&obj, &data[offset], sizeof(T));
+		offset += sizeof(T);
+		return obj;
+	}
+
+	void PrintTag(std::uint32_t tag)
+	{
+		char c[5];
+		memcpy(c, &tag, sizeof(std::uint32_t));
+		c[4] = '\0';
+		std::cout << c << "\n";
+	}
+
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
@@ -215,19 +220,18 @@ namespace AstralEngine
 			sizeof(glyphOffsetTableDir), glyphOffsetTableDir.checkSum))
 		{
 			AE_CORE_WARN("Invalid checksum detected for the glyph offset table directory in TTFParser::LoadFont");
-			return nullptr;
+			//return nullptr;
 		}
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
-			//TableDirectory dir = ReadDataFromTTFFile<TableDirectory>(file);
 			TableDirectory dir = ReadTableDir(file);
 
 			if (!ValidateCheckSum((std::uint32_t*)&dir,
 				sizeof(dir), dir.checkSum))
 			{
 				AE_CORE_WARN("Invalid checksum detected in TTFParser::LoadFont");
-				return nullptr;
+				//return nullptr;
 			}
 
 			char tableID[5];
@@ -238,9 +242,14 @@ namespace AstralEngine
 			if (strcmp(tableID, "head") == 0)
 			{
 				file.seekg(dir.offset);
-				HeaderTable head = ReadDataFromTTFFile<HeaderTable>(file);
-				__debugbreak();
+				HeaderTable head;
 			}
+			else
+			{
+				std::cout << tableID << "\n";
+			}
+
+			file.seekg(oldPos);
 		}
 
 		// temp
