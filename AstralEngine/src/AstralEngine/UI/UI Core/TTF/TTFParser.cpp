@@ -3,6 +3,11 @@
 
 namespace AstralEngine
 {
+	// tags
+	static constexpr std::uint32_t s_headTag = 0x64616568;
+	static constexpr std::uint32_t s_hheaTag = 0x61656868;
+	static constexpr std::uint32_t s_hmtxTag = 0x78746D68;
+
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
 	{
@@ -124,8 +129,46 @@ namespace AstralEngine
 		std::uint16_t numOfLongHorMetrics;
 	};
 
-	//do hmtx table next
+	// used in the hmtx table. The hmtx table is an array of LongHorizontalMetric structs 
+	// with an optional array (this optional array is ommitted here)
+	struct LongHorizontalMetric
+	{
+		std::uint16_t advanceWidth;
+		std::int16_t leftSideBearing;
 
+		bool operator==(const LongHorizontalMetric& other) const
+		{
+			return advanceWidth == other.advanceWidth && leftSideBearing == other.leftSideBearing;
+		}
+
+		bool operator!=(const LongHorizontalMetric& other) const
+		{
+			return !(*this == other);
+		}
+	};
+	
+	//do maxp table next
+	
+	struct VerticalHeader // vhea
+	{
+		std::uint32_t version;
+		std::int16_t vertTypoAscender;
+		std::int16_t vertTypoDescender;
+		std::int16_t vertTypoLineGap;
+		std::int16_t advanceHeightMax;
+		std::int16_t minTopSideBearing;
+		std::int16_t minBottomSideBearing;
+		std::int16_t yMaxExtent;
+		std::int16_t caretSlopeRise;
+		std::int16_t caretSlopeRun;
+		std::int16_t caretOffset;
+		std::int64_t reserved; // set to 0
+		std::int16_t metricDataFormat; // set to 0
+		std::uint16_t numOfLongVerMetrics;
+	};
+
+
+	// Read Table functions /////////////////////////////////////////////////////
 	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
 	{
 		OffsetSubtable offset;
@@ -225,10 +268,77 @@ namespace AstralEngine
 		return head;
 	}
 
+	HorizontalHeader ReadHorizontalHeader(std::ifstream& file)
+	{
+		HorizontalHeader hhea;
+		std::uint64_t data;
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.version, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.ascent, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.descent, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.lineGap, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &hhea.advanceWidthMax, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.minLeftSideBearing, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.minRightSideBearing, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.xMaxExtent, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.caretSlopeRise, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.caretSlopeRun, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.caretOffset, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int64_t));
+		AssertDataEndianness(&data, &hhea.reserved, sizeof(std::int64_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &hhea.metricDataFormat, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &hhea.numOfLongHorMetrics, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		return hhea;
+	}
+
+	LongHorizontalMetric ReadLongHorMetric(std::ifstream& file)
+	{
+		LongHorizontalMetric longHorMetric;
+
+		std::uint16_t data;
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&longHorMetric.advanceWidth, &data, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&longHorMetric.leftSideBearing, &data, sizeof(std::int16_t), Endianness::BigEndian);
+
+		return longHorMetric;
+	}
+
 	// returns true if the check sum test was correct, false otherwise
 	// do not use this function to validate the "head" table
 	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
 	{
+		// checksums might be invalid as many fonts build their checksum differently than per specifications
+		// look at https://stackoverflow.com/questions/54151857/missing-pieces-for-ttf-font-building-from-spec
+		// for more info on how to properly verify the checksum of the font
+
 		std::uint32_t calculatedCheckSum = 0;
 		std::uint32_t numLongsInTable = (tableSize + 3) / 4;
 		while (numLongsInTable > 0)
@@ -243,24 +353,6 @@ namespace AstralEngine
 
 	// TTFParser //////////////////////////////////////////////////////////
 
-	//temp//////////////
-	template<typename T>
-	T ReadData(std::uint8_t* data, size_t& offset)
-	{
-		T obj;
-		memcpy(&obj, &data[offset], sizeof(T));
-		offset += sizeof(T);
-		return obj;
-	}
-
-	void PrintTag(std::uint32_t tag)
-	{
-		char c[5];
-		memcpy(c, &tag, sizeof(std::uint32_t));
-		c[4] = '\0';
-		std::cout << c << "\n";
-	}
-
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
@@ -273,25 +365,47 @@ namespace AstralEngine
 		OffsetSubtable offsetSubtable = ReadOffsetSubtable(file);
 		TableDirectory glyphOffsetTableDir = ReadTableDir(file);
 
+		bool hheaInitialized = false;
 		HeaderTable head;
+		HorizontalHeader hhea;
+		ADynArr<LongHorizontalMetric> hmtx;
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
 			TableDirectory dir = ReadTableDir(file);
 
+			// temp ///////////////////////////////////////
 			char tableID[5];
 			memcpy(tableID, (std::uint32_t*)&dir.tag, 4);
 			tableID[4] = '\0';
+			///////////////////////////////////////////////
+
 			size_t oldPos = file.tellg();
 
-			if (strcmp(tableID, "head") == 0)
+			if (dir.tag == s_headTag)
 			{
 				file.seekg(dir.offset);
 				head = ReadHeaderTable(file);
 			}
-			else
+			else if (dir.tag == s_hheaTag)
 			{
-				std::cout << tableID << "\n";
+				file.seekg(dir.offset);
+				hhea = ReadHorizontalHeader(file);
+				hmtx.Reserve(hhea.numOfLongHorMetrics);
+				hheaInitialized = true;
+			}
+			else if (dir.tag == s_hmtxTag)
+			{
+				if (!hheaInitialized)
+				{
+					AE_CORE_ERROR("hhea table was not found before reaching the hmtx table");
+					return nullptr;
+				}
+
+				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
+				{
+					hmtx.Add(ReadLongHorMetric(file));
+				}
 			}
 
 			file.seekg(oldPos);
