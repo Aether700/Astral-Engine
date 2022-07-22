@@ -4,9 +4,11 @@
 namespace AstralEngine
 {
 	// tags
-	static constexpr std::uint32_t s_headTag = 0x64616568;
-	static constexpr std::uint32_t s_hheaTag = 0x61656868;
-	static constexpr std::uint32_t s_hmtxTag = 0x78746D68;
+	
+	static constexpr std::uint32_t s_headTag = 0x68656164;
+	static constexpr std::uint32_t s_hheaTag = 0x68686561;
+	static constexpr std::uint32_t s_hmtxTag = 0x686D7478;
+	static constexpr std::uint32_t s_maxpTag = 0x6D617870;
 
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
@@ -146,8 +148,30 @@ namespace AstralEngine
 			return !(*this == other);
 		}
 	};
+
+	// table used to track the memory requirements of the font
+	struct Maxp // maxp table
+	{
+		std::int16_t version;
+		std::uint16_t numGlyphs;
+		std::uint16_t maxPoints; // max number of points in non-compound glyphs
+		std::uint16_t maxContours; // max number of contours in non-compound glyphs
+		std::uint16_t maxCompoundPoints;
+		std::uint16_t maxCompoundContours;
+		std::uint16_t maxZones; // set to 2
+		std::uint16_t maxTwilightPoints; // points used in twilight zone
+		std::uint16_t maxStorage;
+		std::uint16_t maxFunctionDefs;
+		std::uint16_t maxInstructionDefs;
+		std::uint16_t maxStackElements; // max stack depth
+		std::uint16_t maxSizeOfInstructions; // max size of instructions for a single glyph in bytes
+		std::uint16_t maxComponentElement; // maximum number of simple glyphs used in a single component glyph
+		
+		// max recursion depth when defining compound glyphs. 
+		// If there are only simple glyphs set to 0
+		std::uint16_t maxComponentDepth; 
+	};
 	
-	//do maxp table next
 	
 	struct VerticalHeader // vhea
 	{
@@ -195,17 +219,19 @@ namespace AstralEngine
 	TableDirectory ReadTableDir(std::ifstream& file)
 	{
 		TableDirectory dir;
-		file.read((char*)&dir.tag, sizeof(dir.tag));
 
 		std::uint32_t data;
-		file.read((char*)&data, sizeof(data));
-		AssertDataEndianness(&data, &dir.checkSum, sizeof(data), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &dir.tag, sizeof(std::uint32_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(data));
-		AssertDataEndianness(&data, &dir.offset, sizeof(data), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &dir.checkSum, sizeof(std::uint32_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(data));
-		AssertDataEndianness(&data, &dir.length, sizeof(data), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &dir.offset, sizeof(std::uint32_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &dir.length, sizeof(std::uint32_t), Endianness::BigEndian);
 		
 		return dir;
 	}
@@ -331,6 +357,59 @@ namespace AstralEngine
 		return longHorMetric;
 	}
 
+	Maxp ReadMaxp(std::ifstream& file)
+	{
+		Maxp m;
+
+		std::uint16_t data;
+		file.read((char*)&data, sizeof(std::int16_t));
+		AssertDataEndianness(&data, &m.version, sizeof(std::int16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.numGlyphs, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxPoints, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxContours, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxCompoundPoints, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxCompoundContours, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxZones, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxTwilightPoints, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxStorage, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxFunctionDefs, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxInstructionDefs, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxStackElements, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxSizeOfInstructions, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxComponentElement, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &m.maxComponentDepth, sizeof(std::uint16_t), Endianness::BigEndian);
+
+		return m;
+	}
+
 	// returns true if the check sum test was correct, false otherwise
 	// do not use this function to validate the "head" table
 	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
@@ -353,6 +432,8 @@ namespace AstralEngine
 
 	// TTFParser //////////////////////////////////////////////////////////
 
+
+	// to double check table data: https://fontdrop.info/#/?darkmode=true go to tab "data"
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
@@ -369,6 +450,7 @@ namespace AstralEngine
 		HeaderTable head;
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
+		Maxp max;
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
@@ -402,10 +484,16 @@ namespace AstralEngine
 					return nullptr;
 				}
 
+				file.seekg(dir.offset);
 				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
 				{
 					hmtx.Add(ReadLongHorMetric(file));
 				}
+			}
+			else if (dir.tag == s_maxpTag)
+			{
+				file.seekg(dir.offset);
+				max = ReadMaxp(file);
 			}
 
 			file.seekg(oldPos);
