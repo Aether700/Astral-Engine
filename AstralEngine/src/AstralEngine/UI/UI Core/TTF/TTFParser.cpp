@@ -60,6 +60,65 @@ namespace AstralEngine
 		std::int16_t glyphDataFormat;
 	};
 
+	struct HorizontalHeader // hhea
+	{
+		Fixed version;
+		FWord ascent;
+		FWord descent;
+		FWord lineGap;
+		uFWord advanceWidthMax;
+		FWord minLeftSideBearing;
+		FWord minRightSideBearing;
+		FWord xMaxExtent;
+		std::int16_t caretSlopeRise;
+		std::int16_t caretSlopeRun;
+		FWord caretOffset;
+		std::int64_t reserved; //set to 0
+		std::int16_t metricDataFormat; // 0 for current format
+		std::uint16_t numOfLongHorMetrics;
+	};
+
+	// used in the hmtx table. The hmtx table is an array of LongHorizontalMetric structs 
+	// with an optional array (this optional array is ommitted here)
+	struct LongHorizontalMetric
+	{
+		std::uint16_t advanceWidth;
+		std::int16_t leftSideBearing;
+
+		bool operator==(const LongHorizontalMetric& other) const
+		{
+			return advanceWidth == other.advanceWidth && leftSideBearing == other.leftSideBearing;
+		}
+
+		bool operator!=(const LongHorizontalMetric& other) const
+		{
+			return !(*this == other);
+		}
+	};
+
+	// table used to track the memory requirements of the font
+	struct MaximumProfileTable // maxp table
+	{
+		Fixed version;
+		std::uint16_t numGlyphs;
+		std::uint16_t maxPoints; // max number of points in non-compound glyphs
+		std::uint16_t maxContours; // max number of contours in non-compound glyphs
+		std::uint16_t maxComponentPoints;
+		std::uint16_t maxComponentContours;
+		std::uint16_t maxZones; // set to 2
+		std::uint16_t maxTwilightPoints; // points used in twilight zone
+		std::uint16_t maxStorage;
+		std::uint16_t maxFunctionDefs;
+		std::uint16_t maxInstructionDefs;
+		std::uint16_t maxStackElements; // max stack depth
+		std::uint16_t maxSizeOfInstructions; // max size of instructions for a single glyph in bytes
+		std::uint16_t maxComponentElements; // maximum number of simple glyphs used in a single component glyph
+		
+		// max recursion depth when defining compound glyphs. 
+		// If there are only simple glyphs set to 0
+		std::uint16_t maxComponentDepth; 
+	};
+	
 	struct CmapIndex
 	{
 		std::uint16_t version;
@@ -119,66 +178,6 @@ namespace AstralEngine
 		std::uint16_t idRangeOffset; // offset in bytes to glyph indexArray or 0
 		std::uint16_t glyphIndexArray;
 	};
-
-	struct HorizontalHeader // hhea
-	{
-		std::int16_t version;
-		std::int16_t ascent;
-		std::int16_t descent;
-		std::int16_t lineGap;
-		std::uint16_t advanceWidthMax;
-		std::int16_t minLeftSideBearing;
-		std::int16_t minRightSideBearing;
-		std::int16_t xMaxExtent;
-		std::int16_t caretSlopeRise;
-		std::int16_t caretSlopeRun;
-		std::int16_t caretOffset;
-		std::int64_t reserved; //set to 0
-		std::int16_t metricDataFormat; // 0 for current format
-		std::uint16_t numOfLongHorMetrics;
-	};
-
-	// used in the hmtx table. The hmtx table is an array of LongHorizontalMetric structs 
-	// with an optional array (this optional array is ommitted here)
-	struct LongHorizontalMetric
-	{
-		std::uint16_t advanceWidth;
-		std::int16_t leftSideBearing;
-
-		bool operator==(const LongHorizontalMetric& other) const
-		{
-			return advanceWidth == other.advanceWidth && leftSideBearing == other.leftSideBearing;
-		}
-
-		bool operator!=(const LongHorizontalMetric& other) const
-		{
-			return !(*this == other);
-		}
-	};
-
-	// table used to track the memory requirements of the font
-	struct Maxp // maxp table
-	{
-		std::int16_t version;
-		std::uint16_t numGlyphs;
-		std::uint16_t maxPoints; // max number of points in non-compound glyphs
-		std::uint16_t maxContours; // max number of contours in non-compound glyphs
-		std::uint16_t maxCompoundPoints;
-		std::uint16_t maxCompoundContours;
-		std::uint16_t maxZones; // set to 2
-		std::uint16_t maxTwilightPoints; // points used in twilight zone
-		std::uint16_t maxStorage;
-		std::uint16_t maxFunctionDefs;
-		std::uint16_t maxInstructionDefs;
-		std::uint16_t maxStackElements; // max stack depth
-		std::uint16_t maxSizeOfInstructions; // max size of instructions for a single glyph in bytes
-		std::uint16_t maxComponentElement; // maximum number of simple glyphs used in a single component glyph
-		
-		// max recursion depth when defining compound glyphs. 
-		// If there are only simple glyphs set to 0
-		std::uint16_t maxComponentDepth; 
-	};
-	
 	
 	struct VerticalHeader // vhea
 	{
@@ -238,6 +237,16 @@ namespace AstralEngine
 		return var;
 	}
 	
+	uFWord ReadUFWord(std::ifstream& file)
+	{
+		uFWord data;
+		file.read((char*)&data, sizeof(uFWord));
+
+		uFWord var;
+		AssertDataEndianness(&data, &var, sizeof(uFWord), Endianness::BigEndian);
+		return var;
+	}
+
 	longDateTime ReadLongDateTime(std::ifstream& file)
 	{
 		longDateTime data;
@@ -325,48 +334,23 @@ namespace AstralEngine
 	HorizontalHeader ReadHorizontalHeader(std::ifstream& file)
 	{
 		HorizontalHeader hhea;
-		std::uint64_t data;
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.version, sizeof(std::int16_t), Endianness::BigEndian);
+		hhea.version = ReadFixed(file);
+		hhea.ascent = ReadFWord(file);
+		hhea.descent = ReadFWord(file);
+		hhea.lineGap = ReadFWord(file);
 
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.ascent, sizeof(std::int16_t), Endianness::BigEndian);
+		hhea.advanceWidthMax = ReadUFWord(file);
+		hhea.minLeftSideBearing = ReadFWord(file);
+		hhea.minRightSideBearing = ReadFWord(file);
+		hhea.xMaxExtent = ReadFWord(file);
 
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.descent, sizeof(std::int16_t), Endianness::BigEndian);
+		hhea.caretSlopeRise = ReadTTFVar<std::int16_t>(file);
+		hhea.caretSlopeRun = ReadTTFVar<std::int16_t>(file);
 
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.lineGap, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &hhea.advanceWidthMax, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.minLeftSideBearing, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.minRightSideBearing, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.xMaxExtent, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.caretSlopeRise, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.caretSlopeRun, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.caretOffset, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int64_t));
-		AssertDataEndianness(&data, &hhea.reserved, sizeof(std::int64_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &hhea.metricDataFormat, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &hhea.numOfLongHorMetrics, sizeof(std::uint16_t), Endianness::BigEndian);
+		hhea.caretOffset = ReadFWord(file);
+		hhea.reserved = ReadTTFVar<std::int64_t>(file);
+		hhea.metricDataFormat = ReadTTFVar<std::int16_t>(file);
+		hhea.numOfLongHorMetrics = ReadTTFVar<std::uint16_t>(file);
 
 		return hhea;
 	}
@@ -375,67 +359,35 @@ namespace AstralEngine
 	{
 		LongHorizontalMetric longHorMetric;
 
-		std::uint16_t data;
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&longHorMetric.advanceWidth, &data, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&longHorMetric.leftSideBearing, &data, sizeof(std::int16_t), Endianness::BigEndian);
+		longHorMetric.advanceWidth = ReadTTFVar<std::uint16_t>(file);
+		longHorMetric.leftSideBearing = ReadTTFVar<std::int16_t>(file);
 
 		return longHorMetric;
 	}
 
-	Maxp ReadMaxp(std::ifstream& file)
+	MaximumProfileTable ReadMaximumProfileTable(std::ifstream& file)
 	{
-		Maxp m;
+		MaximumProfileTable maxp;
+		maxp.version = ReadFixed(file);
+		maxp.numGlyphs = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxPoints = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxContours = ReadTTFVar<std::uint16_t>(file);
 
-		std::uint16_t data;
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &m.version, sizeof(std::int16_t), Endianness::BigEndian);
+		maxp.maxComponentPoints = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxComponentContours = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxZones = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxTwilightPoints = ReadTTFVar<std::uint16_t>(file);
 
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.numGlyphs, sizeof(std::uint16_t), Endianness::BigEndian);
+		maxp.maxStorage = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxFunctionDefs = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxInstructionDefs = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxStackElements = ReadTTFVar<std::uint16_t>(file);
 
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxPoints, sizeof(std::uint16_t), Endianness::BigEndian);
+		maxp.maxSizeOfInstructions = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxComponentElements = ReadTTFVar<std::uint16_t>(file);
+		maxp.maxComponentDepth = ReadTTFVar<std::uint16_t>(file);
 
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxContours, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxCompoundPoints, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxCompoundContours, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxZones, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxTwilightPoints, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxStorage, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxFunctionDefs, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxInstructionDefs, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxStackElements, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxSizeOfInstructions, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxComponentElement, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &m.maxComponentDepth, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		return m;
+		return maxp;
 	}
 
 	// returns true if the check sum test was correct, false otherwise
@@ -478,7 +430,7 @@ namespace AstralEngine
 		HeaderTable head;
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
-		Maxp max;
+		MaximumProfileTable maxp;
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
@@ -499,9 +451,6 @@ namespace AstralEngine
 			}
 			else if (dir.tag == s_hheaTag)
 			{
-				need to review hhea table and hmtx tables to both use the TTF variable types where 
-				need be and test their read functions to make sure the data being read is properly read
-
 				file.seekg(dir.offset);
 				hhea = ReadHorizontalHeader(file);
 				hmtx.Reserve(hhea.numOfLongHorMetrics);
@@ -524,8 +473,10 @@ namespace AstralEngine
 			else if (dir.tag == s_maxpTag)
 			{
 				file.seekg(dir.offset);
-				max = ReadMaxp(file);
+				maxp = ReadMaximumProfileTable(file);
 			}
+
+			need to read cmap next
 
 			file.seekg(oldPos);
 		}
