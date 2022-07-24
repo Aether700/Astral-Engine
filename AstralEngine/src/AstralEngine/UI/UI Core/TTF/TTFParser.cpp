@@ -3,6 +3,14 @@
 
 namespace AstralEngine
 {
+	// ttf variable types
+	typedef std::int16_t shortFrac;
+	typedef std::int16_t Fixed;
+	typedef std::int16_t FWord;
+	typedef std::uint16_t uFWord;
+	typedef std::int16_t F2Dot14;
+	typedef std::int64_t longDateTime;
+
 	// tags
 	
 	static constexpr std::uint32_t s_headTag = 0x68656164;
@@ -29,6 +37,27 @@ namespace AstralEngine
 		std::uint32_t checkSum; 
 		std::uint32_t offset;
 		std::uint32_t length;
+	};
+
+	struct HeaderTable // head
+	{
+		Fixed version;
+		Fixed fontRevision;
+		std::uint32_t checkSumAdjustment;
+		std::uint32_t magicNumber;
+		std::uint16_t flags;
+		std::uint16_t unitsPerEm;
+		longDateTime created;
+		longDateTime modified;
+		FWord xMin;
+		FWord yMin;
+		FWord xMax;
+		FWord yMax;
+		std::uint16_t macStyle;
+		std::uint16_t lowestRecPPEM;
+		std::int16_t fontDirectionHint;
+		std::int16_t indexToLocFormat;
+		std::int16_t glyphDataFormat;
 	};
 
 	struct CmapIndex
@@ -89,28 +118,6 @@ namespace AstralEngine
 		std::uint16_t idDelta; // delta for every character code in segment
 		std::uint16_t idRangeOffset; // offset in bytes to glyph indexArray or 0
 		std::uint16_t glyphIndexArray;
-	};
-
-
-	struct HeaderTable // head
-	{
-		std::int16_t version;
-		std::int16_t fontRevision;
-		std::uint32_t checkSumAdjustment;
-		std::uint32_t magicNumber;
-		std::uint16_t flags;
-		std::uint16_t unitsPerEm;
-		std::int64_t created;
-		std::int64_t modified;
-		std::int16_t xMin;
-		std::int16_t yMin;
-		std::int16_t xMax;
-		std::int16_t yMax;
-		std::uint16_t macStyle;
-		std::uint16_t lowestRecPPEM;
-		std::int16_t fontDirectionHint;
-		std::int16_t indexToLocFormat;
-		std::int16_t glyphDataFormat;
 	};
 
 	struct HorizontalHeader // hhea
@@ -192,26 +199,76 @@ namespace AstralEngine
 	};
 
 
-	// Read Table functions /////////////////////////////////////////////////////
+	// Read functions /////////////////////////////////////////////////////
+
+	/* Variable Reader functions
+	   these functions read the given variable from the provided file and then skips the 
+	   padding as necessary. TTF files are 32 bit aligned and padded with 0s
+	*/
+
+	template<typename T>
+	T ReadTTFVar(std::ifstream& file)
+	{
+		T data;
+		file.read((char*)&data, sizeof(T));
+
+		T var;
+		AssertDataEndianness(&data, &var, sizeof(T), Endianness::BigEndian);
+		return var;
+	}
+
+	Fixed ReadFixed(std::ifstream& file)
+	{
+		Fixed data;
+		file.read((char*)&data, sizeof(Fixed));
+		file.seekg((size_t)file.tellg() + 2);
+
+		Fixed var;
+		AssertDataEndianness(&data, &var, sizeof(Fixed), Endianness::BigEndian);
+		return var;
+	}
+
+	FWord ReadFWord(std::ifstream& file)
+	{
+		FWord data;
+		file.read((char*)&data, sizeof(FWord));
+
+		FWord var;
+		AssertDataEndianness(&data, &var, sizeof(FWord), Endianness::BigEndian);
+		return var;
+	}
+	
+	longDateTime ReadLongDateTime(std::ifstream& file)
+	{
+		longDateTime data;
+		file.read((char*)&data, sizeof(longDateTime));
+
+		longDateTime var;
+		AssertDataEndianness(&data, &var, sizeof(longDateTime), Endianness::BigEndian);
+		return var;
+	}
+
+	// Table Reader functions /////////////////////////////////////////////////////////////
+
 	OffsetSubtable ReadOffsetSubtable(std::ifstream& file)
 	{
 		OffsetSubtable offset;
 
 		std::uint32_t data;
-		file.read((char*)&data, sizeof(offset.scalerType));
-		AssertDataEndianness(&data, &offset.scalerType, sizeof(offset.scalerType), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint32_t));
+		AssertDataEndianness(&data, &offset.scalerType, sizeof(std::uint32_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(offset.numTables));
-		AssertDataEndianness(&data, &offset.numTables, sizeof(offset.numTables), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &offset.numTables, sizeof(std::uint16_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(offset.searchRange));
-		AssertDataEndianness(&data, &offset.searchRange, sizeof(offset.searchRange), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &offset.searchRange, sizeof(std::uint16_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(offset.entrySelector));
-		AssertDataEndianness(&data, &offset.entrySelector, sizeof(offset.entrySelector), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &offset.entrySelector, sizeof(std::uint16_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(offset.rangeShift));
-		AssertDataEndianness(&data, &offset.rangeShift, sizeof(offset.rangeShift), Endianness::BigEndian);
+		file.read((char*)&data, sizeof(std::uint16_t));
+		AssertDataEndianness(&data, &offset.rangeShift, sizeof(std::uint16_t), Endianness::BigEndian);
 
 		return offset;
 	}
@@ -239,57 +296,28 @@ namespace AstralEngine
 	HeaderTable ReadHeaderTable(std::ifstream& file)
 	{
 		HeaderTable head;
-		std::uint64_t data;
-		file.read((char*) &data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.version, sizeof(std::int16_t), Endianness::BigEndian);
 
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.fontRevision, sizeof(std::int16_t), Endianness::BigEndian);
+		head.version = ReadFixed(file);
+		head.fontRevision = ReadFixed(file);
+		
+		head.checkSumAdjustment = ReadTTFVar<std::uint32_t>(file);
+		head.magicNumber = ReadTTFVar<std::uint32_t>(file);
+		head.flags = ReadTTFVar<std::uint16_t>(file);
+		head.unitsPerEm = ReadTTFVar<std::uint16_t>(file);
 
-		file.read((char*)&data, sizeof(std::uint32_t));
-		AssertDataEndianness(&data, &head.checkSumAdjustment, sizeof(std::uint32_t), Endianness::BigEndian);
+		head.created = ReadLongDateTime(file);
+		head.modified = ReadLongDateTime(file);
 
-		file.read((char*)&data, sizeof(std::uint32_t));
-		AssertDataEndianness(&data, &head.magicNumber, sizeof(std::uint32_t), Endianness::BigEndian);
+		head.xMin = ReadFWord(file);
+		head.yMin = ReadFWord(file);
+		head.xMax = ReadFWord(file);
+		head.yMax = ReadFWord(file);
 
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &head.flags, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &head.unitsPerEm, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint64_t));
-		AssertDataEndianness(&data, &head.created, sizeof(std::uint64_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint64_t));
-		AssertDataEndianness(&data, &head.modified, sizeof(std::uint64_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.xMin, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.yMin, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.xMax, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.yMax, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &head.macStyle, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::uint16_t));
-		AssertDataEndianness(&data, &head.lowestRecPPEM, sizeof(std::uint16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.fontDirectionHint, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.indexToLocFormat, sizeof(std::int16_t), Endianness::BigEndian);
-
-		file.read((char*)&data, sizeof(std::int16_t));
-		AssertDataEndianness(&data, &head.glyphDataFormat, sizeof(std::int16_t), Endianness::BigEndian);
+		head.macStyle = ReadTTFVar<std::uint16_t>(file);
+		head.lowestRecPPEM = ReadTTFVar<std::uint16_t>(file);
+		head.fontDirectionHint = ReadTTFVar<std::int16_t>(file);
+		head.indexToLocFormat = ReadTTFVar<std::int16_t>(file);
+		head.glyphDataFormat = ReadTTFVar<std::int16_t>(file);
 
 		return head;
 	}
@@ -471,6 +499,9 @@ namespace AstralEngine
 			}
 			else if (dir.tag == s_hheaTag)
 			{
+				need to review hhea table and hmtx tables to both use the TTF variable types where 
+				need be and test their read functions to make sure the data being read is properly read
+
 				file.seekg(dir.offset);
 				hhea = ReadHorizontalHeader(file);
 				hmtx.Reserve(hhea.numOfLongHorMetrics);
