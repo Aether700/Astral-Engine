@@ -17,6 +17,7 @@ namespace AstralEngine
 	static constexpr std::uint32_t s_hheaTag = 0x68686561;
 	static constexpr std::uint32_t s_hmtxTag = 0x686D7478;
 	static constexpr std::uint32_t s_maxpTag = 0x6D617870;
+	static constexpr std::uint32_t s_cmapTag = 0x636D6170;
 
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
@@ -162,21 +163,130 @@ namespace AstralEngine
 		std::uint32_t offset;
 	};
 
-	struct CmapFormat4
+	struct CmapFormat
+	{
+		virtual CmapFormat* Clone() const = 0;
+	};
+
+	struct CmapFormat4 : public CmapFormat
 	{
 		std::uint16_t format;
 		std::uint16_t length;
 		std::uint16_t language;
-		std::uint16_t segCountX2; // segCount * 2
+		std::uint16_t segCount; // segCount * 2
 		std::uint16_t searchRange;
 		std::uint16_t entrySelector;
 		std::uint16_t rangeShift;
-		std::uint16_t endCode; // the end character for each segment
+		std::uint16_t* endCode; // the end character for each segment
 		std::uint16_t reservedPad; // should be 0
-		std::uint16_t startCode; // starting character for each segment
-		std::uint16_t idDelta; // delta for every character code in segment
-		std::uint16_t idRangeOffset; // offset in bytes to glyph indexArray or 0
-		std::uint16_t glyphIndexArray;
+		std::uint16_t* startCode; // starting character for each segment
+		std::uint16_t* idDelta; // delta for every character code in segment
+		std::uint16_t* idRangeOffset; // offset in bytes to glyph indexArray or 0
+		std::uint16_t* glyphIndexArray;
+
+		CmapFormat4() : endCode(nullptr), startCode(nullptr), idDelta(nullptr), 
+			idRangeOffset(nullptr), glyphIndexArray(nullptr)
+		{
+		}
+
+		~CmapFormat4()
+		{
+			delete[] endCode;
+			delete[] startCode;
+			delete[] idDelta;
+			delete[] idRangeOffset;
+			delete[] glyphIndexArray;
+		}
+
+		virtual CmapFormat* Clone() const override
+		{
+			CmapFormat4* clone = new CmapFormat4();
+			clone->format = format;
+			clone->length = length;
+			clone->language = language;
+			clone->segCount = segCount;
+			clone->searchRange = searchRange;
+			clone->entrySelector = entrySelector;
+			clone->rangeShift = rangeShift;
+			clone->endCode = endCode;
+			clone->reservedPad = reservedPad;
+			clone->startCode = startCode;
+			clone->idDelta = idDelta;
+			clone->idRangeOffset = idRangeOffset;
+			clone->glyphIndexArray = glyphIndexArray;
+
+			return clone;
+		}
+	};
+
+	struct Cmap
+	{
+		CmapIndex index;
+		CmapSubtable* subtables;
+		CmapFormat* format;
+
+		Cmap() : subtables(nullptr), format(nullptr) { }
+		Cmap(Cmap&& other) : index(other.index), subtables(other.subtables), format(other.format) 
+		{
+			other.subtables = nullptr;
+			other.format = nullptr;
+		}
+
+		~Cmap()
+		{
+			delete[] subtables;
+			delete format;
+		}
+
+		CmapSubtable* GetSubtable(CmapPlatforms platformID)
+		{
+			if (subtables == nullptr)
+			{
+				return nullptr;
+			}
+
+			for (std::uint16_t i = 0; i < index.numSubtables; i++)
+			{
+				if (subtables[i].platformID == platformID)
+				{
+					return &subtables[i];
+				}
+			}
+			return nullptr;
+		}
+
+		Cmap& operator=(const Cmap& other)
+		{
+			delete[] subtables;
+			delete format;
+
+			index = other.index;
+			format = other.format->Clone();
+
+			subtables = new CmapSubtable[index.numSubtables];
+
+			for (std::uint16_t i = 0; i < index.numSubtables; i++)
+			{
+				subtables[i] = other.subtables[i];
+			}
+
+			return *this;
+		}
+
+		Cmap& operator=(Cmap&& other)
+		{
+			delete[] subtables;
+			delete format;
+
+			index = other.index;
+			format = other.format;
+			subtables = other.subtables;
+
+			other.subtables = nullptr;
+			other.format = nullptr;
+
+			return *this;
+		}
 	};
 	
 	struct VerticalHeader // vhea
@@ -214,6 +324,19 @@ namespace AstralEngine
 		T var;
 		AssertDataEndianness(&data, &var, sizeof(T), Endianness::BigEndian);
 		return var;
+	}
+
+	template<typename T>
+	T* ReadTTFArr(std::ifstream& file, size_t arraySize)
+	{
+		T* arr = new T[arraySize];
+
+		for (size_t i = 0; i < arraySize; i++)
+		{
+			arr[i] = ReadTTFVar<T>(file);
+		}
+
+		return arr;
 	}
 
 	Fixed ReadFixed(std::ifstream& file)
@@ -390,6 +513,84 @@ namespace AstralEngine
 		return maxp;
 	}
 
+	CmapIndex ReadCmapIndex(std::ifstream& file)
+	{
+		CmapIndex index;
+		index.version = ReadTTFVar<std::uint16_t>(file);
+		index.numSubtables = ReadTTFVar<std::uint16_t>(file);
+
+		return index;
+	}
+
+	CmapSubtable ReadCmapSubtable(std::ifstream& file)
+	{
+		CmapSubtable subtable;
+		subtable.platformID = ReadTTFVar<CmapPlatforms>(file);
+		subtable.platformSpecificEncoding = ReadTTFVar<std::uint16_t>(file);
+		subtable.offset = ReadTTFVar<std::uint32_t>(file);
+
+		return subtable;
+	}
+
+	CmapSubtable* ReadCmapSubtableArr(std::ifstream& file, std::uint16_t numSubtables)
+	{
+		CmapSubtable* subtables = new CmapSubtable[numSubtables];
+
+		for (std::uint16_t i = 0; i < numSubtables; i++)
+		{
+			subtables[i] = ReadCmapSubtable(file);
+		}
+
+		return subtables;
+	}
+
+	CmapFormat4* ReadCmapFormat4(std::ifstream& file)
+	{
+		CmapFormat4* format4 = new CmapFormat4();
+		format4->format = 4;
+		format4->length = ReadTTFVar<std::uint16_t>(file);
+		format4->language = ReadTTFVar<std::uint16_t>(file);
+		format4->segCount = ReadTTFVar<std::uint16_t>(file) / 2;
+		format4->searchRange = ReadTTFVar<std::uint16_t>(file);
+		format4->entrySelector = ReadTTFVar<std::uint16_t>(file);
+		format4->rangeShift = ReadTTFVar<std::uint16_t>(file);
+		format4->endCode = ReadTTFArr<std::uint16_t>(file, format4->segCount);
+		format4->reservedPad = ReadTTFVar<std::uint16_t>(file);
+		format4->startCode = ReadTTFArr<std::uint16_t>(file, format4->segCount);
+		format4->idDelta = ReadTTFArr<std::uint16_t>(file, format4->segCount);
+		format4->idRangeOffset = ReadTTFArr<std::uint16_t>(file, format4->segCount);
+		format4->glyphIndexArray = nullptr; not done reading format 4, still need to read glyphIndexArray
+
+		return format4;
+	}
+
+	CmapFormat* ReadCmapFormat(std::ifstream& file)
+	{
+		std::uint16_t format = ReadTTFVar<std::uint16_t>(file);
+
+		switch(format)
+		{
+		case 4:
+			return ReadCmapFormat4(file);
+
+		case 6:
+			AE_CORE_WARN("Cmap format 6 is not yet supported");
+			return nullptr;
+		}
+
+		AE_CORE_ERROR("Cmap format not supported");
+		return nullptr;
+	}
+
+	Cmap ReadCmap(std::ifstream& file)
+	{
+		Cmap c;
+		c.index = ReadCmapIndex(file);
+		c.subtables = ReadCmapSubtableArr(file, c.index.numSubtables);
+		c.format = ReadCmapFormat(file);
+		return c;
+	}
+
 	// returns true if the check sum test was correct, false otherwise
 	// do not use this function to validate the "head" table
 	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
@@ -431,6 +632,7 @@ namespace AstralEngine
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
 		MaximumProfileTable maxp;
+		Cmap cmap;
 
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
@@ -443,15 +645,14 @@ namespace AstralEngine
 			///////////////////////////////////////////////
 
 			size_t oldPos = file.tellg();
+			file.seekg(dir.offset);
 
 			if (dir.tag == s_headTag)
 			{
-				file.seekg(dir.offset);
 				head = ReadHeaderTable(file);
 			}
 			else if (dir.tag == s_hheaTag)
 			{
-				file.seekg(dir.offset);
 				hhea = ReadHorizontalHeader(file);
 				hmtx.Reserve(hhea.numOfLongHorMetrics);
 				hheaInitialized = true;
@@ -464,7 +665,6 @@ namespace AstralEngine
 					return nullptr;
 				}
 
-				file.seekg(dir.offset);
 				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
 				{
 					hmtx.Add(ReadLongHorMetric(file));
@@ -472,11 +672,16 @@ namespace AstralEngine
 			}
 			else if (dir.tag == s_maxpTag)
 			{
-				file.seekg(dir.offset);
 				maxp = ReadMaximumProfileTable(file);
 			}
+			else if (dir.tag == s_cmapTag)
+			{
+				cmap = std::move(ReadCmap(file));
+				CmapSubtable* subtable = cmap.GetSubtable(CmapPlatforms::Microsoft);
+				int x = 0;
+			}
 
-			need to read cmap next
+			//need to read cmap next
 
 			file.seekg(oldPos);
 		}
