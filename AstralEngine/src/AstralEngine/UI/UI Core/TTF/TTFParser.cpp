@@ -165,11 +165,17 @@ namespace AstralEngine
 
 	struct CmapFormat
 	{
-		virtual CmapFormat* Clone() const = 0;
 	};
+
 
 	struct CmapFormat4 : public CmapFormat
 	{
+		/* this format contains an array of glyphs which maps characters to their glyph 
+		   however the array is not dense and might have indices with invalid characters 
+		   (those characters map to index 0 which is the missing character glyph). A series 
+		   of valid characters in that array is called a "segment" and we search through 
+		   those segments to find a provided character quickly
+		*/
 		std::uint16_t format;
 		std::uint16_t length;
 		std::uint16_t language;
@@ -198,25 +204,52 @@ namespace AstralEngine
 			delete[] glyphIndexArray;
 		}
 
-		virtual CmapFormat* Clone() const override
+		// returns the id of the glyph corresponding to the character 
+		// provided or 0 if the character was not found
+		std::uint16_t GetGlyphID(char c)
 		{
-			CmapFormat4* clone = new CmapFormat4();
-			clone->format = format;
-			clone->length = length;
-			clone->language = language;
-			clone->segCount = segCount;
-			clone->searchRange = searchRange;
-			clone->entrySelector = entrySelector;
-			clone->rangeShift = rangeShift;
-			clone->endCode = endCode;
-			clone->reservedPad = reservedPad;
-			clone->startCode = startCode;
-			clone->idDelta = idDelta;
-			clone->idRangeOffset = idRangeOffset;
-			clone->glyphIndexArray = glyphIndexArray;
-
-			return clone;
+			return GetGlyphID((wchar_t)c);
 		}
+
+		std::uint16_t GetGlyphID (wchar_t c)
+		{
+			std::uint16_t &charID = reinterpret_cast<std::uint16_t &>(c);
+
+			// look through each segment to see if the character could be inside of it
+			for (std::uint16_t i = 0; i < segCount; i++)
+			{
+				if (endCode[i] >= charID)
+				{
+					// verify that the character really is in this segment
+					if (startCode[i] > charID)
+					{
+						break;
+					}
+
+					// the character is in this segment and we need to extract it. Equations taken from 
+					// apple documentation: https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html
+
+					if (idRangeOffset[i] == 0)
+					{
+						return (idDelta[i] + charID) % 65536;
+					}
+					else
+					{
+						std::uint16_t index = *(&idRangeOffset[i] + idRangeOffset[i] / 2 + (charID - startCode[i]));
+						if (index == 0)
+						{
+							break;
+						}
+						std::uint16_t currIDDelta = idDelta[i];
+						std::uint16_t temp = idDelta[i] + index;
+						return (idDelta[i] + index) % 65536;
+					}
+				}
+			}
+
+			return 0;
+		}
+
 	};
 
 	struct Cmap
@@ -253,24 +286,6 @@ namespace AstralEngine
 				}
 			}
 			return nullptr;
-		}
-
-		Cmap& operator=(const Cmap& other)
-		{
-			delete[] subtables;
-			delete format;
-
-			index = other.index;
-			format = other.format->Clone();
-
-			subtables = new CmapSubtable[index.numSubtables];
-
-			for (std::uint16_t i = 0; i < index.numSubtables; i++)
-			{
-				subtables[i] = other.subtables[i];
-			}
-
-			return *this;
 		}
 
 		Cmap& operator=(Cmap&& other)
@@ -559,7 +574,8 @@ namespace AstralEngine
 		format4->startCode = ReadTTFArr<std::uint16_t>(file, format4->segCount);
 		format4->idDelta = ReadTTFArr<std::uint16_t>(file, format4->segCount);
 		format4->idRangeOffset = ReadTTFArr<std::uint16_t>(file, format4->segCount);
-		format4->glyphIndexArray = nullptr; not done reading format 4, still need to read glyphIndexArray
+		constexpr size_t dataReadSoFar = 22; // data read for the Cmap format so far in bytes
+		format4->glyphIndexArray = ReadTTFArr<std::uint16_t> ( file, dataReadSoFar );
 
 		return format4;
 	}
@@ -612,6 +628,26 @@ namespace AstralEngine
 	}
 
 	// TTFParser //////////////////////////////////////////////////////////
+
+	// temp //////////////////////////////
+	void WriteToFileCharIndex(CmapFormat4* format)
+	{
+		std::ofstream file = std::ofstream("ArialTTFCharIndex.txt");
+		std::stringstream ss;
+		for (size_t i = 0; i < 65532; i++) // length specific to arial.ttf.
+		{
+			std::uint16_t id = format->GetGlyphID((wchar_t)i);
+			if (id != 0)
+			{
+				ss << i << ": " << id << "\n";
+			}
+		}
+
+		format->GetGlyphID((wchar_t)278); // id should be 416 but returns 56797
+
+		file.write(ss.str().c_str(), ss.str().length());
+	}
+	/////////////////////////////////////
 
 
 	// to double check table data: https://fontdrop.info/#/?darkmode=true go to tab "data"
@@ -677,14 +713,15 @@ namespace AstralEngine
 			else if (dir.tag == s_cmapTag)
 			{
 				cmap = std::move(ReadCmap(file));
-				CmapSubtable* subtable = cmap.GetSubtable(CmapPlatforms::Microsoft);
-				int x = 0;
+				WriteToFileCharIndex((CmapFormat4*)cmap.format); // temp
 			}
 
 			//need to read cmap next
 
 			file.seekg(oldPos);
 		}
+
+
 
 		// temp
 		return nullptr;
