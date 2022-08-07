@@ -235,13 +235,35 @@ namespace AstralEngine
 					}
 					else
 					{
+						// temp //////////////////////////////////
+						std::uint16_t currIDDelta = idDelta[i]; // 0
+						std::uint16_t currEndCode = endCode[i]; // 383
+						std::uint16_t currStartCode = startCode[i]; // 160
+						std::uint16_t currIDRangeOffset = idRangeOffset[i]; // 282
+						std::uint16_t idMinusStart = charID - startCode[i]; // 118
+						std::uint16_t idRangeDividedBy2 = idRangeOffset[i] / 2; // 141
+						std::uint16_t idRangeIndex = i + idRangeDividedBy2 + idMinusStart; // 260
+						std::uint16_t resultingIndex = idRangeOffset[idRangeIndex]; // 1024
+						std::uint16_t temp = idDelta[i] + resultingIndex; // 1024
+
+						std::ofstream outIDRangeOffset = std::ofstream("idRangeOffset2.txt");
+						for (size_t i = 0; i < segCount; i++)
+						{
+							outIDRangeOffset << idRangeOffset[i] << "\n";
+						}
+						outIDRangeOffset.flush();
+						idRangeOffset is not consistant between different runtimes
+						//////////////////////////////////////////
+
+
+						std::uint16_t* indexAddr = idRangeOffset[i] + 2 * (charID - startCode[i]) 
+							+ (std::uint16_t*)&idRangeOffset[i];
 						std::uint16_t index = *(&idRangeOffset[i] + idRangeOffset[i] / 2 + (charID - startCode[i]));
-						if (index == 0)
+						//if (index == 0)
+						if (*indexAddr == 0)
 						{
 							break;
 						}
-						std::uint16_t currIDDelta = idDelta[i];
-						std::uint16_t temp = idDelta[i] + index;
 						return (idDelta[i] + index) % 65536;
 					}
 				}
@@ -634,6 +656,7 @@ namespace AstralEngine
 	{
 		std::ofstream file = std::ofstream("ArialTTFCharIndex.txt");
 		std::stringstream ss;
+		/*
 		for (size_t i = 0; i < 65532; i++) // length specific to arial.ttf.
 		{
 			std::uint16_t id = format->GetGlyphID((wchar_t)i);
@@ -642,6 +665,7 @@ namespace AstralEngine
 				ss << i << ": " << id << "\n";
 			}
 		}
+		*/
 
 		format->GetGlyphID((wchar_t)278); // id should be 416 but returns 56797
 
@@ -650,7 +674,6 @@ namespace AstralEngine
 	/////////////////////////////////////
 
 
-	// to double check table data: https://fontdrop.info/#/?darkmode=true go to tab "data"
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
