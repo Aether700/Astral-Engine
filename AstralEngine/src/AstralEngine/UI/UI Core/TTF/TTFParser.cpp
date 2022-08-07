@@ -186,7 +186,7 @@ namespace AstralEngine
 		std::uint16_t* endCode; // the end character for each segment
 		std::uint16_t reservedPad; // should be 0
 		std::uint16_t* startCode; // starting character for each segment
-		std::uint16_t* idDelta; // delta for every character code in segment
+		std::int16_t* idDelta; // delta for every character code in segment
 		std::uint16_t* idRangeOffset; // offset in bytes to glyph indexArray or 0
 		std::uint16_t* glyphIndexArray;
 
@@ -235,32 +235,10 @@ namespace AstralEngine
 					}
 					else
 					{
-						// temp //////////////////////////////////
-						std::uint16_t currIDDelta = idDelta[i]; // 0
-						std::uint16_t currEndCode = endCode[i]; // 383
-						std::uint16_t currStartCode = startCode[i]; // 160
-						std::uint16_t currIDRangeOffset = idRangeOffset[i]; // 282
-						std::uint16_t idMinusStart = charID - startCode[i]; // 118
-						std::uint16_t idRangeDividedBy2 = idRangeOffset[i] / 2; // 141
-						std::uint16_t idRangeIndex = i + idRangeDividedBy2 + idMinusStart; // 260
-						std::uint16_t resultingIndex = idRangeOffset[idRangeIndex]; // 1024
-						std::uint16_t temp = idDelta[i] + resultingIndex; // 1024
-
-						std::ofstream outIDRangeOffset = std::ofstream("idRangeOffset2.txt");
-						for (size_t i = 0; i < segCount; i++)
-						{
-							outIDRangeOffset << idRangeOffset[i] << "\n";
-						}
-						outIDRangeOffset.flush();
-						idRangeOffset is not consistant between different runtimes
-						//////////////////////////////////////////
-
-
-						std::uint16_t* indexAddr = idRangeOffset[i] + 2 * (charID - startCode[i]) 
-							+ (std::uint16_t*)&idRangeOffset[i];
-						std::uint16_t index = *(&idRangeOffset[i] + idRangeOffset[i] / 2 + (charID - startCode[i]));
-						//if (index == 0)
-						if (*indexAddr == 0)
+						std::uint16_t index = glyphIndexArray[i - segCount + idRangeOffset[i] / 2 
+							+ (charID - startCode[i])];
+						
+						if (index == 0)
 						{
 							break;
 						}
@@ -281,7 +259,7 @@ namespace AstralEngine
 		CmapFormat* format;
 
 		Cmap() : subtables(nullptr), format(nullptr) { }
-		Cmap(Cmap&& other) : index(other.index), subtables(other.subtables), format(other.format) 
+		Cmap(Cmap&& other) noexcept : index(other.index), subtables(other.subtables), format(other.format) 
 		{
 			other.subtables = nullptr;
 			other.format = nullptr;
@@ -326,6 +304,38 @@ namespace AstralEngine
 		}
 	};
 	
+	enum TTFOutlineFlags : std::uint8_t// used for simple glyphs
+	{
+		TTFOutlineFlagsOnCurve = 1,
+		TTFOutlineXShortVec = 1 << 1,
+		TTFOutlineYShortVec = 1 << 2,
+		TTFOutlineXSameOrPos = 1 << 3,
+		TTFOutlineYSameOrPos = 1 << 4,
+		TTFOutlineReserved1 = 1 << 5,
+		TTFOutlineReserved2 = 1 << 6
+	};
+
+	struct GlyphData
+	{
+	};
+
+	struct SimpleGlyphData : public GlyphData
+	{
+		std::uint16_t* endPtsOfContours; // array of length numberOfContours
+		std::uint16_t instructionLength; // in bytes
+		std::uint8_t* instructions; // array of length instructionLength
+		TTFOutlineFlags* flags; // array of variable length
+	};
+
+	struct GlyphDescription // used in glyf
+	{
+		std::int16_t numberOfContours; // if > 0-> simple glyph, if < 0 compound glyph if == 0 no glyph data
+		FWord xMin;
+		FWord yMin;
+		FWord xMax;
+		FWord yMax;
+	};
+
 	struct VerticalHeader // vhea
 	{
 		std::uint32_t version;
@@ -583,6 +593,16 @@ namespace AstralEngine
 
 	CmapFormat4* ReadCmapFormat4(std::ifstream& file)
 	{
+		/*
+		// temp ///////////////////////////
+		size_t pos = file.tellg();
+		std::uint16_t len = ReadTTFVar<std::uint16_t>(file);
+		std::uint8_t* data = new std::uint8_t[len];
+		file.read((char*)data, len);
+		file.seekg(pos);
+		//////////////////////////////////
+		*/
+
 		CmapFormat4* format4 = new CmapFormat4();
 		format4->format = 4;
 		format4->length = ReadTTFVar<std::uint16_t>(file);
@@ -594,10 +614,10 @@ namespace AstralEngine
 		format4->endCode = ReadTTFArr<std::uint16_t>(file, format4->segCount);
 		format4->reservedPad = ReadTTFVar<std::uint16_t>(file);
 		format4->startCode = ReadTTFArr<std::uint16_t>(file, format4->segCount);
-		format4->idDelta = ReadTTFArr<std::uint16_t>(file, format4->segCount);
+		format4->idDelta = ReadTTFArr<std::int16_t>(file, format4->segCount);
 		format4->idRangeOffset = ReadTTFArr<std::uint16_t>(file, format4->segCount);
-		constexpr size_t dataReadSoFar = 22; // data read for the Cmap format so far in bytes
-		format4->glyphIndexArray = ReadTTFArr<std::uint16_t> ( file, dataReadSoFar );
+		size_t dataReadSoFar = 14 + 2 * 4 * format4->segCount; // data read for the Cmap format so far in bytes
+		format4->glyphIndexArray = ReadTTFArr<std::uint16_t>(file, (format4->length - dataReadSoFar) / 2);
 
 		return format4;
 	}
@@ -656,8 +676,7 @@ namespace AstralEngine
 	{
 		std::ofstream file = std::ofstream("ArialTTFCharIndex.txt");
 		std::stringstream ss;
-		/*
-		for (size_t i = 0; i < 65532; i++) // length specific to arial.ttf.
+		for (size_t i = 0; i <= 65532; i++) // length specific to arial.ttf.
 		{
 			std::uint16_t id = format->GetGlyphID((wchar_t)i);
 			if (id != 0)
@@ -665,9 +684,8 @@ namespace AstralEngine
 				ss << i << ": " << id << "\n";
 			}
 		}
-		*/
 
-		format->GetGlyphID((wchar_t)278); // id should be 416 but returns 56797
+		//format->GetGlyphID((wchar_t)278); // id should be 416 but returns 56797
 
 		file.write(ss.str().c_str(), ss.str().length());
 	}
