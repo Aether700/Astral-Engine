@@ -304,15 +304,22 @@ namespace AstralEngine
 		}
 	};
 	
-	enum TTFOutlineFlags : std::uint8_t// used for simple glyphs
+	enum TTFOutlineFlags : std::uint8_t // used for simple glyphs
 	{
 		TTFOutlineFlagsOnCurve = 1,
-		TTFOutlineXShortVec = 1 << 1,
-		TTFOutlineYShortVec = 1 << 2,
-		TTFOutlineXSameOrPos = 1 << 3,
-		TTFOutlineYSameOrPos = 1 << 4,
-		TTFOutlineReserved1 = 1 << 5,
-		TTFOutlineReserved2 = 1 << 6
+		TTFOutlineXShortVec = 1 << 1, // if set the coordinate is 1 byte long otherwise it is 2 bytes long
+		TTFOutlineYShortVec = 1 << 2, // if set the coordinate is 1 byte long otherwise it is 2 bytes long
+		
+		// if set the next byte specifies the number of additional times this set 
+		// of flags is to be repeated (the number of flags can be smaller than the 
+		// number of points on the glyph)
+		TTFOutlineRepeat = 1 << 3, 
+
+		// meaning of the bit depends on the X/YShort bit. See documentation for details: https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
+		TTFOutlineXSameOrPositive = 1 << 4,
+		TTFOutlineYSameOrPositive = 1 << 5,
+		TTFOutlineReserved1 = 1 << 6,
+		TTFOutlineReserved2 = 1 << 7
 	};
 
 	struct GlyphData
@@ -321,10 +328,49 @@ namespace AstralEngine
 
 	struct SimpleGlyphData : public GlyphData
 	{
+		union SimpleGlyphCoord
+		{
+			std::uint8_t bytes1;
+			std::int16_t bytes2;
+		}; // which type to use is specified by the flags
+		
 		std::uint16_t* endPtsOfContours; // array of length numberOfContours
 		std::uint16_t instructionLength; // in bytes
 		std::uint8_t* instructions; // array of length instructionLength
 		TTFOutlineFlags* flags; // array of variable length
+		SimpleGlyphCoord* xCoordinates;
+		SimpleGlyphCoord* yCoordinates;
+
+		// for internal use only. Not part of the data
+		enum class CoordType
+		{
+			Bytes1,
+			Bytes2
+		};
+
+		CoordType typeOfCoordinate;
+	};
+
+	enum TTFCompoundGlyphComponentFlags : std::uint16_t
+	{
+		Args1And2AreWords = 1,
+		ArgsAreXYValues = 1 << 1,
+		RoundXYToGrid = 1 << 2,
+		HasAScale = 1 << 3,
+		Obsolete = 1 << 4, // ignore
+		MoreComponents = 1 << 5,
+		HasXYScale = 1 << 6,
+		IsTwoByTwo = 1 << 7,
+		HasInstructions = 1 << 8,
+		UsesComponentMetric = 1 << 9,
+		OverlapCompound = 1 << 10
+	};
+
+	struct CompoundGlyphData : public GlyphData
+	{
+		TTFCompoundGlyphComponentFlags flags;
+		std::uint16_t glyphIndex;
+		not finished
 	};
 
 	struct GlyphDescription // used in glyf
@@ -334,6 +380,7 @@ namespace AstralEngine
 		FWord yMin;
 		FWord xMax;
 		FWord yMax;
+		GlyphData* data;
 	};
 
 	struct VerticalHeader // vhea
