@@ -422,6 +422,13 @@ namespace AstralEngine
 			delete data;
 			data = other.data;
 			other.data = nullptr;
+
+			numberOfContours = other.numberOfContours;
+			xMin = other.xMin;
+			yMin = other.yMin;
+			xMax = other.xMax;
+			yMax = other.yMax;
+
 			return *this;
 		}
 
@@ -741,13 +748,17 @@ namespace AstralEngine
 
 	SimpleGlyphData* ReadSimpleGlyphData(std::ifstream& file, std::int16_t numContours)
 	{
-		this function has not been tested yet
 		AE_CORE_ASSERT(numContours > 0, "Number of contours cannot be <= 0 for a simple glyph");
 		
+
 		SimpleGlyphData* data = new SimpleGlyphData();
+		AE_CORE_ASSERT(file.good(), "");
 		data->endPtsOfContours = ReadTTFArr<std::uint16_t>(file, (size_t)numContours); 
+		AE_CORE_ASSERT(file.good(), "");
 		data->instructionLength = ReadTTFVar<std::uint16_t>(file);
+		AE_CORE_ASSERT(file.good(), "");
 		data->instructions = ReadTTFArr<std::uint8_t>(file, (size_t)data->instructionLength); 
+		AE_CORE_ASSERT(file.good(), "");
 
 		// read flags
 		size_t flagIndex = 0;
@@ -787,6 +798,7 @@ namespace AstralEngine
 		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[data->numFlags];
 		size_t coordIndex = 0;
 
+		AE_CORE_ASSERT(file.good(), "");
 		// read X coords
 		for (size_t i = 0; i < data->numFlags; i++)
 		{
@@ -811,6 +823,7 @@ namespace AstralEngine
 			data->xCoordinates[i] = tempCoordArr[i];
 		}
 
+		AE_CORE_ASSERT(file.good(), "");
 		// read y coords
 		coordIndex = 0;
 		for (size_t i = 0; i < data->numFlags; i++)
@@ -837,6 +850,7 @@ namespace AstralEngine
 		}
 
 		delete[] tempCoordArr;
+		AE_CORE_ASSERT(file.good(), ""); // temp for debug purposes
 
 		return data;
 	}
@@ -848,9 +862,11 @@ namespace AstralEngine
 
 	GlyphDescription ReadGlyphDescription(std::ifstream& file)
 	{
-		GlyphDescription glyph;
+		AE_CORE_ASSERT(file.good(), "");
 
-		glyph.numberOfContours = ReadTTFVar<std::int16_t>(file);
+		GlyphDescription glyph;
+		
+		glyph.numberOfContours = ReadTTFVar<std::int16_t>(file); this value is not being read properly
 		glyph.xMin = ReadFWord(file);
 		glyph.yMin = ReadFWord(file);
 		glyph.xMax = ReadFWord(file);
@@ -911,6 +927,27 @@ namespace AstralEngine
 		tableID[4] = '\0';
 		std::cout << tableID << "\n";
 	}
+
+	void LoopGlyphDescription(ADynArr<GlyphDescription>& glyf)
+	{
+		for (GlyphDescription& g : glyf)
+		{
+			if (g.data == nullptr)
+			{
+				int x = 0;
+			}
+			else if (g.numberOfContours > 0)
+			{
+				SimpleGlyphData* simple = (SimpleGlyphData*)g.data;
+				int x = 0;
+			}
+			else
+			{
+				int x = 0;
+			}
+		}
+	}
+
 	///////////////////////////////////////
 
 
@@ -975,6 +1012,8 @@ namespace AstralEngine
 			size_t oldPos = file.tellg();
 			file.seekg(dir.offset);
 
+			PrintTableTag(dir);
+
 			switch(dir.tag)
 			{
 			case s_headTag:
@@ -999,6 +1038,7 @@ namespace AstralEngine
 				{
 					glyf.Add(std::move(ReadGlyphDescription(file)));
 				}
+				LoopGlyphDescription(glyf); // temp
 				break;
 			}
 			file.seekg(oldPos);
