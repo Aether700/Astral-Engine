@@ -210,6 +210,14 @@ namespace AstralEngine
 			m_count++;
 		}
 
+		void Add(T&& element)
+		{
+			AE_PROFILE_FUNCTION();
+			CheckSize();
+			m_arr[m_count] = std::move(element);
+			m_count++;
+		}
+
 		template<typename... Args>
 		T& Emplace(Args&&... args)
 		{
@@ -282,7 +290,7 @@ namespace AstralEngine
 			return -1;
 		}
 
-		void Insert(const T& element, AIterator it)
+		void Insert(const T& element, AIterator& it)
 		{
 			Insert(element, it.m_pos);
 		}
@@ -292,6 +300,7 @@ namespace AstralEngine
 			Insert(element, it.m_pos);
 		}
 
+		
 		virtual void Insert(const T& element, size_t index) override
 		{
 			AE_PROFILE_FUNCTION();

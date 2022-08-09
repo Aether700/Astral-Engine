@@ -18,6 +18,7 @@ namespace AstralEngine
 	static constexpr std::uint32_t s_hmtxTag = 0x686D7478;
 	static constexpr std::uint32_t s_maxpTag = 0x6D617870;
 	static constexpr std::uint32_t s_cmapTag = 0x636D6170;
+	static constexpr std::uint32_t s_glyfTag = 0x676C7966;
 
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
@@ -38,6 +39,16 @@ namespace AstralEngine
 		std::uint32_t checkSum; 
 		std::uint32_t offset;
 		std::uint32_t length;
+
+		bool operator==(const TableDirectory& other) const
+		{
+			return tag == other.tag;
+		}
+
+		bool operator!=(const TableDirectory& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	struct HeaderTable // head
@@ -338,17 +349,21 @@ namespace AstralEngine
 		std::uint16_t instructionLength; // in bytes
 		std::uint8_t* instructions; // array of length instructionLength
 		TTFOutlineFlags* flags; // array of variable length
+		std::uint8_t* repeatCounts; // for internal use only, not part of the documentation
+		size_t numFlags;
 		SimpleGlyphCoord* xCoordinates;
+		size_t numXCoords;
 		SimpleGlyphCoord* yCoordinates;
+		size_t numYCoords;
 
-		// for internal use only. Not part of the data
-		enum class CoordType
+		~SimpleGlyphData()
 		{
-			Bytes1,
-			Bytes2
-		};
-
-		CoordType typeOfCoordinate;
+			delete[] endPtsOfContours;
+			delete[] instructions;
+			delete[] xCoordinates;
+			delete[] yCoordinates;
+			delete[] repeatCounts;
+		}
 	};
 
 	enum TTFCompoundGlyphComponentFlags : std::uint16_t
@@ -370,7 +385,7 @@ namespace AstralEngine
 	{
 		TTFCompoundGlyphComponentFlags flags;
 		std::uint16_t glyphIndex;
-		not finished
+		//not finished
 	};
 
 	struct GlyphDescription // used in glyf
@@ -381,6 +396,44 @@ namespace AstralEngine
 		FWord xMax;
 		FWord yMax;
 		GlyphData* data;
+
+		GlyphDescription() : data(nullptr) { }
+		GlyphDescription(GlyphDescription&& other) : data(other.data), numberOfContours(other.numberOfContours), 
+			xMin(other.xMin), yMin(other.yMin), xMax(other.xMax), yMax(other.yMax) 
+		{
+			other.data = nullptr;
+		}
+
+		~GlyphDescription() 
+		{
+			delete data;
+		}
+
+		// TODO fix ADynArr to allow move operator only to be used
+		GlyphDescription& operator=(const GlyphDescription& other)
+		{
+			AE_CORE_ERROR("Temporary function do not use");
+			return *this; 
+		}
+		//////////////////////////////////////////////////////////
+
+		GlyphDescription& operator=(GlyphDescription&& other) noexcept
+		{
+			delete data;
+			data = other.data;
+			other.data = nullptr;
+			return *this;
+		}
+
+		bool operator==(const GlyphDescription& other) const
+		{
+			return numberOfContours == other.numberOfContours && data == other.data;
+		}
+
+		bool operator!=(const GlyphDescription& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	struct VerticalHeader // vhea
@@ -640,16 +693,6 @@ namespace AstralEngine
 
 	CmapFormat4* ReadCmapFormat4(std::ifstream& file)
 	{
-		/*
-		// temp ///////////////////////////
-		size_t pos = file.tellg();
-		std::uint16_t len = ReadTTFVar<std::uint16_t>(file);
-		std::uint8_t* data = new std::uint8_t[len];
-		file.read((char*)data, len);
-		file.seekg(pos);
-		//////////////////////////////////
-		*/
-
 		CmapFormat4* format4 = new CmapFormat4();
 		format4->format = 4;
 		format4->length = ReadTTFVar<std::uint16_t>(file);
@@ -696,6 +739,136 @@ namespace AstralEngine
 		return c;
 	}
 
+	SimpleGlyphData* ReadSimpleGlyphData(std::ifstream& file, std::int16_t numContours)
+	{
+		this function has not been tested yet
+		AE_CORE_ASSERT(numContours > 0, "Number of contours cannot be <= 0 for a simple glyph");
+		
+		SimpleGlyphData* data = new SimpleGlyphData();
+		data->endPtsOfContours = ReadTTFArr<std::uint16_t>(file, (size_t)numContours); 
+		data->instructionLength = ReadTTFVar<std::uint16_t>(file);
+		data->instructions = ReadTTFArr<std::uint8_t>(file, (size_t)data->instructionLength); 
+
+		// read flags
+		size_t flagIndex = 0;
+		TTFOutlineFlags* tempArr = new TTFOutlineFlags[numContours];
+		std::uint8_t* tempRepeatArr = new std::uint8_t[numContours];
+
+		for (std::int16_t i = 0; i < numContours; i++)
+		{
+			TTFOutlineFlags currFlag = ReadTTFVar<TTFOutlineFlags>(file);
+			tempArr[flagIndex] = currFlag;
+
+			if (currFlag & TTFOutlineRepeat)
+			{
+				tempRepeatArr[flagIndex] = ReadTTFVar<std::uint8_t>(file);
+				i += tempRepeatArr[flagIndex];
+			}
+			else
+			{
+				tempRepeatArr[flagIndex] = 0;
+			}
+			flagIndex++;
+		}
+
+		data->numFlags = flagIndex;
+		data->flags = new TTFOutlineFlags[data->numFlags];
+		data->repeatCounts = new std::uint8_t[data->numFlags];
+
+		for (size_t i = 0; i < data->numFlags; i++)
+		{
+			data->flags[i] = tempArr[i];
+			data->repeatCounts[i] = tempRepeatArr[i];
+		}
+
+		delete[] tempArr;
+		delete[] tempRepeatArr;
+
+		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[data->numFlags];
+		size_t coordIndex = 0;
+
+		// read X coords
+		for (size_t i = 0; i < data->numFlags; i++)
+		{
+			TTFOutlineFlags& currFlag = data->flags[i];
+			if (currFlag & TTFOutlineXShortVec)
+			{
+				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
+				coordIndex++;
+			}
+			else if (!(currFlag & TTFOutlineXSameOrPositive))
+			{
+				tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
+				coordIndex++;
+			}
+		}
+
+		data->numXCoords = coordIndex;
+		data->xCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numXCoords];
+
+		for (size_t i = 0; i < data->numXCoords; i++)
+		{
+			data->xCoordinates[i] = tempCoordArr[i];
+		}
+
+		// read y coords
+		coordIndex = 0;
+		for (size_t i = 0; i < data->numFlags; i++)
+		{
+			TTFOutlineFlags& currFlag = data->flags[i];
+			if (currFlag & TTFOutlineYShortVec)
+			{
+				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
+				coordIndex++;
+			}
+			else if (!(currFlag & TTFOutlineYSameOrPositive))
+			{
+				tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
+				coordIndex++;
+			}
+		}
+
+		data->numYCoords = coordIndex;
+		data->yCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numYCoords];
+
+		for (size_t i = 0; i < data->numYCoords; i++)
+		{
+			data->yCoordinates[i] = tempCoordArr[i];
+		}
+
+		delete[] tempCoordArr;
+
+		return data;
+	}
+
+	CompoundGlyphData* ReadCompoundGlyphData(std::ifstream& file)
+	{
+		return nullptr;
+	}
+
+	GlyphDescription ReadGlyphDescription(std::ifstream& file)
+	{
+		GlyphDescription glyph;
+
+		glyph.numberOfContours = ReadTTFVar<std::int16_t>(file);
+		glyph.xMin = ReadFWord(file);
+		glyph.yMin = ReadFWord(file);
+		glyph.xMax = ReadFWord(file);
+		glyph.yMax = ReadFWord(file);
+		
+		if (glyph.numberOfContours > 0)
+		{
+			glyph.data = ReadSimpleGlyphData(file, glyph.numberOfContours);
+		}
+		else if (glyph.numberOfContours < 0)
+		{
+			glyph.data = ReadCompoundGlyphData(file);
+		}
+		// else there is no data so leave data to nullptr (set by constructor)
+
+		return glyph;
+	}
+
 	// returns true if the check sum test was correct, false otherwise
 	// do not use this function to validate the "head" table
 	bool ValidateCheckSum(std::uint32_t* table, std::uint32_t tableSize, std::uint32_t targetCheckSum)
@@ -716,27 +889,29 @@ namespace AstralEngine
 		return calculatedCheckSum == targetCheckSum;
 	}
 
-	// TTFParser //////////////////////////////////////////////////////////
-
-	// temp //////////////////////////////
-	void WriteToFileCharIndex(CmapFormat4* format)
+	TableDirectory* FindTable(ASinglyLinkedList<TableDirectory*>& tableList, std::uint32_t tag)
 	{
-		std::ofstream file = std::ofstream("ArialTTFCharIndex.txt");
-		std::stringstream ss;
-		for (size_t i = 0; i <= 65532; i++) // length specific to arial.ttf.
+		for (TableDirectory* currDir : tableList)
 		{
-			std::uint16_t id = format->GetGlyphID((wchar_t)i);
-			if (id != 0)
+			if (currDir->tag == tag)
 			{
-				ss << i << ": " << id << "\n";
+				return currDir;
 			}
 		}
-
-		//format->GetGlyphID((wchar_t)278); // id should be 416 but returns 56797
-
-		file.write(ss.str().c_str(), ss.str().length());
+		return nullptr;
 	}
-	/////////////////////////////////////
+
+	// TTFParser //////////////////////////////////////////////////////////
+
+	//temp debug functions//////////////////
+	void PrintTableTag(TableDirectory& dir)
+	{
+		char tableID[5];
+		AssertDataEndianness((std::uint32_t*)&dir.tag, tableID, 4, Endianness::BigEndian);
+		tableID[4] = '\0';
+		std::cout << tableID << "\n";
+	}
+	///////////////////////////////////////
 
 
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
@@ -751,13 +926,86 @@ namespace AstralEngine
 		OffsetSubtable offsetSubtable = ReadOffsetSubtable(file);
 		TableDirectory glyphOffsetTableDir = ReadTableDir(file);
 
-		bool hheaInitialized = false;
 		HeaderTable head;
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
+		ADynArr<GlyphDescription> glyf;
 		MaximumProfileTable maxp;
 		Cmap cmap;
 
+		ASinglyLinkedList<TableDirectory> tableDirectories;
+		ASinglyLinkedList<TableDirectory*> dependencyTables; // tables required by other tables for initialization
+
+		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
+		{
+			tableDirectories.Add(ReadTableDir(file));
+			TableDirectory* currDir = &tableDirectories[0];
+			switch(currDir->tag)
+			{
+			case s_hheaTag:
+			case s_maxpTag:
+				dependencyTables.Add(currDir);
+				break;
+			}
+		}
+
+		for (TableDirectory* dir : dependencyTables)
+		{
+			size_t oldPos = file.tellg();
+			file.seekg(dir->offset);
+			switch(dir->tag)
+			{
+			case s_hheaTag:
+				hhea = ReadHorizontalHeader(file);
+				break;
+
+			case s_maxpTag:
+				maxp = ReadMaximumProfileTable(file);
+				break;
+			}
+			file.seekg(oldPos);
+		}
+
+		for (TableDirectory& dir : tableDirectories)
+		{
+			if (FindTable(dependencyTables, dir.tag) != nullptr)
+			{
+				continue;
+			}
+			size_t oldPos = file.tellg();
+			file.seekg(dir.offset);
+
+			switch(dir.tag)
+			{
+			case s_headTag:
+				head = ReadHeaderTable(file);
+				break;
+
+			case s_hmtxTag:
+				hmtx.Reserve(hhea.numOfLongHorMetrics);
+				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
+				{
+					hmtx.Add(ReadLongHorMetric(file));
+				}
+				break;
+
+			case s_cmapTag:
+				cmap = std::move(ReadCmap(file));
+				break;
+				
+			case s_glyfTag:
+				glyf.Reserve(maxp.numGlyphs);
+				for (size_t i = 0; i < maxp.numGlyphs; i++)
+				{
+					glyf.Add(std::move(ReadGlyphDescription(file)));
+				}
+				break;
+			}
+			file.seekg(oldPos);
+		}
+	
+
+		/*
 		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
 		{
 			TableDirectory dir = ReadTableDir(file);
@@ -797,17 +1045,31 @@ namespace AstralEngine
 			else if (dir.tag == s_maxpTag)
 			{
 				maxp = ReadMaximumProfileTable(file);
+				glyf.Reserve(maxp.numGlyphs);
+				maxpInitialized = true;
 			}
 			else if (dir.tag == s_cmapTag)
 			{
 				cmap = std::move(ReadCmap(file));
-				WriteToFileCharIndex((CmapFormat4*)cmap.format); // temp
+			}
+			else if (dir.tag == s_glyfTag)
+			{
+				AE_CORE_ASSERT(maxpInitialized, "Maximum profile table not initialized before reading the glyf table");
+
+				GlyphDescription des = ReadGlyphDescription(file);
+				int x = 0;
+				/*
+				for (size_t i = 0; i < maxp.numGlyphs; i++)
+				{
+					glyf.Add(ReadGlyphDescription(file));
+				}
+				/
 			}
 
-			//need to read cmap next
 
 			file.seekg(oldPos);
 		}
+		*/
 
 
 
