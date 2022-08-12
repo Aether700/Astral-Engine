@@ -576,7 +576,7 @@ namespace AstralEngine
 		void Resize()
 		{
 			AE_PROFILE_FUNCTION();
-			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + 1;
+			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + (size_t)1;
 			T* temp = new T[newMax];
 
 			for (size_t i = 0; i < m_count; i++)

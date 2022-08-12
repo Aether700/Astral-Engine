@@ -165,41 +165,6 @@ void OnButtonClicked()
 	}
 }
 
-class TestObj
-{
-public:
-	TestObj()
-	{
-		m_arr = new int[5];
-
-		for (size_t i = 0; i < 5; i++)
-		{
-			m_arr[i] = i + 1;
-		}
-	}
-
-	TestObj& operator=(TestObj&& other) noexcept
-	{
-		delete[] m_arr;
-		m_arr = other.m_arr;
-		other.m_arr = nullptr;
-		return *this;
-	}
-
-	bool operator==(const TestObj& other) const
-	{
-		return m_arr == other.m_arr;
-	}
-
-	bool operator!=(const TestObj& other) const
-	{
-		return !(*this == other);
-	}
-
-private:
-	int* m_arr;
-};
-
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -208,12 +173,6 @@ public:
 
 	void OnAttach() override
 	{
-		using namespace AstralEngine;
-
-		ADynArr<TestObj> arr;
-		TestObj test;
-		arr.Add(std::move(test));
-
 		/*
 		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		unsigned int width = window->GetWidth(), height = window->GetHeight();
