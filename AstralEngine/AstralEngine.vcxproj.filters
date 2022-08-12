@@ -93,9 +93,6 @@
     <ClInclude Include="src\AstralEngine\Data Struct\ADynArr.h">
       <Filter>src\AstralEngine\Data Struct</Filter>
     </ClInclude>
-    <ClInclude Include="src\AstralEngine\Data Struct\AList.h">
-      <Filter>src\AstralEngine\Data Struct</Filter>
-    </ClInclude>
     <ClInclude Include="src\AstralEngine\Data Struct\AReference.h">
       <Filter>src\AstralEngine\Data Struct</Filter>
     </ClInclude>
