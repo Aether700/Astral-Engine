@@ -1,6 +1,5 @@
 #pragma once
 #include "AstralEngine/Core/Core.h"
-#include "AList.h"
 #include "AstralEngine/Debug/Instrumentor.h"
 
 
@@ -145,7 +144,7 @@ namespace AstralEngine
 	};
 
 	template<typename T>
-	class ADynArr : public AList<T>
+	class ADynArr sealed
 	{
 		friend class ADynArrIterator<T>;
 	public:
@@ -192,7 +191,7 @@ namespace AstralEngine
 			delete[] m_arr;
 		}
 
-		virtual size_t GetCount() const override 
+		size_t GetCount() const 
 		{
 			return m_count; 
 		}
@@ -202,7 +201,15 @@ namespace AstralEngine
 			return m_maxCount;
 		}
 
-		virtual void Add(const T& element) override
+		void Add(T&& element)
+		{
+			AE_PROFILE_FUNCTION();
+			CheckSize();
+			m_arr[m_count] = std::move(element);
+			m_count++;
+		}
+
+		void Add(const T& element)
 		{
 			AE_PROFILE_FUNCTION();
 			CheckSize();
@@ -226,13 +233,24 @@ namespace AstralEngine
 			return m_arr[0];
 		}
 
-		virtual void AddFirst(const T& element) override 
+		void AddFirst(T&& element)
+		{
+			AE_PROFILE_FUNCTION();
+			Insert(std::move(element), 0);
+		}
+
+		void AddFirst(const T& element) 
 		{
 			AE_PROFILE_FUNCTION();
 			Insert(element, 0);	
 		}
 
-		virtual void AddLast(const T& element) override 
+		void AddLast(T&& element)
+		{
+			Add(std::forward<T>(element));
+		}
+
+		void AddLast(const T& element) 
 		{
 			Add(element); 
 		}
@@ -269,7 +287,7 @@ namespace AstralEngine
 			return m_arr[index];
 		}
 		
-		virtual size_t Find(const T& element) const override
+		size_t Find(const T& element) const
 		{
 			AE_PROFILE_FUNCTION();
 			for (size_t i = 0; i < m_count; i++)
@@ -292,26 +310,6 @@ namespace AstralEngine
 			Insert(element, it.m_pos);
 		}
 
-		virtual void Insert(const T& element, size_t index) override
-		{
-			AE_PROFILE_FUNCTION();
-			CheckSize();
-			
-			if (m_count == 0)
-			{
-				AE_CORE_ASSERT(index == 0, "Invalid index provided");
-				Add(element);
-				return;
-			}
-
-			for (size_t i = m_count - 1; i >= index; i--)
-			{
-				m_arr[i + 1] = std::move(m_arr[i]);
-			}
-			m_arr[index] = element;
-			m_count++;
-		}
-
 		void Insert(T&& element, size_t index)
 		{
 			AE_PROFILE_FUNCTION();
@@ -332,6 +330,26 @@ namespace AstralEngine
 			m_count++;
 		}
 
+		void Insert(const T& element, size_t index)
+		{
+			AE_PROFILE_FUNCTION();
+			CheckSize();
+			
+			if (m_count == 0)
+			{
+				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				Add(element);
+				return;
+			}
+
+			for (size_t i = m_count - 1; i >= index; i--)
+			{
+				m_arr[i + 1] = std::move(m_arr[i]);
+			}
+			m_arr[index] = element;
+			m_count++;
+		}
+
 		void Insert(T&& element, const AIterator& it)
 		{
 			Insert(std::forward(element), it.m_pos);
@@ -342,7 +360,7 @@ namespace AstralEngine
 			Insert(std::forward(element), it.m_pos);
 		}
 
-		virtual void Remove(const T& element) override
+		void Remove(const T& element)
 		{
 			AE_PROFILE_FUNCTION();
 			size_t index = Find(element);
@@ -352,7 +370,7 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void RemoveAt(size_t index) override
+		void RemoveAt(size_t index)
 		{
 			AE_PROFILE_FUNCTION();
 			
@@ -389,7 +407,7 @@ namespace AstralEngine
 			m_maxCount = m_count;
 		}
 
-		virtual void Reserve(size_t count) override
+		void Reserve(size_t count)
 		{
 			AE_PROFILE_FUNCTION();
 			size_t currentCount = m_maxCount - m_count;
@@ -409,14 +427,26 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void Clear() override
+		void Clear()
 		{
 			m_count = 0;
 		}
 
-		virtual bool Contains(const T& element) const override
+		bool Contains(const T& element) const
 		{
 			return Find(element) != -1;
+		}
+
+		bool IsEmpty() const { return m_count == 0; }
+
+		T& Get(size_t index)
+		{
+			return this->operator[](index);
+		}
+
+		const T& Get(size_t index) const
+		{
+			return this->operator[](index);
 		}
 
 		T* GetData() { return m_arr; }
@@ -464,13 +494,13 @@ namespace AstralEngine
 		}
 
 
-		virtual T& operator[](size_t index) override 
+		T& operator[](size_t index) 
 		{
 			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index]; 
 		}
 		
-		virtual const T& operator[](size_t index) const override
+		const T& operator[](size_t index) const
 		{
 			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index];
@@ -546,7 +576,7 @@ namespace AstralEngine
 		void Resize()
 		{
 			AE_PROFILE_FUNCTION();
-			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + 1;
+			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + (size_t)1;
 			T* temp = new T[newMax];
 
 			for (size_t i = 0; i < m_count; i++)

@@ -1,5 +1,4 @@
 #pragma once
-#include "AList.h"
 #include "AstralEngine/Debug/Instrumentor.h"
 
 namespace AstralEngine
@@ -11,7 +10,7 @@ namespace AstralEngine
 	class ADoublyLinkedListConstIterator;
 
 	template<typename T>
-	class ADoublyLinkedList : public AList<T>
+	class ADoublyLinkedList sealed
 	{
 		struct Node;
 		friend class ADoublyLinkedListIterator<T>;
@@ -66,7 +65,7 @@ namespace AstralEngine
 			other.m_count = 0;
 		}
 
-		virtual ~ADoublyLinkedList() 
+		~ADoublyLinkedList() 
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -74,23 +73,27 @@ namespace AstralEngine
 			delete m_dummy;
 		}
 
-		virtual size_t GetCount() const override
+		size_t GetCount() const
 		{
 			return m_count;
 		}
 
-		virtual void Add(const T& element) override
+		void Add(T&& element)
 		{
 			AE_PROFILE_FUNCTION();
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
+			AddNode(newNode);			
+		}
 
-			newNode->next = m_head;
-			m_head->prev = newNode;
-			m_head = newNode;
+		void Add(const T& element)
+		{
+			AE_PROFILE_FUNCTION();
 
-			m_count++;
+			Node* newNode = new Node();
+			newNode->element = element;
+			AddNode(newNode);
 		}
 		
 		//emplace element at the end of the list
@@ -121,51 +124,35 @@ namespace AstralEngine
 			return newNode->element;
 		}
 
-		//moves the element into the list
-		void MoveAdd(T&& element)
+		void AddFirst(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
-
-			Node* newNode = new Node();
-			newNode->element = std::move(element);
-
-			newNode->next = m_head;
-			m_head->prev = newNode;
-			m_head = newNode;
-
-			m_count++;
+			Add(std::forward<T>(element));
 		}
 
-		virtual void AddFirst(const T& element) override
+		void AddFirst(const T& element)
 		{
 			Add(element);
 		}
 
-		virtual void AddLast(const T& element) override
+		void AddLast(T&& element)
 		{
 			AE_PROFILE_FUNCTION();
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
-
-			newNode->next = m_dummy;
-
-			if (m_dummy != m_head)
-			{
-				newNode->prev = m_dummy->prev;
-				m_dummy->prev->next = newNode;
-			}
-			else
-			{
-				m_head = newNode;
-			}
-			m_dummy->prev = newNode;
-			
-
-			m_count++;
+			AddNodeLast(newNode);
 		}
 
-		size_t Find(const T& element) const override
+		void AddLast(const T& element)
+		{
+			AE_PROFILE_FUNCTION();
+
+			Node* newNode = new Node();
+			newNode->element = element;
+			AddNodeLast(newNode);
+		}
+
+		size_t Find(const T& element) const
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -180,77 +167,34 @@ namespace AstralEngine
 			}
 			return -1;
 		}
-
-		virtual void Insert(const T& element, size_t index) override
-		{
-			AE_PROFILE_FUNCTION();
-
-			Node* indexNode = GetNode(index);
-			Node* newNode = new Node();
-			newNode->element = element;
-
-			if (indexNode == m_head)
-			{
-				newNode->next = m_head;
-				m_head->prev = newNode;
-				m_head = newNode;
-			}
-			else
-			{
-				newNode->next = indexNode;
-				newNode->prev = indexNode->prev;
-				indexNode->prev->next = newNode;
-				indexNode->prev = newNode;
-			}
-			m_count++;
-		}
-
+		
 		void Insert(T&& element, size_t index)
 		{
 			AE_PROFILE_FUNCTION();
 
-			Node* indexNode = GetNode(index);
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
+			InsertNode(newNode, index);
+		}
 
-			if (indexNode == m_head)
-			{
-				newNode->next = m_head;
-				m_head->prev = newNode;
-				m_head = newNode;
-			}
-			else
-			{
-				newNode->next = indexNode;
-				newNode->prev = indexNode->prev;
-				indexNode->prev->next = newNode;
-				indexNode->prev = newNode;
-			}
-			m_count++;
+		void Insert(const T& element, size_t index)
+		{
+			AE_PROFILE_FUNCTION();
+
+			Node* newNode = new Node();
+			newNode->element = element;
+			InsertNode(newNode, index);
 		}
 
 		void Insert(T element, AIterator it)
 		{
 			AE_PROFILE_FUNCTION();
 
-			Node* indexNode = it.m_currNode;
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
+			Node* indexNode = it.m_currNode;
 
-			if (indexNode == m_head)
-			{
-				newNode->next = m_head;
-				m_head->prev = newNode;
-				m_head = newNode;
-			}
-			else
-			{
-				newNode->next = indexNode;
-				newNode->prev = indexNode->prev;
-				indexNode->prev->next = newNode;
-				indexNode->prev = newNode;
-			}
-			m_count++;
+			InsertNode(newNode, indexNode);
 		}
 
 		void Insert(T element, AConstIterator it)
@@ -258,26 +202,13 @@ namespace AstralEngine
 			AE_PROFILE_FUNCTION();
 
 			Node* indexNode = it.m_currNode;
-			Node* newNode = new Node();
 			newNode->element = element;
+			Node* newNode = new Node();
 
-			if (indexNode == m_head)
-			{
-				newNode->next = m_head;
-				m_head->prev = newNode;
-				m_head = newNode;
-			}
-			else
-			{
-				newNode->next = indexNode;
-				newNode->prev = indexNode->prev;
-				indexNode->prev->next = newNode;
-				indexNode->prev = newNode;
-			}
-			m_count++;
+			InsertNode(newNode, indexNode);
 		}
 
-		virtual void Remove(const T& element) override
+		void Remove(const T& element)
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -305,7 +236,7 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void RemoveAt(size_t index) override
+		void RemoveAt(size_t index)
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -313,14 +244,12 @@ namespace AstralEngine
 			RemoveNode(toRemove);
 		}
 
-		virtual void Remove(AIterator iterator)
+		void Remove(AIterator iterator)
 		{
 			RemoveNode(iterator.m_currNode);
 		}
 
-		virtual void Reserve(size_t count) override { };
-
-		virtual void Clear() override
+		void Clear()
 		{
 			AE_PROFILE_FUNCTION();
 
@@ -329,17 +258,17 @@ namespace AstralEngine
 			m_count = 0;
 		}
 
-		virtual T& operator[](size_t index) override
+		T& operator[](size_t index)
 		{
 			return GetNode(index)->element;
 		}
 
-		virtual bool Contains(const T& element) const override
+		bool Contains(const T& element) const
 		{
 			return Find(element) != -1;
 		}
 
-		virtual const T& operator[](size_t index) const override
+		const T& operator[](size_t index) const
 		{
 			Node* n = GetNode(index);
 			return n->element;
@@ -450,6 +379,70 @@ namespace AstralEngine
 		}
 
 	private:
+
+		void AddNode(Node* newNode)
+		{
+			newNode->next = m_head;
+			m_head->prev = newNode;
+			m_head = newNode;
+
+			m_count++;
+		}
+
+		void AddNodeLast(Node* newNode)
+		{
+			newNode->next = m_dummy;
+
+			if (m_dummy != m_head)
+			{
+				newNode->prev = m_dummy->prev;
+				m_dummy->prev->next = newNode;
+			}
+			else
+			{
+				m_head = newNode;
+			}
+			m_dummy->prev = newNode;
+
+			m_count++;
+		}
+
+		void InsertNode(Node* newNode, size_t)
+		{
+			Node* indexNode = GetNode(index);
+			if (indexNode == m_head)
+			{
+				newNode->next = m_head;
+				m_head->prev = newNode;
+				m_head = newNode;
+			}
+			else
+			{
+				newNode->next = indexNode;
+				newNode->prev = indexNode->prev;
+				indexNode->prev->next = newNode;
+				indexNode->prev = newNode;
+			}
+			m_count++;
+		}
+
+		void InsertNode(Node* newNode, Node* indexNode)
+		{
+			if (indexNode == m_head)
+			{
+				newNode->next = m_head;
+				m_head->prev = newNode;
+				m_head = newNode;
+			}
+			else
+			{
+				newNode->next = indexNode;
+				newNode->prev = indexNode->prev;
+				indexNode->prev->next = newNode;
+				indexNode->prev = newNode;
+			}
+			m_count++;
+		}
 
 		Node* GetNode(size_t index) const
 		{
