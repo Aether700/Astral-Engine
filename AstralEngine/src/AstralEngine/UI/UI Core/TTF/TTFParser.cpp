@@ -349,11 +349,14 @@ namespace AstralEngine
 		std::uint16_t instructionLength; // in bytes
 		std::uint8_t* instructions; // array of length instructionLength
 		TTFOutlineFlags* flags; // array of variable length
-		std::uint8_t* repeatCounts; // for internal use only, not part of the documentation
-		size_t numFlags;
 		SimpleGlyphCoord* xCoordinates;
-		size_t numXCoords;
 		SimpleGlyphCoord* yCoordinates;
+
+		// for internal use only, not part of the documentation
+		std::uint8_t* repeatCounts; 
+		size_t numOfContours;
+		size_t numFlags;
+		size_t numXCoords;
 		size_t numYCoords;
 
 		~SimpleGlyphData()
@@ -363,6 +366,27 @@ namespace AstralEngine
 			delete[] xCoordinates;
 			delete[] yCoordinates;
 			delete[] repeatCounts;
+		}
+
+		TTFOutlineFlags GetFlags(size_t index)
+		{
+			AE_CORE_ASSERT(index < endPtsOfContours[numOfContours - 1], "Index out of bounds");
+
+			if (index >= numFlags)
+			{
+				return flags[numFlags - 1];
+			}
+
+			TTFOutlineFlags lastFlag = flags[0];
+			for (size_t i = 0; i < index; i++)
+			{
+				lastFlag = flags[i];
+				if (flags[i] & TTFOutlineRepeat)
+				{
+					i += repeatCounts[i];
+				}
+			}
+			return lastFlag;
 		}
 	};
 
@@ -398,8 +422,9 @@ namespace AstralEngine
 		GlyphData* data;
 
 		GlyphDescription() : data(nullptr) { }
-		GlyphDescription(GlyphDescription&& other) : data(other.data), numberOfContours(other.numberOfContours), 
-			xMin(other.xMin), yMin(other.yMin), xMax(other.xMax), yMax(other.yMax) 
+		GlyphDescription(GlyphDescription&& other) noexcept : data(other.data), 
+			numberOfContours(other.numberOfContours), xMin(other.xMin), yMin(other.yMin), 
+			xMax(other.xMax), yMax(other.yMax) 
 		{
 			other.data = nullptr;
 		}
@@ -408,14 +433,6 @@ namespace AstralEngine
 		{
 			delete data;
 		}
-
-		// TODO fix ADynArr to allow move operator only to be used
-		GlyphDescription& operator=(const GlyphDescription& other)
-		{
-			AE_CORE_ERROR("Temporary function do not use");
-			return *this; 
-		}
-		//////////////////////////////////////////////////////////
 
 		GlyphDescription& operator=(GlyphDescription&& other) noexcept
 		{
@@ -752,20 +769,31 @@ namespace AstralEngine
 		
 
 		SimpleGlyphData* data = new SimpleGlyphData();
+		data->numOfContours = numContours;
 		AE_CORE_ASSERT(file.good(), "");
 		data->endPtsOfContours = ReadTTFArr<std::uint16_t>(file, (size_t)numContours); 
 		AE_CORE_ASSERT(file.good(), "");
 		data->instructionLength = ReadTTFVar<std::uint16_t>(file);
 		AE_CORE_ASSERT(file.good(), "");
-		data->instructions = ReadTTFArr<std::uint8_t>(file, (size_t)data->instructionLength); 
+		if (data->instructionLength > 0)
+		{
+			data->instructions = ReadTTFArr<std::uint8_t>(file, (size_t)data->instructionLength);
+		}
+		else
+		{
+			data->instructions = nullptr;
+		}
+
 		AE_CORE_ASSERT(file.good(), "");
 
 		// read flags
 		size_t flagIndex = 0;
-		TTFOutlineFlags* tempArr = new TTFOutlineFlags[numContours];
-		std::uint8_t* tempRepeatArr = new std::uint8_t[numContours];
+		size_t numPoints = data->endPtsOfContours[numContours - 1];
+		TTFOutlineFlags* tempArr = new TTFOutlineFlags[numPoints];
+		std::uint8_t* tempRepeatArr = new std::uint8_t[numPoints];
 
-		for (std::int16_t i = 0; i < numContours; i++)
+
+		for (std::int16_t i = 0; i < numPoints; i++)
 		{
 			TTFOutlineFlags currFlag = ReadTTFVar<TTFOutlineFlags>(file);
 			tempArr[flagIndex] = currFlag;
@@ -795,14 +823,14 @@ namespace AstralEngine
 		delete[] tempArr;
 		delete[] tempRepeatArr;
 
-		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[data->numFlags];
+		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[numPoints];
 		size_t coordIndex = 0;
 
 		AE_CORE_ASSERT(file.good(), "");
 		// read X coords
-		for (size_t i = 0; i < data->numFlags; i++)
+		for (size_t i = 0; i < numPoints; i++)
 		{
-			TTFOutlineFlags& currFlag = data->flags[i];
+			TTFOutlineFlags currFlag = data->GetFlags(i);
 			if (currFlag & TTFOutlineXShortVec)
 			{
 				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
@@ -826,9 +854,9 @@ namespace AstralEngine
 		AE_CORE_ASSERT(file.good(), "");
 		// read y coords
 		coordIndex = 0;
-		for (size_t i = 0; i < data->numFlags; i++)
+		for (size_t i = 0; i < numPoints; i++)
 		{
-			TTFOutlineFlags& currFlag = data->flags[i];
+			TTFOutlineFlags currFlag = data->GetFlags(i);
 			if (currFlag & TTFOutlineYShortVec)
 			{
 				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
@@ -866,12 +894,15 @@ namespace AstralEngine
 
 		GlyphDescription glyph;
 		
-		glyph.numberOfContours = ReadTTFVar<std::int16_t>(file); this value is not being read properly
+		glyph.numberOfContours = ReadTTFVar<std::int16_t>(file); 
 		glyph.xMin = ReadFWord(file);
 		glyph.yMin = ReadFWord(file);
 		glyph.xMax = ReadFWord(file);
 		glyph.yMax = ReadFWord(file);
 		
+		do the compound glyph data reading and then test the whole function. we cannot test the whole 
+	    function without both since the offset of the next simple glyph depends on where the reading of the last glyph ended (might be compound glyph)
+
 		if (glyph.numberOfContours > 0)
 		{
 			glyph.data = ReadSimpleGlyphData(file, glyph.numberOfContours);
