@@ -12,11 +12,9 @@ workspace "AstralEngine"
 	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 	IncludeDir = {}
-	IncludeDir["GLFW"] = "AstralEngine/vendor/GLFW/include"
 	IncludeDir["Glad"] = "AstralEngine/vendor/Glad/include"
 	IncludeDir["stbi"] = "AstralEngine/vendor/stb_image"
 
-include "AstralEngine/vendor/GLFW"
 include "AstralEngine/vendor/Glad"
 
 project "AstralEngine"
@@ -48,14 +46,12 @@ project "AstralEngine"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.stbi}"
 	}
 
 	links
 	{
-		"GLFW",
 		"Glad"
 	}
 
@@ -66,7 +62,6 @@ project "AstralEngine"
 		defines
 		{
 			"AE_PLATFORM_WINDOWS", 
-			"GLFW_INCLUDE_NONE"
 		}
 
 	filter "configurations:Debug"
@@ -104,14 +99,14 @@ project "Sandbox"
 	includedirs
 	{
 		"AstralEngine/src",
-		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.stbi}"
 	}
 
 	links
 	{
-		"AstralEngine"
+		"AstralEngine",
+		"Opengl32.lib"
 	}
 	
 	filter "system:windows"

@@ -82,7 +82,7 @@ namespace AstralEngine
 
 	bool UIContext::OnMouseButtonPressed(MouseButtonPressedEvent& mousePressed)
 	{
-		if (mousePressed.GetButtonKeycode() == AE_MOUSE_BUTTON_LEFT)
+		if (mousePressed.GetButtonKeycode() == MouseButtonCode::Left)
 		{
 			if (m_focusedWindow != nullptr && m_focusedWindow->IsHovered())
 			{
@@ -104,7 +104,7 @@ namespace AstralEngine
 
 	bool UIContext::OnMouseButtonReleased(MouseButtonReleasedEvent& mouseReleased)
 	{
-		if (mouseReleased.GetButtonKeycode() == AE_MOUSE_BUTTON_LEFT)
+		if (mouseReleased.GetButtonKeycode() == MouseButtonCode::Left)
 		{
 			m_movingWindow = false;
 			m_resizingWindow = false;

@@ -4,9 +4,9 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "RenderCommand.h"
-#include "ECS/Components.h"
-#include "UI/UICore.h"
-#include "Core/Application.h"
+#include "AstralEngine/ECS/Components.h"
+#include "AstralEngine/UI/UICore.h"
+#include "AstralEngine/Core/Application.h"
 
 namespace AstralEngine
 {
