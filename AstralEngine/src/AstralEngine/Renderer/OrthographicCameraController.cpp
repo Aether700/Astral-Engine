@@ -22,20 +22,20 @@ namespace AstralEngine
 		AE_PROFILE_FUNCTION();
 		if (Input::GetKey(KeyCode::A))
 		{
-			m_camPos.x -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+			m_camPos.x -= m_camMoveSpeed * (float)Time::GetDeltaTime() * m_zoomLevel;
 		}
 		else if (Input::GetKey(KeyCode::D))
 		{
-			m_camPos.x += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+			m_camPos.x += m_camMoveSpeed * (float)Time::GetDeltaTime() * m_zoomLevel;
 		}
 
 		if (Input::GetKey(KeyCode::W))
 		{
-			m_camPos.y += m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+			m_camPos.y += m_camMoveSpeed * (float)Time::GetDeltaTime() * m_zoomLevel;
 		}
 		else if (Input::GetKey(KeyCode::S))
 		{
-			m_camPos.y -= m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+			m_camPos.y -= m_camMoveSpeed * (float)Time::GetDeltaTime() * m_zoomLevel;
 		}
 		m_camera.SetPosition(m_camPos);
 
@@ -43,11 +43,11 @@ namespace AstralEngine
 		{
 			if (Input::GetKey(KeyCode::Q))
 			{
-				m_camRot -= m_camRotSpeed * Time::GetDeltaTime();
+				m_camRot -= m_camRotSpeed * (float)Time::GetDeltaTime();
 			}
 			else if (Input::GetKey(KeyCode::E))
 			{
-				m_camRot += m_camRotSpeed * Time::GetDeltaTime();
+				m_camRot += m_camRotSpeed * (float)Time::GetDeltaTime();
 			}
 			m_camera.SetRotation(m_camRot);
 		}

@@ -114,11 +114,17 @@ public:
 		{
 			t.position = AstralEngine::Vector3::Zero();
 		}
+
+		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Left))
+		{
+			AstralEngine::Vector2Int pos = AstralEngine::Input::GetMousePosition();
+			AE_WARN("Left mouse button is down. Mouse Pos: %d, %d", pos.x, pos.y);
+		}
 	}
 
 private:
 
-	float speed = 0.05f;
+	float speed = 10.0f;//0.05f;
 };
 
 class RotateAroundTester : public AstralEngine::NativeScript
@@ -198,7 +204,7 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
-		m_entity.EmplaceComponent<Controller>();
+		//m_entity.EmplaceComponent<Controller>();
 		
 		/*
 		auto e = m_scene->CreateAEntity();
@@ -215,7 +221,7 @@ public:
 		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
 		cam.GetTransform().position.z = -8.0f;
 		cam.EmplaceComponent<CamController>();
-		cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
+		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 	}
 
@@ -224,10 +230,6 @@ public:
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-
-		AstralEngine::Renderer::BeginScene((AstralEngine::RuntimeCamera&)m_entity.GetComponent<AstralEngine::Camera>(), m_entity.GetTransform());
-		AstralEngine::Renderer::DrawQuad({ 3, 0, 3 }, AstralEngine::Quaternion::Identity(), { 3 ,3, 3 });
-		AstralEngine::Renderer::EndScene();
 
 		/*
 		m_cameraController->OnUpdate();
@@ -249,6 +251,32 @@ public:
 		*/
 
 		AstralEngine::Renderer::ResetStats();
+	}
+	
+	bool OnEvent(AstralEngine::AEvent& e) override
+	{
+		/*
+		using E = AstralEngine::MouseButtonPressedEvent;
+		E* eventPtr = dynamic_cast<E*>(&e);
+
+		if (eventPtr != nullptr)
+		{
+			static int count = 0;
+			if (eventPtr->GetButtonKeycode() == AstralEngine::MouseButtonCode::Left)
+			{
+				count++;
+				if (count == 3)
+				{
+					AstralEngine::Application::Exit();
+				}
+			}
+			else
+			{
+				count--;
+			}
+		}
+		*/
+		return false;
 	}
 
 	/*

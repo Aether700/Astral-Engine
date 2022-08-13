@@ -1,7 +1,7 @@
 #include "aepch.h"
 #include "Renderer.h"
 #include "Renderer2D.h"
-#include "ECS/Components.h"
+#include "AstralEngine/ECS/Components.h"
 #include "Mesh.h"
 #include "AstralEngine/UI/UICore.h"
 

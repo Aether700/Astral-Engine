@@ -4,7 +4,7 @@
 #include "AstralEngine/Data Struct/AReference.h"
 #include "AstralEngine/Renderer/Renderer.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
-#include "Core/Application.h"
+#include "AstralEngine/Core/Application.h"
 #include "Scene.h"
 #include "AEntity.h"
 #include "Components.h"

@@ -46,14 +46,8 @@ namespace AstralEngine
 			(function<&Application::OnWindowCloseEvent>, this));
 		dispatcher.HandleAEvent<WindowResizeEvent>(ADelegate<bool(WindowResizeEvent&)>
 			(function<&Application::OnWindowResizeEvent>, this));
-		dispatcher.HandleAEvent<KeyPressedEvent>(ADelegate<bool(KeyPressedEvent&)>
-			(&Input::OnKeyPressedEvent));
-		dispatcher.HandleAEvent<KeyReleasedEvent>(ADelegate<bool(KeyReleasedEvent&)>
-			(&Input::OnKeyReleasedEvent));
-		dispatcher.HandleAEvent<MouseButtonPressedEvent>(ADelegate<bool(MouseButtonPressedEvent&)>
-			(&Input::OnMousePressedEvent));
-		dispatcher.HandleAEvent<MouseButtonReleasedEvent>(ADelegate<bool(MouseButtonReleasedEvent&)>
-			(&Input::OnMouseReleasedEvent));
+		
+		Input::OnEvent(e);
 
 		for (int i = 0; i < m_layerStack.GetCount(); i++)
 		{

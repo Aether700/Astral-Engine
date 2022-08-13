@@ -238,6 +238,11 @@ namespace AstralEngine
 			return this->operator[](key);
 		}
 
+		const T& Get(const K& key) const
+		{
+			return this->operator[](key);
+		}
+
 		bool ContainsKey(const K& key) const
 		{
 			int bucketIndex = GetBucketIndex(key);
@@ -297,9 +302,26 @@ namespace AstralEngine
 			return pair.GetElement();
 		}
 
+		const T& operator[](const K& key) const
+		{
+			AE_PROFILE_FUNCTION();
+			AE_CORE_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
+			size_t bucketIndex = GetBucketIndex(key);
+
+			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
+			{
+				if (m_equalsFunc(pair.GetKey(), key))
+				{
+					return pair.GetElement();
+				}
+			}
+
+			return m_bucketArr[bucketIndex][0].GetElement();
+		}
+
 		AUnorderedMap<K, T>::AIterator begin()
 		{
-			size_t bucketIndex;
+			size_t bucketIndex = m_bucketCount - 1;
 			for (size_t i = 0; i < m_bucketCount; i++)
 			{
 				if (!m_bucketArr[i].IsEmpty())
@@ -314,12 +336,12 @@ namespace AstralEngine
 
 		AUnorderedMap<K, T>::AIterator end()
 		{
-			size_t bucketIndex;
-			for (size_t i = m_bucketCount - 1; i >= 0; i--)
+			size_t bucketIndex = m_bucketCount - 1;
+			for (int i = m_bucketCount - 1; i >= 0; i--)
 			{
 				if (!m_bucketArr[i].IsEmpty())
 				{
-					bucketIndex = i;
+					bucketIndex = (size_t)i;
 					break;
 				}
 			}
