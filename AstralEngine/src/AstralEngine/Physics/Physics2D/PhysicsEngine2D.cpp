@@ -54,7 +54,7 @@ namespace AstralEngine
 
 			if (!(constraints & Rigidbody2DConstraintsFixedRotation)) 
 			{
-				rb->SetRotation(rb->GetRotation() + Math::RadiantsToDegree(rb->GetAngularVelocity() * timeStep));
+				rb->SetRotation(rb->GetRotation() + Math::RadiansToDegree(rb->GetAngularVelocity() * timeStep));
 			}
 		}
 	}

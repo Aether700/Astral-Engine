@@ -18,6 +18,6 @@ namespace AstralEngine
 	void Rigidbody2D::OnUpdate()
 	{
 		GetTransform().position = m_position;
-		GetTransform().rotation.z = m_rotation;
+		GetTransform().rotation.SetEulerAngles(0.0f, 0.0f, m_rotation);
 	}
 }

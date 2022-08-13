@@ -20,9 +20,6 @@ namespace AstralEngine
 		static float ArcCos(float v);
 		static float Tan(float v);
 
-		static float DegreeToRadiants(float degrees);
-		static float RadiantsToDegree(float radians);
-
 		static float ArcTan(float v);
 		static float ArcTan2(float y, float x);
 		static float ArcTan2(Vector2 v);
@@ -55,7 +52,6 @@ namespace AstralEngine
 		
 		static float PerlinNoise(float x, float y);
 		static float PerlinNoise(Vector2 pos);
-		static double Pi();
 	};
 
 	/* Basic rudementary Random class to get random ints and floats

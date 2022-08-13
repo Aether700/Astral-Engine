@@ -10,11 +10,23 @@
     <Filter Include="src\AstralEngine\AEvents">
       <UniqueIdentifier>{BE9F4C80-AAC4-9B00-D30F-8190BF939A1E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\AstralEngine\Algorithms">
+      <UniqueIdentifier>{C276D475-2E84-025C-B76A-FE462377CE12}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\AstralEngine\Core">
       <UniqueIdentifier>{F1B75220-5D24-0E1B-2618-A67892433083}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\AstralEngine\Data Struct">
       <UniqueIdentifier>{A7F349B7-93AE-3963-3C66-B2AD280084F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\Debug">
+      <UniqueIdentifier>{2F11B62A-1B0B-DF7C-0478-758DF01045E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\ECS">
+      <UniqueIdentifier>{C3F8D365-AF87-5D2F-58A6-712A44146ED5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\ECS\ECS Core">
+      <UniqueIdentifier>{766BF2ED-E283-D917-AB30-69B117086EB1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\AstralEngine\Math">
       <UniqueIdentifier>{72F85720-DE64-131B-A758-AB7813843583}</UniqueIdentifier>
@@ -24,6 +36,18 @@
     </Filter>
     <Filter Include="src\AstralEngine\Math\Vectors">
       <UniqueIdentifier>{47CD3A23-B3E5-214D-7C92-B1E6E869B6E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\Physics">
+      <UniqueIdentifier>{6B9CD854-57C1-27D5-800C-0D656C9026F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\Physics\Physics2D">
+      <UniqueIdentifier>{D30CCA14-BF48-CD7E-285B-E57514B67599}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\Physics\Physics2D\PhysicsCore">
+      <UniqueIdentifier>{6EF2BF73-5A70-100D-4368-CEA42F855235}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore">
+      <UniqueIdentifier>{3F02DDE1-2B6D-9DED-D488-0253C0D260D0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\AstralEngine\Platform">
       <UniqueIdentifier>{6DF4E9EB-D9B6-1D76-2267-AC028E68F653}</UniqueIdentifier>
@@ -36,6 +60,12 @@
     </Filter>
     <Filter Include="src\AstralEngine\Renderer">
       <UniqueIdentifier>{BFFBC6C6-2BBE-FA50-746E-89DDE06FD32E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\UI">
+      <UniqueIdentifier>{86ACFEA5-F20D-DCB3-7B7B-2266E7DB1273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\AstralEngine\UI\UI Core">
+      <UniqueIdentifier>{9C5EECF4-086C-1ADB-9152-16C6FD5EE691}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -59,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="src\AstralEngine\AEvents\MouseEvents.h">
       <Filter>src\AstralEngine\AEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Algorithms\Algorithms.h">
+      <Filter>src\AstralEngine\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Core\AWindow.h">
       <Filter>src\AstralEngine\Core</Filter>
@@ -90,10 +123,40 @@
     <ClInclude Include="src\AstralEngine\Core\Time.h">
       <Filter>src\AstralEngine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\ADoublyLinkedList.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
     <ClInclude Include="src\AstralEngine\Data Struct\ADynArr.h">
       <Filter>src\AstralEngine\Data Struct</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AHashSet.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AHeap.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AKeyElementPair.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\APriorityQueue.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AQueue.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
     <ClInclude Include="src\AstralEngine\Data Struct\AReference.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\ASinglyLinkedList.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\ASparseSet.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AStack.h">
       <Filter>src\AstralEngine\Data Struct</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Data Struct\AUniqueRef.h">
@@ -101,6 +164,45 @@
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Data Struct\AUnorderedMap.h">
       <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Data Struct\AWeakRef.h">
+      <Filter>src\AstralEngine\Data Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Debug\Instrumentor.h">
+      <Filter>src\AstralEngine\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\AEntity.h">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\Components.h">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\CoreComponents.h">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\ECS Core\ECSUtils.h">
+      <Filter>src\AstralEngine\ECS\ECS Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Group.h">
+      <Filter>src\AstralEngine\ECS\ECS Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Registry.h">
+      <Filter>src\AstralEngine\ECS\ECS Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Storage.h">
+      <Filter>src\AstralEngine\ECS\ECS Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\ECS Core\View.h">
+      <Filter>src\AstralEngine\ECS\ECS Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\Scene.h">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\ECS\SceneCamera.h">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\EntryPoint.h">
+      <Filter>src\AstralEngine</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Math\AMath.h">
       <Filter>src\AstralEngine\Math</Filter>
@@ -110,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Math\Matrices\Mat4.h">
       <Filter>src\AstralEngine\Math\Matrices</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Math\Quaternions.h">
+      <Filter>src\AstralEngine\Math</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Math\Utils.h">
       <Filter>src\AstralEngine\Math</Filter>
@@ -131,6 +236,24 @@
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector4Int.h">
       <Filter>src\AstralEngine\Math\Vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collider2D.h">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore\Physics2DCore.h">
+      <Filter>src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\PhysicsCore.h">
+      <Filter>src\AstralEngine\Physics\Physics2D\PhysicsCore</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.h">
+      <Filter>src\AstralEngine\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h">
       <Filter>src\AstralEngine\Platform\OpenGL</Filter>
@@ -156,8 +279,14 @@
     <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsTime.h">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsUtil.h">
+      <Filter>src\AstralEngine\Platform\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="src\AstralEngine\Platform\Windows\WindowsWindow.h">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Renderer\Framebuffer.h">
+      <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\GraphicsContext.h">
       <Filter>src\AstralEngine\Renderer</Filter>
@@ -165,7 +294,13 @@
     <ClInclude Include="src\AstralEngine\Renderer\IndexBuffer.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\Renderer\Mesh.h">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\OrthographicCamera.h">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Renderer\OrthographicCameraController.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\RenderAPI.h">
@@ -175,6 +310,9 @@
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\Renderer.h">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\Shader.h">
@@ -189,61 +327,52 @@
     <ClInclude Include="src\AstralEngine\Renderer\VertexBuffer.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\UI\UICore.h">
+      <Filter>src\AstralEngine\UI</Filter>
+    </ClInclude>
     <ClInclude Include="src\aepch.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\AstralEngine\Renderer\OrthographicCameraController.h" />
-    <ClInclude Include="src\AstralEngine\Debug\Instrumentor.h" />
-    <ClInclude Include="src\AstralEngine\EntryPoint.h">
-      <Filter>src\AstralEngine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\ADoublyLinkedList.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\APriorityQueue.h" />
-    <ClInclude Include="src\AstralEngine\Renderer\Framebuffer.h" />
-    <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AWeakRef.h" />
-    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Registry.h" />
-    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Storage.h" />
-    <ClInclude Include="src\AstralEngine\ECS\AEntity.h" />
-    <ClInclude Include="src\AstralEngine\ECS\ECS Core\ECSUtils.h" />
-    <ClInclude Include="src\AstralEngine\ECS\Scene.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\ASinglyLinkedList.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AQueue.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AStack.h" />
-    <ClInclude Include="src\AstralEngine\ECS\ECS Core\View.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
-    <ClInclude Include="src\AstralEngine\ECS\ECS Core\Group.h" />
-    <ClInclude Include="src\AstralEngine\ECS\Components.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AKeyElementPair.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AHeap.h" />
-    <ClInclude Include="src\AstralEngine\ECS\SceneCamera.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\ASparseSet.h" />
-    <ClInclude Include="src\AstralEngine\Algorithms\Algorithms.h" />
-    <ClInclude Include="src\AstralEngine\Data Struct\AHashSet.h" />
-    <ClInclude Include="src\AstralEngine\UI\UICore.h" />
-    <ClInclude Include="src\AstralEngine\Renderer\Mesh.h" />
-    <ClInclude Include="src\AstralEngine\ECS\CoreComponents.h" />
-    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collider2D.h" />
-    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
-    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
-    <ClInclude Include="src\AstralEngine\Math\Quaternions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
       <Filter>src\AstralEngine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\Core\Input.cpp">
+      <Filter>src\AstralEngine\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\AstralEngine\Core\LayerStack.cpp">
       <Filter>src\AstralEngine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Core\Log.cpp">
+      <Filter>src\AstralEngine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Core\Time.cpp">
+      <Filter>src\AstralEngine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\ECS\Component.cpp">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\ECS\Scene.cpp">
+      <Filter>src\AstralEngine\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp">
+      <Filter>src\AstralEngine\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat3.cpp">
       <Filter>src\AstralEngine\Math\Matrices</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat4.cpp">
       <Filter>src\AstralEngine\Math\Matrices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp">
+      <Filter>src\AstralEngine\Math</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Math\Utils.cpp">
       <Filter>src\AstralEngine\Math</Filter>
@@ -266,6 +395,21 @@
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector4Int.cpp">
       <Filter>src\AstralEngine\Math\Vectors</Filter>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collider2D.cpp">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore\Physics2DCore.cpp">
+      <Filter>src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp">
+      <Filter>src\AstralEngine\Physics\Physics2D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.cpp">
+      <Filter>src\AstralEngine\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.cpp">
       <Filter>src\AstralEngine\Platform\OpenGL</Filter>
     </ClCompile>
@@ -287,19 +431,28 @@
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLVertexBuffer.cpp">
       <Filter>src\AstralEngine\Platform\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsInput.cpp">
+    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsTime.cpp">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsTime.cpp">
+    <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsUtil.cpp">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Platform\Windows\WindowsWindow.cpp">
       <Filter>src\AstralEngine\Platform\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\Renderer\Framebuffer.cpp">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Renderer\GraphicsContext.cpp">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\IndexBuffer.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\OrthographicCamera.cpp">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Renderer\OrthographicCameraController.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\RenderAPI.cpp">
@@ -309,6 +462,9 @@
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\Renderer.cpp">
+      <Filter>src\AstralEngine\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\Shader.cpp">
@@ -323,26 +479,17 @@
     <ClCompile Include="src\AstralEngine\Renderer\VertexBuffer.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\UI\UI Core\Font.cpp">
+      <Filter>src\AstralEngine\UI\UI Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AstralEngine\UI\UICore.cpp">
+      <Filter>src\AstralEngine\UI</Filter>
+    </ClCompile>
     <ClCompile Include="src\aepch.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\Renderer\OrthographicCameraController.cpp" />
-    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp" />
-    <ClCompile Include="src\AstralEngine\Renderer\Framebuffer.cpp" />
-    <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.cpp" />
-    <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
-    <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
-    <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
-    <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
-    <ClCompile Include="src\AstralEngine\ECS\Component.cpp" />
-    <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
-    <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
-    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collider2D.cpp" />
-    <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp" />
-    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp" />
-    <ClCompile Include="src\AstralEngine\Math\Quaternion.cpp" />
   </ItemGroup>
 </Project>
