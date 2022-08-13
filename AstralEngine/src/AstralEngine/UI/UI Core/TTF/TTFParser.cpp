@@ -405,11 +405,30 @@ namespace AstralEngine
 		OverlapCompound = 1 << 10
 	};
 
+	enum class TTFCompoundGlyphTransformation
+	{
+		SameScale, // entry 1
+		TwoScales, // entry 2
+		FourScales // entry 3
+	};
+
 	struct CompoundGlyphData : public GlyphData
 	{
 		TTFCompoundGlyphComponentFlags flags;
 		std::uint16_t glyphIndex;
-		//not finished
+
+		union CompoundGlyphArg
+		{
+			std::uint8_t unsignedByte;
+			std::int8_t signedByte;
+			std::uint16_t unsigned2Byte;
+			std::int16_t signed2Byte;
+		};
+
+		CompoundGlyphArg arg1;
+		CompoundGlyphArg arg2;
+
+		TTFCompoundGlyphTransformation transformation;
 	};
 
 	struct GlyphDescription // used in glyf
@@ -900,8 +919,8 @@ namespace AstralEngine
 		glyph.xMax = ReadFWord(file);
 		glyph.yMax = ReadFWord(file);
 		
-		do the compound glyph data reading and then test the whole function. we cannot test the whole 
-	    function without both since the offset of the next simple glyph depends on where the reading of the last glyph ended (might be compound glyph)
+		//do the compound glyph data reading and then test the whole function. we cannot test the whole 
+	    //function without both since the offset of the next simple glyph depends on where the reading of the last glyph ended (might be compound glyph)
 
 		if (glyph.numberOfContours > 0)
 		{
