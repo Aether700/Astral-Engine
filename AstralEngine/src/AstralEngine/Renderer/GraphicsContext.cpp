@@ -1,6 +1,6 @@
 #include "aepch.h"
 #include "GraphicsContext.h"
-#include "Platform/OpenGL/OpenGLGraphicsContext.h"
+#include "AstralEngine/Platform/OpenGL/OpenGLGraphicsContext.h"
 #include "RenderAPI.h"
 
 namespace AstralEngine

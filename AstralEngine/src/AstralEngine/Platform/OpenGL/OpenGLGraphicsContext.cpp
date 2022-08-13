@@ -1,12 +1,12 @@
 #include "aepch.h"
 #include "OpenGLGraphicsContext.h"
-#include "Core/AWindow.h"
+#include "AstralEngine/Core/AWindow.h"
 
 #include <glad/glad.h>
 
 #ifdef AE_PLATFORM_WINDOWS
-	#include "Platform/Windows/WindowsUtil.h"
-	#include "Platform/Windows/WindowsWindow.h"
+	#include "AstralEngine/Platform/Windows/WindowsUtil.h"
+	#include "AstralEngine/Platform/Windows/WindowsWindow.h"
 	#include "../vendor/OpenGL/wglext.h"
 #endif
 
