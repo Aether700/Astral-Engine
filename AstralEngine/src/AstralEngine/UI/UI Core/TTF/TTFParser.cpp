@@ -13,12 +13,15 @@ namespace AstralEngine
 
 	// tags
 	
+	these codes are specific to little endian, need to make sure they are accurate when big endian too
+
 	static constexpr std::uint32_t s_headTag = 0x68656164;
 	static constexpr std::uint32_t s_hheaTag = 0x68686561;
 	static constexpr std::uint32_t s_hmtxTag = 0x686D7478;
 	static constexpr std::uint32_t s_maxpTag = 0x6D617870;
 	static constexpr std::uint32_t s_cmapTag = 0x636D6170;
 	static constexpr std::uint32_t s_glyfTag = 0x676C7966;
+	static constexpr std::uint32_t s_locaTag = 0x6C6F6361; 
 
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
@@ -70,6 +73,70 @@ namespace AstralEngine
 		std::int16_t fontDirectionHint;
 		std::int16_t indexToLocFormat;
 		std::int16_t glyphDataFormat;
+	};
+
+	struct IndexToLocationTable //loca
+	{
+		bool isShort;
+		union OffsetArr
+		{
+			std::uint16_t* shortArr;
+			std::uint64_t* longArr;
+		} offsetArr;
+
+
+		IndexToLocationTable() { }
+		IndexToLocationTable(IndexToLocationTable&& other) : isShort(other.isShort)
+		{
+			if (isShort)
+			{
+				offsetArr.shortArr = other.offsetArr.shortArr;
+				other.offsetArr.shortArr = nullptr;
+			}
+			else
+			{
+				offsetArr.longArr = other.offsetArr.longArr;
+				other.offsetArr.longArr = nullptr;
+			}
+		}
+
+		~IndexToLocationTable()
+		{
+			if (isShort)
+			{
+				delete[] offsetArr.shortArr;
+			}
+			else
+			{
+				delete[] offsetArr.longArr;
+			}
+		}
+
+		IndexToLocationTable& operator=(IndexToLocationTable&& other)
+		{
+			if (isShort)
+			{
+				delete[] offsetArr.shortArr;
+			}
+			else
+			{
+				delete[] offsetArr.longArr;
+			}
+
+			isShort = other.isShort;
+			if (isShort)
+			{
+				offsetArr.shortArr = other.offsetArr.shortArr;
+				other.offsetArr.shortArr = nullptr;
+			}
+			else
+			{
+				offsetArr.longArr = other.offsetArr.longArr;
+				other.offsetArr.longArr = nullptr;
+			}
+
+			return *this;
+		}
 	};
 
 	struct HorizontalHeader // hhea
@@ -392,17 +459,17 @@ namespace AstralEngine
 
 	enum TTFCompoundGlyphComponentFlags : std::uint16_t
 	{
-		Args1And2AreWords = 1,
-		ArgsAreXYValues = 1 << 1,
-		RoundXYToGrid = 1 << 2,
-		HasAScale = 1 << 3,
-		Obsolete = 1 << 4, // ignore
-		MoreComponents = 1 << 5,
-		HasXYScale = 1 << 6,
-		IsTwoByTwo = 1 << 7,
-		HasInstructions = 1 << 8,
-		UsesComponentMetric = 1 << 9,
-		OverlapCompound = 1 << 10
+		TTFCompoundGlyphComponentFlagsArgs1And2AreWords = 1,
+		TTFCompoundGlyphComponentFlagsArgsAreXYValues = 1 << 1,
+		TTFCompoundGlyphComponentFlagsRoundXYToGrid = 1 << 2,
+		TTFCompoundGlyphComponentFlagsHasAScale = 1 << 3,
+		TTFCompoundGlyphComponentFlagsObsolete = 1 << 4, // ignore
+		TTFCompoundGlyphComponentFlagsMoreComponents = 1 << 5,
+		TTFCompoundGlyphComponentFlagsHasXYScale = 1 << 6,
+		TTFCompoundGlyphComponentFlagsIsTwoByTwo = 1 << 7,
+		TTFCompoundGlyphComponentFlagsHasInstructions = 1 << 8,
+		TTFCompoundGlyphComponentFlagsUsesComponentMetric = 1 << 9,
+		TTFCompoundGlyphComponentFlagsOverlapCompound = 1 << 10
 	};
 
 	enum class TTFCompoundGlyphTransformation
@@ -419,16 +486,33 @@ namespace AstralEngine
 
 		union CompoundGlyphArg
 		{
-			std::uint8_t unsignedByte;
-			std::int8_t signedByte;
-			std::uint16_t unsigned2Byte;
-			std::int16_t signed2Byte;
+			std::uint8_t byte;
+			std::uint16_t word;
 		};
 
 		CompoundGlyphArg arg1;
 		CompoundGlyphArg arg2;
 
-		TTFCompoundGlyphTransformation transformation;
+		// some of these variables might not be set/used depending on the flags of the components
+		F2Dot14 scale; 
+		F2Dot14 xScale; 
+		F2Dot14 yScale; 
+		F2Dot14 scale01;
+		F2Dot14 scale10;
+
+		//TTFCompoundGlyphTransformation transformation;
+
+		CompoundGlyphData* nextGlyph = nullptr;
+		
+		// only set for "root" glyph data
+		std::uint16_t instructionLength;
+		std::uint8_t* instructions = nullptr;
+
+		~CompoundGlyphData() 
+		{
+			delete nextGlyph;
+			delete instructions;
+		}
 	};
 
 	struct GlyphDescription // used in glyf
@@ -642,6 +726,23 @@ namespace AstralEngine
 		head.glyphDataFormat = ReadTTFVar<std::int16_t>(file);
 
 		return head;
+	}
+
+	IndexToLocationTable ReadLoca(std::ifstream& file, HeaderTable& head, MaximumProfileTable& maxp)
+	{
+		IndexToLocationTable loca;
+		loca.isShort = head.indexToLocFormat == 0;
+		size_t numOffsets = maxp.numGlyphs + 1;
+		if (loca.isShort)
+		{
+			loca.offsetArr.shortArr = ReadTTFArr<std::uint16_t>(file, numOffsets);
+		}
+		else
+		{
+			loca.offsetArr.longArr = ReadTTFArr<std::uint64_t>(file, numOffsets);
+		}
+
+		return loca;
 	}
 
 	HorizontalHeader ReadHorizontalHeader(std::ifstream& file)
@@ -861,6 +962,17 @@ namespace AstralEngine
 				coordIndex++;
 			}
 		}
+		if (file.fail())
+		{
+			int x = 0;
+		}
+		
+		if (file.eof())
+		{
+			int x = 0;
+		}
+
+		AE_CORE_ASSERT(file.good(), "");
 
 		data->numXCoords = coordIndex;
 		data->xCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numXCoords];
@@ -904,7 +1016,59 @@ namespace AstralEngine
 
 	CompoundGlyphData* ReadCompoundGlyphData(std::ifstream& file)
 	{
-		return nullptr;
+		CompoundGlyphData* data = new CompoundGlyphData();
+		CompoundGlyphData* currGlyph = data;
+		
+		do
+		{
+			currGlyph->flags = ReadTTFVar<TTFCompoundGlyphComponentFlags>(file);
+			currGlyph->glyphIndex = ReadTTFVar<std::uint16_t>(file);
+
+
+			if (currGlyph->flags & TTFCompoundGlyphComponentFlagsArgs1And2AreWords)
+			{
+				currGlyph->arg1.word = ReadTTFVar<std::uint16_t>(file);
+				currGlyph->arg2.word = ReadTTFVar<std::uint16_t>(file);
+			}
+			else
+			{
+				currGlyph->arg1.byte = ReadTTFVar<std::uint8_t>(file);
+				currGlyph->arg2.byte = ReadTTFVar<std::uint8_t>(file);
+			}
+
+			if (currGlyph->flags & TTFCompoundGlyphComponentFlagsHasAScale)
+			{
+				currGlyph->scale = ReadTTFVar<F2Dot14>(file);
+			}
+			else if (currGlyph->flags & TTFCompoundGlyphComponentFlagsHasXYScale)
+			{
+				currGlyph->xScale = ReadTTFVar<F2Dot14>(file);
+				currGlyph->yScale = ReadTTFVar<F2Dot14>(file);
+			}
+			else if (currGlyph->flags & TTFCompoundGlyphComponentFlagsIsTwoByTwo)
+			{
+				currGlyph->xScale = ReadTTFVar<F2Dot14>(file);
+				currGlyph->scale01 = ReadTTFVar<F2Dot14>(file);
+				currGlyph->scale10 = ReadTTFVar<F2Dot14>(file);
+				currGlyph->yScale = ReadTTFVar<F2Dot14>(file);
+			}
+
+			if (currGlyph->flags & TTFCompoundGlyphComponentFlagsMoreComponents)
+			{
+				CompoundGlyphData* nextGlyph = new CompoundGlyphData();
+				currGlyph->nextGlyph = nextGlyph;
+				currGlyph = nextGlyph;
+			}
+		} 
+		while (currGlyph->flags & TTFCompoundGlyphComponentFlagsMoreComponents);
+
+		if (currGlyph->flags & TTFCompoundGlyphComponentFlagsHasInstructions)
+		{
+			data->instructionLength = ReadTTFVar<std::uint16_t>(file);
+			data->instructions = ReadTTFArr<std::uint8_t>(file, data->instructionLength);
+		}
+
+		return data;
 	}
 
 	GlyphDescription ReadGlyphDescription(std::ifstream& file)
@@ -993,6 +1157,7 @@ namespace AstralEngine
 			}
 			else
 			{
+				CompoundGlyphData* compound = (CompoundGlyphData*)g.data;
 				int x = 0;
 			}
 		}
@@ -1011,7 +1176,6 @@ namespace AstralEngine
 		}
 
 		OffsetSubtable offsetSubtable = ReadOffsetSubtable(file);
-		TableDirectory glyphOffsetTableDir = ReadTableDir(file);
 
 		HeaderTable head;
 		HorizontalHeader hhea;
@@ -1019,7 +1183,9 @@ namespace AstralEngine
 		ADynArr<GlyphDescription> glyf;
 		MaximumProfileTable maxp;
 		Cmap cmap;
+		IndexToLocationTable loca;
 
+		TableDirectory* locaDir = nullptr;
 		ASinglyLinkedList<TableDirectory> tableDirectories;
 		ASinglyLinkedList<TableDirectory*> dependencyTables; // tables required by other tables for initialization
 
@@ -1027,11 +1193,28 @@ namespace AstralEngine
 		{
 			tableDirectories.Add(ReadTableDir(file));
 			TableDirectory* currDir = &tableDirectories[0];
+
+			// temp ///////////////////////////////////////
+			char tableID[5];
+			memcpy(tableID, (std::uint32_t*)&currDir->tag, 4);
+			tableID[4] = '\0';
+
+			if (strcmp(tableID, "acol") == 0 || strcmp(tableID, "loca") == 0)
+			{
+				int x = 6;
+			}
+
+			///////////////////////////////////////////////
 			switch(currDir->tag)
 			{
 			case s_hheaTag:
 			case s_maxpTag:
+			case s_headTag:
 				dependencyTables.Add(currDir);
+				break;
+
+			case s_locaTag:
+				locaDir = currDir;
 				break;
 			}
 		}
@@ -1042,6 +1225,10 @@ namespace AstralEngine
 			file.seekg(dir->offset);
 			switch(dir->tag)
 			{
+			case s_headTag:
+				head = ReadHeaderTable(file);
+				break;
+
 			case s_hheaTag:
 				hhea = ReadHorizontalHeader(file);
 				break;
@@ -1052,6 +1239,15 @@ namespace AstralEngine
 			}
 			file.seekg(oldPos);
 		}
+
+		{
+			AE_CORE_ASSERT(locaDir != nullptr, "");
+			size_t oldPos = file.tellg();
+			file.seekg(locaDir->offset);
+			loca = ReadLoca(file, head, maxp);
+			file.seekg(oldPos);
+		}
+
 
 		for (TableDirectory& dir : tableDirectories)
 		{
@@ -1066,10 +1262,6 @@ namespace AstralEngine
 
 			switch(dir.tag)
 			{
-			case s_headTag:
-				head = ReadHeaderTable(file);
-				break;
-
 			case s_hmtxTag:
 				hmtx.Reserve(hhea.numOfLongHorMetrics);
 				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
@@ -1083,12 +1275,14 @@ namespace AstralEngine
 				break;
 				
 			case s_glyfTag:
+				/* glyf depends on loca table
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					glyf.Add(std::move(ReadGlyphDescription(file)));
 				}
 				LoopGlyphDescription(glyf); // temp
+				*/
 				break;
 			}
 			file.seekg(oldPos);
