@@ -13,15 +13,13 @@ namespace AstralEngine
 
 	// tags
 	
-	these codes are specific to little endian, need to make sure they are accurate when big endian too
-
-	static constexpr std::uint32_t s_headTag = 0x68656164;
-	static constexpr std::uint32_t s_hheaTag = 0x68686561;
-	static constexpr std::uint32_t s_hmtxTag = 0x686D7478;
-	static constexpr std::uint32_t s_maxpTag = 0x6D617870;
-	static constexpr std::uint32_t s_cmapTag = 0x636D6170;
-	static constexpr std::uint32_t s_glyfTag = 0x676C7966;
-	static constexpr std::uint32_t s_locaTag = 0x6C6F6361; 
+	static constexpr std::uint32_t s_headTag = 0x64616568;
+	static constexpr std::uint32_t s_hheaTag = 0x61656868;
+	static constexpr std::uint32_t s_hmtxTag = 0x78746D68;
+	static constexpr std::uint32_t s_maxpTag = 0x7078616D;
+	static constexpr std::uint32_t s_cmapTag = 0x70616D63;
+	static constexpr std::uint32_t s_glyfTag = 0x66796C67;
+	static constexpr std::uint32_t s_locaTag = 0x61636F6C;
 
 	//part of the font directory which is the first table of the ttf file
 	struct OffsetSubtable
@@ -81,12 +79,17 @@ namespace AstralEngine
 		union OffsetArr
 		{
 			std::uint16_t* shortArr;
-			std::uint64_t* longArr;
+			std::uint32_t* longArr;
 		} offsetArr;
+		size_t arrLen;
+		std::uint32_t ownDirOffset;
 
+		IndexToLocationTable() : isShort(true), arrLen(0)
+		{
+			offsetArr.shortArr = nullptr;
+		}
 
-		IndexToLocationTable() { }
-		IndexToLocationTable(IndexToLocationTable&& other) : isShort(other.isShort)
+		IndexToLocationTable(IndexToLocationTable&& other) noexcept : isShort(other.isShort), arrLen(other.arrLen)
 		{
 			if (isShort)
 			{
@@ -98,6 +101,7 @@ namespace AstralEngine
 				offsetArr.longArr = other.offsetArr.longArr;
 				other.offsetArr.longArr = nullptr;
 			}
+			other.arrLen = 0;
 		}
 
 		~IndexToLocationTable()
@@ -112,7 +116,17 @@ namespace AstralEngine
 			}
 		}
 
-		IndexToLocationTable& operator=(IndexToLocationTable&& other)
+		// retrieves the position of the glyph in the font file
+		std::uint32_t GetGlyphPos(size_t glyphIndex)
+		{
+			if (isShort)
+			{
+				return ownDirOffset + offsetArr.shortArr[glyphIndex] * 2;
+			}
+			return ownDirOffset + offsetArr.longArr[glyphIndex];
+		}
+
+		IndexToLocationTable& operator=(IndexToLocationTable&& other) noexcept
 		{
 			if (isShort)
 			{
@@ -124,6 +138,7 @@ namespace AstralEngine
 			}
 
 			isShort = other.isShort;
+			arrLen = other.arrLen;
 			if (isShort)
 			{
 				offsetArr.shortArr = other.offsetArr.shortArr;
@@ -134,6 +149,7 @@ namespace AstralEngine
 				offsetArr.longArr = other.offsetArr.longArr;
 				other.offsetArr.longArr = nullptr;
 			}
+			other.arrLen = 0;
 
 			return *this;
 		}
@@ -682,11 +698,9 @@ namespace AstralEngine
 	TableDirectory ReadTableDir(std::ifstream& file)
 	{
 		TableDirectory dir;
+		file.read((char*)&dir.tag, sizeof(std::uint32_t));
 
 		std::uint32_t data;
-		file.read((char*)&data, sizeof(std::uint32_t));
-		AssertDataEndianness(&data, &dir.tag, sizeof(std::uint32_t), Endianness::BigEndian);
-
 		file.read((char*)&data, sizeof(std::uint32_t));
 		AssertDataEndianness(&data, &dir.checkSum, sizeof(std::uint32_t), Endianness::BigEndian);
 
@@ -732,14 +746,14 @@ namespace AstralEngine
 	{
 		IndexToLocationTable loca;
 		loca.isShort = head.indexToLocFormat == 0;
-		size_t numOffsets = maxp.numGlyphs + 1;
+		loca.arrLen = maxp.numGlyphs + 1;
 		if (loca.isShort)
 		{
-			loca.offsetArr.shortArr = ReadTTFArr<std::uint16_t>(file, numOffsets);
+			loca.offsetArr.shortArr = ReadTTFArr<std::uint16_t>(file, loca.arrLen);
 		}
 		else
 		{
-			loca.offsetArr.longArr = ReadTTFArr<std::uint64_t>(file, numOffsets);
+			loca.offsetArr.longArr = ReadTTFArr<std::uint32_t>(file, loca.arrLen);
 		}
 
 		return loca;
@@ -886,7 +900,6 @@ namespace AstralEngine
 	SimpleGlyphData* ReadSimpleGlyphData(std::ifstream& file, std::int16_t numContours)
 	{
 		AE_CORE_ASSERT(numContours > 0, "Number of contours cannot be <= 0 for a simple glyph");
-		
 
 		SimpleGlyphData* data = new SimpleGlyphData();
 		data->numOfContours = numContours;
@@ -962,6 +975,7 @@ namespace AstralEngine
 				coordIndex++;
 			}
 		}
+
 		if (file.fail())
 		{
 			int x = 0;
@@ -1083,16 +1097,16 @@ namespace AstralEngine
 		glyph.xMax = ReadFWord(file);
 		glyph.yMax = ReadFWord(file);
 		
-		//do the compound glyph data reading and then test the whole function. we cannot test the whole 
-	    //function without both since the offset of the next simple glyph depends on where the reading of the last glyph ended (might be compound glyph)
-
+		AE_CORE_ASSERT(file.good(), "");
 		if (glyph.numberOfContours > 0)
 		{
 			glyph.data = ReadSimpleGlyphData(file, glyph.numberOfContours);
+			AE_CORE_ASSERT(file.good(), "");
 		}
 		else if (glyph.numberOfContours < 0)
 		{
 			glyph.data = ReadCompoundGlyphData(file);
+			AE_CORE_ASSERT(file.good(), "");
 		}
 		// else there is no data so leave data to nullptr (set by constructor)
 
@@ -1137,7 +1151,6 @@ namespace AstralEngine
 	void PrintTableTag(TableDirectory& dir)
 	{
 		char tableID[5];
-		AssertDataEndianness((std::uint32_t*)&dir.tag, tableID, 4, Endianness::BigEndian);
 		tableID[4] = '\0';
 		std::cout << tableID << "\n";
 	}
@@ -1160,6 +1173,14 @@ namespace AstralEngine
 				CompoundGlyphData* compound = (CompoundGlyphData*)g.data;
 				int x = 0;
 			}
+		}
+	}
+
+	void PrintLoca(IndexToLocationTable& loca)
+	{
+		for (size_t i = 0; i < loca.arrLen; i++)
+		{
+			std::cout << i << ": " << loca.GetGlyphPos(i) << "\n";
 		}
 	}
 
@@ -1198,12 +1219,6 @@ namespace AstralEngine
 			char tableID[5];
 			memcpy(tableID, (std::uint32_t*)&currDir->tag, 4);
 			tableID[4] = '\0';
-
-			if (strcmp(tableID, "acol") == 0 || strcmp(tableID, "loca") == 0)
-			{
-				int x = 6;
-			}
-
 			///////////////////////////////////////////////
 			switch(currDir->tag)
 			{
@@ -1244,7 +1259,8 @@ namespace AstralEngine
 			AE_CORE_ASSERT(locaDir != nullptr, "");
 			size_t oldPos = file.tellg();
 			file.seekg(locaDir->offset);
-			loca = ReadLoca(file, head, maxp);
+			loca = ReadLoca(file, head, maxp); 
+			loca.ownDirOffset = locaDir->offset;
 			file.seekg(oldPos);
 		}
 
@@ -1275,87 +1291,29 @@ namespace AstralEngine
 				break;
 				
 			case s_glyfTag:
-				/* glyf depends on loca table
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
+					file.seekg(loca.GetGlyphPos(i));
+					AE_CORE_ASSERT(file.good(), "");
+					size_t startPos = file.tellg();
 					glyf.Add(std::move(ReadGlyphDescription(file)));
+
+					if (i < maxp.numGlyphs - 1)
+					{
+						size_t startPos = loca.GetGlyphPos(i);
+						size_t actualSize = (size_t)file.tellg() - startPos;
+						size_t targetSize = loca.GetGlyphPos(i + 1) - startPos;
+						AE_CORE_ASSERT(targetSize == actualSize, "");
+					}
+
+					AE_CORE_ASSERT(file.good(), "");
 				}
 				LoopGlyphDescription(glyf); // temp
-				*/
 				break;
 			}
 			file.seekg(oldPos);
 		}
-	
-
-		/*
-		for (std::uint16_t i = 0; i < offsetSubtable.numTables; i++)
-		{
-			TableDirectory dir = ReadTableDir(file);
-
-			// temp ///////////////////////////////////////
-			char tableID[5];
-			memcpy(tableID, (std::uint32_t*)&dir.tag, 4);
-			tableID[4] = '\0';
-			///////////////////////////////////////////////
-
-			size_t oldPos = file.tellg();
-			file.seekg(dir.offset);
-
-			if (dir.tag == s_headTag)
-			{
-				head = ReadHeaderTable(file);
-			}
-			else if (dir.tag == s_hheaTag)
-			{
-				hhea = ReadHorizontalHeader(file);
-				hmtx.Reserve(hhea.numOfLongHorMetrics);
-				hheaInitialized = true;
-			}
-			else if (dir.tag == s_hmtxTag)
-			{
-				if (!hheaInitialized)
-				{
-					AE_CORE_ERROR("hhea table was not found before reaching the hmtx table");
-					return nullptr;
-				}
-
-				for (size_t i = 0; i < (size_t)hhea.numOfLongHorMetrics; i++)
-				{
-					hmtx.Add(ReadLongHorMetric(file));
-				}
-			}
-			else if (dir.tag == s_maxpTag)
-			{
-				maxp = ReadMaximumProfileTable(file);
-				glyf.Reserve(maxp.numGlyphs);
-				maxpInitialized = true;
-			}
-			else if (dir.tag == s_cmapTag)
-			{
-				cmap = std::move(ReadCmap(file));
-			}
-			else if (dir.tag == s_glyfTag)
-			{
-				AE_CORE_ASSERT(maxpInitialized, "Maximum profile table not initialized before reading the glyf table");
-
-				GlyphDescription des = ReadGlyphDescription(file);
-				int x = 0;
-				/*
-				for (size_t i = 0; i < maxp.numGlyphs; i++)
-				{
-					glyf.Add(ReadGlyphDescription(file));
-				}
-				/
-			}
-
-
-			file.seekg(oldPos);
-		}
-		*/
-
-
 
 		// temp
 		return nullptr;
