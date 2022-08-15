@@ -82,7 +82,6 @@ namespace AstralEngine
 			std::uint32_t* longArr;
 		} offsetArr;
 		size_t arrLen;
-		std::uint32_t ownDirOffset;
 
 		IndexToLocationTable() : isShort(true), arrLen(0)
 		{
@@ -117,13 +116,13 @@ namespace AstralEngine
 		}
 
 		// retrieves the position of the glyph in the font file
-		std::uint32_t GetGlyphPos(size_t glyphIndex)
+		std::uint32_t GetGlyphOffset(size_t glyphIndex)
 		{
 			if (isShort)
 			{
-				return ownDirOffset + offsetArr.shortArr[glyphIndex] * 2;
+				return offsetArr.shortArr[glyphIndex] * 2;
 			}
-			return ownDirOffset + offsetArr.longArr[glyphIndex];
+			return offsetArr.longArr[glyphIndex];
 		}
 
 		IndexToLocationTable& operator=(IndexToLocationTable&& other) noexcept
@@ -903,11 +902,8 @@ namespace AstralEngine
 
 		SimpleGlyphData* data = new SimpleGlyphData();
 		data->numOfContours = numContours;
-		AE_CORE_ASSERT(file.good(), "");
 		data->endPtsOfContours = ReadTTFArr<std::uint16_t>(file, (size_t)numContours); 
-		AE_CORE_ASSERT(file.good(), "");
 		data->instructionLength = ReadTTFVar<std::uint16_t>(file);
-		AE_CORE_ASSERT(file.good(), "");
 		if (data->instructionLength > 0)
 		{
 			data->instructions = ReadTTFArr<std::uint8_t>(file, (size_t)data->instructionLength);
@@ -917,7 +913,6 @@ namespace AstralEngine
 			data->instructions = nullptr;
 		}
 
-		AE_CORE_ASSERT(file.good(), "");
 
 		// read flags
 		size_t flagIndex = 0;
@@ -959,7 +954,6 @@ namespace AstralEngine
 		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[numPoints];
 		size_t coordIndex = 0;
 
-		AE_CORE_ASSERT(file.good(), "");
 		// read X coords
 		for (size_t i = 0; i < numPoints; i++)
 		{
@@ -976,18 +970,6 @@ namespace AstralEngine
 			}
 		}
 
-		if (file.fail())
-		{
-			int x = 0;
-		}
-		
-		if (file.eof())
-		{
-			int x = 0;
-		}
-
-		AE_CORE_ASSERT(file.good(), "");
-
 		data->numXCoords = coordIndex;
 		data->xCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numXCoords];
 
@@ -996,7 +978,6 @@ namespace AstralEngine
 			data->xCoordinates[i] = tempCoordArr[i];
 		}
 
-		AE_CORE_ASSERT(file.good(), "");
 		// read y coords
 		coordIndex = 0;
 		for (size_t i = 0; i < numPoints; i++)
@@ -1023,7 +1004,6 @@ namespace AstralEngine
 		}
 
 		delete[] tempCoordArr;
-		AE_CORE_ASSERT(file.good(), ""); // temp for debug purposes
 
 		return data;
 	}
@@ -1180,7 +1160,7 @@ namespace AstralEngine
 	{
 		for (size_t i = 0; i < loca.arrLen; i++)
 		{
-			std::cout << i << ": " << loca.GetGlyphPos(i) << "\n";
+			std::cout << i << ": " << loca.GetGlyphOffset(i) << "\n";
 		}
 	}
 
@@ -1260,21 +1240,18 @@ namespace AstralEngine
 			size_t oldPos = file.tellg();
 			file.seekg(locaDir->offset);
 			loca = ReadLoca(file, head, maxp); 
-			loca.ownDirOffset = locaDir->offset;
 			file.seekg(oldPos);
 		}
 
 
 		for (TableDirectory& dir : tableDirectories)
 		{
+
 			if (FindTable(dependencyTables, dir.tag) != nullptr)
 			{
 				continue;
 			}
-			size_t oldPos = file.tellg();
 			file.seekg(dir.offset);
-
-			PrintTableTag(dir);
 
 			switch(dir.tag)
 			{
@@ -1294,25 +1271,15 @@ namespace AstralEngine
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
-					file.seekg(loca.GetGlyphPos(i));
-					AE_CORE_ASSERT(file.good(), "");
-					size_t startPos = file.tellg();
+					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
 					glyf.Add(std::move(ReadGlyphDescription(file)));
-
-					if (i < maxp.numGlyphs - 1)
-					{
-						size_t startPos = loca.GetGlyphPos(i);
-						size_t actualSize = (size_t)file.tellg() - startPos;
-						size_t targetSize = loca.GetGlyphPos(i + 1) - startPos;
-						AE_CORE_ASSERT(targetSize == actualSize, "");
-					}
-
-					AE_CORE_ASSERT(file.good(), "");
 				}
-				LoopGlyphDescription(glyf); // temp
 				break;
 			}
-			file.seekg(oldPos);
+			AE_CORE_ASSERT(file.good(), "");
+
+			look into drawing glyphs from the glyf data:
+			https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
 		}
 
 		// temp
