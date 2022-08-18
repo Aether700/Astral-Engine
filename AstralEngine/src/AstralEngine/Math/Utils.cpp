@@ -136,14 +136,27 @@ namespace AstralEngine
 		return ArcTan2(v.y, v.x);
 	}
 
-	float Math::DegreeToRadians(float degrees)
+	float Math::Power(float num, int power)
 	{
-		return degrees * 0.01745329251994329576923690768489f;
-	}
+		if (power == 1)
+		{
+			return num;
+		}
+		else if (power == 0)
+		{
+			return 1.0f;
+		}
+		else if (power < 0)
+		{
+			return 1.0f / Power(num, -power);
+		}
 
-	float Math::RadiansToDegree(float radians)
-	{
-		return radians * 57.295779513082320876798154814105f;
+		int halfPower = power / 2;
+		if (power % 2 == 0)
+		{
+			return Power(num, halfPower) * Power(num, halfPower);
+		}
+		return num * Power(num, halfPower) * Power(num, halfPower);
 	}
 
 	float Math::Sqrt(float v)
@@ -195,6 +208,16 @@ namespace AstralEngine
 		}
 
 		return f2;
+	}
+
+	float Math::DegreeToRadians(float degrees)
+	{
+		return degrees * 0.01745329251994329576923690768489f;
+	}
+
+	float Math::RadiansToDegree(float radians)
+	{
+		return radians * 57.295779513082320876798154814105f;
 	}
 
 	float Math::CopySign(float magnitude, float sign)
@@ -298,6 +321,21 @@ namespace AstralEngine
 	float Math::PerlinNoise(Vector2 pos)
 	{
 		return PerlinNoise(pos.x, pos.y);
+	}
+
+	float Math::BezierQuadratic(float p0, float p1, float p2, float t)
+	{
+		if (t >= 1.0f)
+		{
+			return p2;
+		}
+		else if (t <= 0.0f)
+		{
+			return p0;
+		}
+		//B(t) = p1 + (1 - t)^2 * (p0 - p1) + t^2 (p2 - p1)
+		float oneMinusT = 1 - t;
+		return p1 + oneMinusT * oneMinusT * (p0 - p1) + t * t * (p2 - p1);
 	}
 
 	// Random ////////////////////////////////////////

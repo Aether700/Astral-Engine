@@ -1278,8 +1278,8 @@ namespace AstralEngine
 			}
 			AE_CORE_ASSERT(file.good(), "");
 
-			look into drawing glyphs from the glyf data:
-			https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
+			//look into drawing glyphs from the glyf data:
+			//https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
 		}
 
 		// temp

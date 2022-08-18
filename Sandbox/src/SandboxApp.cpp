@@ -8,6 +8,8 @@
 #include "AstralEngine/UI/UI Core/TTF/TTFParser.h"
 ////////
 
+using namespace AstralEngine;
+
 
 //Scripts////////////////////////////////////////////////////////////////////////
 class InputTest : public AstralEngine::NativeScript
@@ -443,6 +445,27 @@ void OnButtonClicked()
 	}
 }
 
+void TestIndividualPower(float num, int power)
+{
+	float astralResult = Math::Power(num, power);
+	float stdResult = std::pow(num, power);
+
+	AE_ASSERT(num == power, "");
+}
+
+void TestPower()
+{
+	TestIndividualPower(2, 2);
+	TestIndividualPower(2, 3);
+	TestIndividualPower(2, 4);
+	TestIndividualPower(5, 2);
+	TestIndividualPower(5, 3);
+	TestIndividualPower(5.5f, 2);
+	TestIndividualPower(5.5f, 9);
+	TestIndividualPower(5.5f, -9);
+	TestIndividualPower(5.5f, -10);
+}
+
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -451,6 +474,7 @@ public:
 
 	void OnAttach() override
 	{
+		TestPower();
 		/*
 		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
 		unsigned int width = window->GetWidth(), height = window->GetHeight();
