@@ -596,6 +596,62 @@ namespace AstralEngine
 		std::uint16_t numOfLongVerMetrics;
 	};
 
+	// Internal Font Objects //////////////////////////////////////////////
+
+	// for now only supports simple glyph
+	class Glyph
+	{
+	public:
+		Glyph(const GlyphDescription& description)
+		{
+			// temp ///////////////////////////
+			AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
+			///////////////////////////////////
+
+			m_numContours = description.numberOfContours;
+			m_outlineMin = Vector2Short(description.xMin, description.yMin);
+			m_outlineMax = Vector2Short(description.xMax, description.yMax);
+
+			if (IsSimpleGlyph())
+			{
+				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
+				m_points.Reserve((size_t)data->endPtsOfContours[m_numContours - 1]);
+
+				read points here
+			}
+
+		}
+
+		bool IsSimpleGlyph() const { return m_numContours > 0; }
+
+	private:
+		struct GlyphPoint
+		{
+			Vector2 coords;
+			bool isOnCurve;
+			bool isMidpoint;
+
+			GlyphPoint() : isOnCurve(false), isMidpoint(false) { }
+			GlyphPoint(const Vector2& c, bool onCurve, bool midpoint) : coords(c), isOnCurve(onCurve), 
+				isMidpoint(midpoint) { }
+
+			bool operator==(const GlyphPoint& other) const
+			{
+				return isOnCurve == other.isOnCurve && isMidpoint == other.isMidpoint && coords == other.coords;
+			}
+
+			bool operator!=(const GlyphPoint& other) const
+			{
+				return !(*this == other);
+			}
+		};
+
+		std::int16_t m_numContours;
+		Vector2Short m_outlineMin;
+		Vector2Short m_outlineMax;
+		ADynArr<GlyphPoint> m_points;
+	};
+
 
 	// Read functions /////////////////////////////////////////////////////
 
