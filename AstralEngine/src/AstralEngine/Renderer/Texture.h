@@ -29,6 +29,8 @@ namespace AstralEngine
 		static AReference<Texture2D> Create(const std::string& path);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height, void* data, unsigned int size);
+
+		static AReference<Texture2D> WhiteTexture();
 	};
 
 	//sub texture of a texture atlas

@@ -18,41 +18,67 @@ namespace AstralEngine
 	class Mesh;
 	class UIElement;
 
-	class DrawCommand;
+	// represents a uniform inside a material
+	class MatUniform
+	{
+	public:
+		MatUniform();
+		MatUniform(const std::string& name, float value);
+		MatUniform(const std::string& name, const Vector2& value);
+		MatUniform(const std::string& name, const Vector3& value);
+		MatUniform(const std::string& name, const Vector4& value);
+		MatUniform(const std::string& name, const Mat3& value);
+		MatUniform(const std::string& name, const Mat4& value);
+		MatUniform(const std::string& name, int value);
+		MatUniform(const std::string& name, const Vector2Int& value);
+		MatUniform(const std::string& name, const Vector3Int& value);
+		MatUniform(const std::string& name, const Vector4Int& value);
+		MatUniform(const std::string& name, bool value);
+		~MatUniform();
+
+		void SetToShader(AReference<Shader> shader) const;
+
+	private:
+		std::string m_name;
+		ADataType m_type;
+		void* m_data;
+	};
 
 	class Material
 	{
 	public:
-		Material(float ambiant = 0.3f, float diffuse = 0.5f, float specular = 1.0f,
-			float shininess = 64.0f)
-			: m_ambiantIntensity(ambiant), m_diffuseIntensity(diffuse),
-			m_specularIntensity(specular), m_shininess(shininess),
-			m_ignoresLighting(0.0f) { }
+		Material();
+		Material(const Vector4& color);
 
-		Material(bool ignoresLighting)
-			: m_ambiantIntensity(0.3f), m_diffuseIntensity(0.5f),
-			m_specularIntensity(1.0f), m_shininess(64.0f),
-			m_ignoresLighting(ignoresLighting ? 1.0f : 0.0f) { }
+		const AReference<Shader>& GetShader() const;
+		AReference<Shader>& GetShader();
+		void SetShader(const AReference<Shader>& shader);
 
-		bool operator==(const Material& other) const
-		{
-			return m_ambiantIntensity == other.m_ambiantIntensity
-				&& m_diffuseIntensity == other.m_diffuseIntensity
-				&& m_specularIntensity == other.m_specularIntensity
-				&& m_shininess == other.m_shininess;
-		}
+		const AReference<Texture2D>& GetDiffuseMap() const;
+		AReference<Texture2D>& GetDiffuseMap();
+		void SetDiffuseMap(const AReference<Texture2D>& diffuse);
 
-		bool operator!=(const Material& other) const
-		{
-			return !(*this == other);
-		}
+		const AReference<Texture2D>& GetSpecularMap() const;
+		AReference<Texture2D>& GetSpecularMap();
+		void SetSpecularMap(const AReference<Texture2D>& specular);
+
+		const Vector4& GetColor() const;
+		Vector4& GetColor();
+		void SetColor(const Vector4& color);
+
+		static AReference<Material> DefaultMat();
+		static AReference<Material> MissingMat();
+
+		bool operator==(const Material& other) const;
+		bool operator!=(const Material& other) const;
 
 	private:
-		float m_ambiantIntensity;
-		float m_diffuseIntensity;
-		float m_specularIntensity;
-		float m_shininess;
-		float m_ignoresLighting;
+		AReference<Shader> m_shader;
+		AReference<Texture2D> m_diffuseMap;
+		AReference<Texture2D> m_specularMap;
+		Vector4 m_color;
+
+		ASinglyLinkedList<MatUniform> m_additionalUniforms;
 	};
 
 	/*struch which contains the data to
@@ -166,7 +192,6 @@ namespace AstralEngine
 	class Renderer
 	{
 		friend class RenderingBatch;
-		friend class DrawCommand;
 	public:
 		static void Init();
 		static void Shutdown();
@@ -180,42 +205,7 @@ namespace AstralEngine
 		static void BeginScene(const RuntimeCamera& camera, const Transform& transform);
 		static void EndScene();
 
-		//requests that all the light's shadow maps be recalculated for this frame
-		static void UpdateLights();
-
-		static void UseShadows(bool value) { s_useShadows = value; }
-
-		static AReference<CubeMap> GetDefaultWhiteCubeMap();
-		static AReference<Texture2D> GetDefaultWhiteTexture();
-
 		//primitives
-
-		//voxels/cubes
-		static void DrawVoxel(const Mat4& transform, const Material& mat, AReference<CubeMap> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Mat4& transform, AReference<CubeMap> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Material& mat, AReference<CubeMap> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			AReference<CubeMap> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Mat4& transform, const Material& mat,
-			const Vector4& color = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Mat4& transform,
-			const Vector4& color = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Material& mat, const Vector4& tintColor = { 1, 1, 1, 1 });
-
-		static void DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		//squares
 		static void DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
@@ -307,22 +297,8 @@ namespace AstralEngine
 
 		static RendererStatistics s_stats;
 
-		static AReference<CubeMap> s_defaultWhiteCubeMap;
-		static AReference<Texture2D> s_defaultWhiteTexture;
-		static AReference<Shader> s_shader;
-		static Material s_defaultMaterial;
 		static AUnorderedMap<RenderingPrimitive, RenderingBatch>* s_renderingBatches;
-		static bool s_useShadows;
 
-		static DirectionalLight* s_directionalLightArr;
-		static unsigned int s_directionalLightIndex;
-
-		static PointLight* s_pointLightArr;
-		static unsigned int s_pointLightIndex;
-
-		static bool s_updateLights;
-
-		static ADynArr<DrawCommand> s_drawCommands; //keeps track of the draw commands executed this frame
 
 	};
 }

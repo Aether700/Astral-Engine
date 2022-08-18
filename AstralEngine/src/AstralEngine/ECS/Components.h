@@ -40,8 +40,21 @@ namespace AstralEngine
 		Transform();
 		Transform(const Vector3& translation);
 		Transform(const Vector3& pos, const Quaternion& rotation, const Vector3& scale);
+		Transform(const Vector3& pos, const Vector3& euler, const Vector3& scale);
 
 		Mat4 GetTransformMatrix() const;
+
+		const Vector3& GetLocalPosition() const;
+		void SetLocalPosition(const Vector3& position);
+		void SetLocalPosition(float x, float y, float z);
+
+		const Quaternion& GetRotation() const;
+		void SetRotation(const Quaternion& rotation);
+		void SetRotation(const Vector3& euler);
+		void SetRotation(float x, float y, float z);
+
+		const Vector3& GetScale() const;
+		void SetScale(const Vector3& scale);
 
 		AEntity GetParent() const { return m_parent; }
 		void SetParent(AEntity parent);
@@ -51,7 +64,10 @@ namespace AstralEngine
 
 		// rotates the transform around the point by the angle provided around the specified axis. 
 		// Note that this function does affects both the internal rotation of the transform and it's position
-		void RotateAround(const Vector3& point, float angle, const Vector3& axis);
+		void RotateAround(const Vector3& point, float angle, const Vector3& axis = Vector3(0.0f, 1.0f, 0.0f));
+
+		// returns true if the transform has changed since last frame, false otherwise
+		bool HasChanged() const;
 
 		Vector3 Forward() const;
 		Vector3 Right() const;
@@ -60,12 +76,17 @@ namespace AstralEngine
 		bool operator==(const Transform& other) const;
 		bool operator!=(const Transform& other) const;
 
-		Vector3 position;
-		Quaternion rotation;
-		Vector3 scale;
 
 	private:
+		Vector3 m_position;
+		Quaternion m_rotation;
+		Vector3 m_scale;
+
 		AEntity m_parent;
+		
+		mutable Mat4 m_transformMatrix;
+		mutable bool m_dirty;
+		mutable bool m_hasChanged;
 	};
 
 	struct Camera : public ToggleableComponent

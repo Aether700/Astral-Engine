@@ -13,7 +13,7 @@ class CamController : public AstralEngine::NativeScript
 public:
 	void OnStart() override
 	{
-		m_startPos = GetTransform().position;
+		m_startPos = GetTransform().GetLocalPosition();
 	}
 	
 	void OnUpdate() override
@@ -22,52 +22,58 @@ public:
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
-			t.position += t.Forward() * m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - t.Forward() * m_speed
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
 		{
-			t.position -= t.Forward() * m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - t.Forward() * m_speed
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
 		{
-			t.position += t.Right() * m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() + t.Right() * m_speed
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
 		{
-			t.position -= t.Right() * m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - t.Right() * m_speed
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
 		{
-			t.position.y += m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() + AstralEngine::Vector3::Up() * m_speed
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
 		{
-			t.position.y -= m_speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - AstralEngine::Vector3::Up() * m_speed 
+				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
 		{
-			auto euler = t.rotation.EulerAngles();
+			auto euler = t.GetRotation().EulerAngles();
 			euler.y += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
-			t.rotation.SetEulerAngles(euler);
+			t.SetRotation(euler);
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
 		{
-			auto euler = t.rotation.EulerAngles();
+			auto euler = t.GetRotation().EulerAngles();
 			euler.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
-			t.rotation.SetEulerAngles(euler);
+			t.SetRotation(euler);
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
 		{
-			t.position = m_startPos;
-			t.rotation = AstralEngine::Quaternion::Identity();
+			t.SetLocalPosition(m_startPos);
+			t.SetRotation(AstralEngine::Quaternion::Identity());
 		}
 
 	}
@@ -92,27 +98,31 @@ public:
 		AstralEngine::Transform& t = GetTransform();
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
-			t.position.y += speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() + AstralEngine::Vector3::Up()
+				* speed * AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
 		{
-			t.position.y -= speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - AstralEngine::Vector3::Up()
+				* speed * AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
 		{
-			t.position.x += speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() + AstralEngine::Vector3::Right()
+				* speed * AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
 		{
-			t.position.x -= speed * AstralEngine::Time::GetDeltaTime();
+			t.SetLocalPosition(t.GetLocalPosition() - AstralEngine::Vector3::Right()
+				* speed * AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKeyDown(AstralEngine::KeyCode::R))
 		{
-			t.position = AstralEngine::Vector3::Zero();
+			t.SetLocalPosition(AstralEngine::Vector3::Zero());
 		}
 
 		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Left))
@@ -138,7 +148,7 @@ public:
 			auto& targetTransform = m_target.GetTransform();
 			float angle = m_rotationSpeed * AstralEngine::Time::GetDeltaTime();
 
-			t.RotateAround(targetTransform.position, angle, AstralEngine::Vector3::Up());
+			t.RotateAround(targetTransform.GetLocalPosition(), angle, AstralEngine::Vector3::Up());
 		}
 	}
 
@@ -219,7 +229,7 @@ public:
 		m_scene->DestroyAEntity(cam);
 		cam = m_scene->CreateAEntity();
 		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
-		cam.GetTransform().position.z = -8.0f;
+		cam.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
 		cam.EmplaceComponent<CamController>();
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;

@@ -97,79 +97,132 @@ namespace AstralEngine
 
 	// Transform //////////////////////////////////////////////////////
 
-	Transform::Transform() : scale(1.0f, 1.0f, 1.0f) { }
+	Transform::Transform() : m_scale(1.0f, 1.0f, 1.0f), m_dirty(true), m_hasChanged(false) { }
 	Transform::Transform(const Vector3& translation)
-		: position(translation), scale(1.0f, 1.0f, 1.0f) { }
+		: m_position(translation), m_scale(1.0f, 1.0f, 1.0f), m_dirty(true), m_hasChanged(false) { }
 
 	Transform::Transform(const Vector3& pos, const Quaternion& rotation, const Vector3& scale)
-		: position(pos), rotation(rotation), scale(scale) { }
+		: m_position(pos), m_rotation(rotation), m_scale(scale), m_dirty(true), m_hasChanged(false) { }
+
+	Transform::Transform(const Vector3& pos, const Vector3& euler, const Vector3& scale)
+		: m_position(pos), m_rotation(euler), m_scale(scale), m_dirty(true), m_hasChanged(false) { }
 
 
 	Mat4 Transform::GetTransformMatrix() const
 	{
-		Mat4 transformMatrix;
-		if (rotation == Quaternion::Identity())
+		if (m_dirty)
 		{
-			transformMatrix = Mat4::Translate(Mat4::Identity(), position) * Mat4::Scale(Mat4::Identity(), scale);
-		}
-		else
-		{
-			Mat4 rotationMatrix = rotation.ComputeRotationMatrix();
-			transformMatrix = Mat4::Translate(Mat4::Identity(), position)
-				* rotationMatrix * Mat4::Scale(Mat4::Identity(), scale);
-		}
+			m_hasChanged = true;
+			m_dirty = false;
+			if (m_rotation == Quaternion::Identity())
+			{
+				m_transformMatrix = Mat4::Translate(Mat4::Identity(), m_position) * Mat4::Scale(Mat4::Identity(), m_scale);
+			}
+			else
+			{
+				Mat4 rotationMatrix = m_rotation.ComputeRotationMatrix();
+				m_transformMatrix = Mat4::Translate(Mat4::Identity(), m_position)
+					* rotationMatrix * Mat4::Scale(Mat4::Identity(), m_scale);
+			}
 
-		if (m_parent.IsValid())
-		{
-			return m_parent.GetTransform().GetTransformMatrix() * transformMatrix;
+			if (m_parent.IsValid())
+			{
+				m_transformMatrix = m_parent.GetTransform().GetTransformMatrix() * m_transformMatrix;
+			}
 		}
+		return m_transformMatrix;
+	}
 
-		return transformMatrix;
+	const Vector3& Transform::GetLocalPosition() const { return m_position; }
+	
+	void Transform::SetLocalPosition(const Vector3& position)
+	{ 
+		m_position = position;
+		m_dirty = true;
+	}
+
+	void Transform::SetLocalPosition(float x, float y, float z)
+	{
+		m_position = Vector3(x, y, z);
+		m_dirty = true;
+	}
+
+	const Quaternion& Transform::GetRotation() const { return m_rotation; }
+
+	void Transform::SetRotation(const Quaternion& rotation)
+	{
+		m_rotation = rotation;
+		m_dirty = true;
+	}
+
+	void Transform::SetRotation(const Vector3& euler)
+	{
+		m_rotation.SetEulerAngles(euler);
+		m_dirty = true;
+	}
+
+	void Transform::SetRotation(float x, float y, float z)
+	{
+		m_rotation.SetEulerAngles(x, y, z);
+		m_dirty = true;
+	}
+
+	const Vector3& Transform::GetScale() const { return m_scale; }
+	
+	void Transform::SetScale(const Vector3& scale)
+	{
+		m_scale = scale;
+		m_dirty = true;
 	}
 
 	void Transform::SetParent(AEntity parent)
 	{
 		m_parent = parent;
+		m_dirty = true;
 	}
 
 	void Transform::LookAt(const Transform& target, const Vector3& up)
 	{
-		LookAt(target.position, up);
+		LookAt(target.m_position, up);
 	}
 
 	void Transform::LookAt(const Vector3& target, const Vector3& up)
 	{
-		rotation = Quaternion::LookRotation(target - position, up);
+		m_rotation = Quaternion::LookRotation(target - m_position, up);
+		m_dirty = true;
 	}
 
 	void Transform::RotateAround(const Vector3& point, float angle, const Vector3& axis)
 	{
-		Vector3 pivotSpacePos = position - point;
+		Vector3 pivotSpacePos = m_position - point;
 		Quaternion rot = Quaternion::AngleAxisToQuaternion(angle, axis);
 		Vector3 resultPosPivotSpace = rot * pivotSpacePos;
-		rotation = rot * rotation;
-		position = resultPosPivotSpace + point;
+		m_rotation = rot * m_rotation;
+		m_position = resultPosPivotSpace + point;
+		m_dirty = true;
 	}
+
+	bool Transform::HasChanged() const { return m_hasChanged; }
 
 	Vector3 Transform::Forward() const
 	{
-		return rotation * Vector3::Forward();
+		return m_rotation * Vector3::Forward();
 	}
 
 	Vector3 Transform::Right() const
 	{
-		return rotation * Vector3::Right();
+		return m_rotation * Vector3::Right();
 	}
 
 	Vector3 Transform::Up() const
 	{
-		return rotation * Vector3::Up();
+		return m_rotation * Vector3::Up();
 	}
 
 	bool Transform::operator==(const Transform& other) const
 	{
-		return position == other.position
-			&& rotation == other.rotation && scale == other.scale;
+		return m_position == other.m_position
+			&& m_rotation == other.m_rotation && m_scale == other.m_scale && m_parent == other.m_parent;
 	}
 
 	bool Transform::operator!=(const Transform& other) const

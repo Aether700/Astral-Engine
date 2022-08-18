@@ -7,21 +7,174 @@
 
 namespace AstralEngine
 {
+	// MatUniform ////////////////////////////////////////////////////////////////////////
+
+	MatUniform::MatUniform() : m_data(nullptr) { }
+	
+	MatUniform::MatUniform(const std::string& name, float value) : m_name(name), m_type(ADataType::Float)
+	{
+		m_data = new float(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, const Vector2& value) : m_name(name), m_type(ADataType::Float2)
+	{
+		m_data = new Vector2(value);
+	}
+	
+	MatUniform::MatUniform(const std::string& name, const Vector3& value) : m_name(name), m_type(ADataType::Float3)
+	{
+		m_data = new Vector3(value);
+	}
+	
+	MatUniform::MatUniform(const std::string& name, const Vector4& value) : m_name(name), m_type(ADataType::Float4)
+	{
+		m_data = new Vector4(value);
+	}
+	
+	MatUniform::MatUniform(const std::string& name, const Mat3& value) : m_name(name), m_type(ADataType::Mat3)
+	{
+		m_data = new Mat3(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, const Mat4& value) : m_name(name), m_type(ADataType::Mat4)
+	{
+		m_data = new Mat4(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, int value) : m_name(name), m_type(ADataType::Int)
+	{
+		m_data = new int(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, const Vector2Int& value) : m_name(name), m_type(ADataType::Int2)
+	{
+		m_data = new Vector2Int(value);
+	}
+	
+	MatUniform::MatUniform(const std::string& name, const Vector3Int& value) : m_name(name), m_type(ADataType::Int3)
+	{
+		m_data = new Vector3Int(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, const Vector4Int& value) : m_name(name), m_type(ADataType::Int4)
+	{
+		m_data = new Vector4Int(value);
+	}
+
+	MatUniform::MatUniform(const std::string& name, bool value) : m_name(name), m_type(ADataType::Bool)
+	{
+		m_data = new bool(value);
+	}
+	
+	MatUniform::~MatUniform() { delete m_data; }
+
+	void MatUniform::SetToShader(AReference<Shader> shader) const
+	{
+		if (shader != nullptr)
+		{
+			AE_CORE_ASSERT(m_data != nullptr, "Trying to set invalid uniform to shader");
+
+			switch(m_type)
+			{
+			case ADataType::Bool:
+				shader->SetBool(m_name, *(bool*)m_data);
+				break;
+
+			case ADataType::Float:
+				shader->SetFloat(m_name, *(float*)m_data);
+				break;
+
+			case ADataType::Float2:
+				shader->SetFloat2(m_name, *(Vector2*)m_data);
+				break;
+
+			case ADataType::Float3:
+				shader->SetFloat3(m_name, *(Vector3*)m_data);
+				break;
+
+			case ADataType::Float4:
+				shader->SetFloat4(m_name, *(Vector4*)m_data);
+				break;
+
+			case ADataType::Int:
+				shader->SetInt(m_name, *(int*)m_data);
+				break;
+
+			case ADataType::Int2:
+				shader->SetInt2(m_name, *(Vector2Int*)m_data);
+				break;
+
+			case ADataType::Int3:
+				shader->SetInt3(m_name, *(Vector3Int*)m_data);
+				break;
+
+			case ADataType::Int4:
+				shader->SetInt4(m_name, *(Vector4Int*)m_data);
+				break;
+
+			case ADataType::Mat3:
+				shader->SetMat3(m_name, *(Mat3*)m_data);
+				break;
+
+			case ADataType::Mat4:
+				shader->SetMat4(m_name, *(Mat4*)m_data);
+				break;
+			}
+		}
+	}
+
+	// Material //////////////////////////////////////////////////////////////////////////
+
+	Material::Material() : m_diffuseMap(Texture2D::WhiteTexture()), 
+		m_specularMap(Texture2D::WhiteTexture()), m_color(1.0f, 1.0f, 1.0f, 1.0f) { }
+
+	Material::Material(const Vector4& color) : m_diffuseMap(Texture2D::WhiteTexture()),
+		m_specularMap(Texture2D::WhiteTexture()), m_color(color) { }
+
+	const AReference<Shader>& Material::GetShader() const { return m_shader; }
+	AReference<Shader>& Material::GetShader() { return m_shader; }
+	void Material::SetShader(const AReference<Shader>& shader) { m_shader = shader; }
+
+	const AReference<Texture2D>& Material::GetDiffuseMap() const { return m_diffuseMap; }
+	AReference<Texture2D>& Material::GetDiffuseMap() { return m_diffuseMap; }
+	void Material::SetDiffuseMap(const AReference<Texture2D>& diffuse) { m_diffuseMap = diffuse; }
+
+	const AReference<Texture2D>& Material::GetSpecularMap() const { return m_specularMap; }
+	AReference<Texture2D>& Material::GetSpecularMap() { return m_specularMap; }
+	void Material::SetSpecularMap(const AReference<Texture2D>& specular) { m_specularMap = specular; }
+
+	const Vector4& Material::GetColor() const { return m_color; }
+	Vector4& Material::GetColor() { return m_color; }
+	void Material::SetColor(const Vector4& color) { m_color = color; }
+
+	AReference<Material> Material::DefaultMat()
+	{
+		static AReference<Material> defaultMat = AReference<Material>::Create();
+		return defaultMat;
+	}
+
+	AReference<Material> Material::MissingMat()
+	{
+		static AReference<Material> missingMat = AReference<Material>::Create(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+		return missingMat;
+	}
+
+	bool Material::operator==(const Material& other) const
+	{
+		return m_shader == other.m_shader && m_diffuseMap == other.m_diffuseMap 
+			&& m_specularMap == other.m_specularMap;
+	}
+
+	bool Material::operator!=(const Material& other) const
+	{
+		return !(*this == other);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////
 
 	AUnorderedMap<RenderingPrimitive, RenderingBatch>* Renderer::s_renderingBatches;
 	RendererStatistics Renderer::s_stats;
-
-	AReference<CubeMap> Renderer::s_defaultWhiteCubeMap;
-	AReference<Texture2D> Renderer::s_defaultWhiteTexture;
-	AReference<Shader> Renderer::s_shader;
-	ADynArr<DrawCommand> Renderer::s_drawCommands;
-	Material Renderer::s_defaultMaterial = Material(); //create the default material
-	bool Renderer::s_useShadows = false;
-	DirectionalLight* Renderer::s_directionalLightArr;
-	unsigned int Renderer::s_directionalLightIndex;
-	PointLight* Renderer::s_pointLightArr;
-	unsigned int Renderer::s_pointLightIndex;
-	bool Renderer::s_updateLights;
 
 	unsigned int RenderingBatch::s_maxVertices = 64000;
 	unsigned int RenderingBatch::s_maxIndices = 72000;
@@ -31,7 +184,6 @@ namespace AstralEngine
 	unsigned int RenderingBatch::s_maxCubemapSlots = RenderingBatch::s_maxTextureSlots / 4;
 	unsigned int RenderingBatch::s_maxCubemapShadowMapSlots = RenderingBatch::s_maxTextureSlots / 4;
 
-	// Draw Command ////////////////////////////////////////////////////////////////////
 
 	//helper function which adds the provided texture to the provided RenderingBatch 
 	//according to the Texture Type and returns the texture index
@@ -44,160 +196,6 @@ namespace AstralEngine
 		}
 		return batch.AddCubemap(texture, renderingTarget);
 	}
-
-	class DrawCommand
-	{
-	public:
-		DrawCommand() : m_positionArr(nullptr), m_normalArr(nullptr), 
-			m_indicesArr(nullptr), m_textureCoords(nullptr) { }
-
-		DrawCommand(const Mat4& transform, const Material& mat,
-			const Vector3* vertices, const Vector3* normals, unsigned int numVertices, const unsigned int* indices,
-			unsigned int indexCount, AReference<Texture> texture, const Vector3* textureCoords,
-			float tileFactor, const Vector4& tintColor, bool ignoresCam) : m_transform(transform), m_mat(mat), 
-			m_numVertices(numVertices), m_indexCount(indexCount), m_texture(texture), m_tileFactor(tileFactor), 
-			m_tintColor(tintColor), m_ignoresCam(ignoresCam)
-		{
-			m_positionArr = new Vector3[numVertices];
-			m_normalArr = new Vector3[numVertices];
-			m_indicesArr = new unsigned int[indexCount];
-			m_textureCoords = new Vector3[numVertices];
-
-			for (unsigned int i = 0; i < numVertices; i++)
-			{
-				m_positionArr[i] = vertices[i];
-				m_normalArr[i] = normals[i];
-				m_textureCoords[i] = textureCoords[i];
-			}
-
-			for (unsigned int i = 0; i < indexCount; i++)
-			{
-				m_indicesArr[i] = indices[i];
-			}
-		}
-
-		DrawCommand(const DrawCommand& other) : m_transform(other.m_transform), m_mat(other.m_mat),
-			m_numVertices(other.m_numVertices), m_indexCount(other.m_indexCount), m_texture(other.m_texture), 
-			m_tileFactor(other.m_tileFactor), m_tintColor(other.m_tintColor), m_ignoresCam(other.m_ignoresCam)
-		{
-			m_positionArr = new Vector3[other.m_numVertices];
-			m_normalArr = new Vector3[other.m_numVertices];
-			m_indicesArr = new unsigned int[other.m_indexCount];
-			m_textureCoords = new Vector3[other.m_numVertices];
-
-			for (unsigned int i = 0; i < other.m_numVertices; i++)
-			{
-				m_positionArr[i] = other.m_positionArr[i];
-				m_normalArr[i] = other.m_normalArr[i];
-				m_textureCoords[i] = other.m_textureCoords[i];
-			}
-
-			for (unsigned int i = 0; i < other.m_indexCount; i++)
-			{
-				m_indicesArr[i] = other.m_indicesArr[i];
-			}
-		}
-
-		~DrawCommand()
-		{
-			delete[] m_positionArr;
-			delete[] m_normalArr;
-			delete[] m_indicesArr;
-			delete[] m_textureCoords;
-		}
-
-		void SendToRenderingBatch()
-		{
-			constexpr RenderingPrimitive renderingTarget = RenderingPrimitive::Triangles;
-			int textureIndex = AddTextureToBatch((*Renderer::s_renderingBatches)[renderingTarget], 
-				renderingTarget, m_texture);
-
-			VertexData* vertexData = new VertexData[m_numVertices];
-
-			for (unsigned int i = 0; i < m_numVertices; i++)
-			{
-				vertexData[i].position = (Vector3)(m_transform
-					* Vector4(m_positionArr[i].x, m_positionArr[i].y, m_positionArr[i].z, 1));
-				vertexData[i].textureCoords = m_textureCoords[i];
-				vertexData[i].color = m_tintColor;
-				vertexData[i].normal = (Vector3)(m_transform
-					* Vector4(m_normalArr[i].x, m_normalArr[i].y, m_normalArr[i].z, 0));
-				vertexData[i].textureIndex = (float)textureIndex;
-				vertexData[i].tillingFactor = m_tileFactor;
-				vertexData[i].uses3DTexture = 0;
-				vertexData[i].ignoresCamera = m_ignoresCam ? 1.0f : 0.0f;
-				vertexData[i].mat = m_mat;
-			}
-
-			(*Renderer::s_renderingBatches)[renderingTarget].Add(vertexData, m_numVertices, m_indicesArr,
-				m_indexCount, renderingTarget);
-
-			delete[] vertexData;
-		}
-
-		bool operator==(const DrawCommand& other) const
-		{
-			return  m_mat == other.m_mat 
-				&& m_numVertices == other.m_numVertices && m_indexCount == other.m_indexCount
-				&& m_tileFactor == other.m_tileFactor && m_tintColor == other.m_tintColor
-				&& m_ignoresCam == other.m_ignoresCam && m_transform == other.m_transform;
-		}
-
-		bool operator!=(const DrawCommand& other) const
-		{
-			return !(*this == other);
-		}
-
-		DrawCommand& operator=(const DrawCommand& other)
-		{
-			delete[] m_positionArr;
-			delete[] m_normalArr;
-			delete[] m_indicesArr;
-			delete[] m_textureCoords;
-
-			m_transform = other.m_transform;
-			m_mat = other.m_mat;
-			m_numVertices = other.m_numVertices;
-			m_indexCount = other.m_indexCount;
-			m_texture = other.m_texture;
-			m_tileFactor = other.m_tileFactor; 
-			m_tintColor = other.m_tintColor;
-			m_ignoresCam = other.m_ignoresCam;
-
-			m_positionArr = new Vector3[other.m_numVertices];
-			m_normalArr = new Vector3[other.m_numVertices];
-			m_textureCoords = new Vector3[other.m_numVertices]; 
-			m_indicesArr = new unsigned int[other.m_indexCount];
-
-			for (unsigned int i = 0; i < other.m_numVertices; i++)
-			{
-				m_positionArr[i] = other.m_positionArr[i];
-				m_normalArr[i] = other.m_normalArr[i];
-				m_textureCoords[i] = other.m_textureCoords[i];
-			}
-
-			for (unsigned int i = 0; i < other.m_indexCount; i++)
-			{
-				m_indicesArr[i] = other.m_indicesArr[i];
-			}
-
-			return *this;
-		}
-
-	private:
-		Mat4 m_transform;
-		Material m_mat;
-		Vector3* m_positionArr;
-		Vector3* m_normalArr;
-		unsigned int m_numVertices;
-		unsigned int* m_indicesArr;
-		unsigned int m_indexCount;
-		AReference<Texture> m_texture;
-		Vector3* m_textureCoords;
-		float m_tileFactor;
-		Vector4 m_tintColor;
-		bool m_ignoresCam;
-	};
 
 	//rendering batch///////////////////////////////////////////////////////////////////
 
@@ -454,8 +452,6 @@ namespace AstralEngine
 		s_renderingBatches = new AUnorderedMap<RenderingPrimitive, RenderingBatch>();
 
 		unsigned int whiteTextureData = 0xffffffff;
-		s_defaultWhiteCubeMap = CubeMap::Create(1, &whiteTextureData);
-		s_defaultWhiteTexture = Texture2D::Create(1, 1, &whiteTextureData, sizeof(whiteTextureData));
 
 		int* samplers = new int[RenderingBatch::s_maxTexture2DSlots];
 		for (int i = 0; i < (int)RenderingBatch::s_maxTexture2DSlots; i++)
@@ -487,13 +483,6 @@ namespace AstralEngine
 			samplersCubemapShadowMap[i] = (int)(i + offset);
 		}
 
-		s_shader = Shader::Create("assets/shaders/Shader2D.glsl");
-		s_shader->Bind();
-		s_shader->SetIntArray("u_texture", samplers, RenderingBatch::s_maxTexture2DSlots);
-		s_shader->SetIntArray("u_cubeMap", samplersCubemap, RenderingBatch::s_maxCubemapSlots);
-		s_shader->SetIntArray("u_shadow2D", samplers2DShadowMap, RenderingBatch::s_maxTexture2DShadowMapSlots);
-		s_shader->SetIntArray("u_cubeMapShadowMap", samplersCubemapShadowMap, RenderingBatch::s_maxCubemapShadowMapSlots);
-
 		delete[] samplers;
 		delete[] samplersCubemap;
 		delete[] samplers2DShadowMap;
@@ -507,8 +496,6 @@ namespace AstralEngine
 
 	void Renderer::Shutdown()
 	{
-		delete[] s_directionalLightArr;
-		delete[] s_pointLightArr;
 		delete s_renderingBatches;
 	}
 
@@ -516,81 +503,26 @@ namespace AstralEngine
 	{
 		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 
-		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		//s_shader->SetFloat3("u_camPos", cam.GetPosition());
-
-		s_directionalLightIndex = 0;
-		s_pointLightIndex = 0;
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
 	{
 		//view is the identity
 		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix();
-
-		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		//s_shader->SetFloat3("u_camPos", Vector3::Zero());
-
-		s_directionalLightIndex = 0;
-		s_pointLightIndex = 0;
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
 		Mat4 viewProjectionMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
-
-		s_shader->Bind();
-		s_shader->SetMat4("u_viewProjMatrix", viewProjectionMatrix);
-		//s_shader->SetFloat3("u_camPos", transform.position);
-
-		s_directionalLightIndex = 0;
-		s_pointLightIndex = 0;
 	}
 
 	void Renderer::EndScene()
 	{
-		if (s_useShadows && (s_directionalLightIndex != 0 || s_pointLightIndex != 0))
-		{
-			if (s_updateLights)
-			{
-				GenerateShadowMaps();
-				s_updateLights = false;
-			}
-
-			s_shader->Bind();
-			s_shader->SetInt("u_useShadows", 1);
-			s_shader->SetInt("u_numDirLights", s_directionalLightIndex);
-			s_shader->SetInt("u_numPointLights", s_pointLightIndex);
-			AddShadowMapToShaders();
-			FlushBatch();
-		}
-		else
-		{
-			s_shader->Bind();
-			//s_shader->SetInt("u_useShadows", 0);
-			FlushBatch();
-		}
-		s_drawCommands.Clear();
+		
 	}
-
-	//requests that all the light's shadow maps be recalculated for this frame
-	void Renderer::UpdateLights()
-	{
-		s_updateLights = true;
-	}
-
-	AReference<CubeMap> Renderer::GetDefaultWhiteCubeMap() { return s_defaultWhiteCubeMap; }
-	AReference<Texture2D> Renderer::GetDefaultWhiteTexture() { return s_defaultWhiteTexture; }
 
 	void Renderer::FlushBatch()
 	{
-		for (DrawCommand& drawCmd : s_drawCommands) 
-		{
-			drawCmd.SendToRenderingBatch();
-		}
-
 		for (auto& pair : *s_renderingBatches)
 		{
 			if (!pair.GetElement().IsEmpty())
@@ -661,55 +593,7 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::DrawVoxel(const Mat4& transform, const Material& mat, AReference<CubeMap> texture,
-		float tileFactor, const Vector4& tintColor)
-	{
-		UploadVoxel(transform, mat, texture, tileFactor, tintColor);
-	}
-
-	void Renderer::DrawVoxel(const Mat4& transform, AReference<CubeMap> texture,
-		float tileFactor, const Vector4& tintColor)
-	{
-		DrawVoxel(transform, s_defaultMaterial, texture, tileFactor, tintColor);
-	}
-
-	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-		const Material& mat, AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
-	{
-		Transform t = Transform(position, rotation, scale);
-		DrawVoxel(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor);
-	}
-
-
-	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-		AReference<CubeMap> texture, float tileFactor, const Vector4& tintColor)
-	{
-		Transform t = Transform(position, rotation, scale);
-		DrawVoxel(t.GetTransformMatrix(), texture, tileFactor, tintColor);
-	}
-
-	void Renderer::DrawVoxel(const Mat4& transform, const Material& mat, const Vector4& color)
-	{
-		DrawVoxel(transform, mat, GetDefaultWhiteCubeMap(), 1, color);
-	}
-
-	void Renderer::DrawVoxel(const Mat4& transform, const Vector4& color)
-	{
-		DrawVoxel(transform, GetDefaultWhiteCubeMap(), 1, color);
-	}
-
-	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation,
-		const Vector3& scale, const Material& mat, const Vector4& color)
-	{
-		DrawVoxel(position, rotation, scale, mat, GetDefaultWhiteCubeMap(), 1, color);
-	}
-
-	void Renderer::DrawVoxel(const Vector3& position, const Quaternion& rotation,
-		const Vector3& scale, const Vector4& color)
-	{
-		DrawVoxel(position, rotation, scale, GetDefaultWhiteCubeMap(), 1, color);
-	}
-
+	
 	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
@@ -719,7 +603,7 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
-		UploadQuad(transform, s_defaultMaterial, texture, tileFactor, tintColor, ignoresCam);
+		UploadQuad(transform, *Material::DefaultMat().Get(), texture, tileFactor, tintColor, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
@@ -740,24 +624,24 @@ namespace AstralEngine
 
 	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(transform, mat, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(transform, mat, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(transform, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(transform, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Material& mat, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, rotation, scale, mat, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, mat, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, rotation, scale, GetDefaultWhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture,
@@ -777,7 +661,7 @@ namespace AstralEngine
 		unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture,
 		const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
 	{
-		UploadVertexData(renderTarget, transform, s_defaultMaterial, vertices, numVertices, normals,
+		UploadVertexData(renderTarget, transform, *Material::DefaultMat().Get(), vertices, numVertices, normals,
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
 
@@ -794,7 +678,7 @@ namespace AstralEngine
 	void Renderer::DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		UploadMesh(transform, s_defaultMaterial, mesh, texture, tileFactor, tintColor);
+		UploadMesh(transform, *Material::DefaultMat().Get(), mesh, texture, tileFactor, tintColor);
 	}
 
 
@@ -1055,8 +939,6 @@ namespace AstralEngine
 			22, 23, 20
 		};
 
-		s_drawCommands.EmplaceBack(transform, mat, positions, normals, sizeof(positions) / sizeof(Vector3), indices,
-			sizeof(indices) / sizeof(unsigned int), texture, positions, tileFactor, tintColor, false);
 		/*
 		(*s_renderingBatches)[renderTarget].Add(cubeVertices, sizeof(cubeVertices) / sizeof(VertexData), indices,
 			sizeof(indices) / sizeof(unsigned int), renderTarget);
@@ -1092,17 +974,12 @@ namespace AstralEngine
 			{ 0, 0, 1 } 
 		};
 
-		s_drawCommands.EmplaceBack(transform, mat, position, normals, sizeof(position) / sizeof(Vector3), indices, 
-			sizeof(indices) / sizeof(unsigned int), texture, textureCoords, tileFactor, tintColor, false);
 	}
 
 	void Renderer::UploadVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Material& mat,
 		const Vector3* vertices, unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount,
 		AReference<Texture2D> texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
 	{
-		s_drawCommands.EmplaceBack(transform, mat, vertices, normals, numVertices, indices,
-			indexCount, texture, textureCoords, tileFactor, tintColor, false);
-
 		/*
 		int textureIndex = (*s_renderingBatches)[renderTarget].AddTexture2D(texture, renderTarget);
 
@@ -1132,9 +1009,6 @@ namespace AstralEngine
 	void Renderer::UploadMesh(const Mat4& transform, const Material& mat, AReference<Mesh>& mesh,
 		AReference<Texture2D> texture, float tileFactor, const Vector4& tintColor)
 	{
-		s_drawCommands.EmplaceBack(transform, mat, mesh->GetPositions().GetData(), mesh->GetNormals().GetData(),
-			mesh->GetPositions().GetCount(), mesh->GetIndices().GetData(), mesh->GetIndices().GetCount(), texture,
-			mesh->GetTextureCoords().GetData(), tileFactor, tintColor, false);
 		/*
 		constexpr RenderingPrimitive renderTarget = RenderingPrimitive::Triangles;
 		int textureIndex = (*s_renderingBatches)[renderTarget].AddTexture2D(texture, renderTarget);

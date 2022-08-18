@@ -6,6 +6,8 @@ namespace AstralEngine
 	Quaternion::Quaternion() : m_w(1.0f) { }
 	Quaternion::Quaternion(float w, const Vector3& v) : m_w(w), m_v(v) { }
 	Quaternion::Quaternion(float w, float x, float y, float z) : m_w(w), m_v(x, y, z) {	}
+	Quaternion::Quaternion(const Vector3& euler) { SetEulerAngles(euler); }
+	Quaternion::Quaternion(float x, float y, float z) { SetEulerAngles(x, y, z); }
 
 	float Quaternion::GetW() const { return m_w; }
 	float Quaternion::GetX() const { return m_v.x; }

@@ -41,6 +41,7 @@ namespace AstralEngine
 		{
 		case RenderAPI::API::None:
 			AE_CORE_ERROR("No RenderAPI is not yet supported");
+			break;
 
 		case RenderAPI::API::OpenGL:
 			return AReference<OpenGLTexture2D>::Create(path);
@@ -48,6 +49,14 @@ namespace AstralEngine
 
 		AE_CORE_ERROR("Unknown RenderAPI");
 		return nullptr;
+	}
+
+	AReference<Texture2D> Texture2D::WhiteTexture()
+	{
+		constexpr unsigned int textureData = 0xffffffff;
+		static AReference<Texture2D> white = Texture2D::Create((unsigned int)1, (unsigned int)1, 
+			(void*)&textureData, sizeof(textureData));
+		return white;
 	}
 
 

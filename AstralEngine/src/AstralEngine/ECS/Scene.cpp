@@ -42,31 +42,31 @@ namespace AstralEngine
 
 			if (Input::GetKey(KeyCode::A))
 			{
-				t.position -= right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() - right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			else if (Input::GetKey(KeyCode::D))
 			{
-				t.position += right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() + right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 
 			if (Input::GetKey(KeyCode::W))
 			{
-				t.position += forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() + forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			else if (Input::GetKey(KeyCode::S))
 			{
-				t.position -= forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() - forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::GetKey(KeyCode::Q))
 				{
-					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
+					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
 				}
 				else if (Input::GetKey(KeyCode::E))
 				{
-					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
+					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
 				}
 			}
 		}
@@ -85,7 +85,7 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetTransform().position.z = -1.0f;
+		camera.GetTransform().SetLocalPosition(0.0f, 0.0f, -1.0f);
 		camera.EmplaceComponent<Camera>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
