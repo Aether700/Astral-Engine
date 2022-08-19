@@ -14,6 +14,8 @@ namespace AstralEngine
 
 		virtual const std::string& GetName() const = 0;
 
+		virtual unsigned int GetRendererID() const = 0;
+
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 

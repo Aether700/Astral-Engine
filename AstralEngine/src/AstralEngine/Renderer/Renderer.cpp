@@ -161,7 +161,7 @@ namespace AstralEngine
 
 	bool Material::operator==(const Material& other) const
 	{
-		return m_shader == other.m_shader && m_diffuseMap == other.m_diffuseMap 
+		return m_shader->GetRendererID() == other.m_shader->GetRendererID() && m_diffuseMap == other.m_diffuseMap
 			&& m_specularMap == other.m_specularMap;
 	}
 

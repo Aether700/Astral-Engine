@@ -14,6 +14,8 @@ namespace AstralEngine
 
 		virtual const std::string& GetName() const override { return m_name; }
 
+		virtual unsigned int GetRendererID() const override { return m_rendererID; }
+
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
 

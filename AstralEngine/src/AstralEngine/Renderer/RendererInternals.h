@@ -37,7 +37,9 @@ namespace AstralEngine
 	public:
 		~DrawList();
 
-		think over how draw cmds are stored internally and then implement draw list class
+		think over how draw cmds are stored/sorted internally and then implement draw list class
+		might want to use UUIDs for do distinguish models/meshes (need to group same mesh/model 
+		together for instance rendering)
 
 		void AddDrawCmd(DrawCommand* cmd);
 		DrawCommand* GetNextDrawCmd();
