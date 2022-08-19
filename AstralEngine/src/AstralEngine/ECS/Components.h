@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "AstralEngine/Renderer/Renderer2D.h"
 #include "AstralEngine/Renderer/Texture.h"
 #include "AstralEngine/Math/AMath.h"
 #include "SceneCamera.h"
@@ -15,23 +14,23 @@ namespace AstralEngine
 		SpriteRenderer();
 		SpriteRenderer(float r, float g, float b, float a);
 		SpriteRenderer(const Vector4& color);
-		SpriteRenderer(const AReference<Texture2D>& sprite);
-		SpriteRenderer(float r, float g, float b, float a, const AReference<Texture2D>& sprite);
-		SpriteRenderer(const Vector4& color, const AReference<Texture2D>& sprite);
+		SpriteRenderer(Texture2DHandle sprite);
+		SpriteRenderer(float r, float g, float b, float a, Texture2DHandle sprite);
+		SpriteRenderer(const Vector4& color, Texture2DHandle sprite);
 
 		Vector4 GetColor() const { return m_color; }
 		void SetColor(float r, float g, float b, float a);
 		void SetColor(Vector4 color);
 
-		AReference<Texture2D> GetSprite() const { return m_sprite; }
-		void SetSprite(AReference<Texture2D> sprite);
+		Texture2DHandle GetSprite() const { return m_sprite; }
+		void SetSprite(Texture2DHandle sprite);
 
 		bool operator==(const SpriteRenderer& other) const;
 		bool operator!=(const SpriteRenderer& other) const;
 
 	private:
 		Vector4 m_color;
-		AReference<Texture2D> m_sprite;
+		Texture2DHandle m_sprite;
 	};
 
 	class Transform

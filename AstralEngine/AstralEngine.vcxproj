@@ -206,7 +206,6 @@
     <ClInclude Include="src\AstralEngine\Renderer\RenderAPI.h" />
     <ClInclude Include="src\AstralEngine\Renderer\RenderCommand.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Renderer.h" />
-    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h" />
     <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Shader.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Texture.h" />
@@ -256,7 +255,6 @@
     <ClCompile Include="src\AstralEngine\Renderer\RenderAPI.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\RendererInternals.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Shader.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Texture.cpp" />

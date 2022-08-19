@@ -34,6 +34,11 @@ namespace AstralEngine
 	// lists all the data to be drawn to the screen in one or more draw calls
 	class DrawCallList
 	{
+
+		// Eventually will need to keep track of what matrix is where in the m_instanceArrBuffer 
+		// and only change the ones which have been modified
+
+		// might want to check that in another object not sure yet
 	public:
 		DrawCallList();
 		DrawCallList(MaterialHandle material, RenderableType type);
@@ -42,22 +47,41 @@ namespace AstralEngine
 		MaterialHandle GetMaterial() const;
 		RenderableType GetType() const;
 
+		void Draw(const Mat4& viewProj) const;
+
 		void AddDrawCommand(DrawCommand* draw);
 		void Clear();
 
 	private:
+		void SetupGeometryData();
+		void SetupQuad();
+
 		ASinglyLinkedList<DrawCommand*> m_data;
 		MaterialHandle m_material;
 		RenderableType m_type;
+
+		AReference<VertexBuffer> m_geometryDataBuffer;
+		AReference<VertexBuffer> m_instanceArrBuffer;
+		AReference<IndexBuffer> m_indexBuffer;
 	};
 
 	class RenderingDataSorter
 	{
 	public:
+		using AIterator = AUnorderedMap<MaterialHandle, DrawCallList>::AIterator;
+		using AConstIterator = AUnorderedMap<MaterialHandle, DrawCallList>::AConstIterator;
+
 		void AddData(DrawCommand* data);
+		void Clear();
+
+		AIterator begin();
+		AIterator end();
+
+		AConstIterator begin() const;
+		AConstIterator end() const;
 
 	private:
-
+		AUnorderedMap<MaterialHandle, DrawCallList> m_drawCalls;
 	};
 
 	// ordered list of DrawCommands. Used to sort in what order what should be drawn
@@ -74,6 +98,6 @@ namespace AstralEngine
 		bool IsEmpty() const;
 
 	private:
-		ADoublyLinkedList<DrawCommand*> m_drawCommands;
+		//ADoublyLinkedList<DrawCommand*> m_drawCommands;
 	};
 }

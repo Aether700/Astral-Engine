@@ -18,6 +18,8 @@ namespace AstralEngine
 	class Mesh;
 	class UIElement;
 
+	class RenderingDataSorter;
+
 	// represents a uniform inside a material
 	class MatUniform
 	{
@@ -205,36 +207,39 @@ namespace AstralEngine
 		//primitives
 
 		//squares
-		static void DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
-			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
+		static void DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
-		static void DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
-			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
-
-		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Material& mat, AReference<Texture2D> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
+		static void DrawQuad(const Mat4& transform, Texture2DHandle texture,
+			float tileFactor = 1.0f, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			AReference<Texture2D> texture, float tileFactor = 1.0f,
-			const Vector4& tintColor = { 1, 1, 1, 1 }, bool ignoresCam = false);
-
-		static void DrawQuad(const Mat4& transform, const Material& mat, 
-			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
-
-		static void DrawQuad(const Mat4& transform, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+			MaterialHandle mat, Texture2DHandle texture, float tileFactor = 1.0f,
+			const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Material& mat, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+			Texture2DHandle texture, float tileFactor = 1.0f,
+			const Vector4& tintColor = { 1, 1, 1, 1 });
+
+		static void DrawQuad(const Mat4& transform, MaterialHandle mat, 
+			const Vector4& color = { 1, 1, 1, 1 });
+
+		static void DrawQuad(const Mat4& transform, const Vector4& color = { 1, 1, 1, 1 });
 
 		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+			MaterialHandle mat, const Vector4& color = { 1, 1, 1, 1 });
 
-		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture, 
-			float tilingFactor = 1, const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+		static void DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
+			const Vector4& color = { 1, 1, 1, 1 });
+
+		static void DrawQuad(const Vector3& position, const Vector3& scale,
+			const Vector4& color = { 1, 1, 1, 1 });
+
+		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale, Texture2DHandle texture,
+			float tilingFactor = 1, const Vector4& color = { 1, 1, 1, 1 });
 
 		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale,
-			const Vector4& color = { 1, 1, 1, 1 }, bool ignoresCam = false);
+			const Vector4& color = { 1, 1, 1, 1 });
 
 		//draw generic Vertex Data
 		static void DrawVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Vector3* vertices,
@@ -257,10 +262,10 @@ namespace AstralEngine
 			bool drawCubes = true);
 
 		//sprite
-		static void DrawSprite(const Mat4& transform, const SpriteRenderer& sprite, bool ignoresCam = false);
+		static void DrawSprite(const Mat4& transform, const SpriteRenderer& sprite);
 
 		static void DrawSprite(const Vector3& position, float rotation, const Vector2& size,
-			const SpriteRenderer& sprite, bool ignoresCam = false);
+			const SpriteRenderer& sprite);
 
 		//UI
 		static void DrawUIElement(const UIElement& element, const Vector4& color);
@@ -280,7 +285,7 @@ namespace AstralEngine
 			float tileFactor, const Vector4& tintColor);
 
 		//uploads a quad or filled in square into the renderer
-		static void UploadQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+		static void UploadQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 			float tileFactor, const Vector4& tintColor, bool ignoresCam);
 
 		//helper function which allows to pass any vertex data with a 2D texture
@@ -293,9 +298,8 @@ namespace AstralEngine
 			AReference<Texture2D> texture, float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static RendererStatistics s_stats;
-
-		static AUnorderedMap<RenderingPrimitive, RenderingBatch>* s_renderingBatches;
-
+		static RenderingDataSorter s_sorter;
+		static Mat4 s_viewProjMatrix;
 
 	};
 }

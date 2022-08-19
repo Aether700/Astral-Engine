@@ -1,9 +1,9 @@
 #include "aepch.h"
 #include "Renderer.h"
-#include "Renderer2D.h"
 #include "AstralEngine/ECS/Components.h"
 #include "Mesh.h"
 #include "AstralEngine/UI/UICore.h"
+#include "AstralEngine/Renderer/RendererInternals.h"
 
 namespace AstralEngine
 {
@@ -169,9 +169,6 @@ namespace AstralEngine
 
 
 	////////////////////////////////////////////////////////////////////////////////////////
-
-	AUnorderedMap<RenderingPrimitive, RenderingBatch>* Renderer::s_renderingBatches;
-	RendererStatistics Renderer::s_stats;
 
 	unsigned int RenderingBatch::s_maxVertices = 64000;
 	unsigned int RenderingBatch::s_maxIndices = 72000;
@@ -440,93 +437,50 @@ namespace AstralEngine
 
 	//Renderer///////////////////////////////////////////////////
 
+	RenderingDataSorter Renderer::s_sorter;
+	RendererStatistics Renderer::s_stats;
+	Mat4 Renderer::s_viewProjMatrix;
+
 	void Renderer::Init()
 	{
 		AE_PROFILE_FUNCTION();
 		RenderCommand::Init();
-		Renderer2D::Init();
-
-		s_renderingBatches = new AUnorderedMap<RenderingPrimitive, RenderingBatch>();
-
-		unsigned int whiteTextureData = 0xffffffff;
-
-		int* samplers = new int[RenderingBatch::s_maxTexture2DSlots];
-		for (int i = 0; i < (int)RenderingBatch::s_maxTexture2DSlots; i++)
-		{
-			samplers[i] = (int)i;
-		}
-
-		unsigned int offset = RenderingBatch::s_maxTexture2DSlots;
-
-		int* samplersCubemap = new int[RenderingBatch::s_maxCubemapSlots];
-		for (int i = 0; i < (int)RenderingBatch::s_maxCubemapSlots; i++)
-		{
-			samplersCubemap[i] = i + offset;
-		}
-
-		offset += RenderingBatch::s_maxCubemapSlots;
-
-		int* samplers2DShadowMap = new int[RenderingBatch::s_maxTexture2DShadowMapSlots];
-		for (unsigned int i = 0; i < RenderingBatch::s_maxTexture2DShadowMapSlots; i++)
-		{
-			samplers2DShadowMap[i] = (int)(i + offset);
-		}
-
-		offset += RenderingBatch::s_maxTexture2DShadowMapSlots;
-
-		int* samplersCubemapShadowMap = new int[RenderingBatch::s_maxCubemapShadowMapSlots];
-		for (unsigned int i = 0; i < RenderingBatch::s_maxCubemapShadowMapSlots; i++)
-		{
-			samplersCubemapShadowMap[i] = (int)(i + offset);
-		}
-
-		delete[] samplers;
-		delete[] samplersCubemap;
-		delete[] samplers2DShadowMap;
-		delete[] samplersCubemapShadowMap;
-
-		/*
-		s_directionalLightArr = new DirectionalLight[RenderingBatch::s_maxTexture2DShadowMapSlots];
-		s_pointLightArr = new PointLight[RenderingBatch::s_maxCubemapShadowMapSlots];
-		*/
 	}
 
 	void Renderer::Shutdown()
 	{
-		delete s_renderingBatches;
 	}
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
-		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
-
+		s_viewProjMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
+		s_sorter.Clear();
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
 	{
 		//view is the identity
-		Mat4 viewProjectionMatrix = cam.GetProjectionMatrix();
+		s_viewProjMatrix = cam.GetProjectionMatrix();
+		s_sorter.Clear();
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
-		Mat4 viewProjectionMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
+		s_viewProjMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
+		s_sorter.Clear();
 	}
 
 	void Renderer::EndScene()
 	{
-		
+		for(auto& pair : s_sorter)
+		{
+			pair.GetElement().Draw(s_viewProjMatrix);
+		}
 	}
 
 	void Renderer::FlushBatch()
 	{
-		for (auto& pair : *s_renderingBatches)
-		{
-			if (!pair.GetElement().IsEmpty())
-			{
-				pair.GetElement().Draw(pair.GetKey());
-			}
-		}
+
 	}
 
 	void Renderer::CleanUpAfterShadowMapGeneration()
@@ -591,68 +545,70 @@ namespace AstralEngine
 	}
 
 	
-	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
-		float tileFactor, const Vector4& tintColor, bool ignoresCam)
+	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
+		float tileFactor, const Vector4& tintColor)
 	{
-		UploadQuad(transform, mat, texture, tileFactor, tintColor, ignoresCam);
+		s_sorter.AddData(new DrawCommand(transform, mat, RenderableType::Quad));
 	}
 
-	void Renderer::DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
-		float tileFactor, const Vector4& tintColor, bool ignoresCam)
+	void Renderer::DrawQuad(const Mat4& transform, Texture2DHandle texture,
+		float tileFactor, const Vector4& tintColor)
 	{
-		UploadQuad(transform, *ResourceHandler::GetMaterial(Material::DefaultMat()).Get(), 
-			texture, tileFactor, tintColor, ignoresCam);
-	}
-
-	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-		const Material& mat, AReference<Texture2D> texture, float tileFactor,
-		const Vector4& tintColor, bool ignoresCam)
-	{
-		Transform t = Transform(position, rotation, scale);
-		DrawQuad(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor, ignoresCam);
+		DrawQuad(transform, Material::DefaultMat(), texture, tileFactor, tintColor);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
-		AReference<Texture2D> texture, float tileFactor,
-		const Vector4& tintColor, bool ignoresCam)
+		MaterialHandle mat, Texture2DHandle texture, float tileFactor,
+		const Vector4& tintColor)
 	{
 		Transform t = Transform(position, rotation, scale);
-		DrawQuad(t.GetTransformMatrix(), texture, tileFactor, tintColor, ignoresCam);
+		DrawQuad(t.GetTransformMatrix(), mat, texture, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, const Vector4& color, bool ignoresCam)
+	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
+		Texture2DHandle texture, float tileFactor, const Vector4& tintColor)
 	{
-		DrawQuad(transform, mat, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, Material::DefaultMat(), texture, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawQuad(const Mat4& transform, const Vector4& color, bool ignoresCam)
+	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, const Vector4& color)
 	{
-		DrawQuad(transform, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
+		DrawQuad(transform, mat, Texture2D::WhiteTexture(), 1.0f, color);
+	}
+
+	void Renderer::DrawQuad(const Mat4& transform, const Vector4& color)
+	{
+		DrawQuad(transform, Texture2D::WhiteTexture(), 1.0f, color);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
-		const Vector3& scale, const Material& mat, const Vector4& color, bool ignoresCam)
+		const Vector3& scale, MaterialHandle mat, const Vector4& color)
 	{
-		DrawQuad(position, rotation, scale, mat, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, mat, Texture2D::WhiteTexture(), 1.0f, color);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
-		const Vector3& scale, const Vector4& color, bool ignoresCam)
+		const Vector3& scale, const Vector4& color)
 	{
-		DrawQuad(position, rotation, scale, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, Texture2D::WhiteTexture(), 1.0f, color);
 	}
 
-	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture,
-		float tilingFactor, const Vector4& color, bool ignoresCam)
+	void Renderer::DrawQuad(const Vector3& position, const Vector3& scale, const Vector4& color)
+	{
+		DrawQuad(position, Quaternion::Identity(), scale, color);
+	}
+
+	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, Texture2DHandle texture,
+		float tilingFactor, const Vector4& color)
 	{
 		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), 
-			texture, tilingFactor, color, ignoresCam);
+			texture, tilingFactor, color);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale,
-		const Vector4& color, bool ignoresCam)
+		const Vector4& color)
 	{
-		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), color, ignoresCam);
+		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), color);
 	}
 
 	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Vector3* vertices,
@@ -728,22 +684,22 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::DrawSprite(const Mat4& transform, const SpriteRenderer& sprite, bool ignoresCam)
+	void Renderer::DrawSprite(const Mat4& transform, const SpriteRenderer& sprite)
 	{
-		DrawQuad(transform, sprite.GetSprite(), 1.0f, sprite.GetColor(), ignoresCam);
+		DrawQuad(transform, sprite.GetSprite(), 1.0f, sprite.GetColor());
 	}
 
 	void Renderer::DrawSprite(const Vector3& position, float rotation, const Vector2& size,
-		const SpriteRenderer& sprite, bool ignoresCam)
+		const SpriteRenderer& sprite)
 	{
-		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor(), ignoresCam);
+		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor());
 	}
 
 	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)
 	{
 		Vector3 worldPos = (Vector3)element.GetWorldPos();
 		DrawQuad(worldPos, Quaternion::Identity(), Vector3(element.GetWorldWidth(),
-			element.GetWorldHeight(), 1), color, true);
+			element.GetWorldHeight(), 1), color);
 	}
 
 	const RendererStatistics& Renderer::GetStats()
@@ -944,7 +900,7 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::UploadQuad(const Mat4& transform, const Material& mat, AReference<Texture2D> texture,
+	void Renderer::UploadQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
 		const Vector3 textureCoords[] = {
@@ -972,6 +928,8 @@ namespace AstralEngine
 			{ 0, 0, 1 },
 			{ 0, 0, 1 } 
 		};
+
+		s_sorter.AddData(new DrawCommand(transform, mat, RenderableType::Quad));
 
 	}
 

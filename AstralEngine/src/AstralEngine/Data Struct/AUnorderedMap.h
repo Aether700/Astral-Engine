@@ -13,9 +13,13 @@ namespace AstralEngine
 	class AUnorderedMap;
 
 	template<typename K, typename T>
+	class AUnorderedMapConstIterator;
+
+	template<typename K, typename T>
 	class AUnorderedMapIterator
 	{
 		friend class AUnorderedMap<K, T>;
+		friend class AUnorderedMapConstIterator<K, T>;
 		
 		using Bucket = ASinglyLinkedList<AKeyElementPair<K, T>>;
 		using BucketAIterator = ASinglyLinkedListIterator<AKeyElementPair<K, T>>;
@@ -133,8 +137,8 @@ namespace AstralEngine
 
 	private:
 		AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt)
-			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt) { }
+			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt, size_t numBuckets)
+			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt, numBuckets) { }
 
 	};
 

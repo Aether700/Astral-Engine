@@ -10,7 +10,7 @@ namespace AstralEngine
 	typedef ResourceHandle ShaderHandle;
 	typedef ResourceHandle MaterialHandle;
 
-	static constexpr ResourceHandle nullHandle = MAXSIZE_T;
+	static constexpr ResourceHandle NullHandle = MAXSIZE_T;
 
 	class Texture2D;
 	class Shader;

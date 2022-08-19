@@ -13,7 +13,11 @@ namespace AstralEngine
 
 		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) override;
 
+		static OpenGLVertexArray* GetCurrBoundVA();
+
 	private:
+		static OpenGLVertexArray* s_currBoundVA;
+
 		unsigned int m_rendererID;
 	};
 }

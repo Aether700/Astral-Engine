@@ -188,8 +188,6 @@ void ManualRender(ShaderHandle shader, AReference<VertexBuffer> vb, AReference<V
 	RenderCommand::Clear();
 	ResourceHandler::GetShader(shader)->Bind();
 	vb->Bind();
-	instanced->Bind(); this line crashes the program might be because of different vertexArray 
-	https://riptutorial.com/opengl/example/26987/instancing-by-vertex-attribute-arrays
 	RenderCommand::DrawInstancedIndexed(ib, 4);
 }
 
@@ -203,22 +201,23 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 		{ -0.25f,  0.25f, 0.0f }
 	};
 
-	instanced->Bind();
-	instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1);
-	instanced->SetData(offsets, sizeof(offsets));
 
 	Vector3 pos[4] =
 	{
-		{ -0.5f, -0.5f, 0.0f },
-		{  0.5f, -0.5f, 0.0f },
-		{  0.5f,  0.5f, 0.0f },
-		{ -0.5f,  0.5f, 0.0f }
+		{ -0.2f, -0.2f, 0.0f },
+		{  0.2f, -0.2f, 0.0f },
+		{  0.2f,  0.2f, 0.0f },
+		{ -0.2f,  0.2f, 0.0f }
 	};
 	vb->Bind();
 	vb->SetLayout({
 		{ ADataType::Float3, "Position" },
 		});
 	vb->SetData(pos, sizeof(pos));
+	
+	instanced->Bind();
+	instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1);
+	instanced->SetData(offsets, sizeof(offsets));
 
 	unsigned int indices[6] =
 	{
@@ -240,7 +239,7 @@ public:
 		// manual rendering
 		m_shader = ResourceHandler::LoadShader("assets/shaders/InstanceRenderingShader.glsl");
 		m_vb = VertexBuffer::Create(sizeof(float) * 20);
-		m_instancedVB = VertexBuffer::Create(sizeof(float) * 20);
+		m_instancedVB = VertexBuffer::Create(sizeof(float) * 20, true);
 		m_ib = IndexBuffer::Create();
 
 		SetupRenderingData(m_vb, m_instancedVB, m_ib);
@@ -294,7 +293,11 @@ public:
 
 	void OnUpdate() override
 	{
-		ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
+		//ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
+
+		Renderer::BeginScene(m_entity.GetComponent<Camera>().camera);
+		Renderer::DrawQuad(Mat4::Identity()); nothing drawing
+		Renderer::EndScene();
 
 		/*
 		m_scene->OnUpdate();

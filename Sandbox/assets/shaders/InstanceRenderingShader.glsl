@@ -2,12 +2,13 @@
 #version 330 core
 
 layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec3 a_offset;
+layout(location = 1) in mat4 a_transform;
+
+uniform mat4 u_viewProjMatrix;
 
 void main()
 {
-	gl_Position = vec4(a_position + a_offset, 1.0);
-	//gl_Position = u_viewProjMatrix * vec4(a_position, 1.0);
+	gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
 }
 
 

@@ -285,9 +285,6 @@
     <ClInclude Include="src\AstralEngine\Renderer\Renderer.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h">
-      <Filter>src\AstralEngine\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\Shader.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
@@ -425,9 +422,6 @@
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\Renderer.cpp">
-      <Filter>src\AstralEngine\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\Shader.cpp">

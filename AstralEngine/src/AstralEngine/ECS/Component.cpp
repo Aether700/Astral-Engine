@@ -6,10 +6,10 @@ namespace AstralEngine
 	// SpriteRenderer ///////////////////////////////////////////////////
 	SpriteRenderer::SpriteRenderer()
 		: m_color(1.0f, 1.0f, 1.0f, 1.0f),
-		m_sprite(Renderer2D::GetDefaultTexture()) { }
+		m_sprite(Texture2D::WhiteTexture()) { }
 
 	SpriteRenderer::SpriteRenderer(float r, float g, float b, float a)
-		: m_color(r, g, b, a), m_sprite(Renderer2D::GetDefaultTexture())
+		: m_color(r, g, b, a), m_sprite(Texture2D::WhiteTexture())
 	{
 		//make sure color provided is a valid color
 		AE_CORE_ASSERT(r <= 1.0f && r >= 0.0f
@@ -19,7 +19,7 @@ namespace AstralEngine
 	}
 
 	SpriteRenderer::SpriteRenderer(const Vector4& color)
-		: m_color(color), m_sprite(Renderer2D::GetDefaultTexture())
+		: m_color(color), m_sprite(Texture2D::WhiteTexture())
 	{
 		//make sure color provided is a valid color
 		AE_CORE_ASSERT(color.r <= 1.0f && color.r >= 0.0f
@@ -28,16 +28,23 @@ namespace AstralEngine
 			&& color.a <= 1.0f && color.a >= 0.0f, "Invalid Color provided");
 	}
 
-	SpriteRenderer::SpriteRenderer(const AReference<Texture2D>& sprite)
+	SpriteRenderer::SpriteRenderer(Texture2DHandle sprite)
 		: m_color(1.0f, 1.0f, 1.0f, 1.0f), m_sprite(sprite)
 	{
-		AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
+		if (sprite == NullHandle)
+		{
+			m_sprite = Texture2D::WhiteTexture();
+		}
 	}
 
-	SpriteRenderer::SpriteRenderer(float r, float g, float b, float a, const AReference<Texture2D>& sprite)
+	SpriteRenderer::SpriteRenderer(float r, float g, float b, float a, Texture2DHandle sprite)
 		: m_color(r, g, b, a), m_sprite(sprite)
 	{
-		AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
+		if (sprite == NullHandle)
+		{
+			m_sprite = Texture2D::WhiteTexture();
+		}
+
 		//make sure color provided is a valid color
 		AE_CORE_ASSERT(r <= 1.0f && r >= 0.0f
 			&& g <= 1.0f && g >= 0.0f
@@ -45,10 +52,14 @@ namespace AstralEngine
 			&& a <= 1.0f && a >= 0.0f, "Invalid Color provided");
 	}
 
-	SpriteRenderer::SpriteRenderer(const Vector4& color, const AReference<Texture2D>& sprite)
+	SpriteRenderer::SpriteRenderer(const Vector4& color, Texture2DHandle sprite)
 		: m_color(color), m_sprite(sprite)
 	{
-		AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
+		if (sprite == NullHandle)
+		{
+			m_sprite = Texture2D::WhiteTexture();
+		}
+
 		//make sure color provided is a valid color
 		AE_CORE_ASSERT(color.r <= 1.0f && color.r >= 0.0f
 			&& color.g <= 1.0f && color.g >= 0.0f
@@ -78,10 +89,16 @@ namespace AstralEngine
 		m_color = color;
 	}
 
-	void SpriteRenderer::SetSprite(AReference<Texture2D> sprite)
+	void SpriteRenderer::SetSprite(Texture2DHandle sprite)
 	{
-		AE_CORE_ASSERT(sprite != nullptr, "Invalid Sprite provided");
-		m_sprite = sprite;
+		if (sprite == NullHandle)
+		{
+			m_sprite = Texture2D::WhiteTexture();
+		}
+		else
+		{
+			m_sprite = sprite;
+		}
 	}
 
 	bool SpriteRenderer::operator==(const SpriteRenderer& other) const
