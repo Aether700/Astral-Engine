@@ -6,17 +6,17 @@ namespace AstralEngine
 	// DrawCommand /////////////////////////////////
 	
 	DrawCommand::DrawCommand() { }
-	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, RenderableType type)
-		: m_transform(transform), m_type(type), m_material(mat) { }
+	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh)
+		: m_transform(transform), m_mesh(mesh), m_material(mat) { }
 
 	const Mat4& DrawCommand::GetTransform() const { return m_transform; }
 	MaterialHandle DrawCommand::GetMaterial() const { return m_material; }
-	RenderableType DrawCommand::GetType() const { return m_type; }
+	MeshHandle DrawCommand::GetMesh() const { return m_mesh; }
 	bool DrawCommand::IsOpaque() const { return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f; }
 
 	bool DrawCommand::operator==(const DrawCommand& other) const
 	{
-		return m_type == other.m_type && m_material == other.m_material
+		return m_mesh == other.m_mesh && m_material == other.m_material
 			&& m_transform == other.m_transform;
 	}
 
@@ -27,7 +27,7 @@ namespace AstralEngine
 
 	// DrawCallList /////////////////////////////////////////////////
 	DrawCallList::DrawCallList() : m_material(NullHandle) { }
-	DrawCallList::DrawCallList(MaterialHandle material, RenderableType type) : m_material(material), m_type(type) 
+	DrawCallList::DrawCallList(MaterialHandle material, MeshHandle mesh) : m_material(material), m_mesh(mesh)
 	{
 		constexpr size_t vbSize = 400;
 		m_geometryDataBuffer = VertexBuffer::Create(vbSize);
@@ -43,7 +43,7 @@ namespace AstralEngine
 
 	MaterialHandle DrawCallList::GetMaterial() const { return m_material; }
 
-	RenderableType DrawCallList::GetType() const { return m_type; }
+	MeshHandle DrawCallList::GetMesh() const { return m_mesh; }
 
 	void DrawCallList::Draw(const Mat4& viewProj) const
 	{
@@ -79,7 +79,7 @@ namespace AstralEngine
 
 	void DrawCallList::AddDrawCommand(DrawCommand* draw)
 	{
-		AE_CORE_ASSERT(draw->GetMaterial() == m_material && draw->GetType() == m_type, "");
+		AE_CORE_ASSERT(draw->GetMaterial() == m_material && draw->GetMesh() == m_mesh, "");
 		m_data.Add(draw);
 	}
 
@@ -94,16 +94,7 @@ namespace AstralEngine
 
 	void DrawCallList::SetupGeometryData()
 	{
-		switch(m_type)
-		{
-		case RenderableType::Quad:
-			SetupQuad();
-			break;
-
-		default:
-			AE_CORE_ERROR("Unknown RenderableType");
-			break;
-		}
+		SetupQuad();
 	}
 
 	void DrawCallList::SetupQuad()
@@ -121,7 +112,7 @@ namespace AstralEngine
 		m_geometryDataBuffer->SetData(pos, sizeof(pos));
 
 		m_instanceArrBuffer->Bind();
-		m_instanceArrBuffer->SetLayout({ { ADataType::Mat4, "transformMatrix", 1 } }, 1);
+		m_instanceArrBuffer->SetLayout({ { ADataType::Mat4, "transformMatrix", 1 } }, 1, sizeof(Vector3));
 
 		unsigned int indices[] =
 		{
@@ -138,7 +129,7 @@ namespace AstralEngine
 	{
 		if (!m_drawCalls.ContainsKey(data->GetMaterial()))
 		{
-			m_drawCalls.Add(data->GetMaterial(), DrawCallList(data->GetMaterial(), data->GetType()));
+			m_drawCalls.Add(data->GetMaterial(), DrawCallList(data->GetMaterial(), data->GetMesh()));
 		}
 		m_drawCalls[data->GetMaterial()].AddDrawCommand(data);
 	}

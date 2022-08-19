@@ -210,13 +210,13 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 		{ -0.2f,  0.2f, 0.0f }
 	};
 	vb->Bind();
-	vb->SetLayout({
-		{ ADataType::Float3, "Position" },
-		});
+	vb->SetLayout({ { ADataType::Float3, "Position" } });
 	vb->SetData(pos, sizeof(pos));
 	
 	instanced->Bind();
-	instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1);
+
+	issue might be with set layout double check to make sure
+	instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1, sizeof(Vector3)); 
 	instanced->SetData(offsets, sizeof(offsets));
 
 	unsigned int indices[6] =
@@ -293,11 +293,13 @@ public:
 
 	void OnUpdate() override
 	{
-		//ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
+		ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
 
+		/*
 		Renderer::BeginScene(m_entity.GetComponent<Camera>().camera);
-		Renderer::DrawQuad(Mat4::Identity()); nothing drawing
+		Renderer::DrawQuad(Mat4::Identity()); //nothing drawing
 		Renderer::EndScene();
+		*/
 
 		/*
 		m_scene->OnUpdate();

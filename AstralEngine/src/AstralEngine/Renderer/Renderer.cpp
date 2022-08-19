@@ -548,7 +548,7 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		s_sorter.AddData(new DrawCommand(transform, mat, RenderableType::Quad));
+		s_sorter.AddData(new DrawCommand(transform, mat, Mesh::QuadMesh()));
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, Texture2DHandle texture,
@@ -929,7 +929,7 @@ namespace AstralEngine
 			{ 0, 0, 1 } 
 		};
 
-		s_sorter.AddData(new DrawCommand(transform, mat, RenderableType::Quad));
+		//s_sorter.AddData(new DrawCommand(transform, mat, RenderableType::Quad));
 
 	}
 

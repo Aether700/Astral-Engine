@@ -450,5 +450,6 @@
     </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\RendererInternals.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Resource.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
   </ItemGroup>
 </Project>

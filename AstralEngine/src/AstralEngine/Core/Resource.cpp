@@ -3,6 +3,7 @@
 #include "AstralEngine/Renderer/Texture.h"
 #include "AstralEngine/Renderer/Shader.h"
 #include "AstralEngine/Renderer/Renderer.h"
+#include "AstralEngine/Renderer/Mesh.h"
 
 namespace AstralEngine
 {
@@ -66,6 +67,32 @@ namespace AstralEngine
 	AReference<Material> ResourceHandler::GetMaterial(MaterialHandle handle)
 	{
 		return GetHandler()->m_materials.GetResource(handle);
+	}
+
+	MeshHandle ResourceHandler::LoadMesh(const std::string& filepath)
+	{
+		AReference<Mesh> m = Mesh::LoadFromFile(filepath);
+		if (m == nullptr)
+		{
+			return NullHandle;
+		}
+		return GetHandler()->m_meshes.AddResource(m);
+	}
+
+	MeshHandle ResourceHandler::CreateMesh(const ADynArr<Vector3>& positions, const ADynArr<Vector2>& textureCoords,
+		const ADynArr<Vector3>& normals, const ADynArr<unsigned int>& indices)
+	{
+		AReference<Mesh> m = AReference<Mesh>::Create(positions, textureCoords, normals, indices);
+		if (m == nullptr)
+		{
+			return NullHandle;
+		}
+		return GetHandler()->m_meshes.AddResource(m);
+	}
+
+	AReference<Mesh> ResourceHandler::GetMesh(MeshHandle handle)
+	{
+		return GetHandler()->m_meshes.GetResource(handle);
 	}
 
 	ResourceHandler* ResourceHandler::GetHandler()

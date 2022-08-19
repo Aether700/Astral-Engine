@@ -1,6 +1,7 @@
 #pragma once
 #include "AstralEngine/Data Struct/ADynArr.h"
 #include "AstralEngine/Data Struct/AReference.h"
+#include "AstralEngine/Math/AMath.h"
 
 namespace AstralEngine
 {
@@ -9,12 +10,14 @@ namespace AstralEngine
 	typedef ResourceHandle Texture2DHandle;
 	typedef ResourceHandle ShaderHandle;
 	typedef ResourceHandle MaterialHandle;
+	typedef ResourceHandle MeshHandle;
 
 	static constexpr ResourceHandle NullHandle = MAXSIZE_T;
 
 	class Texture2D;
 	class Shader;
 	class Material;
+	class Mesh;
 
 	template<typename T>
 	class ResourcePool
@@ -55,9 +58,16 @@ namespace AstralEngine
 		static Texture2DHandle LoadTexture2D(unsigned int width, unsigned int height, void* data, unsigned int size);
 		static AReference<Texture2D> GetTexture2D(Texture2DHandle handle);
 
+		// Material /////////////////////////////////////////////////////
 		static MaterialHandle CreateMaterial();
 		static MaterialHandle CreateMaterial(const Vector4& color);
 		static AReference<Material> GetMaterial(MaterialHandle handle);
+
+		// Mesh //////////////////////////////////////////////////////////
+		static MeshHandle LoadMesh(const std::string& filepath);
+		static MeshHandle CreateMesh(const ADynArr<Vector3>& positions, const ADynArr<Vector2>& textureCoords,
+			const ADynArr<Vector3>& normals, const ADynArr<unsigned int>& indices);
+		static AReference<Mesh> GetMesh(MeshHandle handle);
 
 	private:
 		static ResourceHandler* GetHandler();
@@ -65,6 +75,7 @@ namespace AstralEngine
 		ResourcePool<Texture2D> m_textures2D;
 		ResourcePool<Shader> m_shaders;
 		ResourcePool<Material> m_materials;
+		ResourcePool<Mesh> m_meshes;
 
 	};
 }

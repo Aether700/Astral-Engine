@@ -5,21 +5,15 @@
 
 namespace AstralEngine
 {
-	enum class RenderableType
-	{
-		Mesh,
-		Quad
-	};
-
 	class DrawCommand
 	{
 	public:
 		DrawCommand();
-		DrawCommand(const Mat4& transform, MaterialHandle mat, RenderableType type);
+		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh);
 
 		const Mat4& GetTransform() const;
 		MaterialHandle GetMaterial() const;
-		RenderableType GetType() const;
+		MeshHandle GetMesh() const;
 		bool IsOpaque() const;
 
 		bool operator==(const DrawCommand& other) const;
@@ -27,7 +21,7 @@ namespace AstralEngine
 
 	private:
 		Mat4 m_transform;
-		RenderableType m_type;
+		MeshHandle m_mesh;
 		MaterialHandle m_material;
 	};
 
@@ -41,11 +35,11 @@ namespace AstralEngine
 		// might want to check that in another object not sure yet
 	public:
 		DrawCallList();
-		DrawCallList(MaterialHandle material, RenderableType type);
+		DrawCallList(MaterialHandle material, MeshHandle type);
 		~DrawCallList();
 
 		MaterialHandle GetMaterial() const;
-		RenderableType GetType() const;
+		MeshHandle GetMesh() const;
 
 		void Draw(const Mat4& viewProj) const;
 
@@ -58,7 +52,7 @@ namespace AstralEngine
 
 		ASinglyLinkedList<DrawCommand*> m_data;
 		MaterialHandle m_material;
-		RenderableType m_type;
+		MeshHandle m_mesh;
 
 		AReference<VertexBuffer> m_geometryDataBuffer;
 		AReference<VertexBuffer> m_instanceArrBuffer;

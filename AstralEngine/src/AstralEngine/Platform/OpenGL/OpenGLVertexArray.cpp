@@ -62,14 +62,27 @@ namespace AstralEngine
 		s_currBoundVA = nullptr;
 	}
 
-	void OpenGLVertexArray::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)
+	void OpenGLVertexArray::SetLayout(const VertexBufferLayout& layout)
+	{
+		SetLayout(layout, 0, 0);
+	}
+
+	void OpenGLVertexArray::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset)
 	{
 		AE_PROFILE_FUNCTION();
-		int offset = 0;
+		int offset = (int)dataOffset;
 		int indexOffset = 0;
 
 		for (int i = 0; i < layout.GetCount(); i++)
 		{
+			glEnableVertexAttribArray(i + layoutOffset);
+			glVertexAttribPointer(i + layoutOffset, layout[i].GetComponentCount(), 
+				ADataTypeToOpenGLBaseType(layout[i].type),
+				layout[i].normalized ? GL_TRUE : GL_FALSE,
+				layout.GetStride(), (const void*)offset);
+
+			offset += layout[i].size;
+			/*
 			if (layout[i].type == ADataType::Mat3)
 			{
 				glEnableVertexAttribArray(i + indexOffset + layoutOffset);
@@ -112,6 +125,7 @@ namespace AstralEngine
 					layout.GetStride(), (const void*)(long long)offset);
 				offset += layout[i].size;
 			}
+			*/
 		}
 	}
 

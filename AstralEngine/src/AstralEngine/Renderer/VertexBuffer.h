@@ -114,7 +114,8 @@ namespace AstralEngine
 		virtual void Unbind() const = 0;
 
 		virtual void SetData(const void* data, unsigned int size, unsigned int offset = 0) = 0;
-		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset) = 0;
 
 		static AReference<VertexBuffer> Create(unsigned int size, bool isInstanceArr = false);
 		static AReference<VertexBuffer> Create(float* data, unsigned int dataSize, bool isInstanceArr = false);

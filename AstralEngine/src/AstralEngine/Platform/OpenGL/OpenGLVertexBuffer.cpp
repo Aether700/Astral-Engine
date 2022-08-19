@@ -70,18 +70,23 @@ namespace AstralEngine
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)
+	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout)
+	{
+		SetLayout(layout, 0, 0);
+	}
+
+	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset)
 	{
 		if (m_vertexArray != nullptr)
 		{
-			m_vertexArray->SetLayout(layout, layoutOffset);
+			m_vertexArray->SetLayout(layout, layoutOffset, dataOffset);
 		}
 		else
 		{
 			OpenGLVertexArray* boundVA = OpenGLVertexArray::GetCurrBoundVA();
 			if (boundVA != nullptr);
 			{
-				boundVA->SetLayout(layout, layoutOffset);
+				boundVA->SetLayout(layout, layoutOffset, dataOffset);
 			}
 		}
 
