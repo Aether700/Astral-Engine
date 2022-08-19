@@ -131,37 +131,34 @@ namespace AstralEngine
 	Material::Material(const Vector4& color) : m_diffuseMap(Texture2D::WhiteTexture()),
 		m_specularMap(Texture2D::WhiteTexture()), m_color(color) { }
 
-	const AReference<Shader>& Material::GetShader() const { return m_shader; }
-	AReference<Shader>& Material::GetShader() { return m_shader; }
-	void Material::SetShader(const AReference<Shader>& shader) { m_shader = shader; }
+	ShaderHandle Material::GetShader() const { return m_shader; }
+	void Material::SetShader(ShaderHandle shader) { m_shader = shader; }
 
-	const AReference<Texture2D>& Material::GetDiffuseMap() const { return m_diffuseMap; }
-	AReference<Texture2D>& Material::GetDiffuseMap() { return m_diffuseMap; }
-	void Material::SetDiffuseMap(const AReference<Texture2D>& diffuse) { m_diffuseMap = diffuse; }
+	Texture2DHandle Material::GetDiffuseMap() const { return m_diffuseMap; }
+	void Material::SetDiffuseMap(Texture2DHandle diffuse) { m_diffuseMap = diffuse; }
 
-	const AReference<Texture2D>& Material::GetSpecularMap() const { return m_specularMap; }
-	AReference<Texture2D>& Material::GetSpecularMap() { return m_specularMap; }
-	void Material::SetSpecularMap(const AReference<Texture2D>& specular) { m_specularMap = specular; }
+	Texture2DHandle Material::GetSpecularMap() const { return m_specularMap; }
+	void Material::SetSpecularMap(Texture2DHandle specular) { m_specularMap = specular; }
 
 	const Vector4& Material::GetColor() const { return m_color; }
 	Vector4& Material::GetColor() { return m_color; }
 	void Material::SetColor(const Vector4& color) { m_color = color; }
 
-	AReference<Material> Material::DefaultMat()
+	MaterialHandle Material::DefaultMat()
 	{
-		static AReference<Material> defaultMat = AReference<Material>::Create();
+		static MaterialHandle defaultMat = ResourceHandler::CreateMaterial();
 		return defaultMat;
 	}
 
-	AReference<Material> Material::MissingMat()
+	MaterialHandle Material::MissingMat()
 	{
-		static AReference<Material> missingMat = AReference<Material>::Create(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+		static MaterialHandle missingMat = ResourceHandler::CreateMaterial(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
 		return missingMat;
 	}
 
 	bool Material::operator==(const Material& other) const
 	{
-		return m_shader->GetRendererID() == other.m_shader->GetRendererID() && m_diffuseMap == other.m_diffuseMap
+		return m_shader == other.m_shader && m_diffuseMap == other.m_diffuseMap
 			&& m_specularMap == other.m_specularMap;
 	}
 
@@ -603,7 +600,8 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, AReference<Texture2D> texture,
 		float tileFactor, const Vector4& tintColor, bool ignoresCam)
 	{
-		UploadQuad(transform, *Material::DefaultMat().Get(), texture, tileFactor, tintColor, ignoresCam);
+		UploadQuad(transform, *ResourceHandler::GetMaterial(Material::DefaultMat()).Get(), 
+			texture, tileFactor, tintColor, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
@@ -624,24 +622,24 @@ namespace AstralEngine
 
 	void Renderer::DrawQuad(const Mat4& transform, const Material& mat, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(transform, mat, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(transform, mat, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(transform, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(transform, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Material& mat, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, rotation, scale, mat, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, mat, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation,
 		const Vector3& scale, const Vector4& color, bool ignoresCam)
 	{
-		DrawQuad(position, rotation, scale, Texture2D::WhiteTexture(), 1.0f, color, ignoresCam);
+		DrawQuad(position, rotation, scale, ResourceHandler::GetTexture2D(Texture2D::WhiteTexture()), 1.0f, color, ignoresCam);
 	}
 
 	void Renderer::DrawQuad(const Vector3& position, float rotation, const Vector2& scale, AReference<Texture2D>& texture,
@@ -661,8 +659,8 @@ namespace AstralEngine
 		unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture,
 		const Vector3* textureCoords, float tileFactor, const Vector4& tintColor)
 	{
-		UploadVertexData(renderTarget, transform, *Material::DefaultMat().Get(), vertices, numVertices, normals,
-			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
+		UploadVertexData(renderTarget, transform, *ResourceHandler::GetMaterial(Material::DefaultMat()).Get(), 
+			vertices, numVertices, normals, indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
 
 	void Renderer::DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Quaternion& rotation,
@@ -678,7 +676,8 @@ namespace AstralEngine
 	void Renderer::DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		UploadMesh(transform, *Material::DefaultMat().Get(), mesh, texture, tileFactor, tintColor);
+		UploadMesh(transform, *ResourceHandler::GetMaterial(Material::DefaultMat()).Get(), 
+			mesh, texture, tileFactor, tintColor);
 	}
 
 

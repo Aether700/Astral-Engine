@@ -7,18 +7,18 @@ namespace AstralEngine
 {
 	enum class RenderableType
 	{
-		AEntity, // renderable comes from an entity of the scene
-		Quad,
+		Mesh,
+		Quad
 	};
 
 	class DrawCommand
 	{
 	public:
 		DrawCommand();
-		DrawCommand(const Mat4& transform, AReference<Material> mat, RenderableType type);
+		DrawCommand(const Mat4& transform, MaterialHandle mat, RenderableType type);
 
 		const Mat4& GetTransform() const;
-		const AReference<Material>& GetMaterial() const;
+		MaterialHandle GetMaterial() const;
 		RenderableType GetType() const;
 		bool IsOpaque() const;
 
@@ -28,7 +28,7 @@ namespace AstralEngine
 	private:
 		Mat4 m_transform;
 		RenderableType m_type;
-		AReference<Material> m_material;
+		MaterialHandle m_material;
 	};
 
 	// ordered list of DrawCommands. Used to sort in what order what should be drawn
@@ -37,9 +37,8 @@ namespace AstralEngine
 	public:
 		~DrawList();
 
-		think over how draw cmds are stored/sorted internally and then implement draw list class
-		might want to use UUIDs for do distinguish models/meshes (need to group same mesh/model 
-		together for instance rendering)
+		//think over how draw cmds are stored/sorted internally and then implement draw list class
+		//need to group similar meshes/vertex data together to use instance rendering
 
 		void AddDrawCmd(DrawCommand* cmd);
 		DrawCommand* GetNextDrawCmd();

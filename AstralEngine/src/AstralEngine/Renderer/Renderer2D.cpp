@@ -88,12 +88,13 @@ namespace AstralEngine
 			samplers[i] = i;
 		}
 
-		s_data.shader = Shader::Create("assets/shaders/Shader2D.glsl");
+		s_data.shader = ResourceHandler::GetShader(ResourceHandler::LoadShader("assets/shaders/Shader2D.glsl"));
 		s_data.shader->Bind();
 		s_data.shader->SetIntArray("u_texture", samplers, s_maxTextureSlots);
 
 		unsigned int whiteTextureData = 0xffffffff;
-		AReference<Texture2D> whiteTexture = Texture2D::Create(1, 1, &whiteTextureData, sizeof(unsigned int));
+		AReference<Texture2D> whiteTexture = ResourceHandler::GetTexture2D(ResourceHandler::LoadTexture2D(1, 
+			1, &whiteTextureData, sizeof(unsigned int)));
 		s_data.textureSlots[0] = whiteTexture;
 
 		s_data.quadPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };

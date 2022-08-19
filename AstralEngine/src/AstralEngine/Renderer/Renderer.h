@@ -50,32 +50,29 @@ namespace AstralEngine
 		Material();
 		Material(const Vector4& color);
 
-		const AReference<Shader>& GetShader() const;
-		AReference<Shader>& GetShader();
-		void SetShader(const AReference<Shader>& shader);
+		ShaderHandle GetShader() const;
+		void SetShader(ShaderHandle shader);
 
-		const AReference<Texture2D>& GetDiffuseMap() const;
-		AReference<Texture2D>& GetDiffuseMap();
-		void SetDiffuseMap(const AReference<Texture2D>& diffuse);
+		Texture2DHandle GetDiffuseMap() const;
+		void SetDiffuseMap(Texture2DHandle diffuse);
 
-		const AReference<Texture2D>& GetSpecularMap() const;
-		AReference<Texture2D>& GetSpecularMap();
-		void SetSpecularMap(const AReference<Texture2D>& specular);
+		Texture2DHandle GetSpecularMap() const;
+		void SetSpecularMap(Texture2DHandle specular);
 
 		const Vector4& GetColor() const;
 		Vector4& GetColor();
 		void SetColor(const Vector4& color);
 
-		static AReference<Material> DefaultMat();
-		static AReference<Material> MissingMat();
+		static MaterialHandle DefaultMat();
+		static MaterialHandle MissingMat();
 
 		bool operator==(const Material& other) const;
 		bool operator!=(const Material& other) const;
 
 	private:
-		AReference<Shader> m_shader;
-		AReference<Texture2D> m_diffuseMap;
-		AReference<Texture2D> m_specularMap;
+		ShaderHandle m_shader;
+		Texture2DHandle m_diffuseMap;
+		Texture2DHandle m_specularMap;
 		Vector4 m_color;
 
 		ASinglyLinkedList<MatUniform> m_additionalUniforms;

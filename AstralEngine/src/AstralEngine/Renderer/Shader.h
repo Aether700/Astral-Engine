@@ -9,6 +9,7 @@ namespace AstralEngine
 {
 	class Shader
 	{
+		friend class ResourceHandler;
 	public:
 		virtual ~Shader() { }
 
@@ -35,25 +36,8 @@ namespace AstralEngine
 
 		virtual void SetBool(const std::string& uniformName, bool v) = 0;
 
+	private:
 		static AReference<Shader> Create(const std::string& filepath);
 		static AReference<Shader> Create(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
-	};
-	
-	class ShaderLibrary
-	{
-	public:
-		void Add(const std::string& name, AReference<Shader> shader);
-
-		void Add(AReference<Shader> shader);
-
-		AReference<Shader> Load(const std::string& name, const std::string& filepath);
-		AReference<Shader> Load(const std::string& filepath);
-
-		AReference<Shader> Get(const std::string& name);
-
-		bool Exists(const std::string& name) const;
-
-	private:
-		AUnorderedMap<std::string, AReference<Shader>> m_shaders;
 	};
 }

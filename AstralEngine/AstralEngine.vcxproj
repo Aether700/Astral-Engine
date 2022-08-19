@@ -146,6 +146,7 @@
     <ClInclude Include="src\AstralEngine\Core\LayerStack.h" />
     <ClInclude Include="src\AstralEngine\Core\Log.h" />
     <ClInclude Include="src\AstralEngine\Core\MouseButtonCodes.h" />
+    <ClInclude Include="src\AstralEngine\Core\Resource.h" />
     <ClInclude Include="src\AstralEngine\Core\Time.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADoublyLinkedList.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="src\AstralEngine\Core\Input.cpp" />
     <ClCompile Include="src\AstralEngine\Core\LayerStack.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Resource.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Component.cpp" />

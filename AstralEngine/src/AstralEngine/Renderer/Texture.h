@@ -1,5 +1,7 @@
 #pragma once
 #include "AstralEngine/Data Struct/AReference.h"
+#include "AstralEngine/Core/Resource.h"
+
 #include <string>
 
 namespace AstralEngine
@@ -23,14 +25,16 @@ namespace AstralEngine
 
 	class Texture2D : public Texture
 	{
+		friend class ResourceHandler;
 	public:
 		virtual ~Texture2D() { }
+		
+		static ResourceHandle WhiteTexture();
 
+	private:
 		static AReference<Texture2D> Create(const std::string& path);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height, void* data, unsigned int size);
-
-		static AReference<Texture2D> WhiteTexture();
 	};
 
 	//sub texture of a texture atlas
