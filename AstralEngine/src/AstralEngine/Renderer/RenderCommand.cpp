@@ -45,4 +45,10 @@ namespace AstralEngine
 
 		s_api->DrawIndexed(primitive, indexBuffer, count);
 	}
+
+	void RenderCommand::DrawInstancedIndexed(const AReference<IndexBuffer>& indexBuffer,
+		unsigned int instanceAmount, unsigned int count)
+	{
+		s_api->DrawInstancedIndexed(indexBuffer, instanceAmount, count);
+	}
 }

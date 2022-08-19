@@ -66,6 +66,7 @@
 						{
 							WindowCloseEvent close;
 							windowObj->m_callback(close);
+							windowObj->SetVisible(false);
 						}
 						return 0;
 					}

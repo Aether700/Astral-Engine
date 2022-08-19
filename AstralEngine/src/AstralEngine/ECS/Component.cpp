@@ -110,7 +110,14 @@ namespace AstralEngine
 
 	Mat4 Transform::GetTransformMatrix() const
 	{
-		if (m_dirty)
+		bool parentDirty = false;
+		if (m_parent != NullEntity)
+		{
+			const Transform& parent = m_parent.GetTransform();
+			parentDirty = parent.m_dirty || parent.HasChanged();
+		}
+
+		if (m_dirty || parentDirty)
 		{
 			m_hasChanged = true;
 			m_dirty = false;
@@ -202,7 +209,14 @@ namespace AstralEngine
 		m_dirty = true;
 	}
 
-	bool Transform::HasChanged() const { return m_hasChanged; }
+	bool Transform::HasChanged() const 
+	{
+		if (m_parent != NullEntity)
+		{
+			return m_hasChanged || m_parent.GetTransform().HasChanged();
+		}
+		return m_hasChanged; 
+	}
 
 	Vector3 Transform::Forward() const
 	{

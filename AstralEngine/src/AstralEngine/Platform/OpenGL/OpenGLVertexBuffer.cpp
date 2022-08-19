@@ -47,8 +47,12 @@ namespace AstralEngine
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout)
+	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)
 	{
-		m_vertexArray.SetLayout(layout);
+		m_vertexArray.SetLayout(layout, layoutOffset);
+		for (size_t i = layoutOffset; i < layout.GetCount(); i++)
+		{
+			glVertexAttribDivisor(i, layout[i].advanceRate);
+		}
 	}
 }

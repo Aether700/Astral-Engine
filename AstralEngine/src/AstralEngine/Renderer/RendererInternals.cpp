@@ -24,4 +24,32 @@ namespace AstralEngine
 	{
 		return !(*this == other);
 	}
+
+	// DrawCallList /////////////////////////////////////////////////
+	DrawCallList::DrawCallList() : m_material(nullHandle) { }
+	DrawCallList::DrawCallList(MaterialHandle material, RenderableType type) : m_material(material), m_type(type) { }
+	DrawCallList::~DrawCallList()
+	{
+		Clear();
+	}
+
+	MaterialHandle DrawCallList::GetMaterial() const { return m_material; }
+
+	RenderableType DrawCallList::GetType() const { return m_type; }
+
+	void DrawCallList::AddDrawCommand(DrawCommand* draw)
+	{
+		AE_CORE_ASSERT(draw->GetMaterial() == m_material && draw->GetType() == m_type, "");
+		m_data.Add(draw);
+	}
+
+	void DrawCallList::Clear()
+	{
+		for (DrawCommand* cmd : m_data)
+		{
+			delete cmd;
+		}
+		m_data.Clear();
+	}
+
 }

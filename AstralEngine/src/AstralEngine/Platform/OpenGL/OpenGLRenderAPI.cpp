@@ -56,4 +56,14 @@ namespace AstralEngine
 	{
 		glDrawElements(RenderingPrimitiveToOpenGLPrimitive(primitive), count, GL_UNSIGNED_INT, nullptr);
 	}
+
+	void OpenGLRenderAPI::DrawInstancedIndexed(const AReference<IndexBuffer>& indexBuffer, 
+		unsigned int instanceAmount, unsigned int count)
+	{
+		if (count == 0)
+		{
+			count = indexBuffer->GetCount();
+		}
+		glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, instanceAmount);
+	}
 }

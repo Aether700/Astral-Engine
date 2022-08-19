@@ -53,18 +53,17 @@ namespace AstralEngine
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::SetLayout(const VertexBufferLayout& layout)
+	void OpenGLVertexArray::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)
 	{
 		AE_PROFILE_FUNCTION();
 		int offset = 0;
 
-		for (int i = 0; i < layout.GetCount(); i++)
+		for (int i = layoutOffset; i < layout.GetCount(); i++)
 		{
 			glEnableVertexAttribArray(i);
 			glVertexAttribPointer(i, layout[i].GetComponentCount(), ADataTypeToOpenGLBaseType(layout[i].type),
 				layout[i].normalized ? GL_TRUE : GL_FALSE,
 				layout.GetStride(), (const void*)(long long) offset);
-
 			offset += layout[i].size;
 		}
 	}

@@ -38,11 +38,12 @@ namespace AstralEngine
 		ADataType type;
 		unsigned int size;
 		bool normalized;
+		size_t advanceRate; // used for instance rendering
 
-		LayoutElement() : size(0), type(ADataType::Bool), normalized(false) { }
+		LayoutElement() : size(0), type(ADataType::Bool), normalized(false), advanceRate(0) { }
 
-		LayoutElement(ADataType t, const std::string& n, bool nor = false) : type(t), name(n), 
-			normalized(nor), size(ADataTypeSize(t)) { }
+		LayoutElement(ADataType t, const std::string& n, bool nor = false, size_t advRate = 0) : type(t), name(n), 
+			normalized(nor), size(ADataTypeSize(t)), advanceRate(advRate) { }
 
 		unsigned int GetComponentCount() const
 		{
@@ -113,7 +114,7 @@ namespace AstralEngine
 		virtual void Unbind() const = 0;
 
 		virtual void SetData(const void* data, unsigned int size, unsigned int offset = 0) = 0;
-		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) = 0;
 
 		static AReference<VertexBuffer> Create(unsigned int size);
 		static AReference<VertexBuffer> Create(float* data, unsigned int dataSize);

@@ -18,6 +18,8 @@ namespace AstralEngine
 		static void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count = 0);
 		static void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 
 			unsigned int count = 0);
+
+		static void DrawInstancedIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int instanceAmount, unsigned int count = 0);
 	private:
 		static RenderAPI* s_api;
 	};

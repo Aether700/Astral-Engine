@@ -31,6 +31,35 @@ namespace AstralEngine
 		MaterialHandle m_material;
 	};
 
+	// lists all the data to be drawn to the screen in one or more draw calls
+	class DrawCallList
+	{
+	public:
+		DrawCallList();
+		DrawCallList(MaterialHandle material, RenderableType type);
+		~DrawCallList();
+
+		MaterialHandle GetMaterial() const;
+		RenderableType GetType() const;
+
+		void AddDrawCommand(DrawCommand* draw);
+		void Clear();
+
+	private:
+		ASinglyLinkedList<DrawCommand*> m_data;
+		MaterialHandle m_material;
+		RenderableType m_type;
+	};
+
+	class RenderingDataSorter
+	{
+	public:
+		void AddData(DrawCommand* data);
+
+	private:
+
+	};
+
 	// ordered list of DrawCommands. Used to sort in what order what should be drawn
 	class DrawList
 	{

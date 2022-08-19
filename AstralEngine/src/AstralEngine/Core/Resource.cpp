@@ -6,8 +6,6 @@
 
 namespace AstralEngine
 {
-	static constexpr ResourceHandle invalidHandle = MAXSIZE_T;
-
 	// ResourceHandler /////////////////////////////////////////////////////////////
 	ShaderHandle ResourceHandler::LoadShader(const std::string& filepath)
 	{
@@ -24,7 +22,7 @@ namespace AstralEngine
 		AReference<Texture2D> texture = Texture2D::Create(filepath);
 		if (texture == nullptr)
 		{
-			return invalidHandle;
+			return nullHandle;
 		}
 		return GetHandler()->m_textures2D.AddResource(texture);
 	}
@@ -34,7 +32,7 @@ namespace AstralEngine
 		AReference<Texture2D> texture = Texture2D::Create(width, height);
 		if (texture == nullptr)
 		{
-			return invalidHandle;
+			return nullHandle;
 		}
 		return GetHandler()->m_textures2D.AddResource(texture);
 	}
@@ -45,7 +43,7 @@ namespace AstralEngine
 		AReference<Texture2D> texture = Texture2D::Create(width, height, data, size);
 		if (texture == nullptr)
 		{
-			return invalidHandle;
+			return nullHandle;
 		}
 		return GetHandler()->m_textures2D.AddResource(texture);
 	}
