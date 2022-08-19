@@ -9,7 +9,6 @@ namespace AstralEngine
 	{
 	public:
 		OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
 		~OpenGLShader();
 
 		virtual const std::string& GetName() const override { return m_name; }

@@ -38,6 +38,5 @@ namespace AstralEngine
 
 	private:
 		static AReference<Shader> Create(const std::string& filepath);
-		static AReference<Shader> Create(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
 	};
 }

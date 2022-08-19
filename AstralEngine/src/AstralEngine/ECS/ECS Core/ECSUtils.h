@@ -19,7 +19,7 @@ namespace AstralEngine
 		template<typename Entity>
 		constexpr operator Entity() const
 		{
-			return static_cast<Entity>( (size_t)((size_t)0 - (size_t)1) ); //get MaxValue of the unsigned IDType
+			return static_cast<Entity>(MAXSIZE_T); //get MaxValue of the unsigned IDType
 		}
 
 		constexpr bool operator==(NullObj) const { return true; }

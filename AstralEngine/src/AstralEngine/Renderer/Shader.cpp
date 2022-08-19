@@ -14,24 +14,10 @@ namespace AstralEngine
 		{
 		case RenderAPI::API::None:
 			AE_CORE_ERROR("No RenderAPI is not yet supported");
+			break;
 
 		case RenderAPI::API::OpenGL:
 			return AReference<OpenGLShader>::Create(filepath);
-		}
-
-		AE_CORE_ERROR("Unknown RenderAPI");
-		return nullptr;
-	}
-
-	AReference<Shader> Shader::Create(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc)
-	{
-		switch (RenderAPI::GetAPI())
-		{
-			case RenderAPI::API::None:
-				AE_CORE_ERROR("No RenderAPI is not yet supported");
-
-			case RenderAPI::API::OpenGL:
-				return AReference<OpenGLShader>::Create(name, vertexShaderSrc, fragmentShaderSrc);
 		}
 
 		AE_CORE_ERROR("Unknown RenderAPI");

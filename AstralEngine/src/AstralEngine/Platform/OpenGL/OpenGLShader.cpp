@@ -39,16 +39,6 @@ namespace AstralEngine
 		AUnorderedMap<unsigned int, std::string> shaderSrc = PreProcess(fileContent);
 		CompileShaders(shaderSrc);
 	}
-
-	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexShaderSrc, 
-		const std::string& fragmentShaderSrc)
-	{
-		AUnorderedMap<unsigned int, std::string> shaderSrc;
-		shaderSrc[GL_VERTEX_SHADER] = vertexShaderSrc;
-		shaderSrc[GL_FRAGMENT_SHADER] = fragmentShaderSrc;
-
-		CompileShaders(shaderSrc);
-	}
 	
 	OpenGLShader::~OpenGLShader()
 	{
