@@ -4,6 +4,7 @@
 
 //temp
 #include "AstralEngine/UI/UICore.h"
+#include "glad/glad.h"
 ////////
 
 using namespace AstralEngine;
@@ -24,7 +25,7 @@ public:
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
-			t.SetLocalPosition(t.GetLocalPosition() - t.Forward() * m_speed
+			t.SetLocalPosition(t.GetLocalPosition() + t.Forward() * m_speed
 				* AstralEngine::Time::GetDeltaTime());
 		}
 
@@ -183,24 +184,21 @@ void OnButtonClicked()
 	}
 }
 
-void ManualRender(ShaderHandle shader, AReference<VertexBuffer> vb, AReference<VertexBuffer> instanced, AReference<IndexBuffer> ib)
+void ManualRender(ShaderHandle shader, AReference<VertexBuffer> vb, AReference<VertexBuffer> instanced, 
+	AReference<IndexBuffer> ib)
 {
 	RenderCommand::Clear();
 	ResourceHandler::GetShader(shader)->Bind();
 	vb->Bind();
-	RenderCommand::DrawInstancedIndexed(ib, 4);
+	RenderCommand::DrawInstancedIndexed(ib, 1);
 }
 
 void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> instanced, AReference<IndexBuffer> ib)
 {
-	Vector3 offsets[4] = 
+	Mat4 offsets[1] =
 	{
-		{ -0.25f, -0.25f, 0.0f },
-		{  0.25f, -0.25f, 0.0f },
-		{  0.25f,  0.25f, 0.0f },
-		{ -0.25f,  0.25f, 0.0f }
+		Mat4::Identity()
 	};
-
 
 	Vector3 pos[4] =
 	{
@@ -215,8 +213,25 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 	
 	instanced->Bind();
 
-	issue might be with set layout double check to make sure
-	instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1, sizeof(Vector3)); 
+	//issue might be with set layout double check to make sure
+	//instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1, sizeof(Vector3)); 
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)0);
+	glVertexAttribDivisor(1, 1);
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(4 * sizeof(float)));
+	glVertexAttribDivisor(2, 1);
+	
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(8 * sizeof(float)));
+	glVertexAttribDivisor(3, 1);
+	
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(12 * sizeof(float)));
+	glVertexAttribDivisor(4, 1);
+
+
 	instanced->SetData(offsets, sizeof(offsets));
 
 	unsigned int indices[6] =
@@ -224,6 +239,7 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 		0, 1, 2,
 		2, 3, 0
 	};
+
 	ib->Bind();
 	ib->SetData(indices, sizeof(indices) / sizeof(unsigned int));
 }
@@ -293,7 +309,7 @@ public:
 
 	void OnUpdate() override
 	{
-		ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
+		//ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
 
 		/*
 		Renderer::BeginScene(m_entity.GetComponent<Camera>().camera);
@@ -301,11 +317,9 @@ public:
 		Renderer::EndScene();
 		*/
 
-		/*
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-		*/
 
 		/*
 		m_cameraController->OnUpdate();

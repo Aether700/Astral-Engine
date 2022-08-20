@@ -3,15 +3,22 @@
 
 namespace AstralEngine
 {
+	struct InstancedVertexData
+	{
+		Mat4 transform;
+		Vector4 color;
+	};
+
 	// DrawCommand /////////////////////////////////
 	
 	DrawCommand::DrawCommand() { }
-	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh)
-		: m_transform(transform), m_mesh(mesh), m_material(mat) { }
+	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color)
+		: m_transform(transform), m_mesh(mesh), m_material(mat), m_color(color) { }
 
 	const Mat4& DrawCommand::GetTransform() const { return m_transform; }
 	MaterialHandle DrawCommand::GetMaterial() const { return m_material; }
 	MeshHandle DrawCommand::GetMesh() const { return m_mesh; }
+	const Vector4& DrawCommand::GetColor() const { return m_color; }
 	bool DrawCommand::IsOpaque() const { return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f; }
 
 	bool DrawCommand::operator==(const DrawCommand& other) const
@@ -57,18 +64,19 @@ namespace AstralEngine
 				shader->Bind();
 				shader->SetMat4("u_viewProjMatrix", viewProj);
 
-				Mat4* transformArr = new Mat4[m_data.GetCount()];
+				InstancedVertexData* vertexData = new InstancedVertexData[m_data.GetCount()];
 				size_t index = 0;
 				for (DrawCommand* cmd : m_data)
 				{
-					transformArr[index] = cmd->GetTransform();
+					vertexData[index].transform = cmd->GetTransform();
+					vertexData[index].color = cmd->GetColor();
 					index++;
 				}
 
 				m_geometryDataBuffer->Bind();
 				m_instanceArrBuffer->Bind();
-				m_instanceArrBuffer->SetData(transformArr, sizeof(Mat4) * m_data.GetCount());
-				delete[] transformArr;
+				m_instanceArrBuffer->SetData(vertexData, sizeof(InstancedVertexData) * m_data.GetCount());
+				delete[] vertexData;
 
 				m_geometryDataBuffer->Bind();
 				m_indexBuffer->Bind();
@@ -112,7 +120,8 @@ namespace AstralEngine
 		m_geometryDataBuffer->SetData(pos, sizeof(pos));
 
 		m_instanceArrBuffer->Bind();
-		m_instanceArrBuffer->SetLayout({ { ADataType::Mat4, "transformMatrix", 1 } }, 1, sizeof(Vector3));
+		m_instanceArrBuffer->SetLayout({ { ADataType::Mat4, "transformMatrix", false, 1 }, 
+			{ ADataType::Float4, "color", false, 1 } }, 1);
 
 		unsigned int indices[] =
 		{

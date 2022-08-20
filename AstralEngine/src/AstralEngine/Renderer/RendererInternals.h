@@ -9,11 +9,12 @@ namespace AstralEngine
 	{
 	public:
 		DrawCommand();
-		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh);
+		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color);
 
 		const Mat4& GetTransform() const;
 		MaterialHandle GetMaterial() const;
 		MeshHandle GetMesh() const;
+		const Vector4& GetColor() const;
 		bool IsOpaque() const;
 
 		bool operator==(const DrawCommand& other) const;
@@ -21,6 +22,7 @@ namespace AstralEngine
 
 	private:
 		Mat4 m_transform;
+		Vector4 m_color;
 		MeshHandle m_mesh;
 		MaterialHandle m_material;
 	};

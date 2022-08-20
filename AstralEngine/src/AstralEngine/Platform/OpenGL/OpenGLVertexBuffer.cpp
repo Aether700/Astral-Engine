@@ -70,29 +70,45 @@ namespace AstralEngine
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 	}
 
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout)
-	{
-		SetLayout(layout, 0, 0);
-	}
-
-	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset)
+	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)
 	{
 		if (m_vertexArray != nullptr)
 		{
-			m_vertexArray->SetLayout(layout, layoutOffset, dataOffset);
+			m_vertexArray->SetLayout(layout, layoutOffset);
 		}
 		else
 		{
 			OpenGLVertexArray* boundVA = OpenGLVertexArray::GetCurrBoundVA();
 			if (boundVA != nullptr);
 			{
-				boundVA->SetLayout(layout, layoutOffset, dataOffset);
+				boundVA->SetLayout(layout, layoutOffset);
 			}
 		}
 
+		/*
+		int indexOffset = 0;
 		for (size_t i = 0; i < layout.GetCount(); i++)
 		{
-			glVertexAttribDivisor(i + layoutOffset, layout[i].advanceRate);
+			if (layout[i].type == ADataType::Mat3)
+			{
+				glVertexAttribDivisor(i + layoutOffset + indexOffset, layout[i].advanceRate);
+				glVertexAttribDivisor(i + layoutOffset + indexOffset + 1, layout[i].advanceRate);
+				glVertexAttribDivisor(i + layoutOffset + indexOffset + 2, layout[i].advanceRate);
+				indexOffset += 2;
+			}
+			else if (layout[i].type == ADataType::Mat4)
+			{
+				glVertexAttribDivisor(i + layoutOffset + indexOffset, layout[i].advanceRate);
+				glVertexAttribDivisor(i + layoutOffset + indexOffset + 1, layout[i].advanceRate);
+				glVertexAttribDivisor(i + layoutOffset + indexOffset + 2, layout[i].advanceRate);
+				glVertexAttribDivisor(i + layoutOffset + indexOffset + 3, layout[i].advanceRate);
+				indexOffset += 3;
+			}
+			else
+			{
+				glVertexAttribDivisor(i + layoutOffset + indexOffset, layout[i].advanceRate);
+			}
 		}
+		*/
 	}
 }

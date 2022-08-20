@@ -15,8 +15,7 @@ namespace AstralEngine
 		virtual void Unbind() const override;
 
 		virtual void SetData(const void* data, unsigned int size, unsigned int offset = 0) override;
-		virtual void SetLayout(const VertexBufferLayout& layout) override;
-		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset) override;
+		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) override;
 
 	private:
 		OpenGLVertexArray* m_vertexArray;

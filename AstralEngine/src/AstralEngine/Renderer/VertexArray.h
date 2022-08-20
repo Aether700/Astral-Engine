@@ -11,8 +11,7 @@ namespace AstralEngine
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
-		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset, size_t dataOffset) = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) = 0;
 
 		static AReference<VertexArray> Create();
 	};
