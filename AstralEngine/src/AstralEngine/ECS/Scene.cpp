@@ -148,7 +148,7 @@ namespace AstralEngine
 
 			for (BaseEntity e : group)
 			{
-				auto& components = group.Get<Transform, SpriteRenderer, AEntityData>(e);
+				auto& components = group.Get<SpriteRenderer, AEntityData>(e);
 				AEntityData& data = std::get<AEntityData&>(components);
 
 				if (data.IsActive())
@@ -156,8 +156,8 @@ namespace AstralEngine
 					SpriteRenderer& sprite = std::get<SpriteRenderer&>(components);
 					if (sprite.IsActive())
 					{
-						Transform& transform = std::get<Transform&>(components);
-						Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+						AEntity ent = AEntity(e, this);
+						Renderer::DrawSprite(ent, sprite);
 					}
 				}
 			}

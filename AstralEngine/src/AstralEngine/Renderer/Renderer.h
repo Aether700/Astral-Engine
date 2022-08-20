@@ -66,6 +66,7 @@ namespace AstralEngine
 		void SetColor(const Vector4& color);
 
 		static MaterialHandle DefaultMat();
+		static MaterialHandle SpriteMat();
 		static MaterialHandle MissingMat();
 
 		bool operator==(const Material& other) const;
@@ -88,26 +89,30 @@ namespace AstralEngine
 	struct VertexData
 	{
 		Vector3 position;
-		Vector3 textureCoords;
-		Vector3 normal;
-		Vector4 color;
-		float textureIndex;
-		float tillingFactor;
-		float uses3DTexture;
-		float ignoresCamera;
-		Material mat;
+		//Vector3 textureCoords;
+		//Vector3 normal;
+		//Vector4 color;
+		//float textureIndex;
+		//float tillingFactor;
+		//float uses3DTexture;
+		//float ignoresCamera;
+		//Material mat;
 
+		VertexData() { }
+		/*
 		VertexData() : textureIndex(-1), tillingFactor(1.0f), 
 			uses3DTexture(0.0f), ignoresCamera(0.0f) { }
+		*/
 
 		bool operator==(const VertexData& other) const
 		{
-			return position == other.position && textureCoords == other.textureCoords
+			return position == other.position; /* && textureCoords == other.textureCoords
 				&& normal == other.normal
 				&& color == other.color
 				&& textureIndex == other.textureIndex
 				&& tillingFactor == other.tillingFactor
 				&& mat == other.mat;
+				*/
 		}
 
 		bool operator!=(const VertexData& other) const
@@ -262,7 +267,7 @@ namespace AstralEngine
 			bool drawCubes = true);
 
 		//sprite
-		static void DrawSprite(const Mat4& transform, const SpriteRenderer& sprite);
+		static void DrawSprite(AEntity e, const SpriteRenderer& sprite);
 
 		static void DrawSprite(const Vector3& position, float rotation, const Vector2& size,
 			const SpriteRenderer& sprite);

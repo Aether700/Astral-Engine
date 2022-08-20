@@ -11,7 +11,7 @@ namespace AstralEngine
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetData(unsigned int* data, unsigned int count) = 0;
+		virtual void SetData(const unsigned int* data, unsigned int count) = 0;
 
 		virtual int GetCount() const = 0;
 

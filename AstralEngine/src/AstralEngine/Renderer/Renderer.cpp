@@ -150,6 +150,12 @@ namespace AstralEngine
 		return defaultMat;
 	}
 
+	MaterialHandle Material::SpriteMat()
+	{
+		static MaterialHandle spriteMat = ResourceHandler::CreateMaterial();
+		return spriteMat;
+	}
+
 	MaterialHandle Material::MissingMat()
 	{
 		static MaterialHandle missingMat = ResourceHandler::CreateMaterial(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
@@ -474,7 +480,7 @@ namespace AstralEngine
 	{
 		for(auto& pair : s_sorter)
 		{
-			pair.GetElement().Draw(s_viewProjMatrix);
+			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
 		}
 	}
 
@@ -548,7 +554,7 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		s_sorter.AddData(new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor));
+		s_sorter.AddData(new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity));
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, Texture2DHandle texture,
@@ -684,9 +690,10 @@ namespace AstralEngine
 		*/
 	}
 
-	void Renderer::DrawSprite(const Mat4& transform, const SpriteRenderer& sprite)
+	void Renderer::DrawSprite(AEntity e, const SpriteRenderer& sprite)
 	{
-		DrawQuad(transform, sprite.GetSprite(), 1.0f, sprite.GetColor());
+		s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(), 
+			Mesh::QuadMesh(), sprite.GetColor(), e));
 	}
 
 	void Renderer::DrawSprite(const Vector3& position, float rotation, const Vector2& size,
