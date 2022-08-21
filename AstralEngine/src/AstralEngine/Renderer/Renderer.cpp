@@ -451,10 +451,16 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		RenderCommand::Init();
+		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
+		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
+		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
+		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
+		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
 	}
 
 	void Renderer::Shutdown()
 	{
+		AE_CORE_ERROR("Still need to test spliting up meshes with tank mesh!!!");
 	}
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)
@@ -635,13 +641,6 @@ namespace AstralEngine
 			indices, indexCount, texture, textureCoords, tileFactor, tintColor);
 	}
 
-	void Renderer::DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
-		float tileFactor, const Vector4& tintColor)
-	{
-		UploadMesh(transform, *ResourceHandler::GetMaterial(Material::DefaultMat()).Get(), 
-			mesh, texture, tileFactor, tintColor);
-	}
-
 
 	void Renderer::AddDirectionalLight(const Vector3& position, const Vector3& direction, const Vector4& lightColor, bool drawCubes)
 	{
@@ -700,6 +699,17 @@ namespace AstralEngine
 		const SpriteRenderer& sprite)
 	{
 		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor());
+	}
+
+	void Renderer::DrawMesh(AEntity e, MaterialHandle material, const MeshRenderer& mesh)
+	{
+		s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), material,
+			mesh.GetMesh(), mesh.GetColor(), e));
+	}
+
+	void Renderer::DrawMesh(AEntity e, const MeshRenderer& mesh)
+	{
+		DrawMesh(e, Material::DefaultMat(), mesh);
 	}
 
 	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)

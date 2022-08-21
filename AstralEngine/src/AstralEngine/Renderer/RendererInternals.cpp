@@ -4,6 +4,19 @@
 
 namespace AstralEngine
 {
+	void DrawDataBuffer::TempRenderFunc(MeshHandle mesh)
+	{
+		DrawCommand cmd = DrawCommand(Mat4::Identity(), NullHandle, mesh, Vector4(1, 1, 1, 1), NullEntity);
+		ASinglyLinkedList<DrawCommand*> l;
+		l.Add(&cmd);
+
+		auto shader = ResourceHandler::GetShader(0);
+		shader->Bind();
+		shader->SetMat4("u_viewProjMatrix", Mat4::Identity());
+
+		RenderMeshInstance(Mat4::Identity(), mesh, l);
+	}
+
 	struct InstanceVertexData
 	{
 		Mat4 transform;
@@ -13,8 +26,9 @@ namespace AstralEngine
 	// DrawCommand /////////////////////////////////
 	
 	DrawCommand::DrawCommand() { }
-	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, AEntity e)
-		: m_transform(transform), m_mesh(mesh), m_material(mat), m_color(color), m_entity(e) { }
+	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, 
+		const Vector4& color, const AEntity e) : m_transform(transform), m_mesh(mesh), 
+		m_material(mat), m_color(color), m_entity(e) { }
 
 	const Mat4& DrawCommand::GetTransform() const { return m_transform; }
 	MaterialHandle DrawCommand::GetMaterial() const { return m_material; }
@@ -35,6 +49,11 @@ namespace AstralEngine
 	}
 
 	// DrawDataBuffer ////////////////////////////////////////////////////
+
+	size_t DrawDataBuffer::s_maxNumVertex = 0;
+	size_t DrawDataBuffer::s_maxNumIndices;
+
+
 	DrawDataBuffer::DrawDataBuffer()
 	{
 		// temp ////////////////////
@@ -49,12 +68,28 @@ namespace AstralEngine
 		delete[] m_batchIndicesArr;
 	}
 
-	void DrawDataBuffer::Initalize()
+	void DrawDataBuffer::Initialize()
 	{
-		size_t sizeOfBuffer = 200; // temp value need to query GPU
-		m_instancingBuffer = VertexBuffer::Create(sizeOfBuffer);
-		m_instancingArr = VertexBuffer::Create(sizeOfBuffer, true);
+		if (s_maxNumVertex == 0)
+		{
+			s_maxNumVertex = RenderCommand::GetMaxNumVertices();
+			s_maxNumIndices = RenderCommand::GetMaxNumIndices();
+		}
+
+		m_instancingBuffer = VertexBuffer::Create(s_maxNumVertex * sizeof(VertexData));
+		m_instancingArr = VertexBuffer::Create(s_maxNumVertex * sizeof(InstanceVertexData), true);
 		m_instancingIndices = IndexBuffer::Create();
+
+		m_instancingBuffer->Bind();
+		m_instancingBuffer->SetLayout({
+			{ ADataType::Float3, "position" }
+			});
+		
+		m_instancingArr->Bind();
+		m_instancingArr->SetLayout({
+			{ ADataType::Mat4, "transform", false, 1 },
+			{ ADataType::Float4, "color", false, 1 },
+			}, 1);
 	}
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
@@ -163,13 +198,8 @@ namespace AstralEngine
 		size_t numVertices = meshToInstance->GetPositions().GetCount();
 		VertexData* vertexDataArr = new VertexData[numVertices];
 		ReadVertexDataFromMesh(meshToInstance, vertexDataArr, 0, numVertices);
-
-		m_instancingBuffer->Bind();
-		m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * numVertices);
-
+		
 		const ADynArr<unsigned int>& indices = meshToInstance->GetIndices();
-		m_instancingIndices->SetData(indices.GetData(), indices.GetCount());
-
 
 		InstanceVertexData* instanceData = new InstanceVertexData[commands.GetCount()];
 		size_t index = 0;
@@ -180,17 +210,81 @@ namespace AstralEngine
 			index++;
 		}
 
-		m_instancingArr->Bind();
-		m_instancingArr->SetData(instanceData, sizeof(InstanceVertexData) * commands.GetCount());
+		if (numVertices < s_maxNumVertex)
+		//if (false)
+		{
+			m_instancingBuffer->Bind();
+			m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * numVertices);
+
+			m_instancingIndices->Bind();
+			m_instancingIndices->SetData(indices.GetData(), indices.GetCount());
+
+			m_instancingArr->Bind();
+			m_instancingArr->SetData(instanceData, sizeof(InstanceVertexData) * commands.GetCount());
+
+			m_instancingBuffer->Bind();
+			m_instancingIndices->Bind();
+			RenderCommand::DrawInstancedIndexed(m_instancingIndices, commands.GetCount());
+		}
+		else
+		{
+			AE_CORE_ERROR("not ready yet");
+			size_t drawCallSize;
+			{
+				// make sure numVertex is a multiple of 3 since we are drawing triangles
+				size_t maxVertexSize = s_maxNumVertex - (s_maxNumVertex % 3);
+				size_t maxIndexSize = s_maxNumIndices - (s_maxNumIndices % 3);
+
+				drawCallSize = Math::Min(maxVertexSize, maxIndexSize);
+				drawCallSize = 3; //temp
+			}
+
+			size_t offset = 0;
+
+			while (offset < indices.GetCount())
+			{
+				size_t currDrawSize = Math::Min(drawCallSize, indices.GetCount() - offset);
+				InstanceRenderMeshSection(vertexDataArr, numVertices, indices, instanceData,
+					commands.GetCount(), offset, currDrawSize);
+				offset += currDrawSize;
+			}
+		}
 		delete[] instanceData;
+	}
+
+	void DrawDataBuffer::InstanceRenderMeshSection(VertexData* vertexData, size_t numVertex,
+		const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData,
+		size_t numInstanceData, size_t dataOffset, size_t drawCallSize)
+	{
+		AE_CORE_ASSERT(drawCallSize > 0, "Invalid draw call size");
+		unsigned int* indexArr = new unsigned int[drawCallSize];
+		VertexData* vertexDataArr = new VertexData[drawCallSize];
+
+		for (size_t i = 0; i < drawCallSize; i++)
+		{
+			unsigned int currIndex = indices[i + dataOffset];
+			AE_CORE_ASSERT(currIndex < numVertex, "Index out of bounds");
+			vertexDataArr[i] = vertexData[currIndex];
+			indexArr[i] = i;
+		}
+
+		m_instancingBuffer->Bind();
+		m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * drawCallSize);
+
+		m_instancingIndices->Bind();
+		m_instancingIndices->SetData(indexArr, drawCallSize);
+
+		m_instancingArr->Bind();
+		m_instancingArr->SetData(instanceData, sizeof(InstanceVertexData) * numInstanceData);
 
 		m_instancingBuffer->Bind();
 		m_instancingIndices->Bind();
-		RenderCommand::DrawInstancedIndexed(m_instancingIndices, commands.GetCount());
+		RenderCommand::DrawInstancedIndexed(m_instancingIndices, numInstanceData);
+
+		delete[] indexArr;
+		delete[] vertexDataArr;
 	}
-
-
-
+	
 	void DrawDataBuffer::ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, 
 		size_t dataOffset, size_t dataCount)
 	{
@@ -240,8 +334,8 @@ namespace AstralEngine
 				size_t index = 0;
 				for (DrawCommand* cmd : m_data)
 				{
-					vertexData[index].transform = cmd->GetTransform();
-					vertexData[index].color = cmd->GetColor();
+					//vertexData[index].transform = cmd->GetTransform();
+					//vertexData[index].color = cmd->GetColor();
 					index++;
 				}
 
@@ -313,7 +407,7 @@ namespace AstralEngine
 		if (!m_buffers.ContainsKey(mat))
 		{
 			m_buffers.Add(mat, DrawDataBuffer());
-			m_buffers[mat].Initalize();
+			m_buffers[mat].Initialize();
 		}
 		m_buffers[data->GetMaterial()].AddDrawCommand(data);
 	}

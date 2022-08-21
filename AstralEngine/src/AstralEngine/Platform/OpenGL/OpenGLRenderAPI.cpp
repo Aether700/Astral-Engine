@@ -42,6 +42,28 @@ namespace AstralEngine
 		glClearColor(r, g, b, a);
 	}
 
+	size_t OpenGLRenderAPI::GetNumTextureSlots()
+	{
+		int textureSlots;
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &textureSlots);
+		return (size_t)textureSlots;
+	}
+
+	size_t OpenGLRenderAPI::GetMaxNumVertices()
+	{
+		int numVertices;
+		glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &numVertices);
+		return (size_t)numVertices;
+
+	}
+
+	size_t OpenGLRenderAPI::GetMaxNumIndices()
+	{
+		int numIndices;
+		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &numIndices);
+		return (size_t)numIndices;
+	}
+
 	void OpenGLRenderAPI::DrawIndexed(const AReference<IndexBuffer>& indexBuffer)
 	{
 		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
@@ -64,6 +86,6 @@ namespace AstralEngine
 		{
 			count = indexBuffer->GetCount();
 		}
-		glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, instanceAmount);
+		glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr, instanceAmount);
 	}
 }

@@ -23,6 +23,10 @@ namespace AstralEngine
 		virtual void Clear() = 0;
 		virtual void SetClearColor(float r, float g, float b, float a) = 0;
 
+		virtual size_t GetNumTextureSlots() = 0;
+		virtual size_t GetMaxNumVertices() = 0;
+		virtual size_t GetMaxNumIndices() = 0;
+
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer) = 0;
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count) = 0;
 		virtual void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, unsigned int count) = 0;

@@ -15,7 +15,7 @@ namespace AstralEngine
 	{
 	public:
 
-		EditorCameraController() { AE_CORE_INFO("Editor Camera Controller constructor called"); }
+		EditorCameraController() { }
 
 		void OnStart() override
 		{
@@ -144,11 +144,11 @@ namespace AstralEngine
 		if (mainCamera != nullptr)
 		{
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
-			auto group = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
+			auto spriteGroup = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
 
-			for (BaseEntity e : group)
+			for (BaseEntity e : spriteGroup)
 			{
-				auto& components = group.Get<SpriteRenderer, AEntityData>(e);
+				auto& components = spriteGroup.Get<SpriteRenderer, AEntityData>(e);
 				AEntityData& data = std::get<AEntityData&>(components);
 
 				if (data.IsActive())
@@ -158,6 +158,24 @@ namespace AstralEngine
 					{
 						AEntity ent = AEntity(e, this);
 						Renderer::DrawSprite(ent, sprite);
+					}
+				}
+			}
+
+			auto meshView = m_registry.GetView<Transform, MeshRenderer, AEntityData>();
+
+			for (BaseEntity e : meshView)
+			{
+				auto& components = meshView.Get<MeshRenderer, AEntityData>(e);
+				AEntityData& data = std::get<AEntityData&>(components);
+
+				if (data.IsActive())
+				{
+					MeshRenderer& mesh = std::get<MeshRenderer&>(components);
+					if (mesh.IsActive())
+					{
+						AEntity ent = AEntity(e, this);
+						Renderer::DrawMesh(ent, mesh);
 					}
 				}
 			}

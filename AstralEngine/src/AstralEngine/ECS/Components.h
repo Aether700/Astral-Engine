@@ -33,6 +33,26 @@ namespace AstralEngine
 		Texture2DHandle m_sprite;
 	};
 
+	class MeshRenderer : public ToggleableComponent
+	{
+	public:
+		MeshRenderer();
+		MeshRenderer(MeshHandle mesh, const Vector4& color = {1, 1, 1, 1});
+
+		MeshHandle GetMesh() const;
+		void SetMesh(MeshHandle mesh);
+
+		const Vector4& GetColor() const;
+		void SetColor(const Vector4& color);
+
+		bool operator==(const MeshRenderer& other) const;
+		bool operator!=(const MeshRenderer& other) const;
+
+	private:
+		Vector4 m_color;
+		MeshHandle m_mesh;
+	};
+
 	class Transform
 	{
 	public:

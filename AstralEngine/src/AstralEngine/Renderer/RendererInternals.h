@@ -7,12 +7,13 @@
 namespace AstralEngine
 {
 	struct VertexData;
+	struct InstanceVertexData;
 
 	class DrawCommand
 	{
 	public:
 		DrawCommand();
-		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, AEntity e);
+		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, const AEntity e);
 
 		const Mat4& GetTransform() const;
 		MaterialHandle GetMaterial() const;
@@ -42,11 +43,13 @@ namespace AstralEngine
 		DrawDataBuffer();
 		~DrawDataBuffer();
 
-		void Initalize();
+		void Initialize();
 
 		void Draw(const Mat4& viewProj, MaterialHandle material);
 		void AddDrawCommand(DrawCommand* draw);
 		void Clear();
+
+		void TempRenderFunc(MeshHandle mesh);
 
 	private:
 		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
@@ -56,6 +59,10 @@ namespace AstralEngine
 			ASinglyLinkedList<DrawCommand*>> commandsToInstance);
 		void RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, ASinglyLinkedList<DrawCommand*>& commands);
 
+		void InstanceRenderMeshSection(VertexData* vertexData, size_t numVertex, 
+			const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData, 
+			size_t numInstanceData, size_t dataOffset, size_t drawCallSize);
+
 		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
 			size_t dataCount);
 
@@ -63,6 +70,8 @@ namespace AstralEngine
 		// more in a single frame it will be sent to be instanced instead of being batched 
 		// with the rest of the data
 		static constexpr size_t s_instancingCutoff = 1;//10; 
+		static size_t s_maxNumVertex;
+		static size_t s_maxNumIndices;
 
 		// used for batching
 		AReference<VertexBuffer> m_batchBuffer;

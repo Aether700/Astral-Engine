@@ -26,10 +26,25 @@ namespace AstralEngine
 		static float Sqrt(float v);
 		static float Log(float v);
 
-		static int Min(int i1, int i2);
-		static float Min(float f1, float f2);
-		static int Max(int i1, int i2);
-		static float Max(float f1, float f2);
+		template<typename T>
+		static T Min(T t1, T t2)
+		{
+			if (t1 < t2)
+			{
+				return t1;
+			}
+			return t2;
+		}
+
+		template<typename T>
+		static T Max(T t1, T t2)
+		{
+			if (t1 > t2)
+			{
+				return t1;
+			}
+			return t2;
+		}
 
 		static float CopySign(float magnitude, float sign);
 

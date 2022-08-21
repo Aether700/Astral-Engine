@@ -244,7 +244,7 @@ namespace AstralEngine
 								+ (0u + ... + data.owned(TypeInfo<Exclude>::ID()));
 
 							return !overlapping || ((sz == size) || (sz == data.size));
-						}), "");
+						}), "Group overlap detected");
 
 					const auto next = std::find_if_not(m_groups.begin(), m_groups.end(), [size](const auto& data) 
 						{

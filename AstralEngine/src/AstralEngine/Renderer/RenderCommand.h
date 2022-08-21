@@ -14,6 +14,10 @@ namespace AstralEngine
 		static void SetClearColor(float r, float g, float b, float a);
 		static void SetClearColor(const Vector4& color);
 
+		static size_t GetNumTextureSlots();
+		static size_t GetMaxNumVertices();
+		static size_t GetMaxNumIndices();
+
 		//defaults to triangles
 		static void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count = 0);
 		static void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 

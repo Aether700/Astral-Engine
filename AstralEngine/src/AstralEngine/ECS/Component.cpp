@@ -111,6 +111,27 @@ namespace AstralEngine
 		return !(*this == other);
 	}
 
+	// MeshRenderer ///////////////////////////////////////////////////
+
+	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_color(1, 1, 1, 1) { }
+	MeshRenderer::MeshRenderer(MeshHandle mesh, const Vector4& color) : m_mesh(mesh), m_color(1, 1, 1, 1) { }
+
+	MeshHandle MeshRenderer::GetMesh() const { return m_mesh; }
+	void MeshRenderer::SetMesh(MeshHandle mesh) { m_mesh = mesh; }
+
+	const Vector4& MeshRenderer::GetColor() const { return m_color; }
+	void MeshRenderer::SetColor(const Vector4& color) { m_color = color; }
+
+	bool MeshRenderer::operator==(const MeshRenderer& other) const
+	{
+		return m_mesh == other.m_mesh && m_color == other.m_color;
+	}
+
+	bool MeshRenderer::operator!=(const MeshRenderer& other) const
+	{
+		return !(*this == other);
+	}
+
 
 	// Transform //////////////////////////////////////////////////////
 

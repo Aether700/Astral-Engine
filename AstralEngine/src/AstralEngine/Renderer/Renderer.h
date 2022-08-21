@@ -256,9 +256,6 @@ namespace AstralEngine
 			unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
 			float tileFactor, const Vector4& tintColor);
 
-		static void DrawMesh(const Mat4& transform, AReference<Mesh>& mesh, AReference<Texture2D> texture,
-			float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
-
 		//lighting functions
 		static void AddDirectionalLight(const Vector3& position, const Vector3& direction,
 			const Vector4& lightColor = { 1, 1, 1, 1 }, bool drawCubes = true);
@@ -271,6 +268,10 @@ namespace AstralEngine
 
 		static void DrawSprite(const Vector3& position, float rotation, const Vector2& size,
 			const SpriteRenderer& sprite);
+
+		//mesh
+		static void DrawMesh(AEntity e, MaterialHandle material, const MeshRenderer& mesh);
+		static void DrawMesh(AEntity e, const MeshRenderer& mesh);
 
 		//UI
 		static void DrawUIElement(const UIElement& element, const Vector4& color);

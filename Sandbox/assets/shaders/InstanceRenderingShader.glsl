@@ -2,6 +2,7 @@
 #version 330 core
 
 layout(location = 0) in vec3 a_position;
+//layout(location = 1) in vec3 a_offset;
 layout(location = 1) in mat4 a_transform;
 layout(location = 5) in vec4 a_color;
 

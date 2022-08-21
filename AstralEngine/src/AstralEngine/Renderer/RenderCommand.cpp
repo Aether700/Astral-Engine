@@ -30,6 +30,21 @@ namespace AstralEngine
 		s_api->SetClearColor(color.r, color.g, color.b, color.a);
 	}
 
+	size_t RenderCommand::GetNumTextureSlots()
+	{
+		return s_api->GetNumTextureSlots();
+	}
+
+	size_t RenderCommand::GetMaxNumVertices()
+	{
+		return s_api->GetMaxNumVertices();
+	}
+
+	size_t RenderCommand::GetMaxNumIndices()
+	{
+		return s_api->GetMaxNumIndices();
+	}
+
 	void RenderCommand::DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count)
 	{
 		DrawIndexed(RenderingPrimitive::Triangles, indexBuffer, count);

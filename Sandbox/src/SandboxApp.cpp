@@ -4,7 +4,7 @@
 
 //temp
 #include "AstralEngine/UI/UICore.h"
-#include "glad/glad.h"
+#include "AstralEngine/Renderer/RendererInternals.h"
 ////////
 
 using namespace AstralEngine;
@@ -189,7 +189,9 @@ void ManualRender(ShaderHandle shader, AReference<VertexBuffer> vb, AReference<V
 {
 	RenderCommand::Clear();
 	ResourceHandler::GetShader(shader)->Bind();
+	ResourceHandler::GetShader(shader)->SetMat4("u_viewProjMatrix", Mat4::Identity());
 	vb->Bind();
+	ib->Bind();
 	RenderCommand::DrawInstancedIndexed(ib, 1);
 }
 
@@ -208,30 +210,13 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 		{ -0.2f,  0.2f, 0.0f }
 	};
 	vb->Bind();
-	vb->SetLayout({ { ADataType::Float3, "Position" } });
+	vb->SetLayout({ 
+		{ ADataType::Float3, "Position" },
+		});
 	vb->SetData(pos, sizeof(pos));
 	
 	instanced->Bind();
-
-	//issue might be with set layout double check to make sure
-	//instanced->SetLayout({ { ADataType::Float3, "offsets", false, 1 } }, 1, sizeof(Vector3)); 
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)0);
-	glVertexAttribDivisor(1, 1);
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(4 * sizeof(float)));
-	glVertexAttribDivisor(2, 1);
-	
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(8 * sizeof(float)));
-	glVertexAttribDivisor(3, 1);
-	
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Mat4), (const void*)(12 * sizeof(float)));
-	glVertexAttribDivisor(4, 1);
-
-
+	instanced->SetLayout({ { ADataType::Mat4, "transform", false, 1 } }, 1);
 	instanced->SetData(offsets, sizeof(offsets));
 
 	unsigned int indices[6] =
@@ -285,7 +270,8 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
-		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
+		m_entity.EmplaceComponent<MeshRenderer>(ResourceHandler::LoadMesh("assets/Meshes/Cube.obj"));
 		//m_entity.EmplaceComponent<Controller>();
 		
 		/*
@@ -309,6 +295,18 @@ public:
 
 	void OnUpdate() override
 	{
+		/*
+		static MeshHandle mesh;
+		static DrawDataBuffer* buffer = nullptr;
+
+		if (buffer == nullptr)
+		{
+			mesh = ResourceHandler::LoadMesh("assets/Meshes/Tank.obj");
+			buffer = new DrawDataBuffer();
+			buffer->Initialize();
+		}
+		buffer->TempRenderFunc(mesh);
+		*/
 		//ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
 
 		/*
@@ -323,7 +321,6 @@ public:
 
 		/*
 		m_cameraController->OnUpdate();
-
 
 		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		AstralEngine::RenderCommand::Clear();
