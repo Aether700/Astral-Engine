@@ -8,6 +8,12 @@ namespace AstralEngine
 {
 	// Shader ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	ShaderHandle Shader::DefaultShader()
+	{
+		static ShaderHandle defaultShader = ResourceHandler::LoadShader("assets/shaders/DefaultShader.glsl");
+		return defaultShader;
+	}
+
 	AReference<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (RenderAPI::GetAPI())

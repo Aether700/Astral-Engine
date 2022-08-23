@@ -4,20 +4,6 @@
 
 namespace AstralEngine
 {
-	void DrawDataBuffer::TempRenderFunc(MeshHandle mesh)
-	{
-		DrawCommand cmd = DrawCommand(Mat4::Identity(), NullHandle, mesh, Vector4(1, 1, 1, 1), NullEntity);
-		ASinglyLinkedList<DrawCommand*> l;
-		l.Add(&cmd);
-
-		auto shader = ResourceHandler::GetShader(0);
-		shader->Bind();
-		shader->SetMat4("u_viewProjMatrix", Mat4::Identity());
-
-		RenderMeshInstance(Mat4::Identity(), mesh, l);
-	}
-
-
 	struct InstanceVertexData
 	{
 		Mat4 transform;
@@ -33,16 +19,26 @@ namespace AstralEngine
 	// DrawCommand /////////////////////////////////
 	
 	DrawCommand::DrawCommand() { }
-	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, 
-		const Vector4& color, const AEntity e) : m_transform(transform), m_mesh(mesh), 
-		m_material(mat), m_color(color), m_entity(e) { }
+
+	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, 
+		const AEntity e) : m_transform(transform), m_mesh(mesh), m_material(mat), m_color(color), m_entity(e) 
+	{
+		if (m_material == NullHandle)
+		{
+			m_material = Material::MissingMat();
+		}
+	}
 
 	const Mat4& DrawCommand::GetTransform() const { return m_transform; }
 	MaterialHandle DrawCommand::GetMaterial() const { return m_material; }
 	MeshHandle DrawCommand::GetMesh() const { return m_mesh; }
 	const Vector4& DrawCommand::GetColor() const { return m_color; }
 	AEntity DrawCommand::GetEntity() const { return m_entity; }
-	bool DrawCommand::IsOpaque() const { return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f; }
+	
+	bool DrawCommand::IsOpaque() const 
+	{ 
+		return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f && m_color.a == 1.0f; 
+	}
 
 	bool DrawCommand::operator==(const DrawCommand& other) const
 	{
@@ -124,12 +120,12 @@ namespace AstralEngine
 		AReference<Material> mat = ResourceHandler::GetMaterial(material);
 		AE_CORE_ASSERT(mat != nullptr, "");
 
-		//AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
-		AReference<Shader> shader = ResourceHandler::GetShader(0); // temp
+		AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
 		AE_CORE_ASSERT(shader != nullptr, "");
 
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
+		shader->SetFloat4("u_matColor", mat->GetColor());
 
 		for (DrawCommand* cmd : m_drawCommands)
 		{
@@ -181,6 +177,25 @@ namespace AstralEngine
 		ClearBatching();
 	}
 
+	void DrawDataBuffer::ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr,
+		size_t dataOffset, size_t dataCount)
+	{
+		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		for (size_t i = 0; i < positions.GetCount(); i++)
+		{
+			vertexDataArr[dataOffset + i].position = positions[i];
+		}
+	}
+
+	size_t DrawDataBuffer::ComputeDrawCallSize()
+	{
+		// make sure numVertex is a multiple of 3 since we are drawing triangles
+		size_t maxVertexSize = s_maxNumVertex - (s_maxNumVertex % 3);
+		size_t maxIndexSize = s_maxNumIndices - (s_maxNumIndices % 3);
+
+		return Math::Min(maxVertexSize, maxIndexSize);
+	}
+
 	void DrawDataBuffer::AddToBatching(const Mat4& viewProj, DrawCommand* cmd)
 	{
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
@@ -191,7 +206,35 @@ namespace AstralEngine
 		if (positions.GetCount() >= s_maxNumVertex || indices.GetCount() >= s_maxNumIndices)
 		{
 			// split up mesh for render here
-			AE_CORE_ERROR("Batch mesh splitting not implemented yet");
+			size_t numVertices = positions.GetCount();
+			BatchedVertexData* vertexDataArr = new BatchedVertexData[numVertices];
+
+			for (size_t i = 0; i < numVertices; i++)
+			{
+				vertexDataArr[i].vertex.position = positions[i];
+				vertexDataArr[i].instance.color = cmd->GetColor();
+				vertexDataArr[i].instance.transform = cmd->GetTransform();
+			}
+
+			size_t drawCallSize = ComputeDrawCallSize();
+			size_t offset = 0;
+			size_t currDrawSize = indices.GetCount();
+			while (offset < indices.GetCount())
+			{
+				RenderBatch(viewProj);
+				ClearBatching();
+
+				currDrawSize = Math::Min(drawCallSize, indices.GetCount() - offset);
+				BatchRenderMeshSection(vertexDataArr, numVertices, indices, offset, currDrawSize);
+				offset += currDrawSize;
+			}
+
+			m_batchDataArrCount = currDrawSize;
+			m_batchIndicesArrCount = currDrawSize;
+
+			delete[] vertexDataArr;
+			return;
+
 		}
 		else if (m_batchDataArrCount + positions.GetCount() >= s_maxNumVertex 
 			|| m_batchIndicesArrCount + indices.GetCount() >= s_maxNumIndices )
@@ -229,6 +272,31 @@ namespace AstralEngine
 	{
 		m_batchDataArrCount = 0;
 		m_batchIndicesArrCount = 0;
+	}
+
+	void DrawDataBuffer::BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
+		const ADynArr<unsigned int>& indices, size_t dataOffset, size_t drawCallSize)
+	{
+		unsigned int* indexArr = new unsigned int[drawCallSize];
+		BatchedVertexData* vertexDataArr = new BatchedVertexData[drawCallSize];
+
+		for (size_t i = 0; i < drawCallSize; i++)
+		{
+			unsigned int currIndex = indices[i + dataOffset];
+			AE_CORE_ASSERT(currIndex < numVertex, "Index out of bounds");
+			vertexDataArr[i] = vertexData[currIndex];
+			indexArr[i] = i;
+		}
+
+		m_batchBuffer->Bind();
+		m_batchBuffer->SetData(vertexDataArr, sizeof(BatchedVertexData) * drawCallSize);
+
+		m_instancingIndices->Bind();
+		m_instancingIndices->SetData(indexArr, drawCallSize);
+		RenderCommand::DrawIndexed(m_instancingIndices);
+
+		delete[] indexArr;
+		delete[] vertexDataArr;
 	}
 
 	void DrawDataBuffer::CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance)
@@ -290,16 +358,7 @@ namespace AstralEngine
 		}
 		else
 		{
-			size_t drawCallSize;
-
-			{
-				// make sure numVertex is a multiple of 3 since we are drawing triangles
-				size_t maxVertexSize = s_maxNumVertex - (s_maxNumVertex % 3);
-				size_t maxIndexSize = s_maxNumIndices - (s_maxNumIndices % 3);
-
-				drawCallSize = Math::Min(maxVertexSize, maxIndexSize);
-			}
-
+			size_t drawCallSize = ComputeDrawCallSize();
 			size_t offset = 0;
 
 			while (offset < indices.GetCount())
@@ -344,16 +403,6 @@ namespace AstralEngine
 
 		delete[] indexArr;
 		delete[] vertexDataArr;
-	}
-	
-	void DrawDataBuffer::ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, 
-		size_t dataOffset, size_t dataCount)
-	{
-		const ADynArr<Vector3>& positions = mesh->GetPositions();
-		for (size_t i = 0; i < positions.GetCount(); i++)
-		{
-			vertexDataArr[dataOffset + i].position = positions[i];
-		}
 	}
 
 

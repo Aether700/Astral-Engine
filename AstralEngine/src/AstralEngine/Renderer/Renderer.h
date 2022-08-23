@@ -270,7 +270,6 @@ namespace AstralEngine
 			const SpriteRenderer& sprite);
 
 		//mesh
-		static void DrawMesh(AEntity e, MaterialHandle material, const MeshRenderer& mesh);
 		static void DrawMesh(AEntity e, const MeshRenderer& mesh);
 
 		//UI
@@ -304,7 +303,8 @@ namespace AstralEngine
 			AReference<Texture2D> texture, float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
 
 		static RendererStatistics s_stats;
-		static RenderingDataSorter s_sorter;
+		static RenderingDataSorter s_sorterOpaque;
+		static RenderingDataSorter s_sorterTransparent;
 		static Mat4 s_viewProjMatrix;
 
 	};

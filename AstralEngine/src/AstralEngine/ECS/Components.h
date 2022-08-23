@@ -38,12 +38,17 @@ namespace AstralEngine
 	public:
 		MeshRenderer();
 		MeshRenderer(MeshHandle mesh, const Vector4& color = {1, 1, 1, 1});
+		MeshRenderer(MeshHandle mesh, MaterialHandle mat, const Vector4& color = {1, 1, 1, 1});
 
 		MeshHandle GetMesh() const;
 		void SetMesh(MeshHandle mesh);
 
 		const Vector4& GetColor() const;
 		void SetColor(const Vector4& color);
+		void SetColor(float r, float g, float b, float a);
+
+		MaterialHandle GetMaterial() const;
+		void SetMaterial(MaterialHandle mat);
 
 		bool operator==(const MeshRenderer& other) const;
 		bool operator!=(const MeshRenderer& other) const;
@@ -51,6 +56,7 @@ namespace AstralEngine
 	private:
 		Vector4 m_color;
 		MeshHandle m_mesh;
+		MaterialHandle m_material;
 	};
 
 	class Transform

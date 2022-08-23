@@ -2,6 +2,7 @@
 #include "AstralEngine/Data Struct/AReference.h"
 #include "AstralEngine/Data Struct/AUnorderedMap.h"
 #include "AstralEngine/Math/AMath.h"
+#include "AstralEngine/Core/Resource.h"
 
 #include <string>
 
@@ -35,6 +36,8 @@ namespace AstralEngine
 		virtual void SetMat4(const std::string& uniformName, const Mat4& m) = 0;
 
 		virtual void SetBool(const std::string& uniformName, bool v) = 0;
+
+		static ShaderHandle DefaultShader();
 
 	private:
 		static AReference<Shader> Create(const std::string& filepath);

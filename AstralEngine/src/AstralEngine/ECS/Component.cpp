@@ -1,5 +1,6 @@
 #include "aepch.h"
 #include "Components.h"
+#include "AstralEngine/Renderer/Renderer.h"
 
 namespace AstralEngine
 {
@@ -113,14 +114,27 @@ namespace AstralEngine
 
 	// MeshRenderer ///////////////////////////////////////////////////
 
-	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_color(1, 1, 1, 1) { }
-	MeshRenderer::MeshRenderer(MeshHandle mesh, const Vector4& color) : m_mesh(mesh), m_color(1, 1, 1, 1) { }
+	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_color(1, 1, 1, 1), m_material(Material::DefaultMat()) { }
+	MeshRenderer::MeshRenderer(MeshHandle mesh, const Vector4& color) : m_mesh(mesh),
+		m_color(1, 1, 1, 1), m_material(Material::DefaultMat()) { }
+	MeshRenderer::MeshRenderer(MeshHandle mesh, MaterialHandle mat, const Vector4& color) : m_mesh(mesh), 
+		m_color(1, 1, 1, 1), m_material(mat) { }
 
 	MeshHandle MeshRenderer::GetMesh() const { return m_mesh; }
 	void MeshRenderer::SetMesh(MeshHandle mesh) { m_mesh = mesh; }
 
 	const Vector4& MeshRenderer::GetColor() const { return m_color; }
 	void MeshRenderer::SetColor(const Vector4& color) { m_color = color; }
+	
+	void MeshRenderer::SetColor(float r, float g, float b, float a)
+	{
+		Vector4 color = Vector4(r, g, b, a);
+		SetColor(color);
+	}
+
+	MaterialHandle MeshRenderer::GetMaterial() const { return m_material; }
+
+	void MeshRenderer::SetMaterial(MaterialHandle mat) { m_material = mat; }
 
 	bool MeshRenderer::operator==(const MeshRenderer& other) const
 	{

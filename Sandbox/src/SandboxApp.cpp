@@ -11,9 +11,17 @@ using namespace AstralEngine;
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
-class MeshToggler : public NativeScript
+class MatToggler : public NativeScript
 {
 public:
+	void OnStart()
+	{
+		if (HasComponent<MeshRenderer>())
+		{
+			m_mat = GetComponent<MeshRenderer>().GetMaterial();
+		}
+	}
+
 	void OnUpdate()
 	{
 		if (Input::GetKeyDown(KeyCode::T))
@@ -21,10 +29,22 @@ public:
 			if (HasComponent<MeshRenderer>())
 			{
 				MeshRenderer& mesh = GetComponent<MeshRenderer>();
-				mesh.SetActive(!mesh.IsActive());
+				if (mesh.GetMaterial() == NullHandle)
+				{
+					mesh.SetMaterial(m_mat);
+				}
+				else
+				{
+					mesh.SetMaterial(NullHandle);
+				}
 			}
 		}
 	}
+
+	add texture support to the renderer
+
+private:
+	MaterialHandle m_mat;
 };
 
 class CamController : public AstralEngine::NativeScript
@@ -440,15 +460,15 @@ public:
 		MeshHandle cube = CreateCubeMesh();
 		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
 		m_entity.EmplaceComponent<MeshRenderer>(cube);
-		m_entity.EmplaceComponent<MeshToggler>();
 		//m_entity.EmplaceComponent<Controller>();
 		
 		auto e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube);
-		e.GetTransform().SetLocalPosition({2, 0, 0});
+		e.EmplaceComponent<MeshRenderer>(cube).SetColor(1, 0, 0, 0.5f);
+		e.GetTransform().SetLocalPosition({ 2, 0, 0 });
+		e.EmplaceComponent<MatToggler>();
 
 		e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube);
+		e.EmplaceComponent<MeshRenderer>(cube).SetColor(1, 0, 0, 0.5f);
 		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
 
 		/*

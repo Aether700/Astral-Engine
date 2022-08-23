@@ -126,13 +126,25 @@ namespace AstralEngine
 	// Material //////////////////////////////////////////////////////////////////////////
 
 	Material::Material() : m_diffuseMap(Texture2D::WhiteTexture()), 
-		m_specularMap(Texture2D::WhiteTexture()), m_color(1.0f, 1.0f, 1.0f, 1.0f) { }
+		m_specularMap(Texture2D::WhiteTexture()), m_color(1.0f, 1.0f, 1.0f, 1.0f), 
+		m_shader(Shader::DefaultShader()) { }
 
 	Material::Material(const Vector4& color) : m_diffuseMap(Texture2D::WhiteTexture()),
-		m_specularMap(Texture2D::WhiteTexture()), m_color(color) { }
+		m_specularMap(Texture2D::WhiteTexture()), m_color(color), m_shader(Shader::DefaultShader()) { }
 
 	ShaderHandle Material::GetShader() const { return m_shader; }
-	void Material::SetShader(ShaderHandle shader) { m_shader = shader; }
+	
+	void Material::SetShader(ShaderHandle shader)
+	{
+		if (shader == NullHandle)
+		{
+			m_shader = Shader::DefaultShader();
+		}
+		else
+		{
+			m_shader = shader;
+		}
+	}
 
 	Texture2DHandle Material::GetDiffuseMap() const { return m_diffuseMap; }
 	void Material::SetDiffuseMap(Texture2DHandle diffuse) { m_diffuseMap = diffuse; }
@@ -443,7 +455,8 @@ namespace AstralEngine
 
 	//Renderer///////////////////////////////////////////////////
 
-	RenderingDataSorter Renderer::s_sorter;
+	RenderingDataSorter Renderer::s_sorterOpaque;
+	RenderingDataSorter Renderer::s_sorterTransparent;
 	RendererStatistics Renderer::s_stats;
 	Mat4 Renderer::s_viewProjMatrix;
 
@@ -460,25 +473,33 @@ namespace AstralEngine
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
 		s_viewProjMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
-		s_sorter.Clear();
+		s_sorterOpaque.Clear();
+		s_sorterTransparent.Clear();
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
 	{
 		//view is the identity
 		s_viewProjMatrix = cam.GetProjectionMatrix();
-		s_sorter.Clear();
+		s_sorterOpaque.Clear();
+		s_sorterTransparent.Clear();
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
 		s_viewProjMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
-		s_sorter.Clear();
+		s_sorterOpaque.Clear();
+		s_sorterTransparent.Clear();
 	}
 
 	void Renderer::EndScene()
 	{
-		for(auto& pair : s_sorter)
+		for(auto& pair : s_sorterOpaque)
+		{
+			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
+		}
+
+		for (auto& pair : s_sorterTransparent)
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
 		}
@@ -554,7 +575,15 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		s_sorter.AddData(new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity));
+		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity);
+		if (cmd->IsOpaque())
+		{
+			s_sorterOpaque.AddData(cmd);
+		}
+		else
+		{
+			s_sorterTransparent.AddData(cmd);
+		}
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, Texture2DHandle texture,
@@ -685,8 +714,17 @@ namespace AstralEngine
 
 	void Renderer::DrawSprite(AEntity e, const SpriteRenderer& sprite)
 	{
-		s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(), 
-			Mesh::QuadMesh(), sprite.GetColor(), e));
+		DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(),
+			Mesh::QuadMesh(), sprite.GetColor(), e);
+
+		if (cmd->IsOpaque())
+		{
+			s_sorterOpaque.AddData(cmd);
+		}
+		else
+		{
+			s_sorterTransparent.AddData(cmd);
+		}
 	}
 
 	void Renderer::DrawSprite(const Vector3& position, float rotation, const Vector2& size,
@@ -695,18 +733,23 @@ namespace AstralEngine
 		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor());
 	}
 
-	void Renderer::DrawMesh(AEntity e, MaterialHandle material, const MeshRenderer& mesh)
-	{
-		if (mesh.GetMesh() != NullHandle)
-		{
-			s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), material,
-				mesh.GetMesh(), mesh.GetColor(), e));
-		}
-	}
 
 	void Renderer::DrawMesh(AEntity e, const MeshRenderer& mesh)
 	{
-		DrawMesh(e, Material::DefaultMat(), mesh);
+		if (mesh.GetMesh() != NullHandle)
+		{
+			DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), mesh.GetMaterial(),
+				mesh.GetMesh(), mesh.GetColor(), e);
+
+			if (cmd->IsOpaque())
+			{
+				s_sorterOpaque.AddData(cmd);
+			}
+			else
+			{
+				s_sorterTransparent.AddData(cmd);
+			}
+		}
 	}
 
 	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)

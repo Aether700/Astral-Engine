@@ -50,13 +50,17 @@ namespace AstralEngine
 		void AddDrawCommand(DrawCommand* draw);
 		void Clear();
 
-		void TempRenderFunc(MeshHandle mesh);
-
 	private:
+		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
+			size_t dataCount);
+
+		size_t ComputeDrawCallSize();
 		// Batching /////////////////////////////////////////////
 		void AddToBatching(const Mat4& viewProj, DrawCommand* cmd);
 		void RenderBatch(const Mat4& viewProj);
 		void ClearBatching();
+		void BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
+			const ADynArr<unsigned int>& indices, size_t dataOffset, size_t drawCallSize);
 
 		// Instancing ////////////////////////////////////////////
 		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
@@ -68,13 +72,11 @@ namespace AstralEngine
 			const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData, 
 			size_t numInstanceData, size_t dataOffset, size_t drawCallSize);
 
-		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
-			size_t dataCount);
 
 		// once a mesh has been used s_instancingCutoff times or 
 		// more in a single frame it will be sent to be instanced instead of being batched 
 		// with the rest of the data
-		static constexpr size_t s_instancingCutoff = 3;//10; 
+		static constexpr size_t s_instancingCutoff = 10; 
 		static size_t s_maxNumVertex;
 		static size_t s_maxNumIndices;
 
