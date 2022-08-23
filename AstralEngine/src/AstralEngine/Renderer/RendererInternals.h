@@ -8,6 +8,7 @@ namespace AstralEngine
 {
 	struct VertexData;
 	struct InstanceVertexData;
+	struct BatchedVertexData;
 
 	class DrawCommand
 	{
@@ -52,9 +53,13 @@ namespace AstralEngine
 		void TempRenderFunc(MeshHandle mesh);
 
 	private:
-		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
-		void AddToBatching(DrawCommand* cmd);
+		// Batching /////////////////////////////////////////////
+		void AddToBatching(const Mat4& viewProj, DrawCommand* cmd);
 		void RenderBatch(const Mat4& viewProj);
+		void ClearBatching();
+
+		// Instancing ////////////////////////////////////////////
+		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
 		void RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle, 
 			ASinglyLinkedList<DrawCommand*>> commandsToInstance);
 		void RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, ASinglyLinkedList<DrawCommand*>& commands);
@@ -69,7 +74,7 @@ namespace AstralEngine
 		// once a mesh has been used s_instancingCutoff times or 
 		// more in a single frame it will be sent to be instanced instead of being batched 
 		// with the rest of the data
-		static constexpr size_t s_instancingCutoff = 1;//10; 
+		static constexpr size_t s_instancingCutoff = 3;//10; 
 		static size_t s_maxNumVertex;
 		static size_t s_maxNumIndices;
 
@@ -77,13 +82,11 @@ namespace AstralEngine
 		AReference<VertexBuffer> m_batchBuffer;
 		AReference<IndexBuffer> m_batchIndices;
 		
-		VertexData* m_batchDataArr;
+		BatchedVertexData* m_batchDataArr;
 		size_t m_batchDataArrCount;
-		size_t m_batchDataArrMaxCount;
 
 		unsigned int* m_batchIndicesArr;
 		size_t m_batchIndicesArrCount;
-		size_t m_batchIndicesArrMaxCount;
 
 		// used for instancing
 		AReference<VertexBuffer> m_instancingBuffer;

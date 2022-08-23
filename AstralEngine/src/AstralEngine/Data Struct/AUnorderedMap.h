@@ -250,7 +250,7 @@ namespace AstralEngine
 		bool ContainsKey(const K& key) const
 		{
 			int bucketIndex = GetBucketIndex(key);
-			for (AKeyElementPair<K, T> pair : m_bucketArr[bucketIndex])
+			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
 			{
 				if (m_equalsFunc(pair.GetKey(), key))
 				{
@@ -368,8 +368,8 @@ namespace AstralEngine
 
 		AUnorderedMap<K, T>::AConstIterator end() const
 		{
-			size_t bucketIndex;
-			for (size_t i = m_bucketCount - 1; i >= 0; i--)
+			size_t bucketIndex = 0;
+			for (size_t i = m_bucketCount - 1; i > 0; i--)
 			{
 				if (m_bucketArr[i].GetCount() != 0)
 				{
@@ -377,7 +377,8 @@ namespace AstralEngine
 					break;
 				}
 			}
-			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].end(), m_bucketCount);
+			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, 
+				m_bucketArr[bucketIndex].end(), m_bucketCount);
 		}
 
 		AUnorderedMap<K, T>::AConstIterator rbegin() const

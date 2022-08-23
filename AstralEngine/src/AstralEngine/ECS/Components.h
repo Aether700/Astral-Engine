@@ -134,6 +134,12 @@ namespace AstralEngine
 		NativeScript() : CallbackComponent(false) { }
 
 		template<typename... Component>
+		bool HasComponent() const
+		{
+			return entity.HasComponent<Component...>();
+		}
+
+		template<typename... Component>
 		decltype(auto) GetComponent()
 		{
 			return entity.GetComponent<Component...>();

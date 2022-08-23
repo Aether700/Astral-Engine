@@ -11,6 +11,22 @@ using namespace AstralEngine;
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class MeshToggler : public NativeScript
+{
+public:
+	void OnUpdate()
+	{
+		if (Input::GetKeyDown(KeyCode::T))
+		{
+			if (HasComponent<MeshRenderer>())
+			{
+				MeshRenderer& mesh = GetComponent<MeshRenderer>();
+				mesh.SetActive(!mesh.IsActive());
+			}
+		}
+	}
+};
+
 class CamController : public AstralEngine::NativeScript
 {
 public:
@@ -229,6 +245,157 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 	ib->SetData(indices, sizeof(indices) / sizeof(unsigned int));
 }
 
+MeshHandle CreateCubeMesh()
+{
+	ADynArr<Vector3> positions = 
+	{
+		//back face
+		{  0.5f, -0.5f, -0.5f },
+		{ -0.5f, -0.5f, -0.5f },
+		{ -0.5f,  0.5f, -0.5f },
+		{  0.5f,  0.5f, -0.5f },
+
+		//left face
+		{ -0.5f, -0.5f, -0.5f },
+		{ -0.5f, -0.5f,  0.5f },
+		{ -0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f, -0.5f },
+
+		//front face
+		{ -0.5f, -0.5f,  0.5f },
+		{  0.5f, -0.5f,  0.5f },
+		{  0.5f,  0.5f,  0.5f },
+		{ -0.5f,  0.5f,  0.5f },
+
+		//right face
+		{  0.5f, -0.5f,  0.5f },
+		{  0.5f, -0.5f, -0.5f },
+		{  0.5f,  0.5f, -0.5f },
+		{  0.5f,  0.5f,  0.5f },
+
+		//top face
+		{ -0.5f,  0.5f,  0.5f },
+		{  0.5f,  0.5f,  0.5f },
+		{  0.5f,  0.5f, -0.5f },
+		{ -0.5f,  0.5f, -0.5f },
+
+		//bottom face
+		{ -0.5f, -0.5f, -0.5f },
+		{  0.5f, -0.5f, -0.5f },
+		{  0.5f, -0.5f,  0.5f },
+		{ -0.5f, -0.5f,  0.5f }
+	};
+	
+	ADynArr<Vector2> textureCoords = 
+	{
+		//back face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f },
+
+		//left face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f },
+
+		//front face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f },
+
+		//right face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f },
+
+		//top face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f },
+
+		//bottom face
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f }
+	};
+
+	ADynArr<Vector3> normals =
+	{
+		//back face
+		{ 0.0f, 0.0f, -1.0f },
+		{ 0.0f, 0.0f, -1.0f },
+		{ 0.0f, 0.0f, -1.0f },
+		{ 0.0f, 0.0f, -1.0f },
+		
+		//left face
+		{ -1.0f, 0.0f, 0.0f },
+		{ -1.0f, 0.0f, 0.0f },
+		{ -1.0f, 0.0f, 0.0f },
+		{ -1.0f, 0.0f, 0.0f },
+		
+		//front face
+		{ 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f },
+		
+		//right face
+		{ 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f },
+		
+		//top face
+		{ 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f },
+		
+		//bottom face
+		{ 0.0f, -1.0f, 0.0f },
+		{ 0.0f, -1.0f, 0.0f },
+		{ 0.0f, -1.0f, 0.0f },
+		{ 0.0f, -1.0f, 0.0f }
+
+	};
+
+	ADynArr<unsigned int> indices =
+	{
+		//back face
+		0, 1, 2,
+		2, 3, 0,
+
+		//left face
+		4, 5, 6,
+		6, 7, 4,
+
+		//front face
+		8, 9, 10,
+		10, 11, 8,
+
+		//right face
+		12, 13, 14,
+		14, 15, 12,
+
+		//top face
+		16, 17, 18,
+		18, 19, 16,
+
+		//bottom face
+		20, 21, 22,
+		22, 23, 20
+	};
+
+
+	return ResourceHandler::CreateMesh(positions, textureCoords, normals, indices);
+}
+
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -270,10 +437,20 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
+		MeshHandle cube = CreateCubeMesh();
 		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
-		m_entity.EmplaceComponent<MeshRenderer>(ResourceHandler::LoadMesh("assets/Meshes/Cube.obj"));
+		m_entity.EmplaceComponent<MeshRenderer>(cube);
+		m_entity.EmplaceComponent<MeshToggler>();
 		//m_entity.EmplaceComponent<Controller>();
 		
+		auto e = m_scene->CreateAEntity();
+		e.EmplaceComponent<MeshRenderer>(cube);
+		e.GetTransform().SetLocalPosition({2, 0, 0});
+
+		e = m_scene->CreateAEntity();
+		e.EmplaceComponent<MeshRenderer>(cube);
+		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
+
 		/*
 		auto e = m_scene->CreateAEntity();
 		e.EmplaceComponent<TargetMover>();

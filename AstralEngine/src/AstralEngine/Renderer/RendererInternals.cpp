@@ -17,10 +17,17 @@ namespace AstralEngine
 		RenderMeshInstance(Mat4::Identity(), mesh, l);
 	}
 
+
 	struct InstanceVertexData
 	{
 		Mat4 transform;
 		Vector4 color;
+	};
+
+	struct BatchedVertexData
+	{
+		VertexData vertex;
+		InstanceVertexData instance;
 	};
 
 	// DrawCommand /////////////////////////////////
@@ -56,10 +63,8 @@ namespace AstralEngine
 
 	DrawDataBuffer::DrawDataBuffer()
 	{
-		// temp ////////////////////
 		m_batchDataArr = nullptr;
 		m_batchIndicesArr = nullptr;
-		////////////////////////////
 	}
 
 	DrawDataBuffer::~DrawDataBuffer()
@@ -76,6 +81,24 @@ namespace AstralEngine
 			s_maxNumIndices = RenderCommand::GetMaxNumIndices();
 		}
 
+		// Batching
+		m_batchBuffer = VertexBuffer::Create(s_maxNumVertex * sizeof(VertexData));;
+		m_batchIndices = IndexBuffer::Create();
+
+		m_batchBuffer->Bind();
+		m_batchBuffer->SetLayout({ 
+			{ ADataType::Float3, "position" },
+			{ ADataType::Mat4, "transform" },
+			{ ADataType::Float4, "color" }
+			});
+
+		m_batchDataArr = new BatchedVertexData[s_maxNumVertex];
+		m_batchDataArrCount = 0;
+
+		m_batchIndicesArr = new unsigned int[s_maxNumIndices];
+		m_batchIndicesArrCount = 0;
+
+		// Instancing
 		m_instancingBuffer = VertexBuffer::Create(s_maxNumVertex * sizeof(VertexData));
 		m_instancingArr = VertexBuffer::Create(s_maxNumVertex * sizeof(InstanceVertexData), true);
 		m_instancingIndices = IndexBuffer::Create();
@@ -88,7 +111,7 @@ namespace AstralEngine
 		m_instancingArr->Bind();
 		m_instancingArr->SetLayout({
 			{ ADataType::Mat4, "transform", false, 1 },
-			{ ADataType::Float4, "color", false, 1 },
+			{ ADataType::Float4, "color", false, 1 }
 			}, 1);
 	}
 
@@ -97,6 +120,16 @@ namespace AstralEngine
 		ASinglyLinkedList<MeshHandle> meshesToInstance;
 		AUnorderedMap<MeshHandle, ASinglyLinkedList<DrawCommand*>> commandsToInstance;
 		CollectMeshesToInstance(meshesToInstance);
+
+		AReference<Material> mat = ResourceHandler::GetMaterial(material);
+		AE_CORE_ASSERT(mat != nullptr, "");
+
+		//AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
+		AReference<Shader> shader = ResourceHandler::GetShader(0); // temp
+		AE_CORE_ASSERT(shader != nullptr, "");
+
+		shader->Bind();
+		shader->SetMat4("u_viewProjMatrix", viewProj);
 
 		for (DrawCommand* cmd : m_drawCommands)
 		{
@@ -114,19 +147,9 @@ namespace AstralEngine
 			}
 			else
 			{
-				AddToBatching(cmd);
+				AddToBatching(viewProj, cmd);
 			}
 		}
-
-		AReference<Material> mat = ResourceHandler::GetMaterial(material);
-		AE_CORE_ASSERT(mat != nullptr, "");
-
-		//AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
-		AReference<Shader> shader = ResourceHandler::GetShader(0); // temp
-		AE_CORE_ASSERT(shader != nullptr, "");
-
-		shader->Bind();
-		shader->SetMat4("u_viewProjMatrix", viewProj);
 
 		RenderBatch(viewProj);
 		RenderInstancing(viewProj, commandsToInstance);
@@ -134,6 +157,7 @@ namespace AstralEngine
 
 	void DrawDataBuffer::AddDrawCommand(DrawCommand* draw)
 	{
+		AE_CORE_ASSERT(draw->GetMesh() != NullHandle, "");
 		m_drawCommands.Add(draw);
 		if (m_meshUseCounts.ContainsKey(draw->GetMesh()))
 		{
@@ -154,6 +178,55 @@ namespace AstralEngine
 
 		m_drawCommands.Clear();
 		m_meshUseCounts.Clear();
+		ClearBatching();
+	}
+
+	void DrawDataBuffer::AddToBatching(const Mat4& viewProj, DrawCommand* cmd)
+	{
+		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
+		AE_CORE_ASSERT(mesh != nullptr, "");
+		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		const ADynArr<unsigned int>& indices = mesh->GetIndices();
+
+		if (positions.GetCount() >= s_maxNumVertex || indices.GetCount() >= s_maxNumIndices)
+		{
+			// split up mesh for render here
+			AE_CORE_ERROR("Batch mesh splitting not implemented yet");
+		}
+		else if (m_batchDataArrCount + positions.GetCount() >= s_maxNumVertex 
+			|| m_batchIndicesArrCount + indices.GetCount() >= s_maxNumIndices )
+		{
+			RenderBatch(viewProj);
+			ClearBatching();
+		}
+
+		for (size_t i = 0; i < positions.GetCount(); i++)
+		{
+			m_batchDataArr[m_batchDataArrCount + i].vertex.position = positions[i];
+			m_batchDataArr[m_batchDataArrCount + i].instance.transform = cmd->GetTransform();
+			m_batchDataArr[m_batchDataArrCount + i].instance.color = cmd->GetColor();
+		}
+
+		for (size_t i = 0; i < indices.GetCount(); i++)
+		{
+			m_batchIndicesArr[m_batchIndicesArrCount + i] = m_batchDataArrCount + indices[i];
+		}
+
+		m_batchDataArrCount += positions.GetCount();
+		m_batchIndicesArrCount += indices.GetCount();
+	}
+
+	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
+	{
+		m_batchBuffer->SetData(m_batchDataArr, sizeof(BatchedVertexData) * m_batchDataArrCount);
+		m_batchIndices->SetData(m_batchIndicesArr, m_batchIndicesArrCount);
+
+		m_batchBuffer->Bind();
+		RenderCommand::DrawIndexed(m_batchIndices);
+	}
+
+	void DrawDataBuffer::ClearBatching()
+	{
 		m_batchDataArrCount = 0;
 		m_batchIndicesArrCount = 0;
 	}
@@ -167,16 +240,6 @@ namespace AstralEngine
 				toInstance.Add(pair.GetKey());
 			}
 		}
-	}
-
-	void DrawDataBuffer::AddToBatching(DrawCommand* cmd)
-	{
-		AE_CORE_ERROR("Not yet implemented");
-	}
-	
-	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
-	{
-
 	}
 
 	void DrawDataBuffer::RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle,
@@ -211,7 +274,6 @@ namespace AstralEngine
 		}
 
 		if (numVertices < s_maxNumVertex)
-		//if (false)
 		{
 			m_instancingBuffer->Bind();
 			m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * numVertices);
@@ -228,15 +290,14 @@ namespace AstralEngine
 		}
 		else
 		{
-			AE_CORE_ERROR("not ready yet");
 			size_t drawCallSize;
+
 			{
 				// make sure numVertex is a multiple of 3 since we are drawing triangles
 				size_t maxVertexSize = s_maxNumVertex - (s_maxNumVertex % 3);
 				size_t maxIndexSize = s_maxNumIndices - (s_maxNumIndices % 3);
 
 				drawCallSize = Math::Min(maxVertexSize, maxIndexSize);
-				drawCallSize = 3; //temp
 			}
 
 			size_t offset = 0;

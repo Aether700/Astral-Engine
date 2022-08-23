@@ -451,16 +451,10 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		RenderCommand::Init();
-		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
-		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
-		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
-		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
-		AE_CORE_WARN("Still need to test spliting up meshes with tank mesh!!!");
 	}
 
 	void Renderer::Shutdown()
 	{
-		AE_CORE_ERROR("Still need to test spliting up meshes with tank mesh!!!");
 	}
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)
@@ -703,8 +697,11 @@ namespace AstralEngine
 
 	void Renderer::DrawMesh(AEntity e, MaterialHandle material, const MeshRenderer& mesh)
 	{
-		s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), material,
-			mesh.GetMesh(), mesh.GetColor(), e));
+		if (mesh.GetMesh() != NullHandle)
+		{
+			s_sorter.AddData(new DrawCommand(e.GetTransform().GetTransformMatrix(), material,
+				mesh.GetMesh(), mesh.GetColor(), e));
+		}
 	}
 
 	void Renderer::DrawMesh(AEntity e, const MeshRenderer& mesh)
