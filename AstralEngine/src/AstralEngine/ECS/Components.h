@@ -43,10 +43,6 @@ namespace AstralEngine
 		MeshHandle GetMesh() const;
 		void SetMesh(MeshHandle mesh);
 
-		const Vector4& GetColor() const;
-		void SetColor(const Vector4& color);
-		void SetColor(float r, float g, float b, float a);
-
 		MaterialHandle GetMaterial() const;
 		void SetMaterial(MaterialHandle mat);
 

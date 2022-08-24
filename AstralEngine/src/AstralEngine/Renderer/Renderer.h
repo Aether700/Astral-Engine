@@ -21,27 +21,58 @@ namespace AstralEngine
 	class RenderingDataSorter;
 
 	// represents a uniform inside a material
-	class MatUniform
+	class MaterialUniform
 	{
 	public:
-		MatUniform();
-		MatUniform(const std::string& name, float value);
-		MatUniform(const std::string& name, const Vector2& value);
-		MatUniform(const std::string& name, const Vector3& value);
-		MatUniform(const std::string& name, const Vector4& value);
-		MatUniform(const std::string& name, const Mat3& value);
-		MatUniform(const std::string& name, const Mat4& value);
-		MatUniform(const std::string& name, int value);
-		MatUniform(const std::string& name, const Vector2Int& value);
-		MatUniform(const std::string& name, const Vector3Int& value);
-		MatUniform(const std::string& name, const Vector4Int& value);
-		MatUniform(const std::string& name, bool value);
-		~MatUniform();
+		MaterialUniform();
+		MaterialUniform(const std::string& name);
+		virtual ~MaterialUniform();
 
-		void SetToShader(AReference<Shader> shader) const;
+		const std::string& GetName() const;
+		virtual void SendToShader(AReference<Shader> shader) const = 0;
 
 	private:
 		std::string m_name;
+	};
+
+	class Texture2DUniform : public MaterialUniform
+	{
+	public:
+		Texture2DUniform();
+		Texture2DUniform(const std::string& name, Texture2DHandle texture = NullHandle);
+
+		virtual void SendToShader(AReference<Shader> shader) const override;
+
+		void SetTextureSlot(unsigned int textureSlot);
+		
+		Texture2DHandle GetTexture() const;
+		void SetTexture(Texture2DHandle texture);
+
+	private:
+		Texture2DHandle m_texture;
+		unsigned int m_textureSlot;
+	};
+
+	class PrimitiveUniform : public MaterialUniform
+	{
+	public:
+		PrimitiveUniform();
+		PrimitiveUniform(const std::string& name, float value);
+		PrimitiveUniform(const std::string& name, const Vector2& value);
+		PrimitiveUniform(const std::string& name, const Vector3& value);
+		PrimitiveUniform(const std::string& name, const Vector4& value);
+		PrimitiveUniform(const std::string& name, const Mat3& value);
+		PrimitiveUniform(const std::string& name, const Mat4& value);
+		PrimitiveUniform(const std::string& name, int value);
+		PrimitiveUniform(const std::string& name, const Vector2Int& value);
+		PrimitiveUniform(const std::string& name, const Vector3Int& value);
+		PrimitiveUniform(const std::string& name, const Vector4Int& value);
+		PrimitiveUniform(const std::string& name, bool value);
+		~PrimitiveUniform();
+
+		virtual void SendToShader(AReference<Shader> shader) const override;
+
+	private:
 		ADataType m_type;
 		void* m_data;
 	};
@@ -51,6 +82,7 @@ namespace AstralEngine
 	public:
 		Material();
 		Material(const Vector4& color);
+		~Material();
 
 		ShaderHandle GetShader() const;
 		void SetShader(ShaderHandle shader);
@@ -61,9 +93,18 @@ namespace AstralEngine
 		Texture2DHandle GetSpecularMap() const;
 		void SetSpecularMap(Texture2DHandle specular);
 
+		Texture2DHandle GetTexture(const std::string& name) const;
+		bool SetTexture(const std::string& name, Texture2DHandle texture);
+
+
 		const Vector4& GetColor() const;
 		Vector4& GetColor();
 		void SetColor(const Vector4& color);
+
+		void AddUniform(MaterialUniform* uniform);
+		void RemoveUniform(const std::string& name);
+
+		void SendUniformsToShader();
 
 		static MaterialHandle DefaultMat();
 		static MaterialHandle SpriteMat();
@@ -73,12 +114,17 @@ namespace AstralEngine
 		bool operator!=(const Material& other) const;
 
 	private:
+		static const char* s_diffuseMapName;
+		static const char* s_specularMapName;
+
+		MaterialUniform* FindUniformByName(const std::string& name) const;
+		Texture2DUniform* FindTextureByName(const std::string& name) const;
+
 		ShaderHandle m_shader;
-		Texture2DHandle m_diffuseMap;
-		Texture2DHandle m_specularMap;
 		Vector4 m_color;
 
-		ASinglyLinkedList<MatUniform> m_additionalUniforms;
+		ASinglyLinkedList<MaterialUniform*> m_uniforms;
+		ASinglyLinkedList<Texture2DUniform*> m_textures;
 	};
 
 	/*struch which contains the data to
@@ -89,9 +135,8 @@ namespace AstralEngine
 	struct VertexData
 	{
 		Vector3 position;
-		//Vector3 textureCoords;
+		Vector2 textureCoords;
 		//Vector3 normal;
-		//Vector4 color;
 		//float textureIndex;
 		//float tillingFactor;
 		//float uses3DTexture;
@@ -106,7 +151,8 @@ namespace AstralEngine
 
 		bool operator==(const VertexData& other) const
 		{
-			return position == other.position; /* && textureCoords == other.textureCoords
+			return position == other.position && textureCoords == other.textureCoords;
+				/*
 				&& normal == other.normal
 				&& color == other.color
 				&& textureIndex == other.textureIndex
@@ -134,63 +180,6 @@ namespace AstralEngine
 			numVertices = 0;
 			numIndices = 0;
 		}
-	};
-
-	//one batch per render target (triangles, lines, points, etc.)
-	class RenderingBatch
-	{
-		friend class Renderer;
-	public:
-		RenderingBatch();
-		RenderingBatch(const RenderingBatch& other);
-		~RenderingBatch();
-
-		void Add(const VertexData* vertices, unsigned int numVertices, const unsigned int* indices,
-			unsigned int numIndices, RenderingPrimitive renderTarget);
-
-		//returns texture index for the texture
-		int AddTexture2D(AReference<Texture2D> texture, RenderingPrimitive renderTarget);
-
-		//returns texture index for the texture
-		int AddCubemap(AReference<CubeMap> cubemap, RenderingPrimitive renderTarget);
-
-		void AddTexture2DShadowMap(AReference<Texture2D> shadowMap);
-
-		void AddCubemapShadowMap(AReference<CubeMap> shadowMap);
-
-		void Draw(RenderingPrimitive renderTarget);
-
-		bool IsEmpty() const;
-
-	private:
-		void ResetBatch();
-
-		static unsigned int s_maxVertices;
-		static unsigned int s_maxIndices;
-		static unsigned int s_maxTextureSlots;
-		static unsigned int s_maxTexture2DSlots;
-		static unsigned int s_maxTexture2DShadowMapSlots;
-		static unsigned int s_maxCubemapSlots;
-		static unsigned int s_maxCubemapShadowMapSlots;
-
-
-		AReference<VertexBuffer> m_vbo;
-		AReference<IndexBuffer> m_ibo;
-
-		VertexData* m_vertexDataArr;
-		unsigned int m_vertexDataIndex = 0;
-
-		unsigned int* m_indicesArr;
-		unsigned int m_indicesIndex = 0;
-
-		AReference<Texture2D>* m_texture2DSlots;
-		AReference<Texture2D>* m_texture2DShadowMapSlots;
-		AReference<CubeMap>* m_cubemapSlots;
-		AReference<CubeMap>* m_cubemapShadowMapSlots;
-		unsigned int m_texture2DIndex = 0;
-		unsigned int m_cubemapIndex = 0;
-		unsigned int m_texture2DShadowMapIndex = 0;
-		unsigned int m_cubemapShadowMapIndex = 0;
 	};
 
 	class Renderer
@@ -246,23 +235,6 @@ namespace AstralEngine
 		static void DrawQuad(const Vector3& position, float rotation, const Vector2& scale,
 			const Vector4& color = { 1, 1, 1, 1 });
 
-		//draw generic Vertex Data
-		static void DrawVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Vector3* vertices,
-			unsigned int numVertices, const Vector3* normals, unsigned int* indices, unsigned int indexCount, 
-			AReference<Texture2D> texture, const Vector3* textureCoords, float tileFactor, const Vector4& tintColor);
-
-		static void DrawVertexData(RenderingPrimitive renderTarget, const Vector3& position, const Quaternion& rotation,
-			const Vector3& scale, const Vector3* vertices, unsigned int numVertices, const Vector3* normals, 
-			unsigned int* indices, unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords,
-			float tileFactor, const Vector4& tintColor);
-
-		//lighting functions
-		static void AddDirectionalLight(const Vector3& position, const Vector3& direction,
-			const Vector4& lightColor = { 1, 1, 1, 1 }, bool drawCubes = true);
-
-		static void AddPointLight(const Vector3& position, const Vector4& lightColor = { 1, 1, 1, 1 },
-			bool drawCubes = true);
-
 		//sprite
 		static void DrawSprite(AEntity e, const SpriteRenderer& sprite);
 
@@ -276,32 +248,6 @@ namespace AstralEngine
 		static void DrawUIElement(const UIElement& element, const Vector4& color);
 
 	private:
-		//draw to data passed to the renderer to the screen
-		static void FlushBatch();
-
-		static void CleanUpAfterShadowMapGeneration();
-
-		static void AddShadowMapToShaders();
-
-		static void GenerateShadowMaps();
-
-		//helper function which loads a voxel into the data to pass to the gpu when the renderer flushes
-		static void UploadVoxel(const Mat4& transform, const Material& mat, AReference<CubeMap> texture,
-			float tileFactor, const Vector4& tintColor);
-
-		//uploads a quad or filled in square into the renderer
-		static void UploadQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
-			float tileFactor, const Vector4& tintColor, bool ignoresCam);
-
-		//helper function which allows to pass any vertex data with a 2D texture
-		static void UploadVertexData(RenderingPrimitive renderTarget, const Mat4& transform, const Material& mat,
-			const Vector3* vertices, unsigned int numVertices, const Vector3* normals, unsigned int* indices,
-			unsigned int indexCount, AReference<Texture2D> texture, const Vector3* textureCoords, 
-			float tileFactor, const Vector4& tintColor);
-
-		static void UploadMesh(const Mat4& transform, const Material& mat, AReference<Mesh>& mesh,
-			AReference<Texture2D> texture, float tileFactor = 1, const Vector4& tintColor = { 1, 1, 1, 1 });
-
 		static RendererStatistics s_stats;
 		static RenderingDataSorter s_sorterOpaque;
 		static RenderingDataSorter s_sorterTransparent;

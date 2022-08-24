@@ -41,7 +41,7 @@ public:
 		}
 	}
 
-	add texture support to the renderer
+	//add texture support to the renderer
 
 private:
 	MaterialHandle m_mat;
@@ -416,6 +416,14 @@ MeshHandle CreateCubeMesh()
 	return ResourceHandler::CreateMesh(positions, textureCoords, normals, indices);
 }
 
+MaterialHandle CreateMaterial()
+{
+	MaterialHandle mat = ResourceHandler::CreateMaterial();
+	auto& material = ResourceHandler::GetMaterial(mat);
+	material->SetDiffuseMap(ResourceHandler::LoadTexture2D("assets/textures/crateDiffuse.png"));
+	return mat;
+}
+
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer
@@ -458,17 +466,18 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		
 		MeshHandle cube = CreateCubeMesh();
-		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 1, 0, 1);
-		m_entity.EmplaceComponent<MeshRenderer>(cube);
+		MaterialHandle mat = CreateMaterial();
+		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
+		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
 		//m_entity.EmplaceComponent<Controller>();
 		
 		auto e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube).SetColor(1, 0, 0, 0.5f);
+		e.EmplaceComponent<MeshRenderer>(cube, mat);
 		e.GetTransform().SetLocalPosition({ 2, 0, 0 });
 		e.EmplaceComponent<MatToggler>();
 
 		e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube).SetColor(1, 0, 0, 0.5f);
+		e.EmplaceComponent<MeshRenderer>(cube, mat);
 		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
 
 		/*

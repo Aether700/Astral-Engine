@@ -84,6 +84,7 @@ namespace AstralEngine
 		m_batchBuffer->Bind();
 		m_batchBuffer->SetLayout({ 
 			{ ADataType::Float3, "position" },
+			{ ADataType::Float2, "textureCoords" },
 			{ ADataType::Mat4, "transform" },
 			{ ADataType::Float4, "color" }
 			});
@@ -101,14 +102,15 @@ namespace AstralEngine
 
 		m_instancingBuffer->Bind();
 		m_instancingBuffer->SetLayout({
-			{ ADataType::Float3, "position" }
+			{ ADataType::Float3, "position" },
+			{ ADataType::Float2, "textureCoords" }
 			});
 		
 		m_instancingArr->Bind();
 		m_instancingArr->SetLayout({
 			{ ADataType::Mat4, "transform", false, 1 },
 			{ ADataType::Float4, "color", false, 1 }
-			}, 1);
+			}, 2);
 	}
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
@@ -126,10 +128,14 @@ namespace AstralEngine
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
 		shader->SetFloat4("u_matColor", mat->GetColor());
+		//shader->SetInt("u_diffuseTexture", 0);
+		mat->SendUniformsToShader();
+		//ResourceHandler::GetTexture2D(mat->GetDiffuseMap())->Bind();
 
 		for (DrawCommand* cmd : m_drawCommands)
 		{
-			if (meshesToInstance.Contains(cmd->GetMesh()))
+			//if (meshesToInstance.Contains(cmd->GetMesh()))
+			if (true)
 			{
 				if (commandsToInstance.ContainsKey(cmd->GetMesh()))
 				{
@@ -181,9 +187,11 @@ namespace AstralEngine
 		size_t dataOffset, size_t dataCount)
 	{
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		for (size_t i = 0; i < positions.GetCount(); i++)
 		{
 			vertexDataArr[dataOffset + i].position = positions[i];
+			vertexDataArr[dataOffset + i].textureCoords = textureCoords[i];
 		}
 	}
 
@@ -201,6 +209,7 @@ namespace AstralEngine
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
 		AE_CORE_ASSERT(mesh != nullptr, "");
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		const ADynArr<unsigned int>& indices = mesh->GetIndices();
 
 		if (positions.GetCount() >= s_maxNumVertex || indices.GetCount() >= s_maxNumIndices)
@@ -212,6 +221,7 @@ namespace AstralEngine
 			for (size_t i = 0; i < numVertices; i++)
 			{
 				vertexDataArr[i].vertex.position = positions[i];
+				vertexDataArr[i].vertex.textureCoords = textureCoords[i];
 				vertexDataArr[i].instance.color = cmd->GetColor();
 				vertexDataArr[i].instance.transform = cmd->GetTransform();
 			}
@@ -246,6 +256,7 @@ namespace AstralEngine
 		for (size_t i = 0; i < positions.GetCount(); i++)
 		{
 			m_batchDataArr[m_batchDataArrCount + i].vertex.position = positions[i];
+			m_batchDataArr[m_batchDataArrCount + i].vertex.textureCoords = textureCoords[i];
 			m_batchDataArr[m_batchDataArrCount + i].instance.transform = cmd->GetTransform();
 			m_batchDataArr[m_batchDataArrCount + i].instance.color = cmd->GetColor();
 		}
@@ -341,7 +352,8 @@ namespace AstralEngine
 			index++;
 		}
 
-		if (numVertices < s_maxNumVertex)
+		//if (numVertices < s_maxNumVertex)
+		if (false)
 		{
 			m_instancingBuffer->Bind();
 			m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * numVertices);
@@ -359,6 +371,7 @@ namespace AstralEngine
 		else
 		{
 			size_t drawCallSize = ComputeDrawCallSize();
+			drawCallSize = 3;
 			size_t offset = 0;
 
 			while (offset < indices.GetCount())
@@ -406,108 +419,7 @@ namespace AstralEngine
 	}
 
 
-
-
-	// DrawCallList /////////////////////////////////////////////////
-	DrawCallList::DrawCallList() : m_material(NullHandle) { }
-	DrawCallList::DrawCallList(MaterialHandle material, MeshHandle mesh) : m_material(material), m_mesh(mesh)
-	{
-		constexpr size_t vbSize = 400;
-		m_geometryDataBuffer = VertexBuffer::Create(vbSize);
-		m_instanceArrBuffer = VertexBuffer::Create(vbSize, true);
-		m_indexBuffer = IndexBuffer::Create();
-		SetupGeometryData();
-	}
 	
-	DrawCallList::~DrawCallList()
-	{
-		Clear();
-	}
-
-	MaterialHandle DrawCallList::GetMaterial() const { return m_material; }
-
-	MeshHandle DrawCallList::GetMesh() const { return m_mesh; }
-
-	void DrawCallList::Draw(const Mat4& viewProj) const
-	{
-		if (m_material != NullHandle)
-		{
-			AReference<Material> mat = ResourceHandler::GetMaterial(m_material);
-			if (mat != nullptr)
-			{
-				//AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
-				AReference<Shader> shader = ResourceHandler::GetShader(0); // temp
-				shader->Bind();
-				shader->SetMat4("u_viewProjMatrix", viewProj);
-
-				InstanceVertexData* vertexData = new InstanceVertexData[m_data.GetCount()];
-				size_t index = 0;
-				for (DrawCommand* cmd : m_data)
-				{
-					//vertexData[index].transform = cmd->GetTransform();
-					//vertexData[index].color = cmd->GetColor();
-					index++;
-				}
-
-				m_geometryDataBuffer->Bind();
-				m_instanceArrBuffer->Bind();
-				m_instanceArrBuffer->SetData(vertexData, sizeof(InstanceVertexData) * m_data.GetCount());
-				delete[] vertexData;
-
-				m_geometryDataBuffer->Bind();
-				m_indexBuffer->Bind();
-				RenderCommand::DrawInstancedIndexed(m_indexBuffer, m_data.GetCount());
-			}
-		}
-	}
-
-	void DrawCallList::AddDrawCommand(DrawCommand* draw)
-	{
-		AE_CORE_ASSERT(draw->GetMaterial() == m_material && draw->GetMesh() == m_mesh, "");
-		m_data.Add(draw);
-	}
-
-	void DrawCallList::Clear()
-	{
-		for (DrawCommand* cmd : m_data)
-		{
-			delete cmd;
-		}
-		m_data.Clear();
-	}
-
-	void DrawCallList::SetupGeometryData()
-	{
-		SetupQuad();
-	}
-
-	void DrawCallList::SetupQuad()
-	{
-		Vector3 pos[] =
-		{
-			{ -0.5f, -0.5f, 0.0f },
-			{  0.5f, -0.5f, 0.0f },
-			{  0.5f,  0.5f, 0.0f },
-			{ -0.5f,  0.5f, 0.0f }
-		};
-
-		m_geometryDataBuffer->Bind();
-		m_geometryDataBuffer->SetLayout({ { ADataType::Float3, "position" } });
-		m_geometryDataBuffer->SetData(pos, sizeof(pos));
-
-		m_instanceArrBuffer->Bind();
-		m_instanceArrBuffer->SetLayout({ { ADataType::Mat4, "transformMatrix", false, 1 }, 
-			{ ADataType::Float4, "color", false, 1 } }, 1);
-
-		unsigned int indices[] =
-		{
-			0, 1, 2,
-			2, 3, 0
-		};
-
-		m_indexBuffer->SetData(indices, sizeof(indices) / sizeof(unsigned int));
-	}
-
 	// RenderingDataSorter ////////////////////////////////////////////////////
 
 	void RenderingDataSorter::AddData(DrawCommand* data)

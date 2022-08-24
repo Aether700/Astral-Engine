@@ -86,7 +86,7 @@ namespace AstralEngine
 			AddNodeLast(newNode);
 		}
 
-		size_t Find(const T& element) const
+		int Find(const T& element) const
 		{
 			AE_PROFILE_FUNCTION();
 			Node* ptr = m_head;
