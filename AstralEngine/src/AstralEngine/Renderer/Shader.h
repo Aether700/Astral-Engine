@@ -38,6 +38,7 @@ namespace AstralEngine
 		virtual void SetBool(const std::string& uniformName, bool v) = 0;
 
 		static ShaderHandle DefaultShader();
+		static ShaderHandle SpriteShader();
 
 	private:
 		static AReference<Shader> Create(const std::string& filepath);

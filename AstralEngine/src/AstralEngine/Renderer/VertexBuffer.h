@@ -17,9 +17,9 @@ namespace AstralEngine
 		switch (type)
 		{
 		case ADataType::Float:		return sizeof(float);
-		case ADataType::Float2:	return 2 * sizeof(float);
-		case ADataType::Float3:	return 3 * sizeof(float);
-		case ADataType::Float4:	return 4 * sizeof(float);
+		case ADataType::Float2:	    return 2 * sizeof(float);
+		case ADataType::Float3:	    return 3 * sizeof(float);
+		case ADataType::Float4:	    return 4 * sizeof(float);
 		case ADataType::Mat3:		return 3 * 3 * sizeof(float); // 3x3 matrix
 		case ADataType::Mat4:		return 4 * 4 * sizeof(float); //4x4 matrix
 		case ADataType::Int:		return sizeof(int);

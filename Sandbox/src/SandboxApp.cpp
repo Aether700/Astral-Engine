@@ -420,6 +420,7 @@ MaterialHandle CreateMaterial()
 {
 	MaterialHandle mat = ResourceHandler::CreateMaterial();
 	auto& material = ResourceHandler::GetMaterial(mat);
+	material->SetColor({ 1, 1, 1, 1 });
 	material->SetDiffuseMap(ResourceHandler::LoadTexture2D("assets/textures/crateDiffuse.png"));
 	return mat;
 }

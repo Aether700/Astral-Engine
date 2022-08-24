@@ -1,11 +1,14 @@
 #include "aepch.h"
 #include "OpenGLShader.h"
+#include "AstralEngine/Renderer/RenderCommand.h"
 
 #include <glad/glad.h>
 #include <fstream>
 
 namespace AstralEngine
 {
+	#define TEXTURE_SLOTS_TOKEN "#NUM_TEXTURE_SLOTS"
+
 	static unsigned int StringToOpenGLType(const std::string& type)
 	{
 		if (type == "vertex")
@@ -206,7 +209,6 @@ namespace AstralEngine
 		size_t typeTokenLength = strlen(typeToken);
 
 		size_t position = src.find(typeToken, 0);
-
 		while (position != std::string::npos)
 		{
 			unsigned int eol = (unsigned int)src.find_first_of("\r\n", position);
@@ -214,11 +216,12 @@ namespace AstralEngine
 			size_t start = position + typeTokenLength + 1;
 
 			std::string typeStr = src.substr(start, eol - start);
+
 			unsigned int type = StringToOpenGLType(typeStr);
 
 			size_t nextLinePos = src.find_first_not_of("\r\n", eol);
 			position = src.find(typeToken, nextLinePos);
-			
+
 			size_t count;
 			if (nextLinePos == std::string::npos)
 			{
@@ -231,6 +234,35 @@ namespace AstralEngine
 			
 			shaderSrc[type] = src.substr(nextLinePos, count);
 		}
+
+		for (auto& pair : shaderSrc)
+		{
+			std::string& srcCode = pair.GetElement();
+
+			size_t textureSlotTokenPos = srcCode.find(TEXTURE_SLOTS_TOKEN);
+
+
+			if (textureSlotTokenPos != std::string::npos)
+			{
+				constexpr size_t textureSlotTokenLength = sizeof(TEXTURE_SLOTS_TOKEN) / sizeof(char);
+				size_t numTextureSlots = RenderCommand::GetNumTextureSlots();
+				size_t position = 0;
+				std::stringstream ss;
+				while (textureSlotTokenPos != std::string::npos)
+				{
+					ss << srcCode.substr(position, textureSlotTokenPos - position);
+					ss << numTextureSlots;
+					position = textureSlotTokenPos + textureSlotTokenLength - 1;
+					textureSlotTokenPos = srcCode.find(TEXTURE_SLOTS_TOKEN, position);
+				}
+
+				ss << srcCode.substr(position, srcCode.length() - position);
+				shaderSrc[pair.GetKey()] = ss.str();
+			}
+
+		}
+
+
 		
 		return shaderSrc;
 	}

@@ -163,17 +163,120 @@ namespace AstralEngine
 			}
 		}
 	}
-
-	implement textures for sprites
 	
+	ADataType PrimitiveUniform::GetType() const { return m_type; }
+
+	void PrimitiveUniform::SetValue(float value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Float, "Assigning incorrect type to uniform %S", GetName());
+		float* data = (float*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector2& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Float2, "Assigning incorrect type to uniform %S", GetName());
+		Vector2* data = (Vector2*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector3& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Float3, "Assigning incorrect type to uniform %S", GetName());
+		Vector3* data = (Vector3*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector4& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Float4, "Assigning incorrect type to uniform %S", GetName());
+		Vector4* data = (Vector4*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Mat3& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Mat3, "Assigning incorrect type to uniform %S", GetName());
+		Mat3* data = (Mat3*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Mat4& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Mat4, "Assigning incorrect type to uniform %S", GetName());
+		Mat4* data = (Mat4*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(int value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Int, "Assigning incorrect type to uniform %S", GetName());
+		int* data = (int*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector2Int& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Int2, "Assigning incorrect type to uniform %S", GetName());
+		Vector2Int* data = (Vector2Int*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector3Int& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
+		Vector3Int* data = (Vector3Int*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(const Vector4Int& value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
+		Vector3Int* data = (Vector3Int*)m_data;
+		*data = value;
+	}
+
+	void PrimitiveUniform::SetValue(bool value)
+	{
+		AE_CORE_ASSERT(m_type == ADataType::Bool, "Assigning incorrect type to uniform %S", GetName());
+		bool* data = (bool*)m_data;
+		*data = value;
+	}
+
+
+	// ArrayUniform //////////////////////////////////////////////////////////////////
+	ArrayUniform::ArrayUniform() : m_arr(nullptr), m_count(0) { }
+	ArrayUniform::ArrayUniform(const std::string& name, int* arr, unsigned int count)
+		: MaterialUniform(name), m_arr(arr), m_count(count) { }
+	
+	ArrayUniform::~ArrayUniform() 
+	{
+		delete[] m_arr;
+	}
+
+	void ArrayUniform::SendToShader(AReference<Shader> shader) const
+	{
+		AE_CORE_ASSERT(m_arr != nullptr, "Trying to send invalid uniform to shader");
+		if (shader != nullptr)
+		{
+			shader->SetIntArray(GetName(), (int*)m_arr, m_count);
+		}
+	}
+
+
+
 	// Material //////////////////////////////////////////////////////////////////////////
 
 	const char* Material::s_diffuseMapName = "u_diffuseMap";
 	const char* Material::s_specularMapName = "u_specularMap";
+	const char* Material::s_colorName = "u_matColor";
 
-	Material::Material() : m_color(1.0f, 1.0f, 1.0f, 1.0f), m_shader(Shader::DefaultShader()) { }
+	Material::Material() : m_shader(Shader::DefaultShader()) { }
 
-	Material::Material(const Vector4& color) : m_color(color), m_shader(Shader::DefaultShader()) { }
+	Material::Material(const Vector4& color) : m_shader(Shader::DefaultShader()) 
+	{
+		SetColor(color);
+	}
 
 	Material::~Material()
 	{
@@ -251,9 +354,32 @@ namespace AstralEngine
 		texturePtr->SetTexture(texture);
 	}
 
-	const Vector4& Material::GetColor() const { return m_color; }
-	Vector4& Material::GetColor() { return m_color; }
-	void Material::SetColor(const Vector4& color) { m_color = color; }
+	const Vector4& Material::GetColor() const 
+	{ 
+		MaterialUniform* uniform = FindUniformByName(s_colorName);
+		if (uniform == nullptr)
+		{
+			return Vector4::Zero();
+		}
+		PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
+		return primitive->GetValue<Vector4>();
+	}
+	
+	void Material::SetColor(const Vector4& color) 
+	{ 
+		MaterialUniform* uniform = FindUniformByName(s_colorName);
+		if (uniform == nullptr)
+		{
+			uniform = new PrimitiveUniform(s_colorName, color);
+			AddUniform(uniform);
+		}
+		else
+		{
+			PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
+			AE_CORE_ASSERT(primitive != nullptr, "");
+			primitive->SetValue(color);
+		}
+	}
 
 	void Material::AddUniform(MaterialUniform* uniform)
 	{
@@ -310,7 +436,7 @@ namespace AstralEngine
 		static MaterialHandle defaultMat = NullHandle;
 		if (defaultMat == NullHandle)
 		{
-			defaultMat = ResourceHandler::CreateMaterial();
+			defaultMat = ResourceHandler::CreateMaterial({ 1.0f, 1.0f, 1.0f, 1.0f });
 			AReference<Material> material = ResourceHandler::GetMaterial(defaultMat);
 			material->SetDiffuseMap(Texture2D::WhiteTexture());
 		}
@@ -319,7 +445,22 @@ namespace AstralEngine
 
 	MaterialHandle Material::SpriteMat()
 	{
-		static MaterialHandle spriteMat = ResourceHandler::CreateMaterial();
+		static MaterialHandle spriteMat = NullHandle;
+		if (spriteMat == NullHandle)
+		{
+			spriteMat = ResourceHandler::CreateMaterial();
+			AReference<Material>& sprite = ResourceHandler::GetMaterial(spriteMat);
+			sprite->SetShader(Shader::SpriteShader());
+			size_t numTextureSlots = RenderCommand::GetNumTextureSlots();
+			int* textureSlots = new int[numTextureSlots];
+
+			for (size_t i = 0; i < numTextureSlots; i++)
+			{
+				textureSlots[i] = i;
+			}
+
+			sprite->AddUniform(new ArrayUniform("u_textures", textureSlots, (unsigned int)numTextureSlots));
+		}
 		return spriteMat;
 	}
 

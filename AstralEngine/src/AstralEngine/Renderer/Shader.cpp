@@ -14,6 +14,12 @@ namespace AstralEngine
 		return defaultShader;
 	}
 
+	ShaderHandle Shader::SpriteShader()
+	{
+		static ShaderHandle sprite = ResourceHandler::LoadShader("assets/shaders/SpriteShader.glsl");
+		return sprite;
+	}
+
 	AReference<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (RenderAPI::GetAPI())

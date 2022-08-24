@@ -72,9 +72,45 @@ namespace AstralEngine
 
 		virtual void SendToShader(AReference<Shader> shader) const override;
 
+		ADataType GetType() const;
+
+		template<typename T> 
+		const T& GetValue() const
+		{
+			AE_CORE_ASSERT(m_data != nullptr, "Trying to read invalid uniform");
+			return *(T*)m_data;
+		}
+
+		void SetValue(float value);
+		void SetValue(const Vector2& value);
+		void SetValue(const Vector3& value);
+		void SetValue(const Vector4& value);
+		void SetValue(const Mat3& value);
+		void SetValue(const Mat4& value);
+		void SetValue(int value);
+		void SetValue(const Vector2Int& value);
+		void SetValue(const Vector3Int& value);
+		void SetValue(const Vector4Int& value);
+		void SetValue(bool value);
+
+
 	private:
 		ADataType m_type;
 		void* m_data;
+	};
+
+	class ArrayUniform : public MaterialUniform
+	{
+	public:
+		ArrayUniform();
+		ArrayUniform(const std::string& name, int* arr, unsigned int count);
+		virtual ~ArrayUniform();
+
+		virtual void SendToShader(AReference<Shader> shader) const override;
+
+	private:
+		void* m_arr;
+		unsigned int m_count;
 	};
 
 	class Material
@@ -96,9 +132,7 @@ namespace AstralEngine
 		Texture2DHandle GetTexture(const std::string& name) const;
 		bool SetTexture(const std::string& name, Texture2DHandle texture);
 
-
 		const Vector4& GetColor() const;
-		Vector4& GetColor();
 		void SetColor(const Vector4& color);
 
 		void AddUniform(MaterialUniform* uniform);
@@ -116,12 +150,12 @@ namespace AstralEngine
 	private:
 		static const char* s_diffuseMapName;
 		static const char* s_specularMapName;
+		static const char* s_colorName;
 
 		MaterialUniform* FindUniformByName(const std::string& name) const;
 		Texture2DUniform* FindTextureByName(const std::string& name) const;
 
 		ShaderHandle m_shader;
-		Vector4 m_color;
 
 		ASinglyLinkedList<MaterialUniform*> m_uniforms;
 		ASinglyLinkedList<Texture2DUniform*> m_textures;
