@@ -632,7 +632,7 @@ namespace AstralEngine
 	void Renderer::DrawSprite(AEntity e, const SpriteRenderer& sprite)
 	{
 		DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(),
-			Mesh::QuadMesh(), sprite.GetColor(), e);
+			Mesh::QuadMesh(), sprite.GetColor(), e, sprite.GetSprite());
 
 		if (cmd->IsOpaque())
 		{

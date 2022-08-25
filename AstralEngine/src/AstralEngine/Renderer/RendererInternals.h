@@ -14,13 +14,15 @@ namespace AstralEngine
 	{
 	public:
 		DrawCommand();
-		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, const AEntity e);
+		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, 
+			const Vector4& color, const AEntity e, Texture2DHandle texture = NullHandle);
 
 		const Mat4& GetTransform() const;
 		MaterialHandle GetMaterial() const;
 		MeshHandle GetMesh() const;
 		const Vector4& GetColor() const;
 		AEntity GetEntity() const;
+		Texture2DHandle GetTexture() const;
 		bool IsOpaque() const;
 
 		bool operator==(const DrawCommand& other) const;
@@ -32,6 +34,7 @@ namespace AstralEngine
 		MeshHandle m_mesh;
 		MaterialHandle m_material;
 		AEntity m_entity;
+		Texture2DHandle m_texture;
 	};
 
 
@@ -54,6 +57,9 @@ namespace AstralEngine
 		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
 			size_t dataCount);
 
+		int GetTextureIndex(Texture2DHandle* arr, size_t& index, Texture2DHandle texture);
+		void BindTextures(Texture2DHandle* arr, size_t index);
+
 		size_t ComputeDrawCallSize();
 		// Batching /////////////////////////////////////////////
 		void AddToBatching(const Mat4& viewProj, DrawCommand* cmd);
@@ -61,6 +67,7 @@ namespace AstralEngine
 		void ClearBatching();
 		void BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
 			const ADynArr<unsigned int>& indices, size_t dataOffset, size_t drawCallSize);
+
 
 		// Instancing ////////////////////////////////////////////
 		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
@@ -79,21 +86,28 @@ namespace AstralEngine
 		static constexpr size_t s_instancingCutoff = 10; 
 		static size_t s_maxNumVertex;
 		static size_t s_maxNumIndices;
+		static size_t s_numTextureSlots;
 
 		// used for batching
 		AReference<VertexBuffer> m_batchBuffer;
 		AReference<IndexBuffer> m_batchIndices;
 		
 		BatchedVertexData* m_batchDataArr;
-		size_t m_batchDataArrCount;
+		size_t m_batchDataArrIndex;
 
 		unsigned int* m_batchIndicesArr;
-		size_t m_batchIndicesArrCount;
+		size_t m_batchIndicesArrIndex;
+
+		Texture2DHandle* m_batchTextureSlots;
+		size_t m_batchTextureSlotIndex;
 
 		// used for instancing
 		AReference<VertexBuffer> m_instancingBuffer;
 		AReference<VertexBuffer> m_instancingArr;
 		AReference<IndexBuffer> m_instancingIndices;
+
+		Texture2DHandle* m_instancingTextureSlots;
+		size_t m_instancingTextureSlotIndex;
 
 		// keeps track of how many time each mesh has been used this frame
 		AUnorderedMap<MeshHandle, size_t> m_meshUseCounts; 

@@ -8,6 +8,7 @@ namespace AstralEngine
 	{
 		Mat4 transform;
 		Vector4 color;
+		float textureIndex;
 	};
 
 	struct BatchedVertexData
@@ -21,7 +22,8 @@ namespace AstralEngine
 	DrawCommand::DrawCommand() { }
 
 	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, 
-		const AEntity e) : m_transform(transform), m_mesh(mesh), m_material(mat), m_color(color), m_entity(e) 
+		const AEntity e, Texture2DHandle texture) : m_transform(transform), m_mesh(mesh), m_material(mat), 
+		m_color(color), m_entity(e), m_texture(texture)
 	{
 		if (m_material == NullHandle)
 		{
@@ -35,6 +37,8 @@ namespace AstralEngine
 	const Vector4& DrawCommand::GetColor() const { return m_color; }
 	AEntity DrawCommand::GetEntity() const { return m_entity; }
 	
+	Texture2DHandle DrawCommand::GetTexture() const { return m_texture; }
+
 	bool DrawCommand::IsOpaque() const 
 	{ 
 		return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f && m_color.a == 1.0f; 
@@ -42,8 +46,8 @@ namespace AstralEngine
 
 	bool DrawCommand::operator==(const DrawCommand& other) const
 	{
-		return m_mesh == other.m_mesh && m_material == other.m_material
-			&& m_transform == other.m_transform;
+		return m_mesh == other.m_mesh && m_texture == other.m_texture 
+			&& m_material == other.m_material && m_transform == other.m_transform;
 	}
 
 	bool DrawCommand::operator!=(const DrawCommand& other) const
@@ -55,18 +59,21 @@ namespace AstralEngine
 
 	size_t DrawDataBuffer::s_maxNumVertex = 0;
 	size_t DrawDataBuffer::s_maxNumIndices;
+	size_t DrawDataBuffer::s_numTextureSlots;
 
 
 	DrawDataBuffer::DrawDataBuffer()
 	{
 		m_batchDataArr = nullptr;
 		m_batchIndicesArr = nullptr;
+		m_batchTextureSlots = nullptr;
 	}
 
 	DrawDataBuffer::~DrawDataBuffer()
 	{
 		delete[] m_batchDataArr;
 		delete[] m_batchIndicesArr;
+		delete[] m_batchTextureSlots;
 	}
 
 	void DrawDataBuffer::Initialize()
@@ -75,6 +82,7 @@ namespace AstralEngine
 		{
 			s_maxNumVertex = RenderCommand::GetMaxNumVertices();
 			s_maxNumIndices = RenderCommand::GetMaxNumIndices();
+			s_numTextureSlots = RenderCommand::GetNumTextureSlots();
 		}
 
 		// Batching
@@ -86,14 +94,18 @@ namespace AstralEngine
 			{ ADataType::Float3, "position" },
 			{ ADataType::Float2, "textureCoords" },
 			{ ADataType::Mat4, "transform" },
-			{ ADataType::Float4, "color" }
+			{ ADataType::Float4, "color" },
+			{ ADataType::Int, "textureIndex" }
 			});
 
 		m_batchDataArr = new BatchedVertexData[s_maxNumVertex];
-		m_batchDataArrCount = 0;
+		m_batchDataArrIndex = 0;
 
 		m_batchIndicesArr = new unsigned int[s_maxNumIndices];
-		m_batchIndicesArrCount = 0;
+		m_batchIndicesArrIndex = 0;
+
+		m_batchTextureSlots = new Texture2DHandle[s_numTextureSlots];
+		m_batchTextureSlotIndex = 0;
 
 		// Instancing
 		m_instancingBuffer = VertexBuffer::Create(s_maxNumVertex * sizeof(VertexData));
@@ -109,8 +121,12 @@ namespace AstralEngine
 		m_instancingArr->Bind();
 		m_instancingArr->SetLayout({
 			{ ADataType::Mat4, "transform", false, 1 },
-			{ ADataType::Float4, "color", false, 1 }
+			{ ADataType::Float4, "color", false, 1 },
+			{ ADataType::Int, "textureIndex", false, 1 }
 			}, 2);
+
+		m_instancingTextureSlots = new Texture2DHandle[s_numTextureSlots];
+		m_instancingTextureSlotIndex = 0;
 	}
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
@@ -127,10 +143,7 @@ namespace AstralEngine
 
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
-		shader->SetFloat4("u_matColor", mat->GetColor());
-		//shader->SetInt("u_diffuseTexture", 0);
 		mat->SendUniformsToShader();
-		//ResourceHandler::GetTexture2D(mat->GetDiffuseMap())->Bind();
 
 		for (DrawCommand* cmd : m_drawCommands)
 		{
@@ -181,6 +194,7 @@ namespace AstralEngine
 		m_drawCommands.Clear();
 		m_meshUseCounts.Clear();
 		ClearBatching();
+		m_instancingTextureSlotIndex = 0;
 	}
 
 	void DrawDataBuffer::ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr,
@@ -192,6 +206,37 @@ namespace AstralEngine
 		{
 			vertexDataArr[dataOffset + i].position = positions[i];
 			vertexDataArr[dataOffset + i].textureCoords = textureCoords[i];
+		}
+	}
+
+	int DrawDataBuffer::GetTextureIndex(Texture2DHandle* arr, size_t& index, Texture2DHandle texture)
+	{
+		if (texture == NullHandle)
+		{
+			return -1;
+		}
+
+		AE_CORE_ASSERT(index < s_numTextureSlots, "");
+		for (size_t i = 0; i < index; i++)
+		{
+			if (arr[i] == texture)
+			{
+				return (int)i;
+			}
+		}
+
+		arr[index] = texture;
+		int i = (int)index;
+		index++;
+		return i;
+	}
+
+	void DrawDataBuffer::BindTextures(Texture2DHandle* arr, size_t index)
+	{
+		for (size_t i = 0; i < index; i++)
+		{
+			AReference<Texture2D> texture = ResourceHandler::GetTexture2D(arr[i]);
+			texture->Bind(i);
 		}
 	}
 
@@ -211,6 +256,7 @@ namespace AstralEngine
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
 		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		const ADynArr<unsigned int>& indices = mesh->GetIndices();
+		int textureIndex = GetTextureIndex(m_batchTextureSlots, m_batchTextureSlotIndex, cmd->GetTexture());
 
 		if (positions.GetCount() >= s_maxNumVertex || indices.GetCount() >= s_maxNumIndices)
 		{
@@ -218,12 +264,14 @@ namespace AstralEngine
 			size_t numVertices = positions.GetCount();
 			BatchedVertexData* vertexDataArr = new BatchedVertexData[numVertices];
 
+
 			for (size_t i = 0; i < numVertices; i++)
 			{
 				vertexDataArr[i].vertex.position = positions[i];
 				vertexDataArr[i].vertex.textureCoords = textureCoords[i];
 				vertexDataArr[i].instance.color = cmd->GetColor();
 				vertexDataArr[i].instance.transform = cmd->GetTransform();
+				vertexDataArr[i].instance.textureIndex = (float)textureIndex;
 			}
 
 			size_t drawCallSize = ComputeDrawCallSize();
@@ -239,15 +287,15 @@ namespace AstralEngine
 				offset += currDrawSize;
 			}
 
-			m_batchDataArrCount = currDrawSize;
-			m_batchIndicesArrCount = currDrawSize;
+			m_batchDataArrIndex = currDrawSize;
+			m_batchIndicesArrIndex = currDrawSize;
 
 			delete[] vertexDataArr;
 			return;
 
 		}
-		else if (m_batchDataArrCount + positions.GetCount() >= s_maxNumVertex 
-			|| m_batchIndicesArrCount + indices.GetCount() >= s_maxNumIndices )
+		else if (m_batchDataArrIndex + positions.GetCount() >= s_maxNumVertex 
+			|| m_batchIndicesArrIndex + indices.GetCount() >= s_maxNumIndices )
 		{
 			RenderBatch(viewProj);
 			ClearBatching();
@@ -255,25 +303,28 @@ namespace AstralEngine
 
 		for (size_t i = 0; i < positions.GetCount(); i++)
 		{
-			m_batchDataArr[m_batchDataArrCount + i].vertex.position = positions[i];
-			m_batchDataArr[m_batchDataArrCount + i].vertex.textureCoords = textureCoords[i];
-			m_batchDataArr[m_batchDataArrCount + i].instance.transform = cmd->GetTransform();
-			m_batchDataArr[m_batchDataArrCount + i].instance.color = cmd->GetColor();
+			m_batchDataArr[m_batchDataArrIndex + i].vertex.position = positions[i];
+			m_batchDataArr[m_batchDataArrIndex + i].vertex.textureCoords = textureCoords[i];
+			m_batchDataArr[m_batchDataArrIndex + i].instance.transform = cmd->GetTransform();
+			m_batchDataArr[m_batchDataArrIndex + i].instance.color = cmd->GetColor();
+			m_batchDataArr[m_batchDataArrIndex + i].instance.textureIndex = (float)textureIndex;
 		}
 
 		for (size_t i = 0; i < indices.GetCount(); i++)
 		{
-			m_batchIndicesArr[m_batchIndicesArrCount + i] = m_batchDataArrCount + indices[i];
+			m_batchIndicesArr[m_batchIndicesArrIndex + i] = m_batchDataArrIndex + indices[i];
 		}
 
-		m_batchDataArrCount += positions.GetCount();
-		m_batchIndicesArrCount += indices.GetCount();
+		m_batchDataArrIndex += positions.GetCount();
+		m_batchIndicesArrIndex += indices.GetCount();
 	}
 
 	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
 	{
-		m_batchBuffer->SetData(m_batchDataArr, sizeof(BatchedVertexData) * m_batchDataArrCount);
-		m_batchIndices->SetData(m_batchIndicesArr, m_batchIndicesArrCount);
+		BindTextures(m_batchTextureSlots, m_batchTextureSlotIndex);
+
+		m_batchBuffer->SetData(m_batchDataArr, sizeof(BatchedVertexData) * m_batchDataArrIndex);
+		m_batchIndices->SetData(m_batchIndicesArr, m_batchIndicesArrIndex);
 
 		m_batchBuffer->Bind();
 		RenderCommand::DrawIndexed(m_batchIndices);
@@ -281,8 +332,9 @@ namespace AstralEngine
 
 	void DrawDataBuffer::ClearBatching()
 	{
-		m_batchDataArrCount = 0;
-		m_batchIndicesArrCount = 0;
+		m_batchDataArrIndex = 0;
+		m_batchIndicesArrIndex = 0;
+		m_batchTextureSlotIndex = 0;
 	}
 
 	void DrawDataBuffer::BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
@@ -298,6 +350,8 @@ namespace AstralEngine
 			vertexDataArr[i] = vertexData[currIndex];
 			indexArr[i] = i;
 		}
+
+		BindTextures(m_batchTextureSlots, m_batchTextureSlotIndex);
 
 		m_batchBuffer->Bind();
 		m_batchBuffer->SetData(vertexDataArr, sizeof(BatchedVertexData) * drawCallSize);
@@ -345,16 +399,21 @@ namespace AstralEngine
 
 		InstanceVertexData* instanceData = new InstanceVertexData[commands.GetCount()];
 		size_t index = 0;
+
 		for (DrawCommand* cmd : commands)
 		{
 			instanceData[index].transform = cmd->GetTransform();
 			instanceData[index].color = cmd->GetColor();
+			instanceData[index].textureIndex = (float)GetTextureIndex(m_instancingTextureSlots, 
+				m_instancingTextureSlotIndex, cmd->GetTexture());
 			index++;
 		}
 
 		//if (numVertices < s_maxNumVertex)
 		if (false)
 		{
+			BindTextures(m_instancingTextureSlots, m_instancingTextureSlotIndex);
+
 			m_instancingBuffer->Bind();
 			m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * numVertices);
 
@@ -370,8 +429,10 @@ namespace AstralEngine
 		}
 		else
 		{
+			testing 2 textures for all 4 branches
+			currently only the first texture is being renderer in the currently selected branch (find why)
+
 			size_t drawCallSize = ComputeDrawCallSize();
-			drawCallSize = 3;
 			size_t offset = 0;
 
 			while (offset < indices.GetCount())
@@ -400,6 +461,8 @@ namespace AstralEngine
 			vertexDataArr[i] = vertexData[currIndex];
 			indexArr[i] = i;
 		}
+
+		BindTextures(m_instancingTextureSlots, m_instancingTextureSlotIndex);
 
 		m_instancingBuffer->Bind();
 		m_instancingBuffer->SetData(vertexDataArr, sizeof(VertexData) * drawCallSize);

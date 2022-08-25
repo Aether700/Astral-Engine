@@ -465,12 +465,14 @@ public:
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
+		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
+		//m_entity.EmplaceComponent<Controller>();
 		
 		MeshHandle cube = CreateCubeMesh();
 		MaterialHandle mat = CreateMaterial();
-		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
+		
+		/*
 		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
-		//m_entity.EmplaceComponent<Controller>();
 		
 		auto e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
@@ -480,7 +482,15 @@ public:
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
 		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
+		*/
 
+		auto e = m_scene->CreateAEntity();
+		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png"));
+		e.GetTransform().SetLocalPosition({ 0, 2, 0 });
+		
+		e = m_scene->CreateAEntity();
+		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png"));
+		e.GetTransform().SetLocalPosition({ 2, 2, 0 });
 		/*
 		auto e = m_scene->CreateAEntity();
 		e.EmplaceComponent<TargetMover>();
