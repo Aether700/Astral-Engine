@@ -57,6 +57,7 @@ namespace AstralEngine
 		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
 			size_t dataCount);
 
+		// returns -1 if there is no more available texture slots
 		int GetTextureIndex(Texture2DHandle* arr, size_t& index, Texture2DHandle texture);
 		void BindTextures(Texture2DHandle* arr, size_t index);
 
@@ -72,12 +73,13 @@ namespace AstralEngine
 		// Instancing ////////////////////////////////////////////
 		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
 		void RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle, 
-			ASinglyLinkedList<DrawCommand*>> commandsToInstance);
+			ASinglyLinkedList<DrawCommand*>>& commandsToInstance);
 		void RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, ASinglyLinkedList<DrawCommand*>& commands);
 
 		void InstanceRenderMeshSection(VertexData* vertexData, size_t numVertex, 
 			const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData, 
 			size_t numInstanceData, size_t dataOffset, size_t drawCallSize);
+		void ClearInstancing();
 
 
 		// once a mesh has been used s_instancingCutoff times or 
@@ -100,6 +102,7 @@ namespace AstralEngine
 
 		Texture2DHandle* m_batchTextureSlots;
 		size_t m_batchTextureSlotIndex;
+		bool m_hasBatchedData;
 
 		// used for instancing
 		AReference<VertexBuffer> m_instancingBuffer;

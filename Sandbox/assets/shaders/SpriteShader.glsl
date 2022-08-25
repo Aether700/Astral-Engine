@@ -11,7 +11,7 @@ uniform mat4 u_viewProjMatrix;
 
 out vec4 v_color;
 out vec2 v_textureCoords;
-out float v_textureIndex;
+flat out float v_textureIndex;
 
 void main()
 {
@@ -29,12 +29,11 @@ layout(location = 0) out vec4 color;
 
 in vec4 v_color;
 in vec2 v_textureCoords;
-in float v_textureIndex;
+flat in float v_textureIndex;
 
 uniform sampler2D u_textures[#NUM_TEXTURE_SLOTS];
 
 void main()
 {
-	color = texture(u_textures[int(v_textureIndex)], v_textureCoords) * v_color; 
-	//color = vec4((v_textureIndex * 0.5) + 0.5, 0, 0, 1); 
+	color = texture(u_textures[int(v_textureIndex)], v_textureCoords) * v_color;
 }

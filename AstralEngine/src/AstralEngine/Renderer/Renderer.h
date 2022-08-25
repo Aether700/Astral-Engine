@@ -207,6 +207,12 @@ namespace AstralEngine
 		unsigned int numDrawCalls = 0;
 		unsigned int numVertices = 0;
 		unsigned int numIndices = 0;
+		double timePerFrame;
+
+		double GetFrameRate() const
+		{
+			return 1.0 / timePerFrame;
+		}
 
 		void Reset()
 		{
@@ -218,7 +224,7 @@ namespace AstralEngine
 
 	class Renderer
 	{
-		friend class RenderingBatch;
+		friend class DrawDataBuffer;
 	public:
 		static void Init();
 		static void Shutdown();
@@ -286,6 +292,7 @@ namespace AstralEngine
 		static RenderingDataSorter s_sorterOpaque;
 		static RenderingDataSorter s_sorterTransparent;
 		static Mat4 s_viewProjMatrix;
+		static double s_frameStartTime;
 
 	};
 }

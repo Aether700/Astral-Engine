@@ -11,6 +11,101 @@ using namespace AstralEngine;
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class Rotator : public NativeScript
+{
+public:
+	Rotator() : m_axis(Vector3::Up()) { }
+
+	void SetAxis(const Vector3& axis) { m_axis = axis; }
+
+	void OnUpdate()
+	{
+		static bool rotate = false;
+
+		if (Input::GetKeyDown(KeyCode::R))
+		{
+			rotate = !rotate;
+		}
+
+		if (rotate)
+		{
+			Transform& t = GetTransform();
+			Quaternion rotationThisFrame = Quaternion::AngleAxisToQuaternion(m_speed * Time::GetDeltaTime(), m_axis);
+			t.SetRotation(rotationThisFrame * t.GetRotation());
+		}
+	}
+
+private:
+
+	Vector3 m_axis;
+	float m_speed = 5.0f;
+};
+
+class RendererStatViewer : public NativeScript
+{
+public:
+	void OnStart() override
+	{
+		m_stat = Stat::FrameRate;
+		m_print = false;
+	}
+
+	void OnUpdate() override
+	{
+		if (Input::GetKeyDown(KeyCode::P))
+		{
+			m_print = !m_print;
+		}
+
+		if (m_print)
+		{
+			if (Input::GetKeyDown(KeyCode::K))
+			{
+				int i = (int)m_stat;
+				i = (i + 1) % (int)Stat::Count;
+				m_stat = (Stat)i;
+			}
+
+			switch (m_stat)
+			{
+			case Stat::DrawCalls:
+				AE_INFO("Num Draw Calls: %d", Renderer::GetStats().numDrawCalls);
+				break;
+
+			case Stat::NumIndices:
+				AE_INFO("Num Indices: %d", Renderer::GetStats().numIndices);
+				break;
+
+			case Stat::NumVertices:
+				AE_INFO("Num Vertices: %d", Renderer::GetStats().numVertices);
+				break;
+
+			case Stat::TimePerFrame:
+				AE_INFO("Time Per frame: %f", (float)Renderer::GetStats().timePerFrame);
+				break;
+
+			case Stat::FrameRate:
+				AE_INFO("Frame Rate: %f", (float)Renderer::GetStats().GetFrameRate());
+				break;
+			}
+		}
+	}
+
+private:
+	enum class Stat
+	{
+		DrawCalls,
+		NumVertices,
+		NumIndices,
+		TimePerFrame,
+		FrameRate,
+		Count
+	};
+
+	Stat m_stat;
+	bool m_print;
+};
+
 class MatToggler : public NativeScript
 {
 public:
@@ -468,10 +563,10 @@ public:
 		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		//m_entity.EmplaceComponent<Controller>();
 		
+		/*
 		MeshHandle cube = CreateCubeMesh();
 		MaterialHandle mat = CreateMaterial();
 		
-		/*
 		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
 		
 		auto e = m_scene->CreateAEntity();
@@ -482,15 +577,15 @@ public:
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
 		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
-		*/
 
-		auto e = m_scene->CreateAEntity();
+		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png"));
 		e.GetTransform().SetLocalPosition({ 0, 2, 0 });
 		
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png"));
 		e.GetTransform().SetLocalPosition({ 2, 2, 0 });
+		*/
 		/*
 		auto e = m_scene->CreateAEntity();
 		e.EmplaceComponent<TargetMover>();
@@ -506,8 +601,10 @@ public:
 		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
 		cam.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
 		cam.EmplaceComponent<CamController>();
+		cam.EmplaceComponent<RendererStatViewer>();
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
+		SetupRendererTestScene();
 	}
 
 	void OnUpdate() override
@@ -581,7 +678,9 @@ public:
 		}
 		*/
 		return false;
-	}
+	} 
+	implement rendering records or object similar to send data only if transform was changed
+	then verify if frame rate of the test renderer scene has improved or not
 
 	/*
 	bool OnEvent(AstralEngine::AEvent& e) override
@@ -592,6 +691,60 @@ public:
 	*/
 
 private:
+	void CreateSprite(const Vector3& pos, Texture2DHandle texture = NullHandle, bool rotator = false)
+	{
+		auto e = m_scene->CreateAEntity();
+		e.GetTransform().SetLocalPosition(pos);
+		e.EmplaceComponent<SpriteRenderer>(texture);
+		if (rotator)
+		{
+			e.EmplaceComponent<Rotator>().SetAxis(Vector3::Forward());
+		}
+	}
+
+	void CreateMesh(const Vector3& pos, const Quaternion& rotation, MeshHandle mesh,
+		MaterialHandle mat, bool rotator = false)
+	{
+		auto e = m_scene->CreateAEntity();
+		e.GetTransform().SetLocalPosition(pos);
+		e.GetTransform().SetRotation(rotation);
+		e.EmplaceComponent<MeshRenderer>(mesh, mat);
+
+		if (rotator)
+		{
+			e.EmplaceComponent<Rotator>().SetAxis(Vector3::Up());
+		}
+	}
+
+	void SetupRendererTestScene()
+	{
+		MeshHandle cube = CreateCubeMesh();
+		MaterialHandle mat = CreateMaterial();
+
+		Texture2DHandle t = ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png");
+		Texture2DHandle t2 = ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png");
+		
+		constexpr int gridSize = 3;
+
+		// sprites 
+		for (int x = -gridSize; x < gridSize; x++)
+		{
+			for (int y = -gridSize; y < gridSize; y++)
+			{
+				Texture2DHandle texture = x % 2 == 0 ? t : t2;
+				CreateSprite(Vector3(x * 1.25f, y * 1.25f, 3), texture, (x + y) % 3 == 1);
+			}
+		}
+
+		for (int x = -gridSize; x < gridSize; x++)
+		{
+			for (int y = -gridSize; y < gridSize; y++)
+			{
+				CreateMesh(Vector3(x * 1.25f, y * 1.25f, 0), Quaternion::Identity(), cube, mat, (x + y) % 3 == 0);
+			}
+		}
+	}
+
 	AstralEngine::AReference<AstralEngine::OrthographicCameraController> m_cameraController;
 
 	//AstralEngine::UIWindow m_uiWindow = AstralEngine::UIWindow({ 300, 300 }, 200, 200);//, {1, 0, 0, 1});

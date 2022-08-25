@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/Renderer/RendererInternals.h"
+#include "AstralEngine/Core/Time.h"
 
 namespace AstralEngine
 {
@@ -509,6 +510,7 @@ namespace AstralEngine
 	RenderingDataSorter Renderer::s_sorterTransparent;
 	RendererStatistics Renderer::s_stats;
 	Mat4 Renderer::s_viewProjMatrix;
+	double Renderer::s_frameStartTime;
 
 	void Renderer::Init()
 	{
@@ -522,6 +524,7 @@ namespace AstralEngine
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
+		s_frameStartTime = Time::GetTime();
 		s_viewProjMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
@@ -529,6 +532,7 @@ namespace AstralEngine
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
 	{
+		s_frameStartTime = Time::GetTime();
 		//view is the identity
 		s_viewProjMatrix = cam.GetProjectionMatrix();
 		s_sorterOpaque.Clear();
@@ -537,6 +541,7 @@ namespace AstralEngine
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
 	{
+		s_frameStartTime = Time::GetTime();
 		s_viewProjMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
@@ -553,6 +558,8 @@ namespace AstralEngine
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
 		}
+		
+		s_stats.timePerFrame = Time::GetTime() - s_frameStartTime;
 	}
 	
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
