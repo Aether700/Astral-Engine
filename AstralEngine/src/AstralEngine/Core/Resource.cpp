@@ -66,6 +66,7 @@ namespace AstralEngine
 
 	AReference<Material> ResourceHandler::GetMaterial(MaterialHandle handle)
 	{
+		AE_PROFILE_FUNCTION();
 		return GetHandler()->m_materials.GetResource(handle);
 	}
 
@@ -92,6 +93,7 @@ namespace AstralEngine
 
 	AReference<Mesh> ResourceHandler::GetMesh(MeshHandle handle)
 	{
+		AE_PROFILE_FUNCTION();
 		return GetHandler()->m_meshes.GetResource(handle);
 	}
 

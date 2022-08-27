@@ -132,7 +132,9 @@ namespace AstralEngine
 
 		const AKeyElementPair<K, T>& operator*() const
 		{
-			return AUnorderedMapIterator<K, T>::operator*();
+			AUnorderedMapIterator<K, T>* thisIt = const_cast<AUnorderedMapIterator<K, T>*>
+				((const AUnorderedMapIterator<K, T>*)this);
+			return thisIt->operator*();
 		}
 
 	private:
@@ -233,6 +235,8 @@ namespace AstralEngine
 				if (m_equalsFunc(key, (*it).GetKey()))
 				{
 					m_bucketArr[bucketIndex].Remove(it);
+					m_count--;
+					break;
 				}
 			}
 		}

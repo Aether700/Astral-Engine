@@ -15,7 +15,7 @@ namespace AstralEngine
 	public:
 		DrawCommand();
 		DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, 
-			const Vector4& color, const AEntity e, Texture2DHandle texture = NullHandle);
+			const Vector4& color, const AEntity e, bool opaque, Texture2DHandle texture = NullHandle);
 
 		const Mat4& GetTransform() const;
 		MaterialHandle GetMaterial() const;
@@ -35,6 +35,7 @@ namespace AstralEngine
 		MaterialHandle m_material;
 		AEntity m_entity;
 		Texture2DHandle m_texture;
+		bool m_opaque;
 	};
 
 
@@ -52,6 +53,8 @@ namespace AstralEngine
 		void Draw(const Mat4& viewProj, MaterialHandle material);
 		void AddDrawCommand(DrawCommand* draw);
 		void Clear();
+
+		bool IsEmpty() const;
 
 	private:
 		void ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr, size_t dataOffset,
@@ -73,8 +76,8 @@ namespace AstralEngine
 		// Instancing ////////////////////////////////////////////
 		void CollectMeshesToInstance(ASinglyLinkedList<MeshHandle>& toInstance);
 		void RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle, 
-			ASinglyLinkedList<DrawCommand*>>& commandsToInstance);
-		void RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, ASinglyLinkedList<DrawCommand*>& commands);
+			ADynArr<DrawCommand*>>& commandsToInstance);
+		void RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, ADynArr<DrawCommand*>& commands);
 
 		void InstanceRenderMeshSection(VertexData* vertexData, size_t numVertex, 
 			const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData, 
@@ -85,7 +88,7 @@ namespace AstralEngine
 		// once a mesh has been used s_instancingCutoff times or 
 		// more in a single frame it will be sent to be instanced instead of being batched 
 		// with the rest of the data
-		static constexpr size_t s_instancingCutoff = 10; 
+		static constexpr size_t s_instancingCutoff = 10;//1000; 
 		static size_t s_maxNumVertex;
 		static size_t s_maxNumIndices;
 		static size_t s_numTextureSlots;
@@ -114,6 +117,8 @@ namespace AstralEngine
 
 		// keeps track of how many time each mesh has been used this frame
 		AUnorderedMap<MeshHandle, size_t> m_meshUseCounts; 
+		AUnorderedMap<MeshHandle, ADynArr<DrawCommand*>> m_commandsToInstance;
+		AUnorderedMap<MeshHandle, ADynArr<DrawCommand*>> m_commandsToBatch;
 
 		ASinglyLinkedList<DrawCommand*> m_drawCommands;
 	};
@@ -127,6 +132,8 @@ namespace AstralEngine
 
 		void AddData(DrawCommand* data);
 		void Clear();
+
+		bool IsEmpty() const;
 
 		AIterator begin();
 		AIterator end();

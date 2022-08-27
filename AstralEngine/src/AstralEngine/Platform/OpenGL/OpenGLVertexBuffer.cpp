@@ -67,7 +67,14 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		if (offset > 0)
+		{
+			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		}
+		else
+		{
+			glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+		}
 	}
 
 	void OpenGLVertexBuffer::SetLayout(const VertexBufferLayout& layout, size_t layoutOffset)

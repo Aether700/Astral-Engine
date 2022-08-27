@@ -9,8 +9,8 @@
 namespace AstralEngine
 {
 	// MaterialUniform /////////////////////////////////
-	MaterialUniform::MaterialUniform() { }
-	MaterialUniform::MaterialUniform(const std::string& name) : m_name(name) { }
+	MaterialUniform::MaterialUniform() : m_hasChanged(true) { }
+	MaterialUniform::MaterialUniform(const std::string& name) : m_name(name), m_hasChanged(true) { }
 	MaterialUniform::~MaterialUniform() { }
 
 	const std::string& MaterialUniform::GetName() const { return m_name; }
@@ -23,6 +23,11 @@ namespace AstralEngine
 
 	void Texture2DUniform::SendToShader(AReference<Shader> shader) const
 	{
+		if (!m_hasChanged)
+		{
+			return;
+		}
+
 		AE_CORE_ASSERT(m_texture != NullHandle, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
@@ -31,13 +36,23 @@ namespace AstralEngine
 			{
 				shader->SetInt(GetName(), m_textureSlot);
 				texture->Bind(m_textureSlot);
+				m_hasChanged = true;
 			}
 		}
 	}
 
-	void Texture2DUniform::SetTextureSlot(unsigned int textureSlot) { m_textureSlot = textureSlot; }
+	void Texture2DUniform::SetTextureSlot(unsigned int textureSlot) 
+	{ 
+		m_textureSlot = textureSlot; 
+		m_hasChanged = true;
+	}
+	
 	Texture2DHandle Texture2DUniform::GetTexture() const { return m_texture; }
-	void Texture2DUniform::SetTexture(Texture2DHandle texture) { m_texture = texture; }
+	void Texture2DUniform::SetTexture(Texture2DHandle texture) 
+	{ 
+		m_texture = texture; 
+		m_hasChanged = true;
+	}
 
 	// PrimitiveUniform ////////////////////////////////////////////////////////////////////////
 
@@ -113,6 +128,11 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SendToShader(AReference<Shader> shader) const
 	{
+		if (!m_hasChanged)
+		{
+			return;
+		}
+
 		AE_CORE_ASSERT(m_data != nullptr, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
@@ -162,6 +182,7 @@ namespace AstralEngine
 				shader->SetMat4(GetName(), *(Mat4*)m_data);
 				break;
 			}
+			m_hasChanged = false;
 		}
 	}
 	
@@ -172,6 +193,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Float, "Assigning incorrect type to uniform %S", GetName());
 		float* data = (float*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector2& value)
@@ -179,6 +201,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Float2, "Assigning incorrect type to uniform %S", GetName());
 		Vector2* data = (Vector2*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector3& value)
@@ -186,6 +209,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Float3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3* data = (Vector3*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector4& value)
@@ -193,6 +217,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Float4, "Assigning incorrect type to uniform %S", GetName());
 		Vector4* data = (Vector4*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Mat3& value)
@@ -200,6 +225,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Mat3, "Assigning incorrect type to uniform %S", GetName());
 		Mat3* data = (Mat3*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Mat4& value)
@@ -207,6 +233,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Mat4, "Assigning incorrect type to uniform %S", GetName());
 		Mat4* data = (Mat4*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(int value)
@@ -214,6 +241,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Int, "Assigning incorrect type to uniform %S", GetName());
 		int* data = (int*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector2Int& value)
@@ -221,6 +249,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Int2, "Assigning incorrect type to uniform %S", GetName());
 		Vector2Int* data = (Vector2Int*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector3Int& value)
@@ -228,6 +257,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3Int* data = (Vector3Int*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(const Vector4Int& value)
@@ -235,6 +265,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3Int* data = (Vector3Int*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 	void PrimitiveUniform::SetValue(bool value)
@@ -242,6 +273,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(m_type == ADataType::Bool, "Assigning incorrect type to uniform %S", GetName());
 		bool* data = (bool*)m_data;
 		*data = value;
+		m_hasChanged = true;
 	}
 
 
@@ -257,10 +289,16 @@ namespace AstralEngine
 
 	void ArrayUniform::SendToShader(AReference<Shader> shader) const
 	{
+		if (!m_hasChanged)
+		{
+			return;
+		}
+
 		AE_CORE_ASSERT(m_arr != nullptr, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
 			shader->SetIntArray(GetName(), (int*)m_arr, m_count);
+			m_hasChanged = false;
 		}
 	}
 
@@ -548,8 +586,10 @@ namespace AstralEngine
 	}
 
 	void Renderer::EndScene()
-	{
-		for(auto& pair : s_sorterOpaque)
+	{		
+		AE_PROFILE_FUNCTION();
+
+		for (auto& pair : s_sorterOpaque)
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
 		}
@@ -565,7 +605,8 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity);
+		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity, 
+			(tintColor.a == 1.0f));
 		if (cmd->IsOpaque())
 		{
 			s_sorterOpaque.AddData(cmd);
@@ -639,7 +680,7 @@ namespace AstralEngine
 	void Renderer::DrawSprite(AEntity e, const SpriteRenderer& sprite)
 	{
 		DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(),
-			Mesh::QuadMesh(), sprite.GetColor(), e, sprite.GetSprite());
+			Mesh::QuadMesh(), sprite.GetColor(), e, sprite.GetColor().a == 1.0f,sprite.GetSprite());
 
 		if (cmd->IsOpaque())
 		{
@@ -662,8 +703,9 @@ namespace AstralEngine
 	{
 		if (mesh.GetMesh() != NullHandle)
 		{
+			AReference<Material> m = ResourceHandler::GetMaterial(mesh.GetMaterial());
 			DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), mesh.GetMaterial(),
-				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), e);
+				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), e, (m->GetColor().a == 1.0f));
 
 			if (cmd->IsOpaque())
 			{

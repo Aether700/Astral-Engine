@@ -143,6 +143,8 @@ namespace AstralEngine
 
 		if (mainCamera != nullptr)
 		{
+			AE_PROFILE_SCOPE("Rendering");
+
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
 			auto spriteGroup = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
 
@@ -166,7 +168,11 @@ namespace AstralEngine
 
 			for (BaseEntity e : meshView)
 			{
-				auto& components = meshView.Get<MeshRenderer, AEntityData>(e);
+				this call to view::Get is what is slowing down the renderer create a RenderableList/Renderable 
+				Component to send data to renderer properly and store everything in a single group so no need 
+				for views
+				
+				auto& components = meshView.Get<MeshRenderer, AEntityData>(e); 
 				AEntityData& data = std::get<AEntityData&>(components);
 
 				if (data.IsActive())

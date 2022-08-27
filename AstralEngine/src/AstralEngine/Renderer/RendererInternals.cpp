@@ -22,8 +22,8 @@ namespace AstralEngine
 	DrawCommand::DrawCommand() { }
 
 	DrawCommand::DrawCommand(const Mat4& transform, MaterialHandle mat, MeshHandle mesh, const Vector4& color, 
-		const AEntity e, Texture2DHandle texture) : m_transform(transform), m_mesh(mesh), m_material(mat), 
-		m_color(color), m_entity(e), m_texture(texture)
+		const AEntity e, bool opaque, Texture2DHandle texture) : m_transform(transform), m_mesh(mesh), 
+		m_material(mat), m_color(color), m_entity(e), m_texture(texture), m_opaque(opaque)
 	{
 		if (m_material == NullHandle)
 		{
@@ -39,10 +39,7 @@ namespace AstralEngine
 	
 	Texture2DHandle DrawCommand::GetTexture() const { return m_texture; }
 
-	bool DrawCommand::IsOpaque() const 
-	{ 
-		return ResourceHandler::GetMaterial(m_material)->GetColor().a == 1.0f && m_color.a == 1.0f; 
-	}
+	bool DrawCommand::IsOpaque() const { return m_opaque; }
 
 	bool DrawCommand::operator==(const DrawCommand& other) const
 	{
@@ -132,9 +129,12 @@ namespace AstralEngine
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
 	{
-		ASinglyLinkedList<MeshHandle> meshesToInstance;
-		AUnorderedMap<MeshHandle, ASinglyLinkedList<DrawCommand*>> commandsToInstance;
-		CollectMeshesToInstance(meshesToInstance);
+		AE_PROFILE_FUNCTION();
+
+		if (IsEmpty())
+		{
+			return;
+		}
 
 		AReference<Material> mat = ResourceHandler::GetMaterial(material);
 		AE_CORE_ASSERT(mat != nullptr, "");
@@ -146,29 +146,16 @@ namespace AstralEngine
 		shader->SetMat4("u_viewProjMatrix", viewProj);
 		mat->SendUniformsToShader();
 
-		for (DrawCommand* cmd : m_drawCommands)
+		for (auto& meshCommandPair : m_commandsToBatch)
 		{
-			if (meshesToInstance.Contains(cmd->GetMesh()))
-			//if (true)
-			{
-				if (commandsToInstance.ContainsKey(cmd->GetMesh()))
-				{
-					commandsToInstance[cmd->GetMesh()].Add(cmd);
-				}
-				else
-				{
-					commandsToInstance.Add(cmd->GetMesh(), ASinglyLinkedList<DrawCommand*>());
-					commandsToInstance[cmd->GetMesh()].Add(cmd);
-				}
-			}
-			else
+			for (DrawCommand* cmd : meshCommandPair.GetElement())
 			{
 				AddToBatching(viewProj, cmd);
 			}
 		}
 
 		RenderBatch(viewProj);
-		RenderInstancing(viewProj, commandsToInstance);
+		RenderInstancing(viewProj, m_commandsToInstance);
 	}
 
 	void DrawDataBuffer::AddDrawCommand(DrawCommand* draw)
@@ -183,6 +170,22 @@ namespace AstralEngine
 		{
 			m_meshUseCounts.Add(draw->GetMesh(), 1);
 		}
+
+		size_t count = m_meshUseCounts[draw->GetMesh()];
+		if (count > s_instancingCutoff)
+		{
+			m_commandsToInstance[draw->GetMesh()].Add(draw);
+		}
+		else if (count == s_instancingCutoff)
+		{
+			m_commandsToInstance.Add(draw->GetMesh(), m_commandsToBatch[draw->GetMesh()]);
+			m_commandsToInstance[draw->GetMesh()].Add(draw);
+			m_commandsToBatch.Remove(draw->GetMesh());
+		}
+		else
+		{
+			m_commandsToBatch[draw->GetMesh()].Add(draw);
+		}
 	}
 
 	void DrawDataBuffer::Clear()
@@ -194,9 +197,13 @@ namespace AstralEngine
 
 		m_drawCommands.Clear();
 		m_meshUseCounts.Clear();
+		m_commandsToBatch.Clear();
+		m_commandsToInstance.Clear();
 		ClearBatching();
 		ClearInstancing();
 	}
+
+	bool DrawDataBuffer::IsEmpty() const { return m_drawCommands.IsEmpty(); }
 
 	void DrawDataBuffer::ReadVertexDataFromMesh(AReference<Mesh>& mesh, VertexData* vertexDataArr,
 		size_t dataOffset, size_t dataCount)
@@ -257,6 +264,7 @@ namespace AstralEngine
 
 	void DrawDataBuffer::AddToBatching(const Mat4& viewProj, DrawCommand* cmd)
 	{
+		AE_PROFILE_FUNCTION();
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
 		AE_CORE_ASSERT(mesh != nullptr, "");
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
@@ -338,6 +346,8 @@ namespace AstralEngine
 
 	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
 	{
+		AE_PROFILE_FUNCTION();
+
 		if (m_hasBatchedData)
 		{
 			BindTextures(m_batchTextureSlots, m_batchTextureSlotIndex);
@@ -366,6 +376,8 @@ namespace AstralEngine
 	void DrawDataBuffer::BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
 		const ADynArr<unsigned int>& indices, size_t dataOffset, size_t drawCallSize)
 	{
+		AE_PROFILE_FUNCTION();
+
 		unsigned int* indexArr = new unsigned int[drawCallSize];
 		BatchedVertexData* vertexDataArr = new BatchedVertexData[drawCallSize];
 
@@ -407,8 +419,10 @@ namespace AstralEngine
 	}
 
 	void DrawDataBuffer::RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle,
-		ASinglyLinkedList<DrawCommand*>>& commandsToInstance)
+		ADynArr<DrawCommand*>>& commandsToInstance)
 	{
+		AE_PROFILE_FUNCTION();
+
 		for (auto& pair : commandsToInstance)
 		{
 			RenderMeshInstance(viewProj, pair.GetKey(), pair.GetElement());
@@ -416,8 +430,10 @@ namespace AstralEngine
 	}
 
 	void DrawDataBuffer::RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, 
-		ASinglyLinkedList<DrawCommand*>& commands)
+		ADynArr<DrawCommand*>& commands)
 	{
+		AE_PROFILE_FUNCTION();
+
 		if (commands.IsEmpty())
 		{
 			return;
@@ -513,6 +529,8 @@ namespace AstralEngine
 		const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData,
 		size_t numInstanceData, size_t dataOffset, size_t drawCallSize)
 	{
+		AE_PROFILE_FUNCTION();
+
 		AE_CORE_ASSERT(drawCallSize > 0, "Invalid draw call size");
 		unsigned int* indexArr = new unsigned int[drawCallSize];
 		VertexData* vertexDataArr = new VertexData[drawCallSize];
@@ -575,6 +593,23 @@ namespace AstralEngine
 		{
 			pair.GetElement().Clear();
 		}
+	}
+
+	bool RenderingDataSorter::IsEmpty() const
+	{
+		if (m_buffers.GetCount() == 0)
+		{
+			return true;
+		}
+
+		for (auto& pair : m_buffers)
+		{
+			if (!pair.GetElement().IsEmpty())
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	RenderingDataSorter::AIterator RenderingDataSorter::begin()

@@ -8,6 +8,7 @@ layout(location = 6) in vec4 a_color;
 layout(location = 7) in float a_textureIndex;
 
 uniform mat4 u_viewProjMatrix;
+uniform vec4 u_matColor;
 
 out vec4 v_color;
 out vec2 v_textureCoords;
@@ -15,7 +16,7 @@ out vec2 v_textureCoords;
 void main()
 {
 	v_textureCoords = a_textureCoords;
-	v_color = a_color;
+	v_color = a_color * u_matColor;
 	gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
 }
 
@@ -28,10 +29,9 @@ layout(location = 0) out vec4 color;
 in vec4 v_color;
 in vec2 v_textureCoords;
 
-uniform vec4 u_matColor;
 uniform sampler2D u_diffuseMap;
 
 void main()
 {
-	color = texture(u_diffuseMap, v_textureCoords) * v_color * u_matColor; 
+	color = texture(u_diffuseMap, v_textureCoords) * v_color; 
 }

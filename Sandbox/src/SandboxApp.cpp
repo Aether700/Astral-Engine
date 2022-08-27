@@ -81,7 +81,7 @@ public:
 				break;
 
 			case Stat::TimePerFrame:
-				AE_INFO("Time Per frame: %f", (float)Renderer::GetStats().timePerFrame);
+				AE_INFO("Time Per frame: %f sec", (float)Renderer::GetStats().timePerFrame);
 				break;
 
 			case Stat::FrameRate:
@@ -135,8 +135,6 @@ public:
 			}
 		}
 	}
-
-	//add texture support to the renderer
 
 private:
 	MaterialHandle m_mat;
@@ -679,8 +677,6 @@ public:
 		*/
 		return false;
 	} 
-	implement rendering records or object similar to send data only if transform was changed
-	then verify if frame rate of the test renderer scene has improved or not
 
 	/*
 	bool OnEvent(AstralEngine::AEvent& e) override
@@ -726,6 +722,7 @@ private:
 		
 		constexpr int gridSize = 3;
 
+		/*
 		// sprites 
 		for (int x = -gridSize; x < gridSize; x++)
 		{
@@ -735,7 +732,9 @@ private:
 				CreateSprite(Vector3(x * 1.25f, y * 1.25f, 3), texture, (x + y) % 3 == 1);
 			}
 		}
+		*/
 
+		// mesh
 		for (int x = -gridSize; x < gridSize; x++)
 		{
 			for (int y = -gridSize; y < gridSize; y++)

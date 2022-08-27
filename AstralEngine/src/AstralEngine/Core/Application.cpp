@@ -85,7 +85,7 @@ namespace AstralEngine
 	void Application::Run()
 	{
 		AE_PROFILE_FUNCTION();
-		while(m_isRunning)
+		while (m_isRunning)
 		{
 			AE_PROFILE_SCOPE("Run loop");
 
@@ -99,8 +99,11 @@ namespace AstralEngine
 				}
 			}
 
-			Input::OnUpdate();
-			m_window->OnUpdate();
+			{
+				AE_PROFILE_SCOPE("Window Update");
+				Input::OnUpdate();
+				m_window->OnUpdate();
+			}
 		}
 	}
 

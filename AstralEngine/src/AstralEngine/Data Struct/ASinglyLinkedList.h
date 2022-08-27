@@ -146,6 +146,10 @@ namespace AstralEngine
 			}
 
 			ptr2->next = ptr1->next;
+			if (ptr1 == m_head)
+			{
+				m_head = ptr1->next;
+			}
 			delete ptr1;
 			m_count--;
 		}

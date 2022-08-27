@@ -31,6 +31,9 @@ namespace AstralEngine
 		const std::string& GetName() const;
 		virtual void SendToShader(AReference<Shader> shader) const = 0;
 
+	protected:
+		mutable bool m_hasChanged;
+
 	private:
 		std::string m_name;
 	};
@@ -207,7 +210,7 @@ namespace AstralEngine
 		unsigned int numDrawCalls = 0;
 		unsigned int numVertices = 0;
 		unsigned int numIndices = 0;
-		double timePerFrame;
+		double timePerFrame; // in seconds
 
 		double GetFrameRate() const
 		{
