@@ -25,7 +25,6 @@ namespace AstralEngine
 	public:
 		Entity CreateEntity()
 		{
-			AE_PROFILE_FUNCTION();
 			if (m_destroyedPos.IsEmpty())
 			{
 				Entity e = (Entity) m_entities.GetCount();
@@ -41,8 +40,8 @@ namespace AstralEngine
 
 		void DeleteEntity(const Entity e)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid entity provided");
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid entity provided");
 			RemoveAllComponents(e);
 
 			//store old entity to recycle it's index and set that entity in the ADynArr to Null
@@ -52,7 +51,7 @@ namespace AstralEngine
 
 		bool IsValid(const Entity& e) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t index = ToIntegral(e);
 			return index < m_entities.GetCount() && m_entities[index] == e;
 		}
@@ -60,8 +59,8 @@ namespace AstralEngine
 		template<typename Component, typename ...Args>
 		Component& EmplaceComponent(const Entity& e, Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
 			Component& comp = Assure<Component>().Emplace(*this, e, std::forward<Args>(args)...);
 			return comp;
 		}
@@ -69,32 +68,32 @@ namespace AstralEngine
 		template<typename Component>
 		void RemoveComponent(const Entity& e)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
 			Assure<Component>().RemoveComponent<Component>(*this, e);
 		}
 
 		template<typename Component>
 		void RemoveComponent(const Entity& e, const Component& comp)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
 			Assure<Component>().RemoveComponent(e, comp);
 		}
 
 		template<typename... Component>
 		bool HasComponent(const Entity& e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid entity provided to registry");
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid entity provided to registry");
 			return (Assure<Component>().Contains(e) && ...);
 		}
 
 		template<typename... Component>
 		decltype(auto) GetComponent(const Entity& e)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
 			
 			if constexpr (sizeof...(Component) == 1)
 			{
@@ -109,8 +108,8 @@ namespace AstralEngine
 		template<typename... Component>
 		decltype(auto) GetComponent(const Entity& e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(IsValid(e), "Invalid Entity provided to Registry"); 
+			
+			AE_ECS_ASSERT(IsValid(e), "Invalid Entity provided to Registry");
 
 			if constexpr(sizeof...(Component) == 1)
 			{
@@ -126,7 +125,7 @@ namespace AstralEngine
 		template<typename... Component>
 		void Clear()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if constexpr(sizeof...(Component) == 0)
 			{
 				ForEach([this](const auto entity) 
@@ -148,7 +147,7 @@ namespace AstralEngine
 		template<typename Func>
 		void ForEach(Func function)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			static_assert(std::is_invocable_v<Func, Entity>);
 			for (Entity e : m_entities)
 			{
@@ -189,7 +188,7 @@ namespace AstralEngine
 		Group<Entity, ExcludeList<Exclude...>, GetList<Get...>, Owned...> GetGroup(GetList<Get...>,
 			ExcludeList<Exclude...> = {})
 		{
-			AE_PROFILE_FUNCTION();
+			
 			static_assert(sizeof...(Owned) + sizeof...(Get) > 0);
 			static_assert(sizeof...(Owned) + sizeof...(Get) + sizeof...(Exclude) > 1);
 
@@ -240,7 +239,7 @@ namespace AstralEngine
 				}
 				else
 				{
-					AE_CORE_ASSERT(std::all_of(m_groups.begin(), m_groups.end(), [size](const auto& data) 
+					AE_ECS_ASSERT(std::all_of(m_groups.begin(), m_groups.end(), [size](const auto& data)
 						{
 							//uses bool as an unsigned int
 							const auto overlapping = (0u + ... + data.owned(TypeInfo<std::decay_t<Owned>>::ID()));
@@ -361,7 +360,7 @@ namespace AstralEngine
 			template<typename... Args>
 			decltype(auto) Emplace(Registry<Entity>& owner, const Entity& e, Args... args)
 			{
-				AE_PROFILE_FUNCTION();
+				
 				auto& comp = Storage<Entity, Component>::Emplace(e, std::forward<Args>(args)...);
 				m_create.CallDelagates(owner, e);
 				return comp;
@@ -415,7 +414,7 @@ namespace AstralEngine
 			template<typename Component>
 			void MaybeValidIf(Registry<Entity>& owner, const Entity e)
 			{
-				AE_PROFILE_FUNCTION();
+				
 				//assert we have decayed types
 				static_assert(std::disjunction_v <std::is_same<Owned, 
 					std::decay_t<Owned>>..., std::is_same<Get, std::decay_t<Get>>..., 
@@ -454,7 +453,7 @@ namespace AstralEngine
 			*/
 			void DiscardIf(Registry<Entity>& owner, const Entity e)
 			{
-				AE_PROFILE_FUNCTION();
+				
 				if constexpr (sizeof...(Owned) == 0)
 				{
 					if (current.Contains(e))
@@ -536,7 +535,7 @@ namespace AstralEngine
 		template<typename Component>
 		PoolHandler<Component>& Assure()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			//check if the component provided already has an index
 			if constexpr(HasIndex<Component>::value)
 			{
@@ -608,7 +607,7 @@ namespace AstralEngine
 		*/
 		void RemoveAllComponents(const Entity e)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (PoolData& data : m_pools)
 			{
 				if (data.pool != nullptr && data.pool->Contains(e))

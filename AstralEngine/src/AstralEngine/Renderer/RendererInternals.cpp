@@ -129,7 +129,7 @@ namespace AstralEngine
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
 		if (IsEmpty())
 		{
@@ -137,10 +137,10 @@ namespace AstralEngine
 		}
 
 		AReference<Material> mat = ResourceHandler::GetMaterial(material);
-		AE_CORE_ASSERT(mat != nullptr, "");
+		AE_RENDER_ASSERT(mat != nullptr, "");
 
 		AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
-		AE_CORE_ASSERT(shader != nullptr, "");
+		AE_RENDER_ASSERT(shader != nullptr, "");
 
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
@@ -160,7 +160,7 @@ namespace AstralEngine
 
 	void DrawDataBuffer::AddDrawCommand(DrawCommand* draw)
 	{
-		AE_CORE_ASSERT(draw->GetMesh() != NullHandle, "");
+		AE_RENDER_ASSERT(draw->GetMesh() != NullHandle, "");
 		m_drawCommands.Add(draw);
 		if (m_meshUseCounts.ContainsKey(draw->GetMesh()))
 		{
@@ -248,7 +248,7 @@ namespace AstralEngine
 		for (size_t i = 0; i < index; i++)
 		{
 			AReference<Texture2D> texture = ResourceHandler::GetTexture2D(arr[i]);
-			AE_CORE_ASSERT(texture != nullptr, "");
+			AE_RENDER_ASSERT(texture != nullptr, "");
 			texture->Bind((unsigned int)i);
 		}
 	}
@@ -264,9 +264,9 @@ namespace AstralEngine
 
 	void DrawDataBuffer::AddToBatching(const Mat4& viewProj, DrawCommand* cmd)
 	{
-		AE_PROFILE_FUNCTION();
+		
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
-		AE_CORE_ASSERT(mesh != nullptr, "");
+		AE_RENDER_ASSERT(mesh != nullptr, "");
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
 		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		const ADynArr<unsigned int>& indices = mesh->GetIndices();
@@ -346,7 +346,7 @@ namespace AstralEngine
 
 	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
 		if (m_hasBatchedData)
 		{
@@ -376,7 +376,7 @@ namespace AstralEngine
 	void DrawDataBuffer::BatchRenderMeshSection(BatchedVertexData* vertexData, size_t numVertex,
 		const ADynArr<unsigned int>& indices, size_t dataOffset, size_t drawCallSize)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
 		unsigned int* indexArr = new unsigned int[drawCallSize];
 		BatchedVertexData* vertexDataArr = new BatchedVertexData[drawCallSize];
@@ -384,7 +384,7 @@ namespace AstralEngine
 		for (size_t i = 0; i < drawCallSize; i++)
 		{
 			unsigned int currIndex = indices[i + dataOffset];
-			AE_CORE_ASSERT(currIndex < numVertex, "Index out of bounds");
+			AE_RENDER_ASSERT(currIndex < numVertex, "Index out of bounds");
 			vertexDataArr[i] = vertexData[currIndex];
 			indexArr[i] = i;
 		}
@@ -421,7 +421,7 @@ namespace AstralEngine
 	void DrawDataBuffer::RenderInstancing(const Mat4& viewProj, AUnorderedMap<MeshHandle,
 		ADynArr<DrawCommand*>>& commandsToInstance)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
 		for (auto& pair : commandsToInstance)
 		{
@@ -432,7 +432,7 @@ namespace AstralEngine
 	void DrawDataBuffer::RenderMeshInstance(const Mat4& viewProj, MeshHandle mesh, 
 		ADynArr<DrawCommand*>& commands)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
 		if (commands.IsEmpty())
 		{
@@ -441,7 +441,7 @@ namespace AstralEngine
 
 		AReference<Mesh> meshToInstance = ResourceHandler::GetMesh(mesh);
 
-		AE_CORE_ASSERT(meshToInstance != nullptr, "");
+		AE_RENDER_ASSERT(meshToInstance != nullptr, "");
 
 		size_t numVertices = meshToInstance->GetPositions().GetCount();
 		VertexData* vertexDataArr = new VertexData[numVertices];
@@ -529,16 +529,16 @@ namespace AstralEngine
 		const ADynArr<unsigned int>& indices, InstanceVertexData* instanceData,
 		size_t numInstanceData, size_t dataOffset, size_t drawCallSize)
 	{
-		AE_PROFILE_FUNCTION();
+		
 
-		AE_CORE_ASSERT(drawCallSize > 0, "Invalid draw call size");
+		AE_RENDER_ASSERT(drawCallSize > 0, "Invalid draw call size");
 		unsigned int* indexArr = new unsigned int[drawCallSize];
 		VertexData* vertexDataArr = new VertexData[drawCallSize];
 
 		for (size_t i = 0; i < drawCallSize; i++)
 		{
 			unsigned int currIndex = indices[i + dataOffset];
-			AE_CORE_ASSERT(currIndex < numVertex, "Index out of bounds");
+			AE_RENDER_ASSERT(currIndex < numVertex, "Index out of bounds");
 			vertexDataArr[i] = vertexData[currIndex];
 			indexArr[i] = i;
 		}
@@ -577,7 +577,7 @@ namespace AstralEngine
 
 	void RenderingDataSorter::AddData(DrawCommand* data)
 	{
-		AE_CORE_ASSERT(data != nullptr, "");
+		AE_RENDER_ASSERT(data != nullptr, "");
 		MaterialHandle mat = data->GetMaterial();
 		if (!m_buffers.ContainsKey(mat))
 		{

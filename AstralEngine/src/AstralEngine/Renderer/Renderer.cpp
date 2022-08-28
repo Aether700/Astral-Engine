@@ -28,7 +28,7 @@ namespace AstralEngine
 			return;
 		}
 
-		AE_CORE_ASSERT(m_texture != NullHandle, "Trying to send invalid uniform to shader");
+		AE_RENDER_ASSERT(m_texture != NullHandle, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
 			AReference<Texture2D>& texture = ResourceHandler::GetTexture2D(m_texture);
@@ -133,7 +133,7 @@ namespace AstralEngine
 			return;
 		}
 
-		AE_CORE_ASSERT(m_data != nullptr, "Trying to send invalid uniform to shader");
+		AE_RENDER_ASSERT(m_data != nullptr, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
 			switch (m_type)
@@ -190,7 +190,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(float value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Float, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Float, "Assigning incorrect type to uniform %S", GetName());
 		float* data = (float*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -198,7 +198,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector2& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Float2, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Float2, "Assigning incorrect type to uniform %S", GetName());
 		Vector2* data = (Vector2*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -206,7 +206,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector3& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Float3, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Float3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3* data = (Vector3*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -214,7 +214,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector4& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Float4, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Float4, "Assigning incorrect type to uniform %S", GetName());
 		Vector4* data = (Vector4*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -222,7 +222,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Mat3& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Mat3, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Mat3, "Assigning incorrect type to uniform %S", GetName());
 		Mat3* data = (Mat3*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -230,7 +230,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Mat4& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Mat4, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Mat4, "Assigning incorrect type to uniform %S", GetName());
 		Mat4* data = (Mat4*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -238,7 +238,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(int value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Int, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Int, "Assigning incorrect type to uniform %S", GetName());
 		int* data = (int*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -246,7 +246,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector2Int& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Int2, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Int2, "Assigning incorrect type to uniform %S", GetName());
 		Vector2Int* data = (Vector2Int*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -254,7 +254,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector3Int& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3Int* data = (Vector3Int*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -262,7 +262,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(const Vector4Int& value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Int3, "Assigning incorrect type to uniform %S", GetName());
 		Vector3Int* data = (Vector3Int*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -270,7 +270,7 @@ namespace AstralEngine
 
 	void PrimitiveUniform::SetValue(bool value)
 	{
-		AE_CORE_ASSERT(m_type == ADataType::Bool, "Assigning incorrect type to uniform %S", GetName());
+		AE_RENDER_ASSERT(m_type == ADataType::Bool, "Assigning incorrect type to uniform %S", GetName());
 		bool* data = (bool*)m_data;
 		*data = value;
 		m_hasChanged = true;
@@ -294,7 +294,7 @@ namespace AstralEngine
 			return;
 		}
 
-		AE_CORE_ASSERT(m_arr != nullptr, "Trying to send invalid uniform to shader");
+		AE_RENDER_ASSERT(m_arr != nullptr, "Trying to send invalid uniform to shader");
 		if (shader != nullptr)
 		{
 			shader->SetIntArray(GetName(), (int*)m_arr, m_count);
@@ -415,7 +415,7 @@ namespace AstralEngine
 		else
 		{
 			PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
-			AE_CORE_ASSERT(primitive != nullptr, "");
+			AE_RENDER_ASSERT(primitive != nullptr, "");
 			primitive->SetValue(color);
 		}
 	}
@@ -552,7 +552,7 @@ namespace AstralEngine
 
 	void Renderer::Init()
 	{
-		AE_PROFILE_FUNCTION();
+		
 		RenderCommand::Init();
 	}
 
@@ -587,7 +587,7 @@ namespace AstralEngine
 
 	void Renderer::EndScene()
 	{		
-		AE_PROFILE_FUNCTION();
+		
 
 		for (auto& pair : s_sorterOpaque)
 		{

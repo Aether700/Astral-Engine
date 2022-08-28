@@ -41,7 +41,7 @@ namespace AstralEngine
 
 		~ASinglyLinkedList() 
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Clear();
 			delete m_dummy;
 		}
@@ -50,14 +50,14 @@ namespace AstralEngine
 
 		void Add(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(std::forward<T>(element));
 			AddNode(newNode);
 		}
 
 		void Add(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(element);
 			AddNode(newNode);
 		}
@@ -74,21 +74,21 @@ namespace AstralEngine
 
 		void AddLast(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(std::forward<T>(element));
 			AddNodeLast(newNode);
 		}
 
 		void AddLast(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(element);
 			AddNodeLast(newNode);
 		}
 
 		int Find(const T& element) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* ptr = m_head;
 
 			for (size_t i = 0; i < m_count; i++)
@@ -105,21 +105,21 @@ namespace AstralEngine
 
 		void Insert(T&& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(std::forward<T>(element));
 			InsertNode(newNode, index);
 		}
 
 		void Insert(const T& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node(element);
 			InsertNode(newNode, index);
 		}
 
 		void Remove(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			if (IsEmpty())
 			{
@@ -156,7 +156,7 @@ namespace AstralEngine
 
 		void RemoveAt(size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if(index == 0)
 			{
 				Node* ptr = m_head;
@@ -177,7 +177,7 @@ namespace AstralEngine
 		
 		void Clear() 
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* ptr = m_head;
 			Node* ptr2 = m_head;
 
@@ -312,7 +312,7 @@ namespace AstralEngine
 
 		Node* GetNode(size_t index) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* ptr = m_head;
 
 			for (size_t i = 0; i < index && ptr != m_dummy; i++)
@@ -345,14 +345,14 @@ namespace AstralEngine
 
 		ASinglyLinkedListIterator<T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_currNode = m_currNode->next;
 			return *this;
 		}
 
 		ASinglyLinkedListIterator<T>& operator+=(size_t i)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			for (size_t j = 0; j < i; j++)
 			{
@@ -364,7 +364,7 @@ namespace AstralEngine
 
 		ASinglyLinkedListIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ASinglyLinkedListIterator<T> it = *this;
 			this->operator++();
 			return it;
@@ -414,7 +414,7 @@ namespace AstralEngine
 
 		ASinglyLinkedListConstIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ASinglyLinkedListConstIterator<T> it = *this;
 			this->operator++();
 			return it;

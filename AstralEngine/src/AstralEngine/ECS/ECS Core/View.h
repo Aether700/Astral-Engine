@@ -103,8 +103,7 @@ namespace AstralEngine
 		template<typename... Comp>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e), "Entity provided not contained within View");
+			AE_ECS_ASSERT(Contains(e), "Entity provided not contained within View");
 
 			//if no Comp type
 			if constexpr(sizeof... (Comp) == 0)
@@ -259,7 +258,6 @@ namespace AstralEngine
 		*/
 		const ASparseSet<Entity>& GetCanditate() const
 		{
-			AE_PROFILE_FUNCTION();
 			//returns the Storage containing the least entities casted as a SparseSet
 			return *(std::min)({ static_cast<const ASparseSet<Entity>*>(std::get<PoolType<Component>*>(m_pools))... },
 				[](const auto* lhs, const auto* rhs)
@@ -290,7 +288,6 @@ namespace AstralEngine
 		template<typename Comp, typename Other>
 		decltype(auto) Get(ComponentIterator<Comp> it, PoolType<Other>* cPool, const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
 			/* if the types are the same return "*it" otherwise return "cPool->get(e)"
 
 			  the constexpr is there to allow the compiler to optimize even further the code.
@@ -312,7 +309,6 @@ namespace AstralEngine
 		template<typename Comp, typename Func, typename... Type>
 		void Traverse(Func function, TypeList<Type...>) const
 		{
-			AE_PROFILE_FUNCTION();
 			/* given a list of types B1 to BN, if sizeof(B) == 0 will return std::false_type
 			   otherwise, will return the first Bi in B1 to BN such that bool(Bi::value) == true or,
 			   if no such Bi was found, will return BN
@@ -405,9 +401,8 @@ namespace AstralEngine
 		template<typename Comp = Component>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
 			static_assert(std::is_same_v<Comp, Component>);
-			AE_CORE_ASSERT(Contains(e), "Entity provided not contained in View");
+			AE_ECS_ASSERT(Contains(e), "Entity provided not contained in View");
 			return m_pool->Get(e);
 		}
 

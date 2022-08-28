@@ -22,8 +22,6 @@ namespace AstralEngine
 
 		AHashSetIterator<T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
-
 			m_currIt++;
 
 			if (m_currIt == m_bucketArr[m_currBucket].end())

@@ -172,13 +172,13 @@ namespace AstralEngine
 
 		bool operator!=(const AReference<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 
 		bool operator!=(const AWeakRef<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 

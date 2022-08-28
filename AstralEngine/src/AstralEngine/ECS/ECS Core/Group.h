@@ -59,8 +59,7 @@ namespace AstralEngine
 		template<typename... Comp>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e), "");
+			AE_ECS_ASSERT(Contains(e), "");
 
 			if constexpr (sizeof... (Comp) == 1)
 			{
@@ -88,7 +87,7 @@ namespace AstralEngine
 		template<typename Func, typename... Weak>
 		void Traverse(Func function, TypeList<Weak...>) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (const Entity e : *m_handler)
 			{
 				if constexpr (std::is_invocable_v < Func, decltype(Get<Weak>({}))... > )
@@ -165,15 +164,15 @@ namespace AstralEngine
 
 		bool Contains(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return std::get<0>(m_pools)->Contains(e) && (std::get<0>(m_pools)->GetIndex(e) < (*m_length));
 		}
 
 		template<typename... Comp>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e), "Entity provided not contained within Group");
+			
+			AE_ECS_ASSERT(Contains(e), "Entity provided not contained within Group");
 
 			if constexpr(sizeof...(Comp) == 1)
 			{
@@ -189,7 +188,7 @@ namespace AstralEngine
 		template<typename Func>
 		void ForEach(Func function) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			using OwnedTypeList = TypeListCat<std::conditional_t<std::is_empty_v<Owned>, TypeList<>, TypeList<Owned>>...>;
 			using ComponentTypeList = TypeListCat<std::conditional_t<std::is_empty_v<Component>,
 				TypeList<>, TypeList<Component>>...>;

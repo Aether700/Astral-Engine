@@ -32,7 +32,7 @@ namespace AstralEngine
 
 		AUnorderedMapIterator<K, T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			
 			m_currIt++;
 
@@ -114,7 +114,7 @@ namespace AstralEngine
 
 		AUnorderedMapConstIterator<K, T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			AUnorderedMapConstIterator<K, T> it = *this;
 			this->operator--();
 			return it;
@@ -184,7 +184,7 @@ namespace AstralEngine
 		AUnorderedMap(AUnorderedMap<K, T>&& other) noexcept : m_bucketCount(other.m_bucketCount),
 			m_equalsFunc(other.m_equalsFunc), m_compressFunc(other.m_compressFunc), m_count(other.m_count)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_bucketArr = other.m_bucketArr;
 
 			other.m_bucketArr = nullptr;
@@ -205,8 +205,8 @@ namespace AstralEngine
 
 		void Add(const K& key, const T& element)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!ContainsKey(key), "Key Already contained");
+			
+			AE_DATASTRUCT_ASSERT(!ContainsKey(key), "Key Already contained");
 			size_t bucketIndex = GetBucketIndex(key);
 
 			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, element);
@@ -222,7 +222,7 @@ namespace AstralEngine
 
 		void Remove(const K& key)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (!ContainsKey(key))
 			{
 				return;
@@ -266,7 +266,7 @@ namespace AstralEngine
 
 		void Clear()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (size_t i = 0; i < m_bucketCount; i++)
 			{
 				m_bucketArr[i].Clear();
@@ -275,7 +275,7 @@ namespace AstralEngine
 
 		T& operator[](const K& key)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t bucketIndex = GetBucketIndex(key);
 
 			//try to find existing key
@@ -312,8 +312,8 @@ namespace AstralEngine
 
 		const T& operator[](const K& key) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
+			
+			AE_DATASTRUCT_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
 			size_t bucketIndex = GetBucketIndex(key);
 
 			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
@@ -430,7 +430,7 @@ namespace AstralEngine
 
 		AUnorderedMap<K, T>& operator=(AUnorderedMap<K, T>&& other)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if(other == *this)
 			{
 				return *this;
@@ -477,7 +477,7 @@ namespace AstralEngine
 
 		int GetBucketIndex(const K& key) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return m_compressFunc((int)m_hash(key), m_bucketCount);
 		}
 

@@ -14,8 +14,6 @@ namespace AstralEngine
 		//negative priority goes first then positive => (-1, 0, 1) =>
 		void Enqueue(T& element, int priority = 0) //
 		{
-			AE_PROFILE_FUNCTION();
-
 			QueueNode newNode = QueueNode(element , priority);
 			int i = 0;
 			for (QueueNode n : m_list)
@@ -32,9 +30,9 @@ namespace AstralEngine
 
 		T& Dequeue()
 		{
-			AE_PROFILE_FUNCTION();
+			
 
-			AE_CORE_ASSERT(!m_list.IsEmpty(), "Cannot Dequeue an Empty APriorityQueue");
+			AE_DATASTRUCT_ASSERT(!m_list.IsEmpty(), "Cannot Dequeue an Empty APriorityQueue");
 			T element = std::move(m_list[m_list.GetCount() - 1]);
 			m_list.Remove(m_list.GetCount() - 1);
 
