@@ -279,13 +279,13 @@ namespace AstralEngine
 			const Vector4& color = { 1, 1, 1, 1 });
 
 		//sprite
-		static void DrawSprite(AEntity e, const SpriteRenderer& sprite);
+		static void DrawSprite(const Transform& transform, const SpriteRenderer& sprite);
 
 		static void DrawSprite(const Vector3& position, float rotation, const Vector2& size,
 			const SpriteRenderer& sprite);
 
 		//mesh
-		static void DrawMesh(AEntity e, const MeshRenderer& mesh);
+		static void DrawMesh(const Transform& transform, const MeshRenderer& mesh);
 
 		//UI
 		static void DrawUIElement(const UIElement& element, const Vector4& color);

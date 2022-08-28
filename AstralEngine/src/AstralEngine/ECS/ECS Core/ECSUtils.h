@@ -59,13 +59,20 @@ namespace AstralEngine
 	template<typename...>
 	struct TypeList {};
 
+	template<typename... Type>
+	struct ExcludeList : public TypeList<Type...> { };
+
+	template<typename... Type>
+	struct GetList : public TypeList<Type...> { };
+
+	
 	//variable used to increase readability
 	template<typename... Type>
-	const TypeList<Type...> get = {};
+	constexpr GetList<Type...> get = {};
 
 	//variable used to increase readability
 	template<typename... Type>
-	const TypeList<Type...> exclude = {};
+	constexpr ExcludeList<Type...> exclude = {};
 
 	/*Concatenation of different types into a single list
 	  not defined on purpose to force use of specializations

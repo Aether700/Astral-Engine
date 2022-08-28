@@ -224,6 +224,7 @@
     <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Component.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat3.cpp" />

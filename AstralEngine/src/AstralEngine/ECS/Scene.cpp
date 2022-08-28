@@ -146,42 +146,17 @@ namespace AstralEngine
 			AE_PROFILE_SCOPE("Rendering");
 
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
-			auto spriteGroup = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
+			
+			auto group = m_registry.GetGroup<AEntityData, Transform, RenderData>();
 
-			for (BaseEntity e : spriteGroup)
+			for (BaseEntity e : group)
 			{
-				auto& components = spriteGroup.Get<SpriteRenderer, AEntityData>(e);
-				AEntityData& data = std::get<AEntityData&>(components);
-
+				auto [data, transform, render] = group.Get<AEntityData, Transform, RenderData>(e);
 				if (data.IsActive())
 				{
-					SpriteRenderer& sprite = std::get<SpriteRenderer&>(components);
-					if (sprite.IsActive())
+					if (render.IsActive())
 					{
-						AEntity ent = AEntity(e, this);
-						Renderer::DrawSprite(ent, sprite);
-					}
-				}
-			}
-
-			auto meshView = m_registry.GetView<Transform, MeshRenderer, AEntityData>();
-
-			for (BaseEntity e : meshView)
-			{
-				this call to view::Get is what is slowing down the renderer create a RenderableList/Renderable 
-				Component to send data to renderer properly and store everything in a single group so no need 
-				for views
-				
-				auto& components = meshView.Get<MeshRenderer, AEntityData>(e); 
-				AEntityData& data = std::get<AEntityData&>(components);
-
-				if (data.IsActive())
-				{
-					MeshRenderer& mesh = std::get<MeshRenderer&>(components);
-					if (mesh.IsActive())
-					{
-						AEntity ent = AEntity(e, this);
-						Renderer::DrawMesh(ent, mesh);
+						render.SendToRenderer(transform);
 					}
 				}
 			}

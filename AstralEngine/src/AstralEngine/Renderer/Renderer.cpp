@@ -677,10 +677,10 @@ namespace AstralEngine
 		DrawQuad(position, Quaternion::EulerToQuaternion(0, 0, rotation), Vector3(scale.x, scale.y, 1), color);
 	}
 
-	void Renderer::DrawSprite(AEntity e, const SpriteRenderer& sprite)
+	void Renderer::DrawSprite(const Transform& transform, const SpriteRenderer& sprite)
 	{
-		DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), Material::SpriteMat(),
-			Mesh::QuadMesh(), sprite.GetColor(), e, sprite.GetColor().a == 1.0f,sprite.GetSprite());
+		DrawCommand* cmd = new DrawCommand(transform.GetTransformMatrix(), Material::SpriteMat(),
+			Mesh::QuadMesh(), sprite.GetColor(), transform.GetAEntity(), sprite.GetColor().a == 1.0f, sprite.GetSprite());
 
 		if (cmd->IsOpaque())
 		{
@@ -699,13 +699,13 @@ namespace AstralEngine
 	}
 
 
-	void Renderer::DrawMesh(AEntity e, const MeshRenderer& mesh)
+	void Renderer::DrawMesh(const Transform& transform, const MeshRenderer& mesh)
 	{
 		if (mesh.GetMesh() != NullHandle)
 		{
 			AReference<Material> m = ResourceHandler::GetMaterial(mesh.GetMaterial());
-			DrawCommand* cmd = new DrawCommand(e.GetTransform().GetTransformMatrix(), mesh.GetMaterial(),
-				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), e, (m->GetColor().a == 1.0f));
+			DrawCommand* cmd = new DrawCommand(transform.GetTransformMatrix(), mesh.GetMaterial(),
+				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), transform.GetAEntity(), (m->GetColor().a == 1.0f));
 
 			if (cmd->IsOpaque())
 			{

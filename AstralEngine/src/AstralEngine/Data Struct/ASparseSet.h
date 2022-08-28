@@ -42,10 +42,10 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		void Add(T& element)
+		void Add(T&& element)
 		{
 			CheckSize();
-			m_arr[m_count] = element;
+			m_arr[m_count] = std::move(element);
 			m_count++;
 		}
 
@@ -74,7 +74,7 @@ namespace AstralEngine
 
 			for (size_t i = index; i < m_count; i++)
 			{
-				m_arr[i] = m_arr[i + 1];
+				m_arr[i] = std::move(m_arr[i + 1]);
 			}
 			m_count--;
 		}
@@ -419,8 +419,9 @@ namespace AstralEngine
 
 		size_t GetIndex(const T e) const
 		{
+			AE_PROFILE_FUNCTION();
 			AE_CORE_ASSERT(Contains(e), "Trying to get index of an object not in the sparse set");
-			return (size_t)m_sparse[Page(e)][Offset(e)];
+			return size_t(m_sparse[Page(e)][Offset(e)]);
 		}
 
 		void Swap(const T lhs, const T rhs)

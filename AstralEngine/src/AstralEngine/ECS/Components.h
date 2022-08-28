@@ -8,8 +8,16 @@
 
 namespace AstralEngine
 {
-	class SpriteRenderer : public ToggleableComponent
+	// Base class used to
+	class Renderable : public ToggleableComponent
 	{
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const = 0;
+	};
+
+	class SpriteRenderer : public Renderable
+	{
+		friend class AEntityRenderableComponentPair<SpriteRenderer>;
 	public:
 		SpriteRenderer();
 		SpriteRenderer(float r, float g, float b, float a);
@@ -28,13 +36,17 @@ namespace AstralEngine
 		bool operator==(const SpriteRenderer& other) const;
 		bool operator!=(const SpriteRenderer& other) const;
 
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const override;
+
 	private:
 		Vector4 m_color;
 		Texture2DHandle m_sprite;
 	};
 
-	class MeshRenderer : public ToggleableComponent
+	class MeshRenderer : public Renderable
 	{
+		friend class AEntityRenderableComponentPair<MeshRenderer>;
 	public:
 		MeshRenderer();
 		MeshRenderer(MeshHandle mesh, const Vector4& color = {1, 1, 1, 1});
@@ -49,13 +61,16 @@ namespace AstralEngine
 		bool operator==(const MeshRenderer& other) const;
 		bool operator!=(const MeshRenderer& other) const;
 
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const override;
+
 	private:
 		Vector4 m_color;
 		MeshHandle m_mesh;
 		MaterialHandle m_material;
 	};
 
-	class Transform
+	class Transform : public AEntityLinkedComponent
 	{
 	public:
 		Transform();
@@ -128,58 +143,47 @@ namespace AstralEngine
 		}
 	};
 
-	class NativeScript : public CallbackComponent
+	class NativeScript : public CallbackComponent, AEntityLinkedComponent
 	{
 		friend class AEntity;
 	public:
-
-		NativeScript() : CallbackComponent(false) { }
+		NativeScript() : CallbackComponent(false) { SetActive(true); }
 
 		template<typename... Component>
 		bool HasComponent() const
 		{
-			return entity.HasComponent<Component...>();
+			return GetAEntity().HasComponent<Component...>();
 		}
 
 		template<typename... Component>
 		decltype(auto) GetComponent()
 		{
-			return entity.GetComponent<Component...>();
+			return GetAEntity().GetComponent<Component...>();
 		}
 
 		template<typename... Component>
 		decltype(auto) GetComponent() const
 		{
-			return entity.GetComponent<Component...>();
+			return GetAEntity().GetComponent<Component...>();
 		}
 
-		Transform& GetTransform() { return entity.GetTransform(); }
-		const Transform& GetTransform() const { return entity.GetTransform(); }
+		Transform& GetTransform() { return GetAEntity().GetTransform(); }
+		const Transform& GetTransform() const { return GetAEntity().GetTransform(); }
 
-		const std::string& GetName() const { return entity.GetName(); }
-		void SetName(const std::string& name) { entity.SetName(name); }
+		const std::string& GetName() const { return GetAEntity().GetName(); }
+		void SetName(const std::string& name) { GetAEntity().SetName(name); }
 
 		void Destroy(AEntity& e) const { e.Destroy(); }
-		AEntity CreateAEntity() const { return entity.m_scene->CreateAEntity(); }
+		AEntity CreateAEntity() const { return GetAEntity().m_scene->CreateAEntity(); }
 
 		bool operator==(const NativeScript& other) const
 		{
-			return entity == other.entity;
+			return GetAEntity() == other.GetAEntity();
 		}
 
 		bool operator!=(const NativeScript& other) const
 		{
 			return !(*this == other);
-		}
-
-	protected:
-		AEntity entity;
-
-	private:
-		void SetEntity(AEntity& e)
-		{
-			entity = e;
-			m_isActive = true;
 		}
 	};
 }

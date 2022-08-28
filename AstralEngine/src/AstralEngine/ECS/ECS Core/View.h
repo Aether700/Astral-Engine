@@ -22,7 +22,7 @@ namespace AstralEngine
 	  the view will only return entities that have all of the components listed and none of the excluded ones
 	*/
 	template<typename Entity, typename... Exclude, typename... Component>
-	class View<Entity, TypeList<Exclude...>, Component...>
+	class View<Entity, ExcludeList<Exclude...>, Component...>
 	{
 		friend class Registry<Entity>;
 
@@ -157,7 +157,7 @@ namespace AstralEngine
 
 		class ViewIterator
 		{
-			friend class View<Entity, TypeList<Exclude...>, Component...>;
+			friend class View<Entity, ExcludeList<Exclude...>, Component...>;
 
 		public:
 			using Ptr = const Entity*;
@@ -222,8 +222,8 @@ namespace AstralEngine
 			}
 
 		private:
-			ViewIterator(const ASparseSet<Entity>& candidate, UncheckedType other, FilterType ignore, UnderlyingIterator it)
-				: m_view(&candidate), m_unchecked(other), m_filter(ignore), m_it(it)
+			ViewIterator(const ASparseSet<Entity>& candidate, UncheckedType other, FilterType ignore, 
+				UnderlyingIterator it) : m_view(&candidate), m_unchecked(other), m_filter(ignore), m_it(it)
 			{
 				//if starting iterator is not valid and we are not at 
 				//the end of the current view increment the iterator
@@ -271,7 +271,7 @@ namespace AstralEngine
 		UncheckedType Unchecked(const ASparseSet<Entity>& view) const
 		{
 			size_t pos = 0;
-			UncheckedType other;
+			UncheckedType other = {};
 			/*fill the array of the UncheckedType with all the PoolTypes of the 
 			  Components not refering to the view provided and return the UncheckedType array
 			*/
@@ -330,8 +330,10 @@ namespace AstralEngine
 				{
 					auto curr = it++;
 
-					//return true if every Component pool contains the current entity AND if every exclude pool does not
-					if (((std::is_same_v<Comp, Component> || std::get<PoolType<Component>*>(m_pools)->Contains(entity)) && ...)
+					//return true if every Component pool contains the current entity AND if every exclude 
+					//pool does not
+					if (((std::is_same_v<Comp, Component> 
+						|| std::get<PoolType<Component>*>(m_pools)->Contains(entity)) && ...)
 						&& (!std::get<PoolType<Exclude>*>(m_pools)->Contains(entity) && ...))
 					{
 						//if Func can be invoked with the provided types as arguments (the decltype(Get<Type>())...)
@@ -352,7 +354,8 @@ namespace AstralEngine
 				//do same loop as above but call the function with different arguments
 				for (const auto entity : static_cast<const ASparseSet<Entity>&>(*std::get<PoolType<Comp>*>(m_pools)))
 				{
-					if (((std::is_same_v<Comp, Component> || std::get<PoolType<Component>*>(m_pools)->Contains(entity)) && ...)
+					if (((std::is_same_v<Comp, Component> 
+						|| std::get<PoolType<Component>*>(m_pools)->Contains(entity)) && ...)
 						&& (!std::get<PoolType<Exclude>*>(m_pools)->Contains(entity) && ...))
 					{
 						if constexpr (std::is_invocable_v < Func, decltype(Get<Type>({}))... > )
@@ -377,7 +380,7 @@ namespace AstralEngine
 	  the view will only return entities that have the component specified
 	*/
 	template<typename Entity, typename Component>
-	class View<Entity, TypeList<>, Component>
+	class View<Entity, GetList<>, Component>
 	{
 		friend class Registry<Entity>;
 

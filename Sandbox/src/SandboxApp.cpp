@@ -69,23 +69,23 @@ public:
 			switch (m_stat)
 			{
 			case Stat::DrawCalls:
-				AE_INFO("Num Draw Calls: %d", Renderer::GetStats().numDrawCalls);
+				std::cout << "Num Draw Calls: " << Renderer::GetStats().numDrawCalls << "\n";
 				break;
 
 			case Stat::NumIndices:
-				AE_INFO("Num Indices: %d", Renderer::GetStats().numIndices);
+				std::cout << "Num Indices: " << Renderer::GetStats().numIndices << "\n";
 				break;
 
 			case Stat::NumVertices:
-				AE_INFO("Num Vertices: %d", Renderer::GetStats().numVertices);
+				std::cout << "Num Vertices: " << Renderer::GetStats().numVertices << "\n";
 				break;
 
 			case Stat::TimePerFrame:
-				AE_INFO("Time Per frame: %f sec", (float)Renderer::GetStats().timePerFrame);
+				std::cout << "Time Per frame: " << (float)Renderer::GetStats().timePerFrame << " secs\n";
 				break;
 
 			case Stat::FrameRate:
-				AE_INFO("Frame Rate: %f", (float)Renderer::GetStats().GetFrameRate());
+				std::cout << "Frame Rate: " << (float)Renderer::GetStats().GetFrameRate() << "\n";
 				break;
 			}
 		}
@@ -722,7 +722,6 @@ private:
 		
 		constexpr int gridSize = 3;
 
-		/*
 		// sprites 
 		for (int x = -gridSize; x < gridSize; x++)
 		{
@@ -732,7 +731,6 @@ private:
 				CreateSprite(Vector3(x * 1.25f, y * 1.25f, 3), texture, (x + y) % 3 == 1);
 			}
 		}
-		*/
 
 		// mesh
 		for (int x = -gridSize; x < gridSize; x++)
@@ -742,6 +740,8 @@ private:
 				CreateMesh(Vector3(x * 1.25f, y * 1.25f, 0), Quaternion::Identity(), cube, mat, (x + y) % 3 == 0);
 			}
 		}
+		/*
+		*/
 	}
 
 	AstralEngine::AReference<AstralEngine::OrthographicCameraController> m_cameraController;

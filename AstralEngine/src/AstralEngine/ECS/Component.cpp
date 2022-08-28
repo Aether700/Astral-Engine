@@ -112,6 +112,11 @@ namespace AstralEngine
 		return !(*this == other);
 	}
 
+	void SpriteRenderer::SendDataToRenderer(const Transform& transform) const
+	{
+		Renderer::DrawSprite(transform, *this);
+	}
+
 	// MeshRenderer ///////////////////////////////////////////////////
 
 	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_color(1, 1, 1, 1), m_material(Material::DefaultMat()) { }
@@ -135,6 +140,11 @@ namespace AstralEngine
 	bool MeshRenderer::operator!=(const MeshRenderer& other) const
 	{
 		return !(*this == other);
+	}
+
+	void MeshRenderer::SendDataToRenderer(const Transform& transform) const
+	{
+		Renderer::DrawMesh(transform, *this);
 	}
 
 

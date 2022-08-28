@@ -169,7 +169,7 @@ namespace AstralEngine
 		}
 
 		template<typename... Component, typename... Exclude>
-		View<Entity, TypeList<Exclude...>, Component...> GetView(TypeList<Exclude...> = {})
+		View<Entity, ExcludeList<Exclude...>, Component...> GetView(ExcludeList<Exclude...> = {})
 		{
 			static_assert(sizeof... (Component) > 0);
 			//decay simplifies the type ex: (T[])& would map to T*
@@ -177,7 +177,7 @@ namespace AstralEngine
 		}
 
 		template<typename... Component, typename... Exclude>
-		View<Entity, TypeList<Exclude...>, Component...> GetView(TypeList<Exclude...> = {})const
+		View<Entity, ExcludeList<Exclude...>, Component...> GetView(ExcludeList<Exclude...> = {})const
 		{
 			//assert at least one of the components is const
 			static_assert(std::conjunction_v<std::is_const_v<Component>...>);
@@ -186,15 +186,18 @@ namespace AstralEngine
 		}
 
 		template<typename... Owned, typename... Get, typename... Exclude>
-		Group<Entity, TypeList<Exclude...>, TypeList<Get...>, Owned...> GetGroup(TypeList<Get...>, 
-			TypeList<Exclude...> = {})
+		Group<Entity, ExcludeList<Exclude...>, GetList<Get...>, Owned...> GetGroup(GetList<Get...>,
+			ExcludeList<Exclude...> = {})
 		{
 			AE_PROFILE_FUNCTION();
 			static_assert(sizeof...(Owned) + sizeof...(Get) > 0);
 			static_assert(sizeof...(Owned) + sizeof...(Get) + sizeof...(Exclude) > 1);
 
-			using HandlerType = GroupHandler<TypeList<Exclude...>, TypeList<std::decay_t<Get>...>, std::decay_t<Owned>...>;
-			const auto pools = std::forward_as_tuple(Assure<std::decay_t<Owned>>()..., Assure<std::decay_t<Get>>()...);
+			using HandlerType = GroupHandler<ExcludeList<std::remove_const_t<Exclude>...>, 
+				GetList<std::remove_const_t<Get>...>, std::remove_const_t<Owned>...>;
+
+			const auto pools = std::forward_as_tuple(Assure<std::decay_t<Owned>>()..., 
+				Assure<std::decay_t<Get>>()...);
 			constexpr auto size = sizeof...(Owned) + sizeof...(Get) + sizeof...(Exclude);
 			HandlerType* handler = nullptr;
 
@@ -219,8 +222,9 @@ namespace AstralEngine
 			if (handler == nullptr)
 			{
 				//create the group data and add it to the ADynArr of GroupData
-				AUniqueRef<void, void(void*)> ptr = AUniqueRef<void, void(void*)>(new HandlerType{}, [](void* instance) 
-					{ delete static_cast<HandlerType*>(instance); });
+				
+				AUniqueRef<void, void(void*)> ptr = AUniqueRef<void, void(void*)>(new HandlerType{}, 
+					[](void* instance) { delete static_cast<HandlerType*>(instance); });
 				
 				GroupData candidate = GroupData(size, std::move(ptr),
 					[](const unsigned int type) { return ((type == TypeInfo<std::decay_t<Owned>>::ID()) || ...); },
@@ -281,7 +285,7 @@ namespace AstralEngine
 				if constexpr(sizeof...(Owned) == 0)
 				{
 					//add the entities owned & observed to the handler's sparse set
-					for (const auto entity : GetView<Owned..., Get...>(TypeList<Exclude...>{}))
+					for (const auto entity : GetView<Owned..., Get...>(ExcludeList<Exclude...>{}))
 					{
 						handler->current.Add(entity);
 					}
@@ -307,15 +311,15 @@ namespace AstralEngine
 			else
 			{
 				//the group owns components so we create an owning group
-				return { handler->current, std::get<PoolHandler<std::decay_t<Owned>>&>(pools)..., 
+				return { handler->current, std::get<PoolHandler<std::decay_t<Owned>>&>(pools)...,
 					std::get<PoolHandler<std::decay_t<Get>>&>(pools)... };
 			}
 		}
 
 		//const version of the GetGroup function
 		template<typename... Owned, typename... Get, typename... Exclude>
-		Group<Entity, TypeList<Exclude...>, TypeList<Get...>, Owned...> GetGroup(TypeList<Get...>, 
-			TypeList<Exclude...> = {}) const 
+		Group<Entity, ExcludeList<Exclude...>, GetList<Get...>, Owned...> GetGroup(GetList<Get...>,
+			ExcludeList<Exclude...> = {}) const
 		{
 			static_assert(std::conjunction_v<std::is_const<Owned>..., std::is_const<Get>...>);
 			return const_cast<Registry<Entity>*>(this)->GetGroup<Owned...>(get<Get...>, exclude<Exclude...>);
@@ -323,14 +327,14 @@ namespace AstralEngine
 
 		//GetGroup function but without observed components (only owned)
 		template<typename... Owned, typename... Exclude>
-		Group<Entity, TypeList<Exclude...>, TypeList<>, Owned...> GetGroup(TypeList<Exclude...> = {})
+		Group<Entity, ExcludeList<Exclude...>, GetList<>, Owned...> GetGroup(ExcludeList<Exclude...> = {})
 		{
-			return GetGroup<Owned...>(TypeList<>{}, exclude<Exclude...>);
+			return GetGroup<Owned...>(GetList<>{}, exclude<Exclude...>);
 		}
 
 		//const version of the GetGroup function with only owned components
 		template<typename... Owned, typename... Exclude>
-		Group<Entity, TypeList<Exclude...>, TypeList<>, Owned...> GetGroup(TypeList<Exclude...> = {}) const
+		Group<Entity, TypeList<Exclude...>, TypeList<>, Owned...> GetGroup(ExcludeList<Exclude...> = {}) const
 		{
 			static_assert(std::conjunction_v<std::is_const<Owned>...>);
 			return const_cast<Registry<Entity>*>(this)->GetGroup<Owned...>(exclude<Exclude...>);
@@ -393,7 +397,7 @@ namespace AstralEngine
 		struct GroupHandler;
 
 		template<typename... Exclude, typename... Get, typename... Owned>
-		struct GroupHandler<TypeList<Exclude...>, TypeList<Get...>, Owned...>
+		struct GroupHandler<ExcludeList<Exclude...>, GetList<Get...>, Owned...>
 		{
 			static_assert(std::conjunction_v<std::is_same<Owned, std::decay_t<Owned>>..., 
 				std::is_same<Get, std::decay_t<Get>>..., std::is_same<Exclude, std::decay_t<Exclude>>...>);
@@ -487,7 +491,8 @@ namespace AstralEngine
 				: size(s), handler(ptr), owned(ownedFunc), get(getFunc), exclude(excludeFunc)
 			{ }
 
-			GroupData(GroupData&& other) : size(other.size), owned(other.owned), get(other.get), exclude(other.exclude)
+			GroupData(GroupData&& other) : size(other.size), owned(other.owned), 
+				get(other.get), exclude(other.exclude)
 			{
 				handler = std::move(other.handler);
 				other.owned = nullptr;

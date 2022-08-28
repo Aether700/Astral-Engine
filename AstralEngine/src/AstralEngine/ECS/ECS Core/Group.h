@@ -15,7 +15,7 @@ namespace AstralEngine
 
 	//non-owning group, should avoid usage since it uses more memory (other groups do not)
 	template<typename Entity, typename... Exclude, typename... Component>
-	class Group<Entity, TypeList<Exclude...>, TypeList<Component...>>
+	class Group<Entity, ExcludeList<Exclude...>, GetList<Component...>>
 	{
 		friend class Registry<Entity>;
 
@@ -82,7 +82,6 @@ namespace AstralEngine
 		}
 
 	private:
-		
 		Group(ASparseSet<Entity>& ref, Storage<Entity, std::remove_const_t<Component>>&... gpool)
 			: m_handler(&ref), m_pools(gpool...) { }
 
@@ -113,7 +112,7 @@ namespace AstralEngine
 	  Owned are the components owned by the group while Component are the components observed by the group
 	*/
 	template<typename Entity, typename... Exclude, typename... Component, typename... Owned>
-	class Group<Entity, TypeList<Exclude...>, TypeList<Component...>, Owned...>
+	class Group<Entity, ExcludeList<Exclude...>, GetList<Component...>, Owned...>
 	{
 		friend class Registry<Entity>;
 
@@ -166,6 +165,7 @@ namespace AstralEngine
 
 		bool Contains(const Entity e) const
 		{
+			AE_PROFILE_FUNCTION();
 			return std::get<0>(m_pools)->Contains(e) && (std::get<0>(m_pools)->GetIndex(e) < (*m_length));
 		}
 
@@ -198,7 +198,6 @@ namespace AstralEngine
 		}
 
 	private:
-
 		Group(const size_t& extend, Storage<Entity, std::remove_const_t<Owned>>&... ownedPool,
 			Storage<Entity, std::remove_const_t<Component>>&... componentPool)
 			: m_pools{ &ownedPool..., &componentPool... }, m_length(&extend) {	}
@@ -234,8 +233,9 @@ namespace AstralEngine
 			}
 		}
 
-		const std::tuple<PoolType<Owned>*..., PoolType<Component>...> m_pools;
+		const std::tuple<PoolType<Owned>*..., PoolType<Component>*...> m_pools;
 		const size_t* m_length;
+		const size_t* m_super;
 	};
 
 

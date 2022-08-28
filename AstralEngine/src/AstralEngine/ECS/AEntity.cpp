@@ -4,6 +4,7 @@
 
 namespace AstralEngine
 {
+	// AEntity /////////////////////////////////////////////////////////////////////////////////
 	const std::string& AEntity::GetName() const { return GetComponent<AEntityData>().GetName(); }
 	void AEntity::SetName(const std::string& newName) { GetComponent<AEntityData>().SetName(newName); }
 
@@ -12,4 +13,7 @@ namespace AstralEngine
 
 	bool AEntity::IsActive() const	{ return GetComponent<AEntityData>().IsActive(); }
 	void AEntity::SetActive(bool val) { GetComponent<AEntityData>().SetActive(val); }
+
+	// AEntityLinkedComponent /////////////////////////////////////////////////////////
+	AEntity AEntityLinkedComponent::GetAEntity() const { return m_entity; }
 }

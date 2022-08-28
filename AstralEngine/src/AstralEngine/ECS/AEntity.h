@@ -7,6 +7,7 @@
 namespace AstralEngine
 {
 	class Transform;
+	class AEntityLinkedComponent;
 
 	class AEntity
 	{
@@ -21,10 +22,14 @@ namespace AstralEngine
 		template<typename Component, typename... Args>
 		Component& EmplaceComponent(Args... args)
 		{
+			Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+			if constexpr (std::is_base_of_v<AEntityLinkedComponent, Component>)
+			{
+				comp.m_entity = *this;
+			}
+
 			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
 			{
-				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
-				
 				if (HasComponent<CallbackList>())
 				{
 					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
@@ -35,19 +40,16 @@ namespace AstralEngine
 					list.AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 
-				if constexpr (std::is_base_of_v<NativeScript, Component>)
-				{
-					comp.SetEntity(*this);
-				}
-
 				comp.OnCreate();
-
-				return comp;
 			}
-			else
+			else if constexpr (std::is_base_of_v<Renderable, Component>)
 			{
-				return m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+				AE_CORE_ASSERT(!HasComponent<RenderData>(), 
+					"Engine does not support having multiple renderable components on the same entity");
+				EmplaceComponent<RenderData>(new AEntityRenderableComponentPair<Component>(*this));
 			}
+
+			return comp;
 		}
 
 		template<typename Component>
@@ -173,4 +175,14 @@ namespace AstralEngine
 	};
 	
 	inline constexpr AEntity NullEntity = AEntity();
+
+	class AEntityLinkedComponent
+	{
+		friend class AEntity;
+	public:
+		AEntity GetAEntity() const;
+
+	private:
+		AEntity m_entity;
+	};
 }
