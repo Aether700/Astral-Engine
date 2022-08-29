@@ -89,6 +89,7 @@ namespace AstralEngine
 		m_batchBuffer->Bind();
 		m_batchBuffer->SetLayout({ 
 			{ ADataType::Float3, "position" },
+			{ ADataType::Float3, "normal" },
 			{ ADataType::Float2, "textureCoords" },
 			{ ADataType::Mat4, "transform" },
 			{ ADataType::Float4, "color" },
@@ -113,15 +114,17 @@ namespace AstralEngine
 		m_instancingBuffer->Bind();
 		m_instancingBuffer->SetLayout({
 			{ ADataType::Float3, "position" },
+			{ ADataType::Float3, "normal" },
 			{ ADataType::Float2, "textureCoords" }
 			});
 		
+
 		m_instancingArr->Bind();
 		m_instancingArr->SetLayout({
 			{ ADataType::Mat4, "transform", false, 1 },
 			{ ADataType::Float4, "color", false, 1 },
 			{ ADataType::Float, "textureIndex", false, 1 }
-			}, 2);
+			}, 3);
 
 		m_instancingTextureSlots = new Texture2DHandle[s_numTextureSlots];
 		m_instancingTextureSlotIndex = 0;
@@ -209,11 +212,13 @@ namespace AstralEngine
 		size_t dataOffset, size_t dataCount)
 	{
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		const ADynArr<Vector3>& normals = mesh->GetNormals();
 		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		for (size_t i = 0; i < positions.GetCount(); i++)
 		{
 			vertexDataArr[dataOffset + i].position = positions[i];
 			vertexDataArr[dataOffset + i].textureCoords = textureCoords[i];
+			vertexDataArr[dataOffset + i].normal = normals[i];
 		}
 	}
 
@@ -268,6 +273,7 @@ namespace AstralEngine
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
 		AE_RENDER_ASSERT(mesh != nullptr, "");
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
+		const ADynArr<Vector3>& normals = mesh->GetNormals();
 		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		const ADynArr<unsigned int>& indices = mesh->GetIndices();
 		int textureIndex = GetTextureIndex(m_batchTextureSlots, m_batchTextureSlotIndex, cmd->GetTexture());
@@ -290,6 +296,7 @@ namespace AstralEngine
 			for (size_t i = 0; i < numVertices; i++)
 			{
 				vertexDataArr[i].vertex.position = positions[i];
+				vertexDataArr[i].vertex.normal = normals[i];
 				vertexDataArr[i].vertex.textureCoords = textureCoords[i];
 				vertexDataArr[i].instance.color = cmd->GetColor();
 				vertexDataArr[i].instance.transform = cmd->GetTransform();
@@ -328,6 +335,7 @@ namespace AstralEngine
 		for (size_t i = 0; i < positions.GetCount(); i++)
 		{
 			m_batchDataArr[m_batchDataArrIndex + i].vertex.position = positions[i];
+			m_batchDataArr[m_batchDataArrIndex + i].vertex.normal = normals[i];
 			m_batchDataArr[m_batchDataArrIndex + i].vertex.textureCoords = textureCoords[i];
 			m_batchDataArr[m_batchDataArrIndex + i].instance.transform = cmd->GetTransform();
 			m_batchDataArr[m_batchDataArrIndex + i].instance.color = cmd->GetColor();

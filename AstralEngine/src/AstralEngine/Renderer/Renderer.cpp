@@ -8,6 +8,26 @@
 
 namespace AstralEngine
 {
+	// LightData ///////////////////////////////////////////
+	LightData::LightData() { }
+	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
+		m_ambientIntensity(0.05f), m_diffuseIntensity(0.45f), m_specularIntensity(1.0f) { }
+
+	const Vector3& LightData::GetPosition() const { return m_position; }
+	const Vector3& LightData::GetColor() const { return m_color; }
+	const Vector3& LightData::GetAmbientColor() const { return m_color * m_ambientIntensity; }
+	const Vector3& LightData::GetDiffuseColor() const { return m_color * m_diffuseIntensity; }
+	const Vector3& LightData::GetSpecularColor() const { return m_color * m_specularIntensity; }
+	float LightData::GetAmbientIntensity() const { return m_ambientIntensity; }
+	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
+	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
+
+	void LightData::SetPosition(const Vector3& position) { m_position = position; }
+	void LightData::SetColor(const Vector3& color) { m_color = color; }
+	void LightData::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
+	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
+	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
+
 	// MaterialUniform /////////////////////////////////
 	MaterialUniform::MaterialUniform() : m_hasChanged(true) { }
 	MaterialUniform::MaterialUniform(const std::string& name) : m_name(name), m_hasChanged(true) { }
@@ -303,11 +323,41 @@ namespace AstralEngine
 	}
 
 
+	// LightUniform /////////////////////////////////////////////////////////
+	LightUniform::LightUniform() { }
+	LightUniform::LightUniform(const std::string& name, LightHandle light) 
+		: MaterialUniform(name), m_light(light) { }
+
+	void LightUniform::SetLight(LightHandle light)
+	{
+		m_light = light;
+		m_hasChanged = true;
+	}
+
+	void LightUniform::SendToShader(AReference<Shader> shader) const
+	{
+		if (!m_hasChanged)
+		{
+			return;
+		}
+
+		if (Renderer::LightsModified() && shader != nullptr)
+		{
+			AE_RENDER_ASSERT(Renderer::LightIsValid(m_light), "Trying to send invalid uniform to shader");
+			LightData& data = Renderer::GetLightData(m_light);
+			shader->SetFloat3("u_lightPos", data.GetPosition());
+			shader->SetFloat3("u_lightAmbient", data.GetAmbientColor());
+			shader->SetFloat3("u_lightDiffuse", data.GetDiffuseColor());
+			shader->SetFloat3("u_lightSpecular", data.GetSpecularColor());
+			m_hasChanged = false;
+		}
+	}
 
 	// Material //////////////////////////////////////////////////////////////////////////
 
 	const char* Material::s_diffuseMapName = "u_diffuseMap";
 	const char* Material::s_specularMapName = "u_specularMap";
+	const char* Material::s_camPosName = "u_camPos";
 	const char* Material::s_colorName = "u_matColor";
 
 	Material::Material() : m_shader(Shader::DefaultShader()) { }
@@ -364,12 +414,25 @@ namespace AstralEngine
 
 	Texture2DHandle Material::GetSpecularMap() const 
 	{ 
-		AE_CORE_ERROR("not implemented yet");
-		return NullHandle; 
+		Texture2DUniform* specular = FindTextureByName(s_specularMapName);
+		if (specular == nullptr)
+		{
+			return NullHandle;
+		}
+		return specular->GetTexture();
 	}
-	void Material::SetSpecularMap(Texture2DHandle specular) 
-	{ 
-		AE_CORE_ERROR("not implemented yet");
+
+	void Material::SetSpecularMap(Texture2DHandle specular)
+	{
+		Texture2DUniform* specularUniform = FindTextureByName(s_specularMapName);
+		if (specularUniform == nullptr)
+		{
+			AddUniform(new Texture2DUniform(s_specularMapName, specular));
+		}
+		else
+		{
+			specularUniform->SetTexture(specular);
+		}
 	}
 
 	Texture2DHandle Material::GetTexture(const std::string& name) const
@@ -464,6 +527,12 @@ namespace AstralEngine
 			{
 				if (!m_textures.Contains((Texture2DUniform*)uniform))
 				{
+					// auto update camPos
+					if (uniform->GetName() == s_camPosName)
+					{
+						PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
+						primitive->SetValue(Renderer::GetCamPos());
+					}
 					uniform->SendToShader(shader);
 				}
 			}
@@ -478,6 +547,11 @@ namespace AstralEngine
 			defaultMat = ResourceHandler::CreateMaterial({ 1.0f, 1.0f, 1.0f, 1.0f });
 			AReference<Material> material = ResourceHandler::GetMaterial(defaultMat);
 			material->SetDiffuseMap(Texture2D::WhiteTexture());
+			material->SetSpecularMap(Texture2D::WhiteTexture());
+
+			// temp
+			material->AddUniform(new LightUniform("light", 0));
+			material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
 		}
 		return defaultMat;
 	}
@@ -544,15 +618,20 @@ namespace AstralEngine
 
 	//Renderer///////////////////////////////////////////////////
 
+	RendererStatistics Renderer::s_stats;
+
+	Mat4 Renderer::s_viewProjMatrix;
+	Vector3 Renderer::s_camPos;
+	double Renderer::s_frameStartTime;
+
 	RenderingDataSorter Renderer::s_sorterOpaque;
 	RenderingDataSorter Renderer::s_sorterTransparent;
-	RendererStatistics Renderer::s_stats;
-	Mat4 Renderer::s_viewProjMatrix;
-	double Renderer::s_frameStartTime;
+	
+	ADynArr<LightData> Renderer::s_lightData;
+	bool Renderer::s_lightsModified;
 
 	void Renderer::Init()
 	{
-		
 		RenderCommand::Init();
 	}
 
@@ -560,10 +639,47 @@ namespace AstralEngine
 	{
 	}
 
+	const RendererStatistics& Renderer::GetStats()
+	{
+		return s_stats;
+	}
+
+	void Renderer::ResetStats()
+	{
+		s_stats.Reset();
+	}
+
+	Vector3 Renderer::GetCamPos()
+	{
+		return s_camPos;
+	}
+
+	bool Renderer::LightsModified() { return s_lightsModified; }
+
+	bool Renderer::LightIsValid(LightHandle light) { return light < s_lightData.GetCount(); }
+
+	LightHandle Renderer::AddLight(LightData& light)
+	{
+		LightHandle handle = s_lightData.GetCount();
+		s_lightData.Add(std::move(light));
+		s_lightsModified = true;
+		return handle;
+	}
+	
+	const ADynArr<LightData>& Renderer::GetLightData() { return s_lightData; }
+
+	LightData& Renderer::GetLightData(LightHandle light)
+	{ 
+		AE_RENDER_ASSERT(LightIsValid(light), "Trying to retrieve invalid light data");
+		s_lightsModified = true;
+		return s_lightData[light];
+	}
+
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
 		s_frameStartTime = Time::GetTime();
 		s_viewProjMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
+		s_camPos = Vector3::Zero();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
 	}
@@ -573,6 +689,7 @@ namespace AstralEngine
 		s_frameStartTime = Time::GetTime();
 		//view is the identity
 		s_viewProjMatrix = cam.GetProjectionMatrix();
+		s_camPos = Vector3::Zero();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
 	}
@@ -581,14 +698,13 @@ namespace AstralEngine
 	{
 		s_frameStartTime = Time::GetTime();
 		s_viewProjMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
+		s_camPos = transform.GetLocalPosition();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
 	}
 
 	void Renderer::EndScene()
 	{		
-		
-
 		for (auto& pair : s_sorterOpaque)
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
@@ -600,6 +716,7 @@ namespace AstralEngine
 		}
 		
 		s_stats.timePerFrame = Time::GetTime() - s_frameStartTime;
+		s_lightsModified = false;
 	}
 	
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
@@ -723,15 +840,5 @@ namespace AstralEngine
 		Vector3 worldPos = (Vector3)element.GetWorldPos();
 		DrawQuad(worldPos, Quaternion::Identity(), Vector3(element.GetWorldWidth(),
 			element.GetWorldHeight(), 1), color);
-	}
-
-	const RendererStatistics& Renderer::GetStats()
-	{
-		return s_stats;
-	}
-
-	void Renderer::ResetStats()
-	{
-		s_stats.Reset();
 	}
 }

@@ -151,6 +151,8 @@ public:
 	void OnUpdate() override
 	{
 		auto& t = GetTransform();
+		Vector3 pos = t.GetLocalPosition();
+		Vector3 camPos = Renderer::GetCamPos();
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
 		{
@@ -200,6 +202,18 @@ public:
 			auto euler = t.GetRotation().EulerAngles();
 			euler.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
 			t.SetRotation(euler);
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
+		{
+			Quaternion rotation = Quaternion::AngleAxisToQuaternion(-m_rotSpeed * Time::GetDeltaTime(), t.Right());
+			t.SetRotation(rotation * t.GetRotation());
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
+		{
+			Quaternion rotation = Quaternion::AngleAxisToQuaternion(m_rotSpeed * Time::GetDeltaTime(), t.Right());
+			t.SetRotation(rotation * t.GetRotation());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
@@ -358,6 +372,15 @@ void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> in
 	ib->SetData(indices, sizeof(indices) / sizeof(unsigned int));
 }
 
+MaterialHandle CreateLightCubeMat()
+{
+	MaterialHandle mat = ResourceHandler::CreateMaterial();
+	auto& material = ResourceHandler::GetMaterial(mat);
+	material->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	material->SetShader(ResourceHandler::LoadShader("assets/shaders/DebugCubeLightShader.glsl"));
+	return mat;
+}
+
 MeshHandle CreateCubeMesh()
 {
 	ADynArr<Vector3> positions = 
@@ -509,13 +532,18 @@ MeshHandle CreateCubeMesh()
 	return ResourceHandler::CreateMesh(positions, textureCoords, normals, indices);
 }
 
-MaterialHandle CreateMaterial()
+MaterialHandle CreateMaterial(LightHandle light)
 {
 	MaterialHandle mat = ResourceHandler::CreateMaterial();
 	auto& material = ResourceHandler::GetMaterial(mat);
 	material->SetColor({ 1, 1, 1, 1 });
 	material->SetDiffuseMap(ResourceHandler::LoadTexture2D("assets/textures/crateDiffuse.png"));
-	return mat;
+	material->SetSpecularMap(ResourceHandler::LoadTexture2D("assets/textures/crateSpecular.png"));
+	material->AddUniform(new LightUniform("light", light));
+	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
+	//return mat;
+	return Material::DefaultMat(); // temp
+	specular reflection not working properly
 }
 
 //layer/////////////////////////////////
@@ -560,15 +588,24 @@ public:
 		m_entity = m_scene->CreateAEntity();
 		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		//m_entity.EmplaceComponent<Controller>();
-		
-		/*
 		MeshHandle cube = CreateCubeMesh();
-		MaterialHandle mat = CreateMaterial();
+		MaterialHandle lightMat = CreateLightCubeMat();
+
+		auto e = m_scene->CreateAEntity();
+		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
+		e.GetTransform().SetLocalPosition({ 3.0f, 5.0f, -2.0f });
+		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
+		Light& l = e.EmplaceComponent<Light>();
 		
+		MaterialHandle mat = CreateMaterial(l.GetHandle());
+
 		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
 		
-		auto e = m_scene->CreateAEntity();
+		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
+		
+
+		/*
 		e.GetTransform().SetLocalPosition({ 2, 0, 0 });
 		e.EmplaceComponent<MatToggler>();
 
@@ -602,7 +639,7 @@ public:
 		cam.EmplaceComponent<RendererStatViewer>();
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
-		SetupRendererTestScene();
+		//SetupRendererTestScene();
 	}
 
 	void OnUpdate() override
@@ -712,10 +749,10 @@ private:
 		}
 	}
 
-	void SetupRendererTestScene()
+	void SetupRendererTestScene(LightHandle light)
 	{
 		MeshHandle cube = CreateCubeMesh();
-		MaterialHandle mat = CreateMaterial();
+		MaterialHandle mat = CreateMaterial(light);
 
 		Texture2DHandle t = ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png");
 		Texture2DHandle t2 = ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png");

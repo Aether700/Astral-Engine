@@ -119,11 +119,9 @@ namespace AstralEngine
 
 	// MeshRenderer ///////////////////////////////////////////////////
 
-	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_color(1, 1, 1, 1), m_material(Material::DefaultMat()) { }
-	MeshRenderer::MeshRenderer(MeshHandle mesh, const Vector4& color) : m_mesh(mesh),
-		m_color(1, 1, 1, 1), m_material(Material::DefaultMat()) { }
-	MeshRenderer::MeshRenderer(MeshHandle mesh, MaterialHandle mat, const Vector4& color) : m_mesh(mesh), 
-		m_color(1, 1, 1, 1), m_material(mat) { }
+	MeshRenderer::MeshRenderer() : m_mesh(NullHandle), m_material(Material::DefaultMat()) { }
+	MeshRenderer::MeshRenderer(MeshHandle mesh) : m_mesh(mesh), m_material(Material::DefaultMat()) { }
+	MeshRenderer::MeshRenderer(MeshHandle mesh, MaterialHandle mat) : m_mesh(mesh), m_material(mat) { }
 
 	MeshHandle MeshRenderer::GetMesh() const { return m_mesh; }
 	void MeshRenderer::SetMesh(MeshHandle mesh) { m_mesh = mesh; }
@@ -134,7 +132,7 @@ namespace AstralEngine
 
 	bool MeshRenderer::operator==(const MeshRenderer& other) const
 	{
-		return m_mesh == other.m_mesh && m_color == other.m_color;
+		return m_mesh == other.m_mesh;
 	}
 
 	bool MeshRenderer::operator!=(const MeshRenderer& other) const
@@ -295,5 +293,40 @@ namespace AstralEngine
 	bool Transform::operator!=(const Transform& other) const
 	{
 		return !(*this == other);
+	}
+
+	// Light ///////////////////////////////////////////////////
+	Light::Light() : m_light(NullHandle) { }
+	
+	void Light::OnCreate()
+	{
+		if (!Renderer::LightIsValid(m_light))
+		{
+			LightData data = LightData(GetTransform().GetLocalPosition(), { 1.0f, 1.0f, 1.0f });
+			m_light = Renderer::AddLight(data);
+		}
+	}
+
+	LightHandle Light::GetHandle() const { return m_light; }
+
+	const Vector3& Light::GetColor() const
+	{
+		LightData& data = RetrieveLightData();
+		return data.GetColor();
+	}
+
+	void Light::SetColor(const Vector3& color)
+	{
+		LightData& data = RetrieveLightData();
+		data.SetColor(color);
+	}
+
+	bool Light::operator==(const Light& other) const { return m_light == other.m_light; }
+	bool Light::operator!=(const Light& other) const { return !(*this == other); }
+
+	LightData& Light::RetrieveLightData() const
+	{
+		AE_CORE_ASSERT(Renderer::LightIsValid(m_light), "");
+		return Renderer::GetLightData(m_light);
 	}
 }

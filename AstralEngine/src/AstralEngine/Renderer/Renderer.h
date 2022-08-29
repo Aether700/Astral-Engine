@@ -9,16 +9,48 @@
 #include "OrthographicCamera.h"
 #include "AstralEngine/ECS/SceneCamera.h"
 #include "AstralEngine/ECS/AEntity.h"
-#include "AstralEngine/ECS/Components.h"
 
 namespace AstralEngine
 {
-	class DirectionalLight;
-	class PointLight;
+	typedef size_t LightHandle;
+
 	class Mesh;
 	class UIElement;
 
 	class RenderingDataSorter;
+	class SpriteRenderer;
+	class MeshRenderer;
+
+	class LightData
+	{
+	public:
+		LightData();
+		LightData(const Vector3& position, const Vector3& color = { 1.0f, 1.0f, 1.0f });
+
+		const Vector3& GetPosition() const;
+		const Vector3& GetColor() const;
+		const Vector3& GetAmbientColor() const;
+		const Vector3& GetDiffuseColor() const;
+		const Vector3& GetSpecularColor() const;
+		float GetAmbientIntensity() const;
+		float GetDiffuseIntensity() const;
+		float GetSpecularIntensity() const;
+
+		void SetPosition(const Vector3& position);
+		void SetColor(const Vector3& color);
+		void SetAmbientIntensity(float intensity);
+		void SetDiffuseIntensity(float intensity);
+		void SetSpecularIntensity(float intensity);
+
+
+
+	private:
+		Vector3 m_position;
+		Vector3 m_color;
+		float m_ambientIntensity;
+		float m_diffuseIntensity;
+		float m_specularIntensity;
+	};
 
 	// represents a uniform inside a material
 	class MaterialUniform
@@ -116,6 +148,20 @@ namespace AstralEngine
 		unsigned int m_count;
 	};
 
+	class LightUniform : public MaterialUniform
+	{
+	public:
+		LightUniform();
+		LightUniform(const std::string& name, LightHandle light);
+
+		void SetLight(LightHandle light);
+
+		virtual void SendToShader(AReference<Shader> shader) const override;
+
+	private:
+		LightHandle m_light;
+	};
+
 	class Material
 	{
 	public:
@@ -153,6 +199,7 @@ namespace AstralEngine
 	private:
 		static const char* s_diffuseMapName;
 		static const char* s_specularMapName;
+		static const char* s_camPosName;
 		static const char* s_colorName;
 
 		MaterialUniform* FindUniformByName(const std::string& name) const;
@@ -172,6 +219,7 @@ namespace AstralEngine
 	struct VertexData
 	{
 		Vector3 position;
+		Vector3 normal;
 		Vector2 textureCoords;
 		//Vector3 normal;
 		//float textureIndex;
@@ -234,6 +282,15 @@ namespace AstralEngine
 
 		static const RendererStatistics& GetStats();
 		static void ResetStats();
+		static Vector3 GetCamPos();
+
+		// Lights
+		static bool LightsModified();
+		static bool LightIsValid(LightHandle light);
+
+		static LightHandle AddLight(LightData& light);
+		static const ADynArr<LightData>& GetLightData();
+		static LightData& GetLightData(LightHandle light);
 
 		//use to start renderering and stop rendering
 		static void BeginScene(const OrthographicCamera& cam);
@@ -292,10 +349,15 @@ namespace AstralEngine
 
 	private:
 		static RendererStatistics s_stats;
+		
 		static RenderingDataSorter s_sorterOpaque;
 		static RenderingDataSorter s_sorterTransparent;
+		
 		static Mat4 s_viewProjMatrix;
+		static Vector3 s_camPos;
 		static double s_frameStartTime;
 
+		static ADynArr<LightData> s_lightData;
+		static bool s_lightsModified;
 	};
 }

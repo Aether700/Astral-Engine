@@ -11,7 +11,7 @@ namespace AstralEngine
 
 	class AEntity
 	{
-		friend class NativeScript;
+		friend class AEntityLinkedComponent;
 	public:
 		constexpr AEntity() : m_id(Null), m_scene(nullptr) { }
 
@@ -181,6 +181,43 @@ namespace AstralEngine
 		friend class AEntity;
 	public:
 		AEntity GetAEntity() const;
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return GetAEntity().HasComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		Transform& GetTransform() { return m_entity.GetTransform(); }
+		const Transform& GetTransform() const { return m_entity.GetTransform(); }
+
+		const std::string& GetName() const { return m_entity.GetName(); }
+		void SetName(const std::string& name) { m_entity.SetName(name); }
+
+		void Destroy(AEntity& e) const { e.Destroy(); }
+		AEntity CreateAEntity() const { return m_entity.m_scene->CreateAEntity(); }
+
+		bool operator==(const AEntityLinkedComponent& other) const
+		{
+			return m_entity == other.m_entity;
+		}
+
+		bool operator!=(const AEntityLinkedComponent& other) const
+		{
+			return !(*this == other);
+		}
 
 	private:
 		AEntity m_entity;

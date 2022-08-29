@@ -5,6 +5,7 @@
 #include "SceneCamera.h"
 #include "CoreComponents.h"
 #include "AEntity.h"
+#include "AstralEngine/Renderer/Renderer.h"
 
 namespace AstralEngine
 {
@@ -49,8 +50,8 @@ namespace AstralEngine
 		friend class AEntityRenderableComponentPair<MeshRenderer>;
 	public:
 		MeshRenderer();
-		MeshRenderer(MeshHandle mesh, const Vector4& color = {1, 1, 1, 1});
-		MeshRenderer(MeshHandle mesh, MaterialHandle mat, const Vector4& color = {1, 1, 1, 1});
+		MeshRenderer(MeshHandle mesh);
+		MeshRenderer(MeshHandle mesh, MaterialHandle mat);
 
 		MeshHandle GetMesh() const;
 		void SetMesh(MeshHandle mesh);
@@ -65,7 +66,6 @@ namespace AstralEngine
 		virtual void SendDataToRenderer(const Transform& transform) const override;
 
 	private:
-		Vector4 m_color;
 		MeshHandle m_mesh;
 		MaterialHandle m_material;
 	};
@@ -143,39 +143,12 @@ namespace AstralEngine
 		}
 	};
 
-	class NativeScript : public CallbackComponent, AEntityLinkedComponent
+	class NativeScript : public CallbackComponent, public AEntityLinkedComponent
 	{
 		friend class AEntity;
 	public:
 		NativeScript() : CallbackComponent(false) { SetActive(true); }
-
-		template<typename... Component>
-		bool HasComponent() const
-		{
-			return GetAEntity().HasComponent<Component...>();
-		}
-
-		template<typename... Component>
-		decltype(auto) GetComponent()
-		{
-			return GetAEntity().GetComponent<Component...>();
-		}
-
-		template<typename... Component>
-		decltype(auto) GetComponent() const
-		{
-			return GetAEntity().GetComponent<Component...>();
-		}
-
-		Transform& GetTransform() { return GetAEntity().GetTransform(); }
-		const Transform& GetTransform() const { return GetAEntity().GetTransform(); }
-
-		const std::string& GetName() const { return GetAEntity().GetName(); }
-		void SetName(const std::string& name) { GetAEntity().SetName(name); }
-
-		void Destroy(AEntity& e) const { e.Destroy(); }
-		AEntity CreateAEntity() const { return GetAEntity().m_scene->CreateAEntity(); }
-
+		
 		bool operator==(const NativeScript& other) const
 		{
 			return GetAEntity() == other.GetAEntity();
@@ -185,5 +158,24 @@ namespace AstralEngine
 		{
 			return !(*this == other);
 		}
+	};
+
+	class Light : public AEntityLinkedComponent, public CallbackComponent
+	{
+	public:
+		Light();
+		void OnCreate() override;
+
+		LightHandle GetHandle() const;
+		const Vector3& GetColor() const;
+		void SetColor(const Vector3& color);
+
+		bool operator==(const Light& other) const;
+		bool operator!=(const Light& other) const;
+
+	private:
+		LightData& RetrieveLightData() const;
+
+		LightHandle m_light;
 	};
 }
