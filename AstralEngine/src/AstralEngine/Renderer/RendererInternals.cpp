@@ -132,8 +132,6 @@ namespace AstralEngine
 
 	void DrawDataBuffer::Draw(const Mat4& viewProj, MaterialHandle material)
 	{
-		
-
 		if (IsEmpty())
 		{
 			return;
@@ -148,6 +146,16 @@ namespace AstralEngine
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
 		mat->SendUniformsToShader();
+
+		RenderGeometry(viewProj);
+	}
+
+	void DrawDataBuffer::RenderGeometry(const Mat4& viewProj)
+	{
+		if (IsEmpty())
+		{
+			return;
+		}
 
 		for (auto& meshCommandPair : m_commandsToBatch)
 		{
@@ -354,8 +362,6 @@ namespace AstralEngine
 
 	void DrawDataBuffer::RenderBatch(const Mat4& viewProj)
 	{
-		
-
 		if (m_hasBatchedData)
 		{
 			BindTextures(m_batchTextureSlots, m_batchTextureSlotIndex);

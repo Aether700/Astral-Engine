@@ -20,6 +20,12 @@ namespace AstralEngine
 		return sprite;
 	}
 
+	ShaderHandle Shader::GBufferShader()
+	{
+		static ShaderHandle gbuffer = ResourceHandler::LoadShader("assets/shaders/GBufferShader.glsl");
+		return gbuffer;
+	}
+
 	AReference<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (RenderAPI::GetAPI())

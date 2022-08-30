@@ -39,6 +39,7 @@ namespace AstralEngine
 
 		static ShaderHandle DefaultShader();
 		static ShaderHandle SpriteShader();
+		static ShaderHandle GBufferShader();
 
 	private:
 		static AReference<Shader> Create(const std::string& filepath);

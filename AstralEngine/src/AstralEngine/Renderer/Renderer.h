@@ -181,18 +181,24 @@ namespace AstralEngine
 		Texture2DHandle GetTexture(const std::string& name) const;
 		bool SetTexture(const std::string& name, Texture2DHandle texture);
 
+		bool HasColor() const;
 		const Vector4& GetColor() const;
 		void SetColor(const Vector4& color);
 
+		void UseDeferredRendering(bool deferred);
+		bool UsesDeferredRendering() const;
+		
 		void AddCamPosUniform();
 		void AddUniform(MaterialUniform* uniform);
 		void RemoveUniform(const std::string& name);
 
 		void SendUniformsToShader();
 
+
 		static MaterialHandle DefaultMat();
 		static MaterialHandle SpriteMat();
 		static MaterialHandle MissingMat();
+		static MaterialHandle GBufferMat();
 
 		bool operator==(const Material& other) const;
 		bool operator!=(const Material& other) const;
@@ -210,6 +216,8 @@ namespace AstralEngine
 
 		ASinglyLinkedList<MaterialUniform*> m_uniforms;
 		ASinglyLinkedList<Texture2DUniform*> m_textures;
+
+		bool m_usesDeferred;
 	};
 
 	/*struch which contains the data to
@@ -360,5 +368,7 @@ namespace AstralEngine
 
 		static ADynArr<LightData> s_lightData;
 		static bool s_lightsModified;
+		
+		static bool s_generateGBuffer;
 	};
 }

@@ -51,6 +51,7 @@ namespace AstralEngine
 		void Initialize();
 
 		void Draw(const Mat4& viewProj, MaterialHandle material);
+		void RenderGeometry(const Mat4& viewProj);
 		void AddDrawCommand(DrawCommand* draw);
 		void Clear();
 

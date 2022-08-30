@@ -534,7 +534,6 @@ MeshHandle CreateCubeMesh()
 
 MaterialHandle CreateMaterial(LightHandle light)
 { 
-	start implementing deferred shading
 	MaterialHandle mat = ResourceHandler::CreateMaterial();
 	auto& material = ResourceHandler::GetMaterial(mat);
 	material->SetColor({ 1, 1, 1, 1 });
@@ -543,6 +542,7 @@ MaterialHandle CreateMaterial(LightHandle light)
 	material->AddUniform(new LightUniform("light", light));
 	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
 	material->AddCamPosUniform();
+	material->UseDeferredRendering(true);
 	return mat;
 }
 

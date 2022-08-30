@@ -30,6 +30,9 @@ void main()
 #type fragment
 #version 330 core
 
+//layout(location = 0) out vec3 position;
+//layout(location = 1) out vec3 normal;
+//layout(location = 2) out vec4 color;
 layout(location = 0) out vec4 color;
 
 in vec4 v_color;
@@ -39,34 +42,12 @@ in vec2 v_textureCoords;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_specularMap;
-uniform float u_matShininess;
-
-uniform vec3 u_camPos;
-uniform vec3 u_lightPos;
-uniform vec3 u_lightAmbient;
-uniform vec3 u_lightDiffuse;
-uniform vec3 u_lightSpecular;
 
 void main()
 {
-	vec4 baseColor = texture(u_diffuseMap, v_textureCoords) * v_color;  	
-    
-	// ambient
-    vec3 ambient = u_lightAmbient * baseColor.rgb;
-  	
-    // diffuse
-    vec3 lightDir = normalize(u_lightPos - v_position);
-    float diff = max(dot(v_normal, lightDir), 0.0);
-    vec3 diffuse = u_lightDiffuse * diff * baseColor.rgb;  
-    
-    // specular
-    vec3 viewDir = normalize(u_camPos - v_position);
-    vec3 reflectDir = reflect(-lightDir, v_normal);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_matShininess);
-    vec3 specular = u_lightSpecular * spec * texture(u_specularMap, v_textureCoords).rgb;  
-    
-    vec3 result = ambient + diffuse + specular;
-
-	//color = baseColor;
-	color = vec4(result, baseColor.a);
+	//position = v_position;
+	//normal = v_normal;
+	color.rgb = (texture(u_diffuseMap, v_textureCoords) * v_color).rgb;
+	//color.a = texture(u_specularMap, v_textureCoords).a; // store specular component in alpha channel
+	color.a = 1;
 }

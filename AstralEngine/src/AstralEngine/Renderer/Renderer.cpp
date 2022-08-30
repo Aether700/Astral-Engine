@@ -360,9 +360,9 @@ namespace AstralEngine
 	const char* Material::s_camPosName = "u_camPos";
 	const char* Material::s_colorName = "u_matColor";
 
-	Material::Material() : m_shader(Shader::DefaultShader()) { }
+	Material::Material() : m_shader(Shader::DefaultShader()), m_usesDeferred(false) { }
 
-	Material::Material(const Vector4& color) : m_shader(Shader::DefaultShader()) 
+	Material::Material(const Vector4& color) : m_shader(Shader::DefaultShader()), m_usesDeferred(false)
 	{
 		SetColor(color);
 	}
@@ -456,6 +456,8 @@ namespace AstralEngine
 		texturePtr->SetTexture(texture);
 	}
 
+	bool Material::HasColor() const { return FindUniformByName(s_colorName) != nullptr; }
+
 	const Vector4& Material::GetColor() const 
 	{ 
 		MaterialUniform* uniform = FindUniformByName(s_colorName);
@@ -482,6 +484,10 @@ namespace AstralEngine
 			primitive->SetValue(color);
 		}
 	}
+
+	void Material::UseDeferredRendering(bool deferred) { m_usesDeferred = deferred; }
+
+	bool Material::UsesDeferredRendering() const { return m_usesDeferred; }
 
 	void Material::AddCamPosUniform()
 	{
@@ -554,6 +560,7 @@ namespace AstralEngine
 			material->SetDiffuseMap(Texture2D::WhiteTexture());
 			material->SetSpecularMap(Texture2D::WhiteTexture());
 			material->AddCamPosUniform();
+			material->UseDeferredRendering(true);
 		}
 		return defaultMat;
 	}
@@ -581,8 +588,31 @@ namespace AstralEngine
 
 	MaterialHandle Material::MissingMat()
 	{
-		static MaterialHandle missingMat = ResourceHandler::CreateMaterial(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+		static MaterialHandle missingMat = NullHandle;
+		if (missingMat == NullHandle)
+		{
+			missingMat = ResourceHandler::CreateMaterial(Vector4(1.0f, 0.0f, 1.0f, 1.0f));
+			AReference<Material> mat = ResourceHandler::GetMaterial(missingMat);
+			mat->SetShader(Shader::SpriteShader());
+		}
 		return missingMat;
+	}
+
+	MaterialHandle Material::GBufferMat()
+	{
+		static MaterialHandle gBufferMat = NullHandle;
+		if (gBufferMat == NullHandle)
+		{
+			gBufferMat = ResourceHandler::CreateMaterial(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+			AReference<Material> mat = ResourceHandler::GetMaterial(gBufferMat);
+			mat->SetShader(Shader::GBufferShader());
+
+			AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
+			shader->Bind();
+			shader->SetInt(s_diffuseMapName, 0);
+			shader->SetInt(s_specularMapName, 1);
+		}
+		return gBufferMat;
 	}
 
 	bool Material::operator==(const Material& other) const
@@ -631,6 +661,7 @@ namespace AstralEngine
 	
 	ADynArr<LightData> Renderer::s_lightData;
 	bool Renderer::s_lightsModified;
+	bool Renderer::s_generateGBuffer;
 
 	void Renderer::Init()
 	{
@@ -665,6 +696,7 @@ namespace AstralEngine
 		LightHandle handle = s_lightData.GetCount();
 		s_lightData.Add(std::move(light));
 		s_lightsModified = true;
+		s_generateGBuffer = false;
 		return handle;
 	}
 	
@@ -684,6 +716,7 @@ namespace AstralEngine
 		s_camPos = Vector3::Zero();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
+		s_generateGBuffer = false;
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& cam)
@@ -694,6 +727,7 @@ namespace AstralEngine
 		s_camPos = Vector3::Zero();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
+		s_generateGBuffer = false;
 	}
 
 	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
@@ -703,10 +737,55 @@ namespace AstralEngine
 		s_camPos = transform.GetLocalPosition();
 		s_sorterOpaque.Clear();
 		s_sorterTransparent.Clear();
+		s_generateGBuffer = false;
 	}
 
 	void Renderer::EndScene()
 	{		
+		if (s_generateGBuffer)
+		{
+			//generate Gbuffer
+			AReference<Material> mat = ResourceHandler::GetMaterial(Material::GBufferMat());
+			AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
+			
+			shader->Bind();
+			shader->SetMat4("u_viewProjMatrix", s_viewProjMatrix);
+
+			for (auto& pair : s_sorterOpaque)
+			{
+				AReference<Material> currMat = ResourceHandler::GetMaterial(pair.GetKey());
+				AE_RENDER_ASSERT(currMat != nullptr, "");
+
+				Texture2DHandle diffuseMap = currMat->GetDiffuseMap();
+				Texture2DHandle specularMap = currMat->GetSpecularMap();
+				if (diffuseMap == NullHandle)
+				{
+					diffuseMap = Texture2D::WhiteTexture();
+				}
+				
+				if (specularMap == NullHandle)
+				{
+					specularMap = Texture2D::WhiteTexture();
+				}
+
+
+				Vector4 color = currMat->GetColor();
+				if (!currMat->HasColor())
+				{
+					color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+
+				shader->SetFloat4("u_matColor", color);
+
+				ResourceHandler::GetTexture2D(diffuseMap)->Bind();
+				ResourceHandler::GetTexture2D(specularMap)->Bind(1);
+
+				test rendering to framebuffer/texture
+
+				pair.GetElement().RenderGeometry(s_viewProjMatrix);
+			}
+		}
+		/*
 		for (auto& pair : s_sorterOpaque)
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
@@ -716,6 +795,7 @@ namespace AstralEngine
 		{
 			pair.GetElement().Draw(s_viewProjMatrix, pair.GetKey());
 		}
+		*/
 		
 		s_stats.timePerFrame = Time::GetTime() - s_frameStartTime;
 		s_lightsModified = false;
@@ -724,7 +804,7 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,
 		float tileFactor, const Vector4& tintColor)
 	{
-		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity, 
+		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity,
 			(tintColor.a == 1.0f));
 		if (cmd->IsOpaque())
 		{
@@ -733,6 +813,12 @@ namespace AstralEngine
 		else
 		{
 			s_sorterTransparent.AddData(cmd);
+		}
+
+		AReference<Material>& materialRef = ResourceHandler::GetMaterial(mat);
+		if (materialRef != nullptr)
+		{
+			s_generateGBuffer = s_generateGBuffer || materialRef->UsesDeferredRendering();
 		}
 	}
 
@@ -809,6 +895,12 @@ namespace AstralEngine
 		{
 			s_sorterTransparent.AddData(cmd);
 		}
+
+		AReference<Material> material = ResourceHandler::GetMaterial(Material::SpriteMat());
+		if (material != nullptr)
+		{
+			s_generateGBuffer = s_generateGBuffer || material->UsesDeferredRendering();
+		}
 	}
 
 	void Renderer::DrawSprite(const Vector3& position, float rotation, const Vector2& size,
@@ -822,9 +914,10 @@ namespace AstralEngine
 	{
 		if (mesh.GetMesh() != NullHandle)
 		{
-			AReference<Material> m = ResourceHandler::GetMaterial(mesh.GetMaterial());
+			AReference<Material> material = ResourceHandler::GetMaterial(mesh.GetMaterial());
 			DrawCommand* cmd = new DrawCommand(transform.GetTransformMatrix(), mesh.GetMaterial(),
-				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), transform.GetAEntity(), (m->GetColor().a == 1.0f));
+				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), transform.GetAEntity(), 
+				(material->GetColor().a == 1.0f));
 
 			if (cmd->IsOpaque())
 			{
@@ -833,6 +926,11 @@ namespace AstralEngine
 			else
 			{
 				s_sorterTransparent.AddData(cmd);
+			}
+
+			if (material != nullptr)
+			{
+				s_generateGBuffer = s_generateGBuffer || material->UsesDeferredRendering();
 			}
 		}
 	}
