@@ -180,13 +180,13 @@ public:
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
 		{
-			t.SetLocalPosition(t.GetLocalPosition() + AstralEngine::Vector3::Up() * m_speed
+			t.SetLocalPosition(t.GetLocalPosition() + t.Up() * m_speed
 				* AstralEngine::Time::GetDeltaTime());
 		}
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
 		{
-			t.SetLocalPosition(t.GetLocalPosition() - AstralEngine::Vector3::Up() * m_speed 
+			t.SetLocalPosition(t.GetLocalPosition() - t.Up() * m_speed 
 				* AstralEngine::Time::GetDeltaTime());
 		}
 
@@ -533,7 +533,8 @@ MeshHandle CreateCubeMesh()
 }
 
 MaterialHandle CreateMaterial(LightHandle light)
-{
+{ 
+	start implementing deferred shading
 	MaterialHandle mat = ResourceHandler::CreateMaterial();
 	auto& material = ResourceHandler::GetMaterial(mat);
 	material->SetColor({ 1, 1, 1, 1 });
@@ -541,9 +542,8 @@ MaterialHandle CreateMaterial(LightHandle light)
 	material->SetSpecularMap(ResourceHandler::LoadTexture2D("assets/textures/crateSpecular.png"));
 	material->AddUniform(new LightUniform("light", light));
 	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
-	//return mat;
-	return Material::DefaultMat(); // temp
-	specular reflection not working properly
+	material->AddCamPosUniform();
+	return mat;
 }
 
 //layer/////////////////////////////////

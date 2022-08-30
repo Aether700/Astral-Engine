@@ -483,6 +483,11 @@ namespace AstralEngine
 		}
 	}
 
+	void Material::AddCamPosUniform()
+	{
+		AddUniform(new PrimitiveUniform(s_camPosName, Vector3::Zero()));
+	}
+
 	void Material::AddUniform(MaterialUniform* uniform)
 	{
 		m_uniforms.Add(uniform);
@@ -548,10 +553,7 @@ namespace AstralEngine
 			AReference<Material> material = ResourceHandler::GetMaterial(defaultMat);
 			material->SetDiffuseMap(Texture2D::WhiteTexture());
 			material->SetSpecularMap(Texture2D::WhiteTexture());
-
-			// temp
-			material->AddUniform(new LightUniform("light", 0));
-			material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
+			material->AddCamPosUniform();
 		}
 		return defaultMat;
 	}

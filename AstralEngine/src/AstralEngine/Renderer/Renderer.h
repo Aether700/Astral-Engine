@@ -184,6 +184,7 @@ namespace AstralEngine
 		const Vector4& GetColor() const;
 		void SetColor(const Vector4& color);
 
+		void AddCamPosUniform();
 		void AddUniform(MaterialUniform* uniform);
 		void RemoveUniform(const std::string& name);
 
