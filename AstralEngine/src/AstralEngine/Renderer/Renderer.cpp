@@ -780,8 +780,6 @@ namespace AstralEngine
 				ResourceHandler::GetTexture2D(diffuseMap)->Bind();
 				ResourceHandler::GetTexture2D(specularMap)->Bind(1);
 
-				test rendering to framebuffer/texture
-
 				pair.GetElement().RenderGeometry(s_viewProjMatrix);
 			}
 		}

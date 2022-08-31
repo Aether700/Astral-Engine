@@ -17,7 +17,7 @@ namespace AstralEngine
 
 		virtual bool IsSwapChainTarget() const override;
 
-		virtual unsigned int GetColorAttachment() const override;
+		virtual Texture2DHandle GetColorAttachment() const override;
 		virtual void Resize(unsigned int width, unsigned int height) override;
 
 	private:
@@ -25,6 +25,7 @@ namespace AstralEngine
 		unsigned int m_width, m_height;
 		bool m_isSwapChainTarget;
 
-		unsigned int m_colorAttachment, m_depthAttachment;
+		Texture2DHandle m_colorAttachment;
+		Texture2DHandle m_depthAttachment;
 	};
 }

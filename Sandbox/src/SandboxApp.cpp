@@ -340,27 +340,26 @@ void ManualRender(ShaderHandle shader, AReference<VertexBuffer> vb, AReference<V
 
 void SetupRenderingData(AReference<VertexBuffer> vb, AReference<VertexBuffer> instanced, AReference<IndexBuffer> ib)
 {
-	Mat4 offsets[1] =
+	struct TempVertex
 	{
-		Mat4::Identity()
+		Vector3 pos;
+		Vector2 textureCoord;
 	};
 
-	Vector3 pos[4] =
+	TempVertex data[4] =
 	{
-		{ -0.2f, -0.2f, 0.0f },
-		{  0.2f, -0.2f, 0.0f },
-		{  0.2f,  0.2f, 0.0f },
-		{ -0.2f,  0.2f, 0.0f }
+		{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f } },
+		{ {  0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } },
+		{ {  0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f } },
+		{ { -0.5f,  0.5f, 0.0f }, { 0.0f, 1.0f } }
 	};
+
 	vb->Bind();
 	vb->SetLayout({ 
 		{ ADataType::Float3, "Position" },
+		{ ADataType::Float2, "textureCoords" }
 		});
-	vb->SetData(pos, sizeof(pos));
-	
-	instanced->Bind();
-	instanced->SetLayout({ { ADataType::Mat4, "transform", false, 1 } }, 1);
-	instanced->SetData(offsets, sizeof(offsets));
+	vb->SetData(data, sizeof(data));
 
 	unsigned int indices[6] =
 	{
@@ -555,7 +554,11 @@ public:
 	void OnAttach() override
 	{
 		// manual rendering
-		m_shader = ResourceHandler::LoadShader("assets/shaders/InstanceRenderingShader.glsl");
+		m_shader = ResourceHandler::LoadShader("assets/shaders/FullscreenTextureShader.glsl");
+		AReference<Shader> shader = ResourceHandler::GetShader(m_shader);
+		shader->Bind();
+		shader->SetInt("u_texture", 0);
+
 		m_vb = VertexBuffer::Create(sizeof(float) * 20);
 		m_instancedVB = VertexBuffer::Create(sizeof(float) * 20, true);
 		m_ib = IndexBuffer::Create();
@@ -644,48 +647,28 @@ public:
 
 	void OnUpdate() override
 	{
-		/*
-		static MeshHandle mesh;
-		static DrawDataBuffer* buffer = nullptr;
-
-		if (buffer == nullptr)
-		{
-			mesh = ResourceHandler::LoadMesh("assets/Meshes/Tank.obj");
-			buffer = new DrawDataBuffer();
-			buffer->Initialize();
-		}
-		buffer->TempRenderFunc(mesh);
-		*/
-		//ManualRender(m_shader, m_vb, m_instancedVB, m_ib);
-
-		/*
-		Renderer::BeginScene(m_entity.GetComponent<Camera>().camera);
-		Renderer::DrawQuad(Mat4::Identity()); //nothing drawing
-		Renderer::EndScene();
-		*/
-
+		static AReference<Framebuffer> f = Framebuffer::Create(256, 256);
+		f->Bind();
+		RenderCommand::SetViewport(0, 0, f->GetWidth(), f->GetHeight());
+		//RenderTriangleScene();
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
+		f->Unbind();
 
-		/*
-		m_cameraController->OnUpdate();
-
-		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		AstralEngine::RenderCommand::Clear();
-		AstralEngine::Renderer::BeginScene(m_cameraController->GetCamera());
-
-		AstralEngine::Application::GetUIContext()->TempUpdate();
-
-		/*
-		AstralEngine::Renderer2D::DrawQuad(AstralEngine::Mat4::Identity(), { 1, 1, 1, 1 });
-		AstralEngine::Renderer::DrawQuad(AstralEngine::Mat4::Identity());
-		//AstralEngine::Renderer2D::DrawUIWindow(m_uiWindow);
-
-
-		AstralEngine::Renderer::EndScene();
-		*/
-
+		RenderCommand::SetViewport(0, 0, window->GetWidth(), window->GetHeight());
+		RenderCommand::SetClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		RenderCommand::Clear();
+		AReference<Shader> shader = ResourceHandler::GetShader(m_shader);
+		shader->Bind();
+		static Texture2DHandle h = ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png");
+		AReference<Texture2D> colorAttachment = ResourceHandler::GetTexture2D(f->GetColorAttachment());
+		//AReference<Texture2D> colorAttachment = ResourceHandler::GetTexture2D(h);
+		colorAttachment->Bind();
+		m_vb->Bind();
+		m_ib->Bind();
+		RenderCommand::DrawIndexed(m_ib);
+	
 		AstralEngine::Renderer::ResetStats();
 	}
 	
@@ -747,6 +730,34 @@ private:
 		{
 			e.EmplaceComponent<Rotator>().SetAxis(Vector3::Up());
 		}
+	}
+
+	void RenderTriangleScene()
+	{
+		static AReference<VertexBuffer> vb = nullptr;
+		static AReference<IndexBuffer> ib = nullptr;
+		static AReference<Shader> shader = nullptr;
+		if (vb == nullptr)
+		{
+			Vector2 pos[3] = 
+			{
+				{ -0.5f, -0.5f },
+				{  0.5f, -0.5f },
+				{  0.0f,  0.5f }
+			};
+			vb = VertexBuffer::Create((float*)pos, sizeof(pos));
+			vb->SetLayout({ { ADataType::Float2, "pos" } });
+			unsigned int indices[] = { 0, 1, 2 };
+
+			ib = IndexBuffer::Create(indices, 3);
+			shader = ResourceHandler::GetShader(ResourceHandler::LoadShader("assets/shaders/triangle.glsl"));
+		}
+
+		
+		shader->Bind();
+		vb->Bind();
+		ib->Bind();
+		RenderCommand::DrawIndexed(ib);
 	}
 
 	void SetupRendererTestScene(LightHandle light)

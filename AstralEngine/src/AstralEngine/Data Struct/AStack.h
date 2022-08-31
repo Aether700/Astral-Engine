@@ -14,7 +14,7 @@ namespace AstralEngine
 		
 		T& Pop() 
 		{
-			AE_ASSERT(!m_list.IsEmpty());
+			AE_ASSERT(!m_list.IsEmpty(), "");
 			T& popped = m_list[0];
 			m_list.Remove(0);
 			return popped;
@@ -22,7 +22,7 @@ namespace AstralEngine
 
 		T& Peek() const
 		{
-			AE_ASSERT(!m_list.IsEmpty());
+			AE_ASSERT(!m_list.IsEmpty(), "");
 			return m_list[0];
 		}
 
@@ -30,7 +30,10 @@ namespace AstralEngine
 
 		bool IsEmpty() const { return m_list.IsEmpty(); }
 
-		size_t Find(const T& element) const { return m_list.Find(element); }
+		int Find(const T& element) const { return m_list.Find(element); }
+
+		bool Contains(const T& element) const { return Find(element) != -1; }
+
 
 	private:
 		ASinglyLinkedList<T> m_list;

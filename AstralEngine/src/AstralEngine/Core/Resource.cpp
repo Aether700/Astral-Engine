@@ -18,6 +18,11 @@ namespace AstralEngine
 		return GetHandler()->m_shaders.GetResource(handle);
 	}
 
+	void ResourceHandler::DeleteShader(ShaderHandle handle)
+	{
+		GetHandler()->m_shaders.RemoveHandle(handle);
+	}
+
 	Texture2DHandle ResourceHandler::LoadTexture2D(const std::string& filepath)
 	{
 		AReference<Texture2D> texture = Texture2D::Create(filepath);
@@ -28,7 +33,7 @@ namespace AstralEngine
 		return GetHandler()->m_textures2D.AddResource(texture);
 	}
 	
-	Texture2DHandle ResourceHandler::LoadTexture2D(unsigned int width, unsigned int height)
+	Texture2DHandle ResourceHandler::CreateTexture2D(unsigned int width, unsigned int height)
 	{
 		AReference<Texture2D> texture = Texture2D::Create(width, height);
 		if (texture == nullptr)
@@ -38,7 +43,7 @@ namespace AstralEngine
 		return GetHandler()->m_textures2D.AddResource(texture);
 	}
 
-	Texture2DHandle ResourceHandler::LoadTexture2D(unsigned int width, unsigned int height,
+	Texture2DHandle ResourceHandler::CreateTexture2D(unsigned int width, unsigned int height,
 		void* data, unsigned int size)
 	{
 		AReference<Texture2D> texture = Texture2D::Create(width, height, data, size);
@@ -52,6 +57,11 @@ namespace AstralEngine
 	AReference<Texture2D> ResourceHandler::GetTexture2D(Texture2DHandle handle)
 	{
 		return GetHandler()->m_textures2D.GetResource(handle);
+	}
+
+	void ResourceHandler::DeleteTexture2D(Texture2DHandle handle)
+	{
+		GetHandler()->m_textures2D.RemoveHandle(handle);
 	}
 
 	MaterialHandle ResourceHandler::CreateMaterial()
@@ -68,6 +78,11 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		return GetHandler()->m_materials.GetResource(handle);
+	}
+
+	void ResourceHandler::DeleteMaterial(MaterialHandle handle)
+	{
+		GetHandler()->m_materials.RemoveHandle(handle);
 	}
 
 	MeshHandle ResourceHandler::LoadMesh(const std::string& filepath)
@@ -95,6 +110,11 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		return GetHandler()->m_meshes.GetResource(handle);
+	}
+
+	void ResourceHandler::DeleteMesh(MeshHandle handle)
+	{
+		GetHandler()->m_meshes.RemoveHandle(handle);
 	}
 
 	ResourceHandler* ResourceHandler::GetHandler()

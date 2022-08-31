@@ -8,7 +8,7 @@ namespace AstralEngine
 	ResourceHandle Texture2D::WhiteTexture()
 	{
 		constexpr unsigned int textureData = 0xffffffff;
-		static ResourceHandle whiteTextureHandle = ResourceHandler::LoadTexture2D(1, 1, 
+		static ResourceHandle whiteTextureHandle = ResourceHandler::CreateTexture2D(1, 1, 
 			(void*) &textureData, sizeof(textureData));
 		return whiteTextureHandle;
 	}
