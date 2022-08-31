@@ -13,7 +13,7 @@ namespace AstralEngine
 		return whiteTextureHandle;
 	}
 
-	AReference<Texture2D> Texture2D::Create(unsigned int width, unsigned int height, void* data, unsigned int size)
+	AReference<Texture2D> Texture2D::Create(const std::string& path)
 	{
 		switch (RenderAPI::GetAPI())
 		{
@@ -22,7 +22,7 @@ namespace AstralEngine
 			break;
 
 		case RenderAPI::API::OpenGL:
-			return AReference<OpenGLTexture2D>::Create(width, height, data, size);
+			return AReference<OpenGLTexture2D>::Create(path);
 		}
 
 		AE_CORE_ERROR("Unknown RenderAPI");
@@ -44,7 +44,23 @@ namespace AstralEngine
 		return nullptr;
 	}
 
-	AReference<Texture2D> Texture2D::Create(const std::string& path)
+	AReference<Texture2D> Texture2D::Create(unsigned int width, unsigned int height,
+		Texture2DInternalFormat internalFormat)
+	{
+		switch (RenderAPI::GetAPI())
+		{
+		case RenderAPI::API::None:
+			AE_CORE_ERROR("No RenderAPI is not yet supported");
+
+		case RenderAPI::API::OpenGL:
+			return AReference<OpenGLTexture2D>::Create(width, height, internalFormat);
+		}
+
+		AE_CORE_ERROR("Unknown RenderAPI");
+		return nullptr;
+	}
+
+	AReference<Texture2D> Texture2D::Create(unsigned int width, unsigned int height, void* data, unsigned int size)
 	{
 		switch (RenderAPI::GetAPI())
 		{
@@ -53,13 +69,12 @@ namespace AstralEngine
 			break;
 
 		case RenderAPI::API::OpenGL:
-			return AReference<OpenGLTexture2D>::Create(path);
+			return AReference<OpenGLTexture2D>::Create(width, height, data, size);
 		}
 
 		AE_CORE_ERROR("Unknown RenderAPI");
 		return nullptr;
 	}
-
 
 
 	//CubeMap /////////////////////////////////////////

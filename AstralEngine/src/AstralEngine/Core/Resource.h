@@ -19,6 +19,7 @@ namespace AstralEngine
 	class Shader;
 	class Material;
 	class Mesh;
+	enum class Texture2DInternalFormat;
 
 	template<typename T>
 	class ResourcePool
@@ -73,6 +74,8 @@ namespace AstralEngine
 		// Texture2D /////////////////////////////////////////////////
 		static Texture2DHandle LoadTexture2D(const std::string& filepath);
 		static Texture2DHandle CreateTexture2D(unsigned int width, unsigned int height);
+		static Texture2DHandle CreateTexture2D(unsigned int width, unsigned int height, 
+			Texture2DInternalFormat internalFormat);
 		static Texture2DHandle CreateTexture2D(unsigned int width, unsigned int height, void* data, unsigned int size);
 		static AReference<Texture2D> GetTexture2D(Texture2DHandle handle);
 		static void DeleteTexture2D(Texture2DHandle handle);

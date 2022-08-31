@@ -17,15 +17,20 @@ namespace AstralEngine
 
 		virtual bool IsSwapChainTarget() const override;
 
-		virtual Texture2DHandle GetColorAttachment() const override;
+		virtual Texture2DHandle GetColorAttachment(size_t attachmentIndex = 0) const override;
+		virtual void SetColorAttachment(Texture2DHandle texture, size_t attachmentIndex) override;
 		virtual void Resize(unsigned int width, unsigned int height) override;
 
 	private:
+		static size_t s_numColorAttachments;
+		
 		unsigned int m_rendererID;
 		unsigned int m_width, m_height;
 		bool m_isSwapChainTarget;
 
-		Texture2DHandle m_colorAttachment;
+		Texture2DHandle* m_colorAttachments;
+		size_t m_largestColorAttachmentIndex;
+
 		Texture2DHandle m_depthAttachment;
 	};
 }

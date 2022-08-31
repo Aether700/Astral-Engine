@@ -7,6 +7,7 @@ namespace AstralEngine
 	{
 	public:
 		OpenGLTexture2D(unsigned int width, unsigned int height);
+		OpenGLTexture2D(unsigned int width, unsigned int height, Texture2DInternalFormat internalFormat);
 		OpenGLTexture2D(unsigned int width, unsigned int height, void* data, unsigned int size);
 		OpenGLTexture2D(const std::string& path);
 		~OpenGLTexture2D();

@@ -17,9 +17,10 @@ namespace AstralEngine
 	class Mesh;
 	class UIElement;
 
-	class RenderingDataSorter;
+	class RenderQueue;
 	class SpriteRenderer;
 	class MeshRenderer;
+	class GBuffer;
 
 	class LightData
 	{
@@ -208,6 +209,9 @@ namespace AstralEngine
 		static const char* s_specularMapName;
 		static const char* s_camPosName;
 		static const char* s_colorName;
+		static const char* s_positionGBufferName;
+		static const char* s_normalGBufferName;
+		static const char* s_colorGBufferName;
 
 		MaterialUniform* FindUniformByName(const std::string& name) const;
 		Texture2DUniform* FindTextureByName(const std::string& name) const;
@@ -292,6 +296,7 @@ namespace AstralEngine
 		static const RendererStatistics& GetStats();
 		static void ResetStats();
 		static Vector3 GetCamPos();
+		static void BindGBufferTextures();
 
 		// Lights
 		static bool LightsModified();
@@ -359,8 +364,8 @@ namespace AstralEngine
 	private:
 		static RendererStatistics s_stats;
 		
-		static RenderingDataSorter s_sorterOpaque;
-		static RenderingDataSorter s_sorterTransparent;
+		static RenderQueue* s_forwardQueue;
+		static RenderQueue* s_deferredQueue;
 		
 		static Mat4 s_viewProjMatrix;
 		static Vector3 s_camPos;
@@ -368,7 +373,5 @@ namespace AstralEngine
 
 		static ADynArr<LightData> s_lightData;
 		static bool s_lightsModified;
-		
-		static bool s_generateGBuffer;
 	};
 }

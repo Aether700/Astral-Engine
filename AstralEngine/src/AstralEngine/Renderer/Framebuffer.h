@@ -18,7 +18,8 @@ namespace AstralEngine
 
 		virtual bool IsSwapChainTarget() const = 0;
 
-		virtual Texture2DHandle GetColorAttachment() const = 0;
+		virtual Texture2DHandle GetColorAttachment(size_t attachmentIndex = 0) const = 0;
+		virtual void SetColorAttachment(Texture2DHandle texture, size_t attachmentIndex) = 0;
 		virtual void Resize(unsigned int width, unsigned int height) = 0;
 
 		static AReference<Framebuffer> Create(unsigned int width, unsigned int height, bool isSwapChainTarget = false);

@@ -2,6 +2,7 @@
 #include "AstralEngine/Math/AMath.h"
 #include "AstralEngine/ECS/AEntity.h"
 #include "Renderer.h"
+#include "Framebuffer.h"
 
 
 namespace AstralEngine
@@ -24,6 +25,7 @@ namespace AstralEngine
 		AEntity GetEntity() const;
 		Texture2DHandle GetTexture() const;
 		bool IsOpaque() const;
+		bool UsesDeferred() const;
 
 		bool operator==(const DrawCommand& other) const;
 		bool operator!=(const DrawCommand& other) const;
@@ -38,6 +40,23 @@ namespace AstralEngine
 		bool m_opaque;
 	};
 
+
+	class GBuffer
+	{
+	public:
+		GBuffer();
+		void Bind();
+		void Unbind();
+
+		AReference<Shader> PrepareForRender(const Mat4& viewProjMatrix);
+		void BindTexureData();
+
+	private:
+		static constexpr unsigned int s_framebufferWidth = 512;
+		static constexpr unsigned int s_framebufferHeight = 512;
+
+		AReference<Framebuffer> m_framebuffer;
+	};
 
 	// class responsible for handling draw calls by either batching them or instanciating them
 	// additionally this class will keep track of what transforms matrix have not changed since 
@@ -146,20 +165,22 @@ namespace AstralEngine
 		AUnorderedMap<MaterialHandle, DrawDataBuffer> m_buffers;
 	};
 
-	// ordered list of DrawCommands. Used to sort in what order what should be drawn
-	class DrawList
+	// processes and renders to the screen according to a specific rendering path either forward or deferred
+	class RenderQueue sealed
 	{
 	public:
-		~DrawList();
+		RenderQueue(GBuffer* gBuffer = nullptr);
+		~RenderQueue();
 
-		//think over how draw cmds are stored/sorted internally and then implement draw list class
-		//need to group similar meshes/vertex data together to use instance rendering
+		void AddData(DrawCommand* data);
+		void Draw(const Mat4& viewProj);
+		void Clear();
 
-		void AddDrawCmd(DrawCommand* cmd);
-		DrawCommand* GetNextDrawCmd();
-		bool IsEmpty() const;
+		void BindGBufferTextureData();
 
 	private:
-		//ADoublyLinkedList<DrawCommand*> m_drawCommands;
+		GBuffer* m_gBuffer;
+		RenderingDataSorter m_opaque;
+		RenderingDataSorter* m_transparent;
 	};
 }

@@ -23,6 +23,12 @@ namespace AstralEngine
 		virtual bool operator==(const Texture& other) const = 0;
 	};
 
+	enum class Texture2DInternalFormat
+	{
+		Depth24Stencil8,
+		RGBA8
+	};
+
 	class Texture2D : public Texture
 	{
 		friend class ResourceHandler;
@@ -34,6 +40,8 @@ namespace AstralEngine
 	private:
 		static AReference<Texture2D> Create(const std::string& path);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height);
+		static AReference<Texture2D> Create(unsigned int width, unsigned int height, 
+			Texture2DInternalFormat internalFormat);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height, void* data, unsigned int size);
 	};
 

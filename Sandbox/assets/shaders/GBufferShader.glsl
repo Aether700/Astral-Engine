@@ -30,10 +30,9 @@ void main()
 #type fragment
 #version 330 core
 
-//layout(location = 0) out vec3 position;
-//layout(location = 1) out vec3 normal;
-//layout(location = 2) out vec4 color;
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec3 position;
+layout(location = 1) out vec3 normal;
+layout(location = 2) out vec4 color;
 
 in vec4 v_color;
 in vec3 v_position;
@@ -45,9 +44,8 @@ uniform sampler2D u_specularMap;
 
 void main()
 {
-	//position = v_position;
-	//normal = v_normal;
+	position = v_position;
+	normal = v_normal;
 	color.rgb = (texture(u_diffuseMap, v_textureCoords) * v_color).rgb;
-	//color.a = texture(u_specularMap, v_textureCoords).a; // store specular component in alpha channel
-	color.a = 1;
+	color.a = texture(u_specularMap, v_textureCoords).a; // store specular component in alpha channel
 }

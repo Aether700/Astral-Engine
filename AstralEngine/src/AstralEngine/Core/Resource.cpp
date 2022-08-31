@@ -44,6 +44,17 @@ namespace AstralEngine
 	}
 
 	Texture2DHandle ResourceHandler::CreateTexture2D(unsigned int width, unsigned int height,
+		Texture2DInternalFormat internalFormat)
+	{
+		AReference<Texture2D> texture = Texture2D::Create(width, height, internalFormat);
+		if (texture == nullptr)
+		{
+			return NullHandle;
+		}
+		return GetHandler()->m_textures2D.AddResource(texture);
+	}
+
+	Texture2DHandle ResourceHandler::CreateTexture2D(unsigned int width, unsigned int height,
 		void* data, unsigned int size)
 	{
 		AReference<Texture2D> texture = Texture2D::Create(width, height, data, size);

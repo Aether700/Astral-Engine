@@ -1,5 +1,6 @@
 #include "aepch.h"
 #include "RendererInternals.h"
+#include "AstralEngine/Core/Application.h"
 #include "Mesh.h"
 
 namespace AstralEngine
@@ -41,6 +42,11 @@ namespace AstralEngine
 
 	bool DrawCommand::IsOpaque() const { return m_opaque; }
 
+	bool DrawCommand::UsesDeferred() const
+	{
+		return ResourceHandler::GetMaterial(m_material)->UsesDeferredRendering();
+	}
+
 	bool DrawCommand::operator==(const DrawCommand& other) const
 	{
 		return m_mesh == other.m_mesh && m_texture == other.m_texture 
@@ -50,6 +56,53 @@ namespace AstralEngine
 	bool DrawCommand::operator!=(const DrawCommand& other) const
 	{
 		return !(*this == other);
+	}
+
+	// GBuffer ////////////////////////////////////////////////////////////////
+
+	GBuffer::GBuffer()
+	{
+		m_framebuffer = Framebuffer::Create(s_framebufferWidth, s_framebufferHeight);
+		m_framebuffer->Bind();
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(s_framebufferWidth, s_framebufferHeight), 1);
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(s_framebufferWidth, s_framebufferHeight), 2);
+		m_framebuffer->Unbind();
+	}
+
+	void GBuffer::Bind()
+	{
+		m_framebuffer->Bind();
+		RenderCommand::SetViewport(0, 0, s_framebufferWidth, s_framebufferHeight);
+		RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		RenderCommand::Clear();
+	}
+
+	void GBuffer::Unbind()
+	{
+		m_framebuffer->Unbind();
+		AWindow* window = Application::GetWindow();
+		RenderCommand::SetViewport(0, 0, window->GetWidth(), window->GetHeight());
+	}
+
+	AReference<Shader> GBuffer::PrepareForRender(const Mat4& viewProjMatrix)
+	{
+		AReference<Material> mat = ResourceHandler::GetMaterial(Material::GBufferMat());
+		AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
+
+		shader->Bind();
+		shader->SetMat4("u_viewProjMatrix", viewProjMatrix);
+		return shader;
+	}
+
+	void GBuffer::BindTexureData()
+	{
+		AReference<Texture2D> t1 = ResourceHandler::GetTexture2D(m_framebuffer->GetColorAttachment());
+		AReference<Texture2D> t2 = ResourceHandler::GetTexture2D(m_framebuffer->GetColorAttachment(1));
+		AReference<Texture2D> t3 = ResourceHandler::GetTexture2D(m_framebuffer->GetColorAttachment(2));
+
+		t1->Bind();
+		t2->Bind(2);
+		t3->Bind(3);
 	}
 
 	// DrawDataBuffer ////////////////////////////////////////////////////
@@ -146,6 +199,11 @@ namespace AstralEngine
 		shader->Bind();
 		shader->SetMat4("u_viewProjMatrix", viewProj);
 		mat->SendUniformsToShader();
+
+		if (mat->UsesDeferredRendering())
+		{
+			Renderer::BindGBufferTextures();
+		}
 
 		RenderGeometry(viewProj);
 	}
@@ -645,5 +703,120 @@ namespace AstralEngine
 	{
 		return m_buffers.end();
 	}
+
+	// RenderQueue /////////////////////////////////////////////////////////////////////
+	RenderQueue::RenderQueue(GBuffer* gBuffer) : m_gBuffer(gBuffer), m_transparent(nullptr)
+	{
+		if (gBuffer == nullptr)
+		{
+			m_transparent = new RenderingDataSorter();
+		}
+	}
+
+	RenderQueue::~RenderQueue() { }
+
+	void RenderQueue::AddData(DrawCommand* data)
+	{
+		AE_CORE_ASSERT(data->UsesDeferred() == (m_gBuffer != nullptr), 
+			"Draw Command passed to the wrong render queue");
+
+		if (data->UsesDeferred())
+		{
+			AE_CORE_ASSERT(m_gBuffer != nullptr, "Draw Command passed to the wrong render queue");
+			AE_CORE_ASSERT(data->IsOpaque(), "Deferred render queue does not support transparent material");
+			m_opaque.AddData(data);
+		}
+		else 
+		{
+			if (data->IsOpaque())
+			{
+				m_opaque.AddData(data);
+			}
+			else
+			{
+				m_transparent->AddData(data);
+			}
+		}
+	}
+
+	void RenderQueue::Draw(const Mat4& viewProj)
+	{
+		if (m_gBuffer != nullptr)
+		{
+			// deferred rendering
+			m_gBuffer->Bind();
+			AReference<Shader> shader = m_gBuffer->PrepareForRender(viewProj);
+			/*
+			AReference<Material> mat = ResourceHandler::GetMaterial(Material::GBufferMat());
+			AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
+
+			shader->Bind();
+			shader->SetMat4("u_viewProjMatrix", s_viewProjMatrix);
+			*/
+
+			for (auto& pair : m_opaque)
+			{
+				AReference<Material> currMat = ResourceHandler::GetMaterial(pair.GetKey());
+				AE_RENDER_ASSERT(currMat != nullptr, "");
+
+				Texture2DHandle diffuseMap = currMat->GetDiffuseMap();
+				Texture2DHandle specularMap = currMat->GetSpecularMap();
+				if (diffuseMap == NullHandle)
+				{
+					diffuseMap = Texture2D::WhiteTexture();
+				}
+
+				if (specularMap == NullHandle)
+				{
+					specularMap = Texture2D::WhiteTexture();
+				}
+
+
+				Vector4 color = currMat->GetColor();
+				if (!currMat->HasColor())
+				{
+					color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+
+				shader->SetFloat4("u_matColor", color);
+
+				ResourceHandler::GetTexture2D(diffuseMap)->Bind();
+				ResourceHandler::GetTexture2D(specularMap)->Bind(1);
+
+				pair.GetElement().RenderGeometry(viewProj);
+			}
+			m_gBuffer->Unbind();
+
+			replace and draw fullscreen quad here. will need to test that the deferred rendering works properly
+			for (auto& pair : m_opaque)
+			{
+				pair.GetElement().Draw(viewProj, pair.GetKey());
+			}
+		}
+		else
+		{
+			// forward rendering
+			for (auto& pair : m_opaque)
+			{
+				pair.GetElement().Draw(viewProj, pair.GetKey());
+			}
+
+			for (auto& pair : *m_transparent)
+			{
+				pair.GetElement().Draw(viewProj, pair.GetKey());
+			}
+		}
+	}
+
+	void RenderQueue::Clear()
+	{
+		m_opaque.Clear();
+		if (m_transparent != nullptr)
+		{
+			m_transparent->Clear();
+		}
+	}
+
+	void RenderQueue::BindGBufferTextureData() { m_gBuffer->BindTexureData(); }
 
 }

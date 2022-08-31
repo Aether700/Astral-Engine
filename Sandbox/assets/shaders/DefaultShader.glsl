@@ -11,19 +11,20 @@ layout(location = 8) in float a_textureIndex;
 uniform mat4 u_viewProjMatrix;
 uniform vec4 u_matColor;
 
-out vec4 v_color;
-out vec3 v_position;
-out vec3 v_normal;
+//out vec4 v_color;
+//out vec3 v_position;
+//out vec3 v_normal;
 out vec2 v_textureCoords;
 
 void main()
 {
-    v_position = vec3(a_transform * vec4(a_position, 1.0f));
+    //v_position = vec3(a_transform * vec4(a_position, 1.0f));
+    vec3 v_position = vec3(a_transform * vec4(a_position, 1.0f)); // temp?
 	gl_Position = u_viewProjMatrix * vec4(v_position, 1.0f);
 
-	v_normal = normalize(mat3(transpose(inverse(a_transform))) * a_normal); // can be optimized if computed on cpu
+	//v_normal = normalize(mat3(transpose(inverse(a_transform))) * a_normal); // can be optimized if computed on cpu
 	v_textureCoords = a_textureCoords;
-	v_color = a_color * u_matColor;
+	//v_color = a_color * u_matColor;
 }
 
 
@@ -32,11 +33,15 @@ void main()
 
 layout(location = 0) out vec4 color;
 
-in vec4 v_color;
-in vec3 v_position;
-in vec3 v_normal;
+//in vec4 v_color;
+//in vec3 v_position;
+//in vec3 v_normal;
 in vec2 v_textureCoords;
 
+
+uniform sampler2D u_positionGBuffer;
+uniform sampler2D u_normalGBuffer;
+uniform sampler2D u_colorGBuffer;
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_specularMap;
 uniform float u_matShininess;
@@ -49,24 +54,27 @@ uniform vec3 u_lightSpecular;
 
 void main()
 {
-	vec4 baseColor = texture(u_diffuseMap, v_textureCoords) * v_color;  	
+	vec3 baseColor = texture(u_colorGBuffer, v_textureCoords).rgb;
+    vec3 normal = texture(u_normalGBuffer, v_textureCoords).rgb;
+    vec3 position = texture(u_positionGBuffer, v_textureCoords).rgb;
+    float specularIntensity = texture(u_colorGBuffer, v_textureCoords).a;
     
 	// ambient
-    vec3 ambient = u_lightAmbient * baseColor.rgb;
+    vec3 ambient = u_lightAmbient * baseColor;
   	
     // diffuse
-    vec3 lightDir = normalize(u_lightPos - v_position);
-    float diff = max(dot(v_normal, lightDir), 0.0);
+    vec3 lightDir = normalize(u_lightPos - position);
+    float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = u_lightDiffuse * diff * baseColor.rgb;  
     
     // specular
-    vec3 viewDir = normalize(u_camPos - v_position);
-    vec3 reflectDir = reflect(-lightDir, v_normal);  
+    vec3 viewDir = normalize(u_camPos - position);
+    vec3 reflectDir = reflect(-lightDir, normal);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_matShininess);
-    vec3 specular = u_lightSpecular * spec * texture(u_specularMap, v_textureCoords).rgb;  
+    vec3 specular = u_lightSpecular * spec * specularIntensity;  
     
     vec3 result = ambient + diffuse + specular;
 
 	//color = baseColor;
-	color = vec4(result, baseColor.a);
+	color = vec4(result, 1.0f);
 }

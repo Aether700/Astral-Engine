@@ -541,7 +541,8 @@ MaterialHandle CreateMaterial(LightHandle light)
 	material->AddUniform(new LightUniform("light", light));
 	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
 	material->AddCamPosUniform();
-	material->UseDeferredRendering(true);
+	//material->UseDeferredRendering(true);
+	material->UseDeferredRendering(false);
 	return mat;
 }
 
@@ -647,28 +648,10 @@ public:
 
 	void OnUpdate() override
 	{
-		static AReference<Framebuffer> f = Framebuffer::Create(256, 256);
-		f->Bind();
-		RenderCommand::SetViewport(0, 0, f->GetWidth(), f->GetHeight());
-		//RenderTriangleScene();
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-		f->Unbind();
 
-		RenderCommand::SetViewport(0, 0, window->GetWidth(), window->GetHeight());
-		RenderCommand::SetClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-		RenderCommand::Clear();
-		AReference<Shader> shader = ResourceHandler::GetShader(m_shader);
-		shader->Bind();
-		static Texture2DHandle h = ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png");
-		AReference<Texture2D> colorAttachment = ResourceHandler::GetTexture2D(f->GetColorAttachment());
-		//AReference<Texture2D> colorAttachment = ResourceHandler::GetTexture2D(h);
-		colorAttachment->Bind();
-		m_vb->Bind();
-		m_ib->Bind();
-		RenderCommand::DrawIndexed(m_ib);
-	
 		AstralEngine::Renderer::ResetStats();
 	}
 	

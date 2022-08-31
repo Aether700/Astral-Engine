@@ -5,9 +5,29 @@
 
 namespace AstralEngine
 {
+	unsigned int EngineInternalFormatToOpenGLInternalFormat(Texture2DInternalFormat internalFormat)
+	{
+		switch(internalFormat)
+		{
+		case Texture2DInternalFormat::RGBA8:
+			return GL_RGBA8;
+
+		case Texture2DInternalFormat::Depth24Stencil8:
+			return GL_DEPTH24_STENCIL8;
+		}
+		AE_CORE_ERROR("Unknown texture internal format");
+		return 0;
+	}
+
 	//OpenGLTexture2D///////////////////////////////////////////////////////////////////
-	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height) 
-		: m_internalFormat(GL_RGBA8), m_dataFormat(GL_RGBA), m_width(width), m_height(height) 
+	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height) : OpenGLTexture2D(width, height, 
+		Texture2DInternalFormat::RGBA8)
+	{
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height, 
+		Texture2DInternalFormat internalFormat) : m_dataFormat(GL_RGBA), m_width(width), m_height(height),
+		m_internalFormat(EngineInternalFormatToOpenGLInternalFormat(internalFormat))
 	{
 		AE_PROFILE_FUNCTION();
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_rendererID);
