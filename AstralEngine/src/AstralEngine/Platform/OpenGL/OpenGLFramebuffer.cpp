@@ -78,7 +78,7 @@ namespace AstralEngine
 		AE_CORE_ASSERT(attachmentIndex < s_numColorAttachments, "");
 		m_colorAttachments[attachmentIndex] = texture;
 		AReference<Texture2D> colorAttachment = ResourceHandler::GetTexture2D(texture);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_2D,
 			colorAttachment->GetTextureID(), 0);
 		if (m_largestColorAttachmentIndex < attachmentIndex + 1)
 		{

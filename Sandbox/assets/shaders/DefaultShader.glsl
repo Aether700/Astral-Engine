@@ -51,7 +51,7 @@ void main()
     // diffuse
     vec3 lightDir = normalize(u_lightPos - position);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = u_lightDiffuse * diff * baseColor.rgb;  
+    vec3 diffuse = u_lightDiffuse * diff * baseColor;  
     
     // specular
     vec3 viewDir = normalize(u_camPos - position);
@@ -61,7 +61,7 @@ void main()
     
     vec3 result = ambient + diffuse + specular;
 
-	//color = baseColor;
+	//color = vec4(baseColor, 1.0f);
+	color = vec4(specularIntensity, 0, 0, 1.0f);
 	//color = vec4(result, 1.0f);
-	color = vec4(specularIntensity, specularIntensity, specularIntensity, 1.0f);
 }

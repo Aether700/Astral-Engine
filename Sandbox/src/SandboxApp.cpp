@@ -5,6 +5,7 @@
 //temp
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/Renderer/RendererInternals.h"
+#include "glad/glad.h"
 ////////
 
 using namespace AstralEngine;
@@ -647,6 +648,36 @@ public:
 
 	void OnUpdate() override
 	{
+		/*
+		static AReference<Texture2D> texture1 = nullptr;
+		static AReference<Texture2D> texture2 = nullptr;
+		static AReference<Framebuffer> fb;
+		if (texture1 == nullptr)
+		{
+			fb = Framebuffer::Create(1024, 1024);
+			fb->Bind();
+			fb->SetColorAttachment(ResourceHandler::CreateTexture2D(1024, 1024), 1);
+			texture1 = ResourceHandler::GetTexture2D(fb->GetColorAttachment());
+			texture2 = ResourceHandler::GetTexture2D(fb->GetColorAttachment(1));
+		}
+		fb->Bind();
+
+		static ShaderHandle shader = ResourceHandler::LoadShader("assets/shaders/MRTTest.glsl");
+		AReference<Shader> s = ResourceHandler::GetShader(shader);
+		s->Bind();
+		RenderTriangleScene();
+
+		fb->Unbind();
+
+		AReference<Shader> fullscreenShader = ResourceHandler::GetShader(Shader::FullscreenQuadShader());
+		fullscreenShader->Bind();
+		fullscreenShader->SetInt("u_texture", 0);
+		texture2->Bind();
+		RenderFullscreenTexture();
+		*/
+
+
+
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
@@ -718,7 +749,7 @@ private:
 	{
 		static AReference<VertexBuffer> vb = nullptr;
 		static AReference<IndexBuffer> ib = nullptr;
-		static AReference<Shader> shader = nullptr;
+		//static AReference<Shader> shader = nullptr;
 		if (vb == nullptr)
 		{
 			Vector2 pos[3] = 
@@ -732,11 +763,41 @@ private:
 			unsigned int indices[] = { 0, 1, 2 };
 
 			ib = IndexBuffer::Create(indices, 3);
-			shader = ResourceHandler::GetShader(ResourceHandler::LoadShader("assets/shaders/triangle.glsl"));
+			//shader = ResourceHandler::GetShader(ResourceHandler::LoadShader("assets/shaders/triangle.glsl"));
 		}
 
 		
-		shader->Bind();
+		//shader->Bind();
+		vb->Bind();
+		ib->Bind();
+		RenderCommand::DrawIndexed(ib);
+	}
+
+	void RenderFullscreenTexture()
+	{
+		static AReference<VertexBuffer> vb = nullptr;
+		static AReference<IndexBuffer> ib = nullptr;
+		if (vb == nullptr)
+		{
+			float pos[] =
+			{
+				-1.0f, -1.0f,    0.0f, 0.0f,
+				 1.0f, -1.0f,    1.0f, 0.0f,
+				 1.0f,  1.0f,    1.0f, 1.0f,
+				-1.0f,  1.0f,    0.0f, 1.0f
+			};
+			vb = VertexBuffer::Create((float*)pos, sizeof(pos));
+			vb->SetLayout({ { ADataType::Float2, "pos" }, { ADataType::Float2, "textureCoords" } });
+			unsigned int indices[] = 
+			{ 
+				0, 1, 2,
+				2, 3, 0
+			};
+
+			ib = IndexBuffer::Create(indices, 6);
+		}
+
+
 		vb->Bind();
 		ib->Bind();
 		RenderCommand::DrawIndexed(ib);

@@ -532,9 +532,6 @@ namespace AstralEngine
 			unsigned int textureSlot = 0;
 			if (UsesDeferredRendering())
 			{
-				shader->SetInt(s_positionGBufferName, 0);
-				shader->SetInt(s_normalGBufferName, 1);
-				shader->SetInt(s_colorGBufferName, 2);
 				textureSlot = 3;
 			}
 
@@ -572,6 +569,12 @@ namespace AstralEngine
 			material->SetSpecularMap(Texture2D::WhiteTexture());
 			material->AddCamPosUniform();
 			material->UseDeferredRendering(true);
+
+			AReference<Shader> shader = ResourceHandler::GetShader(material->GetShader());
+			shader->Bind();
+			shader->SetInt(s_positionGBufferName, 0);
+			shader->SetInt(s_normalGBufferName, 1);
+			shader->SetInt(s_colorGBufferName, 2);
 		}
 		return defaultMat;
 	}

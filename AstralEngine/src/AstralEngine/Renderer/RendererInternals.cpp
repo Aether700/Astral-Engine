@@ -746,8 +746,6 @@ namespace AstralEngine
 	{
 		if (m_gBuffer != nullptr)
 		{
-			multiple render target not working
-
 			// deferred rendering
 			m_gBuffer->Bind();
 			AReference<Shader> shader = m_gBuffer->PrepareForRender(viewProj);
@@ -776,12 +774,13 @@ namespace AstralEngine
 					specularMap = Texture2D::WhiteTexture();
 				}
 
-
 				Vector4 color = currMat->GetColor();
 				if (!currMat->HasColor())
 				{
 					color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 				}
+
+				diffuse color is not being recorded/received properly
 
 				shader->SetFloat4("u_matColor", color);
 
@@ -793,15 +792,16 @@ namespace AstralEngine
 			m_gBuffer->Unbind();
 			RenderCommand::Clear();
 
-			/*
 			shader = ResourceHandler::GetShader(m_deferredShader);
 			shader->Bind();
 			m_gBuffer->BindTexureData();
 			m_deferredVB->Bind();
 			m_deferredIB->Bind();
 			RenderCommand::DrawIndexed(m_deferredIB);
+			/*
 			*/
 
+			/*
 			shader = ResourceHandler::GetShader(Shader::FullscreenQuadShader());
 			shader->Bind();
 			shader->SetInt("u_texture", 0);
@@ -812,6 +812,7 @@ namespace AstralEngine
 			m_deferredVB->Bind();
 			m_deferredIB->Bind();
 			RenderCommand::DrawIndexed(m_deferredIB);
+			*/
 
 		}
 		else
