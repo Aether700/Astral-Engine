@@ -64,6 +64,18 @@ namespace AstralEngine
 		return (size_t)numIndices;
 	}
 
+	void OpenGLRenderAPI::EnableBlending(bool enabled)
+	{
+		if (enabled)
+		{
+			glEnable(GL_BLEND);
+		}
+		else
+		{
+			glDisable(GL_BLEND);
+		}
+	}
+
 	void OpenGLRenderAPI::DrawIndexed(const AReference<IndexBuffer>& indexBuffer)
 	{
 		glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);

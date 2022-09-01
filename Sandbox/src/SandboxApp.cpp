@@ -541,8 +541,7 @@ MaterialHandle CreateMaterial(LightHandle light)
 	material->AddUniform(new LightUniform("light", light));
 	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
 	material->AddCamPosUniform();
-	//material->UseDeferredRendering(true);
-	material->UseDeferredRendering(false);
+	material->UseDeferredRendering(true);
 	return mat;
 }
 

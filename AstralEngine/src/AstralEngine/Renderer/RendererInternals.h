@@ -179,8 +179,14 @@ namespace AstralEngine
 		void BindGBufferTextureData();
 
 	private:
+		void SetupFullscreenRenderingObjects();
+
 		GBuffer* m_gBuffer;
 		RenderingDataSorter m_opaque;
 		RenderingDataSorter* m_transparent;
+
+		ShaderHandle m_deferredShader;
+		AReference<VertexBuffer> m_deferredVB;
+		AReference<IndexBuffer> m_deferredIB;
 	};
 }

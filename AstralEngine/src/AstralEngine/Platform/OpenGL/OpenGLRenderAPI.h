@@ -15,6 +15,8 @@ namespace AstralEngine
 		virtual size_t GetMaxNumVertices() override;
 		virtual size_t GetMaxNumIndices() override;
 
+		virtual void EnableBlending(bool enabled) override;
+
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer) override;
 		virtual void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count) override;
 		virtual void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 

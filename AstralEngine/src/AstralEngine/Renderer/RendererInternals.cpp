@@ -73,7 +73,6 @@ namespace AstralEngine
 	{
 		m_framebuffer->Bind();
 		RenderCommand::SetViewport(0, 0, s_framebufferWidth, s_framebufferHeight);
-		RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		RenderCommand::Clear();
 	}
 
@@ -101,8 +100,8 @@ namespace AstralEngine
 		AReference<Texture2D> t3 = ResourceHandler::GetTexture2D(m_framebuffer->GetColorAttachment(2));
 
 		t1->Bind();
-		t2->Bind(2);
-		t3->Bind(3);
+		t2->Bind(1);
+		t3->Bind(2);
 	}
 
 	// DrawDataBuffer ////////////////////////////////////////////////////
@@ -711,6 +710,10 @@ namespace AstralEngine
 		{
 			m_transparent = new RenderingDataSorter();
 		}
+		else
+		{
+			SetupFullscreenRenderingObjects();
+		}
 	}
 
 	RenderQueue::~RenderQueue() { }
@@ -743,6 +746,8 @@ namespace AstralEngine
 	{
 		if (m_gBuffer != nullptr)
 		{
+			multiple render target not working
+
 			// deferred rendering
 			m_gBuffer->Bind();
 			AReference<Shader> shader = m_gBuffer->PrepareForRender(viewProj);
@@ -786,12 +791,28 @@ namespace AstralEngine
 				pair.GetElement().RenderGeometry(viewProj);
 			}
 			m_gBuffer->Unbind();
+			RenderCommand::Clear();
 
-			replace and draw fullscreen quad here. will need to test that the deferred rendering works properly
-			for (auto& pair : m_opaque)
-			{
-				pair.GetElement().Draw(viewProj, pair.GetKey());
-			}
+			/*
+			shader = ResourceHandler::GetShader(m_deferredShader);
+			shader->Bind();
+			m_gBuffer->BindTexureData();
+			m_deferredVB->Bind();
+			m_deferredIB->Bind();
+			RenderCommand::DrawIndexed(m_deferredIB);
+			*/
+
+			shader = ResourceHandler::GetShader(Shader::FullscreenQuadShader());
+			shader->Bind();
+			shader->SetInt("u_texture", 0);
+			static Texture2DHandle pos = 0;
+			static Texture2DHandle normal = 2;
+			static Texture2DHandle color = 3;
+			ResourceHandler::GetTexture2D(normal)->Bind();
+			m_deferredVB->Bind();
+			m_deferredIB->Bind();
+			RenderCommand::DrawIndexed(m_deferredIB);
+
 		}
 		else
 		{
@@ -818,5 +839,43 @@ namespace AstralEngine
 	}
 
 	void RenderQueue::BindGBufferTextureData() { m_gBuffer->BindTexureData(); }
+
+	void RenderQueue::SetupFullscreenRenderingObjects()
+	{
+		m_deferredShader = Shader::DefaultShader();
+
+		{
+			AReference<Shader> shader = ResourceHandler::GetShader(m_deferredShader);
+			shader->Bind();
+			shader->SetInt("u_positionGBuffer", 0);
+			shader->SetInt("u_normalGBuffer", 1);
+			shader->SetInt("u_colorGBuffer", 2);
+		}
+
+		constexpr float data[] =
+		{
+			// position   +   texture coords
+			-1.0f, -1.0f,     0.0f, 0.0f,
+			 1.0f, -1.0f,     1.0f, 0.0f,
+			 1.0f,  1.0f,     1.0f, 1.0f,
+			-1.0f,  1.0f,     0.0f, 1.0f
+		};
+
+		constexpr unsigned int indices[] =
+		{
+			0, 1, 2,
+			2, 3, 0
+		};
+
+		m_deferredVB = VertexBuffer::Create((float*)data, sizeof(data));
+		m_deferredVB->Bind();
+		m_deferredVB->SetLayout({ 
+			{ ADataType::Float2, "position" },
+			{ ADataType::Float2, "textureCoords" }
+			});
+
+		m_deferredIB = IndexBuffer::Create((unsigned int*)indices, sizeof(indices) / sizeof(unsigned int));
+
+	}
 
 }

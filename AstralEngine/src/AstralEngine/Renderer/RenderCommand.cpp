@@ -45,6 +45,11 @@ namespace AstralEngine
 		return s_api->GetMaxNumIndices();
 	}
 
+	void RenderCommand::EnableBlending(bool enabled)
+	{
+		s_api->EnableBlending(enabled);
+	}
+
 	void RenderCommand::DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count)
 	{
 		DrawIndexed(RenderingPrimitive::Triangles, indexBuffer, count);

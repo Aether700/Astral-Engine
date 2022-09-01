@@ -18,6 +18,8 @@ namespace AstralEngine
 		static size_t GetMaxNumVertices();
 		static size_t GetMaxNumIndices();
 
+		static void EnableBlending(bool enabled);
+
 		//defaults to triangles
 		static void DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count = 0);
 		static void DrawIndexed(RenderingPrimitive primitive, const AReference<IndexBuffer>& indexBuffer, 

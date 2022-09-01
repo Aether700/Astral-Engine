@@ -26,6 +26,12 @@ namespace AstralEngine
 		return gbuffer;
 	}
 
+	ShaderHandle Shader::FullscreenQuadShader()
+	{
+		static ShaderHandle fullscreen = ResourceHandler::LoadShader("assets/shaders/FullscreenTextureShader.glsl");
+		return fullscreen;
+	}
+
 	AReference<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (RenderAPI::GetAPI())

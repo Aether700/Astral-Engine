@@ -1,30 +1,15 @@
 #type vertex
 #version 330 core
 
-layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec3 a_normal;
-layout(location = 2) in vec2 a_textureCoords;
-layout(location = 3) in mat4 a_transform;
-layout(location = 7) in vec4 a_color;
-layout(location = 8) in float a_textureIndex;
+layout(location = 0) in vec2 a_position;
+layout(location = 1) in vec2 a_textureCoords;
 
-uniform mat4 u_viewProjMatrix;
-uniform vec4 u_matColor;
-
-//out vec4 v_color;
-//out vec3 v_position;
-//out vec3 v_normal;
 out vec2 v_textureCoords;
 
 void main()
 {
-    //v_position = vec3(a_transform * vec4(a_position, 1.0f));
-    vec3 v_position = vec3(a_transform * vec4(a_position, 1.0f)); // temp?
-	gl_Position = u_viewProjMatrix * vec4(v_position, 1.0f);
-
-	//v_normal = normalize(mat3(transpose(inverse(a_transform))) * a_normal); // can be optimized if computed on cpu
+    gl_Position = vec4(a_position, 0, 1);
 	v_textureCoords = a_textureCoords;
-	//v_color = a_color * u_matColor;
 }
 
 
@@ -42,6 +27,7 @@ in vec2 v_textureCoords;
 uniform sampler2D u_positionGBuffer;
 uniform sampler2D u_normalGBuffer;
 uniform sampler2D u_colorGBuffer;
+
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_specularMap;
 uniform float u_matShininess;
@@ -76,5 +62,6 @@ void main()
     vec3 result = ambient + diffuse + specular;
 
 	//color = baseColor;
-	color = vec4(result, 1.0f);
+	//color = vec4(result, 1.0f);
+	color = vec4(specularIntensity, specularIntensity, specularIntensity, 1.0f);
 }

@@ -70,7 +70,6 @@ namespace AstralEngine
 
 	Texture2DHandle OpenGLFramebuffer::GetColorAttachment(size_t attachmentIndex) const
 	{
-
 		return m_colorAttachments[attachmentIndex];
 	}
 
