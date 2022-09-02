@@ -14,12 +14,15 @@ namespace AstralEngine
 
 		virtual unsigned int GetWidth() const override;
 		virtual unsigned int GetHeight() const override;
+		virtual unsigned int GetRendererID() const override;
 
 		virtual bool IsSwapChainTarget() const override;
 
 		virtual Texture2DHandle GetColorAttachment(size_t attachmentIndex = 0) const override;
 		virtual void SetColorAttachment(Texture2DHandle texture, size_t attachmentIndex) override;
 		virtual void Resize(unsigned int width, unsigned int height) override;
+
+		virtual void CopyTo(AReference<Framebuffer> targetFB) const override;
 
 	private:
 		static size_t s_numColorAttachments;

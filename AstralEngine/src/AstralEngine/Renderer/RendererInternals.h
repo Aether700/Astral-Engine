@@ -179,6 +179,7 @@ namespace AstralEngine
 		void BindGBufferTextureData();
 
 	private:
+		void SendLightUniformsToShader(AReference<Shader>& shader);
 		void SetupFullscreenRenderingObjects();
 
 		GBuffer* m_gBuffer;

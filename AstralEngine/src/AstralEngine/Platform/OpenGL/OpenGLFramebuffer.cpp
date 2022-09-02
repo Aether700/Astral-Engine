@@ -63,6 +63,11 @@ namespace AstralEngine
 		return m_height;
 	}
 
+	unsigned int OpenGLFramebuffer::GetRendererID() const
+	{
+		return m_rendererID;
+	}
+
 	bool OpenGLFramebuffer::IsSwapChainTarget() const
 	{
 		return m_isSwapChainTarget;
@@ -123,4 +128,17 @@ namespace AstralEngine
 		m_height = height;
 	}
 
+	void OpenGLFramebuffer::CopyTo(AReference<Framebuffer> targetFB) const
+	{
+		unsigned int targetID = 0;
+		if (targetFB != nullptr)
+		{
+			targetID = targetFB->GetRendererID();
+		}
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_rendererID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetID); 
+		glBlitFramebuffer(0, 0, GetWidth(), GetHeight(), 0, 0, 
+			GetWidth(), GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
 }

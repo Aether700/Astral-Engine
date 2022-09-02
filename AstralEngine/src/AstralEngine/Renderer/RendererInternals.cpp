@@ -748,14 +748,8 @@ namespace AstralEngine
 		{
 			// deferred rendering
 			m_gBuffer->Bind();
+			RenderCommand::EnableBlending(false);
 			AReference<Shader> shader = m_gBuffer->PrepareForRender(viewProj);
-			/*
-			AReference<Material> mat = ResourceHandler::GetMaterial(Material::GBufferMat());
-			AReference<Shader> shader = ResourceHandler::GetShader(mat->GetShader());
-
-			shader->Bind();
-			shader->SetMat4("u_viewProjMatrix", s_viewProjMatrix);
-			*/
 
 			for (auto& pair : m_opaque)
 			{
@@ -780,8 +774,6 @@ namespace AstralEngine
 					color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 
-				diffuse color is not being recorded/received properly
-
 				shader->SetFloat4("u_matColor", color);
 
 				ResourceHandler::GetTexture2D(diffuseMap)->Bind();
@@ -790,11 +782,17 @@ namespace AstralEngine
 				pair.GetElement().RenderGeometry(viewProj);
 			}
 			m_gBuffer->Unbind();
+			RenderCommand::EnableBlending(true);
 			RenderCommand::Clear();
+
+			need to copy gbuffer fb to default fb so we can use forward rendering with the deferred
 
 			shader = ResourceHandler::GetShader(m_deferredShader);
 			shader->Bind();
+			SendLightUniformsToShader(shader);
+			shader->SetFloat3("u_camPos", Renderer::GetCamPos());
 			m_gBuffer->BindTexureData();
+
 			m_deferredVB->Bind();
 			m_deferredIB->Bind();
 			RenderCommand::DrawIndexed(m_deferredIB);
@@ -840,6 +838,20 @@ namespace AstralEngine
 	}
 
 	void RenderQueue::BindGBufferTextureData() { m_gBuffer->BindTexureData(); }
+
+	void RenderQueue::SendLightUniformsToShader(AReference<Shader>& shader)
+	{
+		if (!Renderer::LightsModified() || shader == nullptr)
+		{
+			return;
+		}
+		const ADynArr<LightData>& lightData = Renderer::GetLightData();
+
+		shader->SetFloat3("u_lightPos", lightData[0].GetPosition());
+		shader->SetFloat3("u_lightAmbient", lightData[0].GetAmbientColor());
+		shader->SetFloat3("u_lightDiffuse", lightData[0].GetDiffuseColor());
+		shader->SetFloat3("u_lightSpecular", lightData[0].GetSpecularColor());
+	}
 
 	void RenderQueue::SetupFullscreenRenderingObjects()
 	{

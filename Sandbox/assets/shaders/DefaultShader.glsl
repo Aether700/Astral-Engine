@@ -18,11 +18,7 @@ void main()
 
 layout(location = 0) out vec4 color;
 
-//in vec4 v_color;
-//in vec3 v_position;
-//in vec3 v_normal;
 in vec2 v_textureCoords;
-
 
 uniform sampler2D u_positionGBuffer;
 uniform sampler2D u_normalGBuffer;
@@ -40,28 +36,27 @@ uniform vec3 u_lightSpecular;
 
 void main()
 {
-	vec3 baseColor = texture(u_colorGBuffer, v_textureCoords).rgb;
+	vec4 baseColor = texture(u_colorGBuffer, v_textureCoords);
     vec3 normal = texture(u_normalGBuffer, v_textureCoords).rgb;
     vec3 position = texture(u_positionGBuffer, v_textureCoords).rgb;
-    float specularIntensity = texture(u_colorGBuffer, v_textureCoords).a;
+    float specularIntensity = texture(u_normalGBuffer, v_textureCoords).a;
     
 	// ambient
-    vec3 ambient = u_lightAmbient * baseColor;
+    vec3 ambient = u_lightAmbient * baseColor.rgb;
   	
     // diffuse
     vec3 lightDir = normalize(u_lightPos - position);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = u_lightDiffuse * diff * baseColor;  
+    vec3 diffuse = u_lightDiffuse * diff * baseColor.rgb;  
     
     // specular
     vec3 viewDir = normalize(u_camPos - position);
     vec3 reflectDir = reflect(-lightDir, normal);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_matShininess);
+    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_matShininess);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // send shininess through gbuffer
     vec3 specular = u_lightSpecular * spec * specularIntensity;  
     
     vec3 result = ambient + diffuse + specular;
 
-	//color = vec4(baseColor, 1.0f);
-	color = vec4(specularIntensity, 0, 0, 1.0f);
-	//color = vec4(result, 1.0f);
+	color = vec4(result, baseColor.a);
 }

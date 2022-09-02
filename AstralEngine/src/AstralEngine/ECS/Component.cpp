@@ -300,11 +300,8 @@ namespace AstralEngine
 	
 	void Light::OnCreate()
 	{
-		if (!Renderer::LightIsValid(m_light))
-		{
-			LightData data = LightData(GetTransform().GetLocalPosition(), { 1.0f, 1.0f, 1.0f });
-			m_light = Renderer::AddLight(data);
-		}
+		LightData data = LightData(GetTransform().GetLocalPosition(), { 1.0f, 1.0f, 1.0f });
+		m_light = Renderer::AddLight(data);
 	}
 
 	LightHandle Light::GetHandle() const { return m_light; }
