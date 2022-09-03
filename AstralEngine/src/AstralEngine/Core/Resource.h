@@ -67,11 +67,13 @@ namespace AstralEngine
 	{
 	public:
 		// Shader ////////////////////////////////////////////////////
+		static bool ShaderIsValid(ShaderHandle handle);
 		static ShaderHandle LoadShader(const std::string& filepath);
 		static AReference<Shader> GetShader(ShaderHandle handle);
 		static void DeleteShader(ShaderHandle handle);
 
 		// Texture2D /////////////////////////////////////////////////
+		static bool Texture2DIsValid(Texture2DHandle handle);
 		static Texture2DHandle LoadTexture2D(const std::string& filepath);
 		static Texture2DHandle CreateTexture2D(unsigned int width, unsigned int height);
 		static Texture2DHandle CreateTexture2D(unsigned int width, unsigned int height, 
@@ -81,12 +83,14 @@ namespace AstralEngine
 		static void DeleteTexture2D(Texture2DHandle handle);
 
 		// Material /////////////////////////////////////////////////////
+		static bool MaterialIsValid(MaterialHandle handle);
 		static MaterialHandle CreateMaterial();
 		static MaterialHandle CreateMaterial(const Vector4& color);
 		static AReference<Material> GetMaterial(MaterialHandle handle);
 		static void DeleteMaterial(MaterialHandle handle);
 
 		// Mesh //////////////////////////////////////////////////////////
+		static bool MeshIsValid(MeshHandle handle);
 		static MeshHandle LoadMesh(const std::string& filepath);
 		static MeshHandle CreateMesh(const ADynArr<Vector3>& positions, const ADynArr<Vector2>& textureCoords,
 			const ADynArr<Vector3>& normals, const ADynArr<unsigned int>& indices);

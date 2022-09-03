@@ -48,13 +48,14 @@ namespace AstralEngine
 		void Bind();
 		void Unbind();
 
+		void OnWindowResize(WindowResizeEvent& resize);
+
+		const AReference<Framebuffer>& GetFramebuffer() const;
+
 		AReference<Shader> PrepareForRender(const Mat4& viewProjMatrix);
 		void BindTexureData();
 
 	private:
-		static constexpr unsigned int s_framebufferWidth = 512;
-		static constexpr unsigned int s_framebufferHeight = 512;
-
 		AReference<Framebuffer> m_framebuffer;
 	};
 
@@ -171,6 +172,8 @@ namespace AstralEngine
 	public:
 		RenderQueue(GBuffer* gBuffer = nullptr);
 		~RenderQueue();
+
+		void OnWindowResize(WindowResizeEvent& resize);
 
 		void AddData(DrawCommand* data);
 		void Draw(const Mat4& viewProj);

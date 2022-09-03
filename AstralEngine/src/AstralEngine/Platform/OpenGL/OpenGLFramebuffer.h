@@ -27,6 +27,8 @@ namespace AstralEngine
 	private:
 		static size_t s_numColorAttachments;
 		
+		void Initialize(unsigned int width, unsigned int height);
+
 		unsigned int m_rendererID;
 		unsigned int m_width, m_height;
 		bool m_isSwapChainTarget;

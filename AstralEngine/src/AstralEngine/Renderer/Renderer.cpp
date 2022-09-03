@@ -689,6 +689,11 @@ namespace AstralEngine
 		delete s_deferredQueue;
 	}
 
+	void Renderer::OnWindowResize(WindowResizeEvent& resize)
+	{
+		s_deferredQueue->OnWindowResize(resize);
+	}
+
 	const RendererStatistics& Renderer::GetStats()
 	{
 		return s_stats;

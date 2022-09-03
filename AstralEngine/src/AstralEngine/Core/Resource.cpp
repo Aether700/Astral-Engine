@@ -8,6 +8,11 @@
 namespace AstralEngine
 {
 	// ResourceHandler /////////////////////////////////////////////////////////////
+	bool ResourceHandler::ShaderIsValid(ShaderHandle handle) 
+	{ 
+		return GetHandler()->m_shaders.HandleIsValid(handle); 
+	}
+
 	ShaderHandle ResourceHandler::LoadShader(const std::string& filepath)
 	{
 		return GetHandler()->m_shaders.AddResource(Shader::Create(filepath));
@@ -21,6 +26,11 @@ namespace AstralEngine
 	void ResourceHandler::DeleteShader(ShaderHandle handle)
 	{
 		GetHandler()->m_shaders.RemoveHandle(handle);
+	}
+
+	bool ResourceHandler::Texture2DIsValid(Texture2DHandle handle)
+	{
+		return GetHandler()->m_textures2D.HandleIsValid(handle);
 	}
 
 	Texture2DHandle ResourceHandler::LoadTexture2D(const std::string& filepath)
@@ -75,6 +85,11 @@ namespace AstralEngine
 		GetHandler()->m_textures2D.RemoveHandle(handle);
 	}
 
+	bool ResourceHandler::MaterialIsValid(MaterialHandle handle)
+	{
+		return GetHandler()->m_materials.HandleIsValid(handle);
+	}
+
 	MaterialHandle ResourceHandler::CreateMaterial()
 	{
 		return GetHandler()->m_materials.AddResource(AReference<Material>::Create());
@@ -94,6 +109,11 @@ namespace AstralEngine
 	void ResourceHandler::DeleteMaterial(MaterialHandle handle)
 	{
 		GetHandler()->m_materials.RemoveHandle(handle);
+	}
+
+	bool ResourceHandler::MeshIsValid(MeshHandle handle)
+	{
+		return GetHandler()->m_meshes.HandleIsValid(handle);
 	}
 
 	MeshHandle ResourceHandler::LoadMesh(const std::string& filepath)

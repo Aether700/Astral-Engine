@@ -234,29 +234,13 @@ namespace AstralEngine
 		Vector3 position;
 		Vector3 normal;
 		Vector2 textureCoords;
-		//Vector3 normal;
-		//float textureIndex;
-		//float tillingFactor;
-		//float uses3DTexture;
-		//float ignoresCamera;
-		//Material mat;
 
 		VertexData() { }
-		/*
-		VertexData() : textureIndex(-1), tillingFactor(1.0f), 
-			uses3DTexture(0.0f), ignoresCamera(0.0f) { }
-		*/
 
 		bool operator==(const VertexData& other) const
 		{
-			return position == other.position && textureCoords == other.textureCoords;
-				/*
-				&& normal == other.normal
-				&& color == other.color
-				&& textureIndex == other.textureIndex
-				&& tillingFactor == other.tillingFactor
-				&& mat == other.mat;
-				*/
+			return position == other.position && textureCoords == other.textureCoords 
+				&& normal == other.normal;
 		}
 
 		bool operator!=(const VertexData& other) const
@@ -292,6 +276,8 @@ namespace AstralEngine
 	public:
 		static void Init();
 		static void Shutdown();
+
+		static void OnWindowResize(WindowResizeEvent& resize);
 
 		static const RendererStatistics& GetStats();
 		static void ResetStats();

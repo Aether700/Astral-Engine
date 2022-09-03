@@ -15,8 +15,8 @@ namespace AstralEngine
 		T& Pop() 
 		{
 			AE_ASSERT(!m_list.IsEmpty(), "");
-			T& popped = m_list[0];
-			m_list.Remove(0);
+			T popped = std::move(m_list[0]);
+			m_list.RemoveAt(0);
 			return popped;
 		}
 

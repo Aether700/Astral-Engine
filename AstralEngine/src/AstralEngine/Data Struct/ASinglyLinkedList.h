@@ -119,8 +119,6 @@ namespace AstralEngine
 
 		void Remove(const T& element)
 		{
-			
-
 			if (IsEmpty())
 			{
 				return;

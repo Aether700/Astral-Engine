@@ -607,7 +607,13 @@ public:
 		
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
-		
+
+		e = m_scene->CreateAEntity();
+		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
+		e.GetTransform().SetLocalPosition({ 2.0f, 1.0f, 4.0f });
+		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
+
+
 
 		/*
 		e.GetTransform().SetLocalPosition({ 2, 0, 0 });

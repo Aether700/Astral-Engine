@@ -62,17 +62,20 @@ namespace AstralEngine
 
 	GBuffer::GBuffer()
 	{
-		m_framebuffer = Framebuffer::Create(s_framebufferWidth, s_framebufferHeight);
+		AWindow* window = Application::GetWindow();
+		unsigned int width = window->GetWidth();
+		unsigned int height = window->GetHeight();
+		m_framebuffer = Framebuffer::Create(width, height);
 		m_framebuffer->Bind();
-		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(s_framebufferWidth, s_framebufferHeight), 1);
-		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(s_framebufferWidth, s_framebufferHeight), 2);
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), 1);
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), 2);
 		m_framebuffer->Unbind();
 	}
 
 	void GBuffer::Bind()
 	{
 		m_framebuffer->Bind();
-		RenderCommand::SetViewport(0, 0, s_framebufferWidth, s_framebufferHeight);
+		RenderCommand::SetViewport(0, 0, m_framebuffer->GetWidth(), m_framebuffer->GetHeight());
 		RenderCommand::Clear();
 	}
 
@@ -82,6 +85,13 @@ namespace AstralEngine
 		AWindow* window = Application::GetWindow();
 		RenderCommand::SetViewport(0, 0, window->GetWidth(), window->GetHeight());
 	}
+
+	void GBuffer::OnWindowResize(WindowResizeEvent& resize)
+	{
+		m_framebuffer->Resize(resize.GetWidth(), resize.GetHeight());
+	}
+
+	const AReference<Framebuffer>& GBuffer::GetFramebuffer() const { return m_framebuffer; }
 
 	AReference<Shader> GBuffer::PrepareForRender(const Mat4& viewProjMatrix)
 	{
@@ -718,6 +728,14 @@ namespace AstralEngine
 
 	RenderQueue::~RenderQueue() { }
 
+	void RenderQueue::OnWindowResize(WindowResizeEvent& resize)
+	{
+		if (m_gBuffer != nullptr)
+		{
+			m_gBuffer->OnWindowResize(resize);
+		}
+	}
+
 	void RenderQueue::AddData(DrawCommand* data)
 	{
 		AE_CORE_ASSERT(data->UsesDeferred() == (m_gBuffer != nullptr), 
@@ -785,7 +803,7 @@ namespace AstralEngine
 			RenderCommand::EnableBlending(true);
 			RenderCommand::Clear();
 
-			need to copy gbuffer fb to default fb so we can use forward rendering with the deferred
+
 
 			shader = ResourceHandler::GetShader(m_deferredShader);
 			shader->Bind();
@@ -796,6 +814,7 @@ namespace AstralEngine
 			m_deferredVB->Bind();
 			m_deferredIB->Bind();
 			RenderCommand::DrawIndexed(m_deferredIB);
+			m_gBuffer->GetFramebuffer()->CopyTo(nullptr);
 			/*
 			*/
 
