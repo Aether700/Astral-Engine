@@ -166,4 +166,5 @@ namespace AstralEngine
 	const Vector3 operator*(float k, const Vector3& v) { return v * k; }
 
 	bool Vector3::operator==(const Vector3& other) const { return x == other.x && y == other.y && z == other.z; }
+	bool Vector3::operator!=(const Vector3& other) const { return !(*this == other); }
 }

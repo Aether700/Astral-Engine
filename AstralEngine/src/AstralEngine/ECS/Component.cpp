@@ -1,6 +1,7 @@
 #include "aepch.h"
 #include "Components.h"
 #include "AstralEngine/Renderer/Renderer.h"
+#include "AstralEngine/Renderer/RendererInternals.h"
 
 namespace AstralEngine
 {
@@ -296,15 +297,43 @@ namespace AstralEngine
 	}
 
 	// Light ///////////////////////////////////////////////////
-	Light::Light() : m_light(NullHandle) { }
+	Light::Light() : m_light(NullHandle), m_type(LightType::Directional), m_direction(-0.5f, -1.0f, -0.5f), 
+		m_color(1.0f, 1.0f, 1.0f)
+	{
+		m_direction.Normalize();
+	}
 	
 	void Light::OnCreate()
 	{
-		LightData data = LightData(GetTransform().GetLocalPosition(), { 1.0f, 1.0f, 1.0f });
-		m_light = Renderer::AddLight(data);
+		m_light = Renderer::AddLight(CreateLightData());
+	}
+
+	void Light::OnEnable()
+	{
+		m_light = Renderer::AddLight(CreateLightData());
+	}
+
+	create and test a single directional light, light handler needs to keep track of the 
+	number of directional/point/spot lights
+
+	void Light::OnDisable()
+	{
+		Renderer::RemoveLight(m_light);
 	}
 
 	LightHandle Light::GetHandle() const { return m_light; }
+
+	LightType Light::GetType() const
+	{
+		LightData& data = RetrieveLightData();
+		return data.GetLightType();
+	}
+
+	void Light::SetType(LightType type)
+	{
+		LightData& data = RetrieveLightData();
+		data.SetLightType(type);
+	}
 
 	const Vector3& Light::GetColor() const
 	{
@@ -318,6 +347,18 @@ namespace AstralEngine
 		data.SetColor(color);
 	}
 
+	const Vector3& Light::GetDirection() const
+	{
+		LightData& data = RetrieveLightData();
+		return data.GetDirection();
+	}
+
+	void Light::SetDirection(const Vector3& direction)
+	{
+		LightData& data = RetrieveLightData();
+		data.SetDirection(direction);
+	}
+
 	bool Light::operator==(const Light& other) const { return m_light == other.m_light; }
 	bool Light::operator!=(const Light& other) const { return !(*this == other); }
 
@@ -325,5 +366,13 @@ namespace AstralEngine
 	{
 		AE_CORE_ASSERT(Renderer::LightIsValid(m_light), "");
 		return Renderer::GetLightData(m_light);
+	}
+
+	LightData Light::CreateLightData() const
+	{
+		LightData data = LightData(GetTransform().GetLocalPosition(), m_color);
+		data.SetDirection(m_direction);
+		data.SetLightType(m_type);
+		return data;
 	}
 }

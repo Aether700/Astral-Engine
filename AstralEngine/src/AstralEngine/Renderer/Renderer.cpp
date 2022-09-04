@@ -8,26 +8,6 @@
 
 namespace AstralEngine
 {
-	// LightData ///////////////////////////////////////////
-	LightData::LightData() { }
-	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
-		m_ambientIntensity(0.05f), m_diffuseIntensity(0.45f), m_specularIntensity(1.0f) { }
-
-	const Vector3& LightData::GetPosition() const { return m_position; }
-	const Vector3& LightData::GetColor() const { return m_color; }
-	const Vector3& LightData::GetAmbientColor() const { return m_color * m_ambientIntensity; }
-	const Vector3& LightData::GetDiffuseColor() const { return m_color * m_diffuseIntensity; }
-	const Vector3& LightData::GetSpecularColor() const { return m_color * m_specularIntensity; }
-	float LightData::GetAmbientIntensity() const { return m_ambientIntensity; }
-	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
-	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
-
-	void LightData::SetPosition(const Vector3& position) { m_position = position; }
-	void LightData::SetColor(const Vector3& color) { m_color = color; }
-	void LightData::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
-	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
-	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
-
 	// MaterialUniform /////////////////////////////////
 	MaterialUniform::MaterialUniform() : m_hasChanged(true) { }
 	MaterialUniform::MaterialUniform(const std::string& name) : m_name(name), m_hasChanged(true) { }
@@ -703,9 +683,8 @@ namespace AstralEngine
 	Mat4 Renderer::s_viewProjMatrix;
 	Vector3 Renderer::s_camPos;
 	double Renderer::s_frameStartTime;
-	
-	ADynArr<LightData> Renderer::s_lightData;
-	bool Renderer::s_lightsModified;
+
+	LightHandler Renderer::s_lightHandler;
 
 	void Renderer::Init()
 	{
@@ -742,25 +721,23 @@ namespace AstralEngine
 
 	void Renderer::BindGBufferTextures() { s_deferredQueue->BindGBufferTextureData(); }
 
-	bool Renderer::LightsModified() { return s_lightsModified; }
+	bool Renderer::LightsModified() { return s_lightHandler.LightsModified(); }
 
-	bool Renderer::LightIsValid(LightHandle light) { return light < s_lightData.GetCount(); }
+	bool Renderer::LightIsValid(LightHandle light) { return s_lightHandler.LightIsValid(light); }
 
-	LightHandle Renderer::AddLight(LightData& light)
-	{
-		LightHandle handle = s_lightData.GetCount();
-		s_lightData.Add(std::move(light));
-		s_lightsModified = true;
-		return handle;
-	}
+	LightHandle Renderer::AddLight(LightData& light) { return s_lightHandler.AddLight(light); }
 	
-	const ADynArr<LightData>& Renderer::GetLightData() { return s_lightData; }
+	void Renderer::RemoveLight(LightHandle& light) { s_lightHandler.RemoveLight(light); }
 
 	LightData& Renderer::GetLightData(LightHandle light)
 	{ 
-		AE_RENDER_ASSERT(LightIsValid(light), "Trying to retrieve invalid light data");
-		s_lightsModified = true;
-		return s_lightData[light];
+		return s_lightHandler.GetLightData(light);
+	}
+
+	const LightData& Renderer::GetLightDataConst(LightHandle light)
+	{
+		const LightHandler& handler = const_cast<const LightHandler&>(s_lightHandler);
+		return handler.GetLightData(light);
 	}
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)
@@ -797,7 +774,7 @@ namespace AstralEngine
 		s_forwardQueue->Draw(s_viewProjMatrix);
 		
 		s_stats.timePerFrame = Time::GetTime() - s_frameStartTime;
-		s_lightsModified = false;
+		s_lightHandler.m_lightsModified = false;
 	}
 	
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, Texture2DHandle texture,

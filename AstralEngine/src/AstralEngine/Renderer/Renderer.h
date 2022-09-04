@@ -21,36 +21,14 @@ namespace AstralEngine
 	class SpriteRenderer;
 	class MeshRenderer;
 	class GBuffer;
+	class LightData;
+	class LightHandler;
 
-	class LightData
+	enum class LightType
 	{
-	public:
-		LightData();
-		LightData(const Vector3& position, const Vector3& color = { 1.0f, 1.0f, 1.0f });
-
-		const Vector3& GetPosition() const;
-		const Vector3& GetColor() const;
-		const Vector3& GetAmbientColor() const;
-		const Vector3& GetDiffuseColor() const;
-		const Vector3& GetSpecularColor() const;
-		float GetAmbientIntensity() const;
-		float GetDiffuseIntensity() const;
-		float GetSpecularIntensity() const;
-
-		void SetPosition(const Vector3& position);
-		void SetColor(const Vector3& color);
-		void SetAmbientIntensity(float intensity);
-		void SetDiffuseIntensity(float intensity);
-		void SetSpecularIntensity(float intensity);
-
-
-
-	private:
-		Vector3 m_position;
-		Vector3 m_color;
-		float m_ambientIntensity;
-		float m_diffuseIntensity;
-		float m_specularIntensity;
+		Directional,
+		Point,
+		Spot
 	};
 
 	// represents a uniform inside a material
@@ -294,8 +272,9 @@ namespace AstralEngine
 		static bool LightIsValid(LightHandle light);
 
 		static LightHandle AddLight(LightData& light);
-		static const ADynArr<LightData>& GetLightData();
+		static void RemoveLight(LightHandle& light);
 		static LightData& GetLightData(LightHandle light);
+		static const LightData& GetLightDataConst(LightHandle light);
 
 		//use to start renderering and stop rendering
 		static void BeginScene(const OrthographicCamera& cam);
@@ -362,7 +341,6 @@ namespace AstralEngine
 		static Vector3 s_camPos;
 		static double s_frameStartTime;
 
-		static ADynArr<LightData> s_lightData;
-		static bool s_lightsModified;
+		static LightHandler s_lightHandler;
 	};
 }

@@ -870,12 +870,12 @@ namespace AstralEngine
 		{
 			return;
 		}
-		const ADynArr<LightData>& lightData = Renderer::GetLightData();
+		LightData& lightData = Renderer::GetLightData(0);
 
-		shader->SetFloat3("u_lightPos", lightData[0].GetPosition());
-		shader->SetFloat3("u_lightAmbient", lightData[0].GetAmbientColor());
-		shader->SetFloat3("u_lightDiffuse", lightData[0].GetDiffuseColor());
-		shader->SetFloat3("u_lightSpecular", lightData[0].GetSpecularColor());
+		shader->SetFloat3("u_lightPos", lightData.GetPosition());
+		shader->SetFloat3("u_lightAmbient", lightData.GetAmbientColor());
+		shader->SetFloat3("u_lightDiffuse", lightData.GetDiffuseColor());
+		shader->SetFloat3("u_lightSpecular", lightData.GetSpecularColor());
 	}
 
 	void RenderQueue::SetupFullscreenRenderingObjects()
@@ -916,4 +916,90 @@ namespace AstralEngine
 
 	}
 
+
+	// LightData ///////////////////////////////////////////
+	LightData::LightData() : m_type(LightType::Directional) { }
+	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
+		m_ambientIntensity(0.05f), m_diffuseIntensity(0.45f), m_specularIntensity(1.0f),
+		m_type(LightType::Directional) { }
+
+	LightType LightData::GetLightType() const { return m_type; }
+	const Vector3& LightData::GetPosition() const { return m_position; }
+	const Vector3& LightData::GetDirection() const { return m_direction; }
+	const Vector3& LightData::GetColor() const { return m_color; }
+	const Vector3& LightData::GetAmbientColor() const { return m_color * m_ambientIntensity; }
+	const Vector3& LightData::GetDiffuseColor() const { return m_color * m_diffuseIntensity; }
+	const Vector3& LightData::GetSpecularColor() const { return m_color * m_specularIntensity; }
+	float LightData::GetAmbientIntensity() const { return m_ambientIntensity; }
+	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
+	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
+
+	void LightData::SetLightType(LightType type) { m_type = type; }
+	void LightData::SetPosition(const Vector3& position) { m_position = position; }
+
+	void LightData::SetDirection(const Vector3& direction)
+	{
+		AE_CORE_ASSERT(direction != Vector3::Zero(), "Invalid direction provided to light");
+		m_direction = direction;
+	}
+
+	void LightData::SetColor(const Vector3& color) { m_color = color; }
+	void LightData::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
+	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
+	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
+
+	// LightHandler //////////////////////////////////////////////////////////////////
+	LightHandler::LightHandler() : m_lights(s_maxNumLights), m_lightsModified(false) { }
+	
+	LightHandle LightHandler::AddLight(LightData& data)
+	{
+		if (m_lights.GetCount() >= s_maxNumLights && m_handlesToRecycle.IsEmpty())
+		{
+			AE_CORE_WARN("Scene already contains the maximum number of lights supported. Cannot add more lights");
+			return NullHandle;
+		}
+		m_lightsModified = true;
+
+		LightHandle light = NullHandle;
+		if (m_handlesToRecycle.IsEmpty())
+		{
+			light = m_lights.GetCount();
+			m_lights.Add(std::move(data));
+		}
+		else
+		{
+			light = m_handlesToRecycle.Pop();
+			m_lights[light] = std::move(data);
+		}
+		return light;
+	}
+	
+	void LightHandler::RemoveLight(LightHandle light)
+	{
+		if (LightIsValid(light))
+		{
+			m_lightsModified = true;
+			m_handlesToRecycle.Push(light);
+		}
+	}
+
+	LightData& LightHandler::GetLightData(LightHandle light)
+	{
+		AE_CORE_ASSERT(LightIsValid(light), "");
+		m_lightsModified = true;
+		return m_lights[light];
+	}
+
+	const LightData& LightHandler::GetLightData(LightHandle light) const
+	{
+		AE_CORE_ASSERT(LightIsValid(light), "");
+		return m_lights[light];
+	}
+
+	bool LightHandler::LightIsValid(LightHandle light) const
+	{
+		return light < m_lights.GetCount() && !m_handlesToRecycle.Contains(light);
+	}
+
+	bool LightHandler::LightsModified() const { return m_lightsModified; }
 }

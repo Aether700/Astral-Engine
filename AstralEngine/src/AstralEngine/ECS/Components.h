@@ -165,17 +165,31 @@ namespace AstralEngine
 	public:
 		Light();
 		void OnCreate() override;
+		void OnEnable() override;
+		void OnDisable() override;
 
 		LightHandle GetHandle() const;
+
+		LightType GetType() const;
+		void SetType(LightType type);
+
 		const Vector3& GetColor() const;
 		void SetColor(const Vector3& color);
+
+		const Vector3& GetDirection() const;
+		void SetDirection(const Vector3& direction);
 
 		bool operator==(const Light& other) const;
 		bool operator!=(const Light& other) const;
 
 	private:
 		LightData& RetrieveLightData() const;
+		LightData CreateLightData() const;
 
 		LightHandle m_light;
+
+		LightType m_type;
+		Vector3 m_color;
+		Vector3 m_direction;
 	};
 }

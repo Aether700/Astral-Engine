@@ -545,8 +545,6 @@ MaterialHandle CreateMaterial(LightHandle light)
 	return mat;
 }
 
-add support for multiple lights at once
-
 //layer/////////////////////////////////
 
 class TestLayer : public AstralEngine::Layer

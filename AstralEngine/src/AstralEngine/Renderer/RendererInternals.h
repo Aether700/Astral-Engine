@@ -7,6 +7,8 @@
 
 namespace AstralEngine
 {
+	typedef size_t LightHandle;
+
 	struct VertexData;
 	struct InstanceVertexData;
 	struct BatchedVertexData;
@@ -192,5 +194,63 @@ namespace AstralEngine
 		ShaderHandle m_deferredShader;
 		AReference<VertexBuffer> m_deferredVB;
 		AReference<IndexBuffer> m_deferredIB;
+	};
+
+
+	class LightData
+	{
+	public:
+		LightData();
+		LightData(const Vector3& position, const Vector3& color = { 1.0f, 1.0f, 1.0f });
+
+		LightType GetLightType() const;
+		const Vector3& GetPosition() const;
+		const Vector3& GetDirection() const;
+		const Vector3& GetColor() const;
+		const Vector3& GetAmbientColor() const;
+		const Vector3& GetDiffuseColor() const;
+		const Vector3& GetSpecularColor() const;
+		float GetAmbientIntensity() const;
+		float GetDiffuseIntensity() const;
+		float GetSpecularIntensity() const;
+
+		void SetLightType(LightType type);
+		void SetPosition(const Vector3& position);
+		void SetDirection(const Vector3& position);
+		void SetColor(const Vector3& color);
+		void SetAmbientIntensity(float intensity);
+		void SetDiffuseIntensity(float intensity);
+		void SetSpecularIntensity(float intensity);
+
+	private:
+		LightType m_type;
+		Vector3 m_position;
+		Vector3 m_direction;
+		Vector3 m_color;
+		float m_ambientIntensity;
+		float m_diffuseIntensity;
+		float m_specularIntensity;
+	};
+
+	class LightHandler sealed
+	{
+		friend class Renderer;
+	public:
+		LightHandler();
+		LightHandle AddLight(LightData& data);
+		void RemoveLight(LightHandle light);
+
+		LightData& GetLightData(LightHandle light);
+		const LightData& GetLightData(LightHandle light) const;
+
+		bool LightIsValid(LightHandle light) const;
+		bool LightsModified() const;
+
+	private:
+		static constexpr size_t s_maxNumLights = 50;
+
+		ADynArr<LightData> m_lights;
+		AStack<LightHandle> m_handlesToRecycle;
+		bool m_lightsModified;
 	};
 }
