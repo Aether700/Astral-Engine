@@ -11,6 +11,7 @@ namespace AstralEngine
 		static void Init();
 		static void SetViewport(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 		static void Clear();
+		static Vector4 GetClearColor();
 		static void SetClearColor(float r, float g, float b, float a);
 		static void SetClearColor(const Vector4& color);
 

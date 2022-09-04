@@ -122,15 +122,18 @@ namespace AstralEngine
 		{
 			if (m_colorAttachments[i] != NullHandle)
 			{
+				Texture2DInternalFormat internalFormat = ResourceHandler::GetTexture2D(
+					m_colorAttachments[i])->GetInternalFormat();
 				ResourceHandler::DeleteTexture2D(m_colorAttachments[i]);
-				SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), i);
+				SetColorAttachment(ResourceHandler::CreateTexture2D(width, height, internalFormat), i);
 			}
 		}
 
 		// resize depth attachment
+		Texture2DInternalFormat internalFormat = ResourceHandler::GetTexture2D(
+			m_depthAttachment)->GetInternalFormat();
 		ResourceHandler::DeleteTexture2D(m_depthAttachment);
-		m_depthAttachment = ResourceHandler::CreateTexture2D(width, height,
-			Texture2DInternalFormat::Depth24Stencil8);
+		m_depthAttachment = ResourceHandler::CreateTexture2D(width, height, internalFormat);
 		AReference<Texture2D> depthAttachment = ResourceHandler::GetTexture2D(m_depthAttachment);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D,

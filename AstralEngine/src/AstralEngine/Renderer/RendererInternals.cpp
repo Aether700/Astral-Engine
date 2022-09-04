@@ -67,7 +67,8 @@ namespace AstralEngine
 		unsigned int height = window->GetHeight();
 		m_framebuffer = Framebuffer::Create(width, height);
 		m_framebuffer->Bind();
-		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), 1);
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height, 
+			Texture2DInternalFormat::RGB16Normal), 1);
 		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), 2);
 		m_framebuffer->Unbind();
 	}
@@ -764,9 +765,13 @@ namespace AstralEngine
 	{
 		if (m_gBuffer != nullptr)
 		{
+			Vector4 clearColor = RenderCommand::GetClearColor();
 			// deferred rendering
 			m_gBuffer->Bind();
+			RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			RenderCommand::Clear();
 			RenderCommand::EnableBlending(false);
+
 			AReference<Shader> shader = m_gBuffer->PrepareForRender(viewProj);
 
 			for (auto& pair : m_opaque)
@@ -786,10 +791,10 @@ namespace AstralEngine
 					specularMap = Texture2D::WhiteTexture();
 				}
 
-				Vector4 color = currMat->GetColor();
-				if (!currMat->HasColor())
+				Vector4 color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+				if (currMat->HasColor())
 				{
-					color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+					color = currMat->GetColor();
 				}
 
 				shader->SetFloat4("u_matColor", color);
@@ -801,6 +806,7 @@ namespace AstralEngine
 			}
 			m_gBuffer->Unbind();
 			RenderCommand::EnableBlending(true);
+			RenderCommand::SetClearColor(clearColor);
 			RenderCommand::Clear();
 
 

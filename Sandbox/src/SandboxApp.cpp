@@ -540,11 +540,12 @@ MaterialHandle CreateMaterial(LightHandle light)
 	material->SetDiffuseMap(ResourceHandler::LoadTexture2D("assets/textures/crateDiffuse.png"));
 	material->SetSpecularMap(ResourceHandler::LoadTexture2D("assets/textures/crateSpecular.png"));
 	material->AddUniform(new LightUniform("light", light));
-	material->AddUniform(new PrimitiveUniform("u_matShininess", 32.0f));
 	material->AddCamPosUniform();
 	material->UseDeferredRendering(true);
 	return mat;
 }
+
+add support for multiple lights at once
 
 //layer/////////////////////////////////
 
@@ -567,53 +568,30 @@ public:
 		SetupRenderingData(m_vb, m_instancedVB, m_ib);
 		//////////////////
 
-		/*
-		AstralEngine::AWindow* window = AstralEngine::Application::GetWindow();
-		unsigned int width = window->GetWidth(), height = window->GetHeight();
-		float aspectRatio = (float)width / (float)height;
-		m_cameraController = AstralEngine::AReference<AstralEngine::OrthographicCameraController>::Create(aspectRatio, true);
-		m_cameraController->SetZoomLevel(5.5f);
-
-		AstralEngine::AReference<AstralEngine::UIWindow> uiWindow 
-			= AstralEngine::UIContext::CreateUIWindow({ 300, 300 }, 200, 200);
-		AstralEngine::UIContext::CreateUIWindow({ 800, 300 }, 200, 200);
-
-		AstralEngine::AReference<AstralEngine::UIButton> button 
-			= AstralEngine::AReference<AstralEngine::UIButton>::Create("My Button", AstralEngine::Vector4(0.8f, 0, 0, 1));
-		uiWindow->AddElement((AstralEngine::AReference<AstralEngine::UIElement>)button);
-		button->SetParent(uiWindow);
-		button->AddListener(AstralEngine::ADelegate<void()>(&OnButtonClicked));
-		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
-		*/
-
-		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
-
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
-		//m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
-		//m_entity.EmplaceComponent<Controller>();
 		MeshHandle cube = CreateCubeMesh();
 		MaterialHandle lightMat = CreateLightCubeMat();
 
 		auto e = m_scene->CreateAEntity();
 		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
-		e.GetTransform().SetLocalPosition({ 3.0f, 5.0f, -2.0f });
+		e.GetTransform().SetLocalPosition({ 3.0f, 5.0f, -4.0f });
 		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
 		Light& l = e.EmplaceComponent<Light>();
-		
+
 		MaterialHandle mat = CreateMaterial(l.GetHandle());
 
 		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
-		
+
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
 
+		/*
 		e = m_scene->CreateAEntity();
 		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
 		e.GetTransform().SetLocalPosition({ 2.0f, 1.0f, 4.0f });
 		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
-
-
+		*/
 
 		/*
 		e.GetTransform().SetLocalPosition({ 2, 0, 0 });
@@ -626,7 +604,7 @@ public:
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png"));
 		e.GetTransform().SetLocalPosition({ 0, 2, 0 });
-		
+
 		e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png"));
 		e.GetTransform().SetLocalPosition({ 2, 2, 0 });
@@ -650,6 +628,17 @@ public:
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 		//SetupRendererTestScene();
+
+		// temp ///////////////////////////////////
+		Vector3 lightPos = { 3.0f, 5.0f, -4.0f };
+		Vector3 cubePos = { 0.0f, 0.0f, 0.0f };
+		Vector3 normal = { 0.0f, 0.0f, -1.0f };
+
+		Vector3 lightDir = Vector3::Normalize(lightPos - cubePos);
+		float angle = Vector3::Angle(lightDir, normal);
+		float diff = Math::RadiansToDegree(Math::Max(Vector3::DotProduct(normal, lightDir), 0.0f));
+		int x = 0;
+		///////////////////////////////////////////
 	}
 
 	void OnUpdate() override

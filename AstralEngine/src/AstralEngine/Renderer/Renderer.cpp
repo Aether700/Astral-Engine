@@ -362,6 +362,7 @@ namespace AstralEngine
 	const char* Material::s_positionGBufferName = "u_positionGBuffer";
 	const char* Material::s_normalGBufferName = "u_normalGBuffer";
 	const char* Material::s_colorGBufferName = "u_colorGBuffer";
+	const char* Material::s_shininessName = "u_matShininess";
 
 	Material::Material() : m_shader(Shader::DefaultShader()), m_usesDeferred(false) { }
 
@@ -466,6 +467,7 @@ namespace AstralEngine
 		MaterialUniform* uniform = FindUniformByName(s_colorName);
 		if (uniform == nullptr)
 		{
+			AE_CORE_ERROR("Material has no color uniform");
 			return Vector4::Zero();
 		}
 		PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
@@ -485,6 +487,34 @@ namespace AstralEngine
 			PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
 			AE_RENDER_ASSERT(primitive != nullptr, "");
 			primitive->SetValue(color);
+		}
+	}
+
+	bool Material::HasShininess() const { return FindUniformByName(s_shininessName) != nullptr; }
+	
+	float Material::GetShininess() const 
+	{
+		MaterialUniform* uniform = FindUniformByName(s_shininessName);
+		if (uniform == nullptr)
+		{
+			AE_CORE_ERROR("Material Has no shininess uniform");
+			return 0.0f;
+		}
+		PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
+		return primitive->GetValue<float>();
+	}
+
+	void Material::SetShininess(float shininess)
+	{
+		MaterialUniform* uniform = FindUniformByName(s_shininessName);
+		if (uniform == nullptr)
+		{
+			AddUniform(new PrimitiveUniform(s_shininessName, shininess));
+		}
+		else
+		{
+			PrimitiveUniform* primitive = dynamic_cast<PrimitiveUniform*>(uniform);
+			primitive->SetValue(shininess);
 		}
 	}
 
@@ -568,6 +598,7 @@ namespace AstralEngine
 			material->SetDiffuseMap(Texture2D::WhiteTexture());
 			material->SetSpecularMap(Texture2D::WhiteTexture());
 			material->AddCamPosUniform();
+			material->SetShininess(32.0f);
 			material->UseDeferredRendering(true);
 
 			AReference<Shader> shader = ResourceHandler::GetShader(material->GetShader());

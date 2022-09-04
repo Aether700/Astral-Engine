@@ -45,8 +45,8 @@ uniform sampler2D u_specularMap;
 void main()
 {
 	position = vec4(v_position, 1);
-	normal.rgb = v_normal;
-	normal.a = texture(u_specularMap, v_textureCoords).r; // store specular component in alpha channel
+	normal = vec4(v_normal, 1);
 
-	color = (texture(u_diffuseMap, v_textureCoords) * v_color);
+	color.rgb = (texture(u_diffuseMap, v_textureCoords) * v_color).rgb;
+	color.a = texture(u_specularMap, v_textureCoords).r; // store specular component in alpha channel
 }

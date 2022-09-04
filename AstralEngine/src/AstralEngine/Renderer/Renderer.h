@@ -186,6 +186,10 @@ namespace AstralEngine
 		const Vector4& GetColor() const;
 		void SetColor(const Vector4& color);
 
+		bool HasShininess() const;
+		float GetShininess() const;
+		void SetShininess(float shininess);
+
 		void UseDeferredRendering(bool deferred);
 		bool UsesDeferredRendering() const;
 		
@@ -212,6 +216,7 @@ namespace AstralEngine
 		static const char* s_positionGBufferName;
 		static const char* s_normalGBufferName;
 		static const char* s_colorGBufferName;
+		static const char* s_shininessName;
 
 		MaterialUniform* FindUniformByName(const std::string& name) const;
 		Texture2DUniform* FindTextureByName(const std::string& name) const;

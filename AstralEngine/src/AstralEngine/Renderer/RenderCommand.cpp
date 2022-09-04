@@ -20,6 +20,11 @@ namespace AstralEngine
 		s_api->Clear(); 
 	}
 	
+	Vector4 RenderCommand::GetClearColor()
+	{
+		return s_api->GetClearColor();
+	}
+
 	void RenderCommand::SetClearColor(float r, float g, float b, float a) 
 	{
 		s_api->SetClearColor(r, g, b, a); 

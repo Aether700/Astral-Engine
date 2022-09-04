@@ -37,6 +37,13 @@ namespace AstralEngine
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+	Vector4 OpenGLRenderAPI::GetClearColor()
+	{
+		float color[4];
+		glGetFloatv(GL_COLOR_CLEAR_VALUE, (float*)&color);
+		return Vector4(color[0], color[1], color[2], color[3]);
+	}
+
 	void OpenGLRenderAPI::SetClearColor(float r, float g, float b, float a)
 	{
 		glClearColor(r, g, b, a);

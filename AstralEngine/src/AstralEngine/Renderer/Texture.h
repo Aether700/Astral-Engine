@@ -26,7 +26,9 @@ namespace AstralEngine
 	enum class Texture2DInternalFormat
 	{
 		Depth24Stencil8,
-		RGBA8
+		RGBA8,
+		RGB8,
+		RGB16Normal
 	};
 
 	class Texture2D : public Texture
@@ -35,6 +37,8 @@ namespace AstralEngine
 	public:
 		virtual ~Texture2D() { }
 		
+		virtual Texture2DInternalFormat GetInternalFormat() const = 0;
+
 		static ResourceHandle WhiteTexture();
 
 	private:

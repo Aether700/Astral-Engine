@@ -36,10 +36,15 @@ uniform vec3 u_lightSpecular;
 
 void main()
 {
-	vec4 baseColor = texture(u_colorGBuffer, v_textureCoords);
     vec3 normal = texture(u_normalGBuffer, v_textureCoords).rgb;
+    if (normal == vec3(0, 0, 0))
+    {
+        discard;
+    }
+
+	vec4 baseColor = vec4(texture(u_colorGBuffer, v_textureCoords).rgb, 1);
     vec3 position = texture(u_positionGBuffer, v_textureCoords).rgb;
-    float specularIntensity = texture(u_normalGBuffer, v_textureCoords).a;
+    float specularIntensity = texture(u_colorGBuffer, v_textureCoords).a;
     
 	// ambient
     vec3 ambient = u_lightAmbient * baseColor.rgb;
@@ -52,12 +57,10 @@ void main()
     // specular
     vec3 viewDir = normalize(u_camPos - position);
     vec3 reflectDir = reflect(-lightDir, normal);  
-    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_matShininess);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // send shininess through gbuffer
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
     vec3 specular = u_lightSpecular * spec * specularIntensity;  
     
     vec3 result = ambient + diffuse + specular;
 
-	//color = vec4(result, baseColor.a);
-	color = baseColor;
+	color = vec4(result, baseColor.a);
 }
