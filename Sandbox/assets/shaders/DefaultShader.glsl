@@ -38,7 +38,7 @@ struct DirectionalLight
     vec3 specular;
 };
 
-uniform DirectionalLight u_directionalLightArr[50];
+uniform DirectionalLight u_directionalLightArr[#NUM_LIGHTS];
 uniform int u_numDirectionalLights;
 
 vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor, 

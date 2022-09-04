@@ -964,6 +964,21 @@ namespace AstralEngine
 		if (LightIsValid(light))
 		{
 			m_lightsModified = true;
+			LightData& data = GetLightData(light);
+			switch(data.GetLightType())
+			{
+			case LightType::Directional:
+				m_directionalLights.Remove(light);
+				break;
+
+			case LightType::Point:
+				m_pointLights.Remove(light);
+				break;
+
+			default:
+				AE_CORE_ERROR("Unknown light type detected");
+				break;
+			}
 			m_handlesToRecycle.Push(light);
 		}
 	}
@@ -988,10 +1003,10 @@ namespace AstralEngine
 
 	bool LightHandler::LightsModified() const { return m_lightsModified; }
 
-	constexpr size_t LightHandler::GetMaxNumLights() { return s_maxNumLights; }
-
 	void LightHandler::SendLightUniformsToShader(AReference<Shader>& shader) const
 	{
+		check to implement point lights
+
 		if (!LightsModified() || shader == nullptr)
 		{
 			return;

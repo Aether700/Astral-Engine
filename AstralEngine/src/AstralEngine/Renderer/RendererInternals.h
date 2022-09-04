@@ -246,7 +246,7 @@ namespace AstralEngine
 		bool LightIsValid(LightHandle light) const;
 		bool LightsModified() const;
 
-		static constexpr size_t GetMaxNumLights();
+		static constexpr size_t GetMaxNumLights() { return s_maxNumLights; }
 
 		void SendLightUniformsToShader(AReference<Shader>& shader) const;
 

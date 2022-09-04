@@ -12,6 +12,27 @@ using namespace AstralEngine;
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class LightToggler : public NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		if (Input::GetKeyDown(KeyCode::L))
+		{
+			if (HasComponent<Light>());
+			{
+				Light& l = GetComponent<Light>();
+				l.SetActive(!l.IsActive());
+
+				if (HasComponent<MeshRenderer>())
+				{
+					GetComponent<MeshRenderer>().SetActive(l.IsActive());
+				}
+			}
+		}
+	}
+};
+
 class Rotator : public NativeScript
 {
 public:
@@ -571,6 +592,8 @@ public:
 		MaterialHandle lightMat = CreateLightCubeMat();
 
 		CreateDirectionalLight({ 3.0f, 5.0f, 1.0f }, cube, lightMat);
+		CreateDirectionalLight({ -3.0f, 5.0f, 1.0f }, cube, lightMat);
+		CreateDirectionalLight({ 0.0f, 5.0f, 0.0f }, cube, lightMat);
 
 		/*
 		auto e = m_scene->CreateAEntity();
@@ -719,7 +742,15 @@ public:
 private:
 	void CreateDirectionalLight(const Vector3& pos, MeshHandle cube, MaterialHandle lightMat)
 	{
+		static bool first = true;
+
 		auto e = m_scene->CreateAEntity();
+
+		if (first)
+		{
+			first = false;
+			e.EmplaceComponent<LightToggler>();
+		}
 
 		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
 		e.EmplaceComponent<MeshRenderer>(cube, lightMat);

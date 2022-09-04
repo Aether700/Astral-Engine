@@ -39,9 +39,12 @@ namespace AstralEngine
 		int GetUniformLocation(const std::string& name);
 		std::string ReadFile(const std::string& filepath);
 		
+
 		//type is a GLenum
 		unsigned int CreateGLShader(const std::string& src, unsigned int type);
 		AUnorderedMap<unsigned int, std::string> PreProcess(const std::string& src);
+		void PreprocessToken(std::string& src, const char* token, size_t tokenLen, 
+			const std::string& tokenReplacement);
 		void CompileShaders(AUnorderedMap<unsigned int, std::string>& shaderSrcs);
 
 		unsigned int m_rendererID;
