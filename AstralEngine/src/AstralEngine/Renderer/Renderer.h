@@ -127,20 +127,6 @@ namespace AstralEngine
 		unsigned int m_count;
 	};
 
-	class LightUniform : public MaterialUniform
-	{
-	public:
-		LightUniform();
-		LightUniform(const std::string& name, LightHandle light);
-
-		void SetLight(LightHandle light);
-
-		virtual void SendToShader(AReference<Shader> shader) const override;
-
-	private:
-		LightHandle m_light;
-	};
-
 	class Material
 	{
 	public:
@@ -256,6 +242,7 @@ namespace AstralEngine
 	class Renderer
 	{
 		friend class DrawDataBuffer;
+		friend class Light;
 	public:
 		static void Init();
 		static void Shutdown();
@@ -275,6 +262,8 @@ namespace AstralEngine
 		static void RemoveLight(LightHandle& light);
 		static LightData& GetLightData(LightHandle light);
 		static const LightData& GetLightDataConst(LightHandle light);
+
+		static void SendLightUniformsToShader(AReference<Shader>& shader);
 
 		//use to start renderering and stop rendering
 		static void BeginScene(const OrthographicCamera& cam);

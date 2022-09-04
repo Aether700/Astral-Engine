@@ -532,14 +532,13 @@ MeshHandle CreateCubeMesh()
 	return ResourceHandler::CreateMesh(positions, textureCoords, normals, indices);
 }
 
-MaterialHandle CreateMaterial(LightHandle light)
+MaterialHandle CreateMaterial()
 { 
 	MaterialHandle mat = ResourceHandler::CreateMaterial();
 	auto& material = ResourceHandler::GetMaterial(mat);
 	material->SetColor({ 1, 1, 1, 1 });
 	material->SetDiffuseMap(ResourceHandler::LoadTexture2D("assets/textures/crateDiffuse.png"));
 	material->SetSpecularMap(ResourceHandler::LoadTexture2D("assets/textures/crateSpecular.png"));
-	material->AddUniform(new LightUniform("light", light));
 	material->AddCamPosUniform();
 	material->UseDeferredRendering(true);
 	return mat;
@@ -571,17 +570,22 @@ public:
 		MeshHandle cube = CreateCubeMesh();
 		MaterialHandle lightMat = CreateLightCubeMat();
 
+		CreateDirectionalLight({ 3.0f, 5.0f, 1.0f }, cube, lightMat);
+
+		/*
 		auto e = m_scene->CreateAEntity();
 		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
-		e.GetTransform().SetLocalPosition({ 3.0f, 5.0f, -4.0f });
 		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
 		Light& l = e.EmplaceComponent<Light>();
+		e.GetTransform().SetLocalPosition(-5.0f * l.GetDirection() + e.GetTransform().GetLocalPosition());
+		*/
 
-		MaterialHandle mat = CreateMaterial(l.GetHandle());
+
+		MaterialHandle mat = CreateMaterial();
 
 		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
 
-		e = m_scene->CreateAEntity();
+		auto e = m_scene->CreateAEntity();
 		e.EmplaceComponent<MeshRenderer>(cube, mat);
 
 		/*
@@ -713,6 +717,18 @@ public:
 	*/
 
 private:
+	void CreateDirectionalLight(const Vector3& pos, MeshHandle cube, MaterialHandle lightMat)
+	{
+		auto e = m_scene->CreateAEntity();
+
+		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
+		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
+		Light& l = e.EmplaceComponent<Light>();
+		//e.GetTransform().SetLocalPosition(-5.0f * l.GetDirection() + e.GetTransform().GetLocalPosition());
+		e.GetTransform().SetLocalPosition(pos);
+		l.SetDirection(-pos);
+	}
+	
 	void CreateSprite(const Vector3& pos, Texture2DHandle texture = NullHandle, bool rotator = false)
 	{
 		auto e = m_scene->CreateAEntity();
@@ -796,10 +812,10 @@ private:
 		RenderCommand::DrawIndexed(ib);
 	}
 
-	void SetupRendererTestScene(LightHandle light)
+	void SetupRendererTestScene()
 	{
 		MeshHandle cube = CreateCubeMesh();
-		MaterialHandle mat = CreateMaterial(light);
+		MaterialHandle mat = CreateMaterial();
 
 		Texture2DHandle t = ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png");
 		Texture2DHandle t2 = ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png");

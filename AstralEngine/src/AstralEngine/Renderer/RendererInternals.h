@@ -184,7 +184,6 @@ namespace AstralEngine
 		void BindGBufferTextureData();
 
 	private:
-		void SendLightUniformsToShader(AReference<Shader>& shader);
 		void SetupFullscreenRenderingObjects();
 
 		GBuffer* m_gBuffer;
@@ -234,6 +233,7 @@ namespace AstralEngine
 
 	class LightHandler sealed
 	{
+		friend class Light;
 		friend class Renderer;
 	public:
 		LightHandler();
@@ -246,11 +246,21 @@ namespace AstralEngine
 		bool LightIsValid(LightHandle light) const;
 		bool LightsModified() const;
 
+		static constexpr size_t GetMaxNumLights();
+
+		void SendLightUniformsToShader(AReference<Shader>& shader) const;
+
 	private:
 		static constexpr size_t s_maxNumLights = 50;
 
+		void SendDirectionalLightUniforms(AReference<Shader>& shader) const;
+		void SendPointLightUniforms(AReference<Shader>& shader) const;
+		void OnLightTypeChange(LightHandle light, LightType oldType, LightType newType);
+
 		ADynArr<LightData> m_lights;
 		AStack<LightHandle> m_handlesToRecycle;
+		ASinglyLinkedList<LightHandle> m_directionalLights;
+		ASinglyLinkedList<LightHandle> m_pointLights;
 		bool m_lightsModified;
 	};
 }

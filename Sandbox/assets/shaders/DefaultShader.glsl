@@ -26,13 +26,40 @@ uniform sampler2D u_colorGBuffer;
 
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_specularMap;
-uniform float u_matShininess;
 
 uniform vec3 u_camPos;
-uniform vec3 u_lightPos;
-uniform vec3 u_lightAmbient;
-uniform vec3 u_lightDiffuse;
-uniform vec3 u_lightSpecular;
+
+struct DirectionalLight
+{
+    vec3 direction;
+  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+uniform DirectionalLight u_directionalLightArr[50];
+uniform int u_numDirectionalLights;
+
+vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor, 
+    float specularIntensity, vec3 normal, vec3 viewDir)
+{
+    vec3 lightDir = normalize(-light.direction);
+    
+    // ambient
+    vec3 ambient = light.ambient * baseColor;
+    
+    // diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * baseColor;
+    
+    // specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // try to add shininess per mat here?
+    vec3 specular = light.specular * spec * specularIntensity;
+    
+    return ambient + diffuse + specular;
+}
 
 void main()
 {
@@ -42,17 +69,18 @@ void main()
         discard;
     }
 
-	vec4 baseColor = vec4(texture(u_colorGBuffer, v_textureCoords).rgb, 1);
+	vec3 baseColor = texture(u_colorGBuffer, v_textureCoords).rgb;
     vec3 position = texture(u_positionGBuffer, v_textureCoords).rgb;
     float specularIntensity = texture(u_colorGBuffer, v_textureCoords).a;
     
+    /*
 	// ambient
-    vec3 ambient = u_lightAmbient * baseColor.rgb;
+    vec3 ambient = u_lightAmbient * baseColor;
   	
     // diffuse
     vec3 lightDir = normalize(u_lightPos - position);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = u_lightDiffuse * diff * baseColor.rgb;  
+    vec3 diffuse = u_lightDiffuse * diff * baseColor;  
     
     // specular
     vec3 viewDir = normalize(u_camPos - position);
@@ -63,4 +91,16 @@ void main()
     vec3 result = ambient + diffuse + specular;
 
 	color = vec4(result, baseColor.a);
+    */
+
+    vec3 viewDir = normalize(u_camPos - position);
+
+    vec3 result = vec3(0, 0, 0);
+    for (int i = 0; i < u_numDirectionalLights; i++)
+    {
+        result += CalculateDirectionalLightShading(u_directionalLightArr[i], baseColor, 
+            specularIntensity, normal, viewDir);
+    }
+
+    color = vec4(result, 1.0f);
 }

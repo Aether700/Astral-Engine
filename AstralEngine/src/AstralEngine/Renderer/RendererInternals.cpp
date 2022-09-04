@@ -809,11 +809,9 @@ namespace AstralEngine
 			RenderCommand::SetClearColor(clearColor);
 			RenderCommand::Clear();
 
-
-
 			shader = ResourceHandler::GetShader(m_deferredShader);
 			shader->Bind();
-			SendLightUniformsToShader(shader);
+			Renderer::SendLightUniformsToShader(shader);
 			shader->SetFloat3("u_camPos", Renderer::GetCamPos());
 			m_gBuffer->BindTexureData();
 
@@ -821,22 +819,6 @@ namespace AstralEngine
 			m_deferredIB->Bind();
 			RenderCommand::DrawIndexed(m_deferredIB);
 			m_gBuffer->GetFramebuffer()->CopyTo(nullptr);
-			/*
-			*/
-
-			/*
-			shader = ResourceHandler::GetShader(Shader::FullscreenQuadShader());
-			shader->Bind();
-			shader->SetInt("u_texture", 0);
-			static Texture2DHandle pos = 0;
-			static Texture2DHandle normal = 2;
-			static Texture2DHandle color = 3;
-			ResourceHandler::GetTexture2D(normal)->Bind();
-			m_deferredVB->Bind();
-			m_deferredIB->Bind();
-			RenderCommand::DrawIndexed(m_deferredIB);
-			*/
-
 		}
 		else
 		{
@@ -863,20 +845,6 @@ namespace AstralEngine
 	}
 
 	void RenderQueue::BindGBufferTextureData() { m_gBuffer->BindTexureData(); }
-
-	void RenderQueue::SendLightUniformsToShader(AReference<Shader>& shader)
-	{
-		if (!Renderer::LightsModified() || shader == nullptr)
-		{
-			return;
-		}
-		LightData& lightData = Renderer::GetLightData(0);
-
-		shader->SetFloat3("u_lightPos", lightData.GetPosition());
-		shader->SetFloat3("u_lightAmbient", lightData.GetAmbientColor());
-		shader->SetFloat3("u_lightDiffuse", lightData.GetDiffuseColor());
-		shader->SetFloat3("u_lightSpecular", lightData.GetSpecularColor());
-	}
 
 	void RenderQueue::SetupFullscreenRenderingObjects()
 	{
@@ -935,6 +903,7 @@ namespace AstralEngine
 	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
 
 	void LightData::SetLightType(LightType type) { m_type = type; }
+
 	void LightData::SetPosition(const Vector3& position) { m_position = position; }
 
 	void LightData::SetDirection(const Vector3& direction)
@@ -971,6 +940,22 @@ namespace AstralEngine
 			light = m_handlesToRecycle.Pop();
 			m_lights[light] = std::move(data);
 		}
+
+		switch(m_lights[light].GetLightType())
+		{
+		case LightType::Directional:
+			m_directionalLights.Add(light);
+			break;
+
+		case LightType::Point:
+			m_pointLights.Add(light);
+			break;
+
+		default:
+			AE_CORE_ERROR("Unknown light type detected");
+			break;
+		}
+
 		return light;
 	}
 	
@@ -1002,4 +987,100 @@ namespace AstralEngine
 	}
 
 	bool LightHandler::LightsModified() const { return m_lightsModified; }
+
+	constexpr size_t LightHandler::GetMaxNumLights() { return s_maxNumLights; }
+
+	void LightHandler::SendLightUniformsToShader(AReference<Shader>& shader) const
+	{
+		if (!LightsModified() || shader == nullptr)
+		{
+			return;
+		}
+		
+		SendDirectionalLightUniforms(shader);
+		SendPointLightUniforms(shader);
+		
+		/*
+		LightData& lightData = Renderer::GetLightData(0);
+
+		shader->SetFloat3("u_lightPos", lightData.GetPosition());
+		shader->SetFloat3("u_lightAmbient", lightData.GetAmbientColor());
+		shader->SetFloat3("u_lightDiffuse", lightData.GetDiffuseColor());
+		shader->SetFloat3("u_lightSpecular", lightData.GetSpecularColor());
+		*/
+	}
+
+	void LightHandler::SendDirectionalLightUniforms(AReference<Shader>& shader) const
+	{
+		shader->SetInt("u_numDirectionalLights", m_directionalLights.GetCount());
+		size_t index = 0;
+		std::stringstream ss;
+		for (LightHandle light : m_directionalLights)
+		{
+			const LightData& data = GetLightData(light);
+			ss.str("");
+			ss << "u_directionalLightArr[" << index << "]";
+			std::string varName = ss.str();
+			
+			ss.str("");
+			ss << varName << ".direction";
+			shader->SetFloat3(ss.str(), data.GetDirection());
+
+			ss.str("");
+			ss << varName << ".ambient";
+			shader->SetFloat3(ss.str(), data.GetAmbientColor());
+
+			ss.str("");
+			ss << varName << ".diffuse";
+			shader->SetFloat3(ss.str(), data.GetDiffuseColor());
+
+			ss.str("");
+			ss << varName << ".specular";
+			shader->SetFloat3(ss.str(), data.GetSpecularColor());
+
+			index++;
+		}
+	}
+
+	void LightHandler::SendPointLightUniforms(AReference<Shader>& shader) const
+	{
+		if (m_pointLights.GetCount() > 0)
+		{
+			AE_CORE_ERROR("Function Not Implemented yet");
+		}
+	}
+
+	void LightHandler::OnLightTypeChange(LightHandle light, LightType oldType, LightType newType)
+	{
+		AE_CORE_ASSERT(LightIsValid(light), "");
+		switch(oldType)
+		{
+		case LightType::Directional:
+			m_directionalLights.Remove(light);
+			break;
+
+		case LightType::Point:
+			m_pointLights.Remove(light);
+			break;
+
+		default:
+			AE_CORE_ERROR("Unknown light type detected");
+			break;
+		}
+
+		switch(newType)
+		{
+		case LightType::Directional:
+			m_directionalLights.Add(light);
+			break;
+
+		case LightType::Point:
+			m_pointLights.Add(light);
+			break;
+
+		default:
+			AE_CORE_ERROR("Unknown light type detected");
+			break;
+		}
+	}
 }

@@ -302,37 +302,6 @@ namespace AstralEngine
 		}
 	}
 
-
-	// LightUniform /////////////////////////////////////////////////////////
-	LightUniform::LightUniform() { }
-	LightUniform::LightUniform(const std::string& name, LightHandle light) 
-		: MaterialUniform(name), m_light(light) { }
-
-	void LightUniform::SetLight(LightHandle light)
-	{
-		m_light = light;
-		m_hasChanged = true;
-	}
-
-	void LightUniform::SendToShader(AReference<Shader> shader) const
-	{
-		if (!m_hasChanged)
-		{
-			return;
-		}
-
-		if (Renderer::LightsModified() && shader != nullptr)
-		{
-			AE_RENDER_ASSERT(Renderer::LightIsValid(m_light), "Trying to send invalid uniform to shader");
-			LightData& data = Renderer::GetLightData(m_light);
-			shader->SetFloat3("u_lightPos", data.GetPosition());
-			shader->SetFloat3("u_lightAmbient", data.GetAmbientColor());
-			shader->SetFloat3("u_lightDiffuse", data.GetDiffuseColor());
-			shader->SetFloat3("u_lightSpecular", data.GetSpecularColor());
-			m_hasChanged = false;
-		}
-	}
-
 	// Material //////////////////////////////////////////////////////////////////////////
 
 	const char* Material::s_diffuseMapName = "u_diffuseMap";
@@ -738,6 +707,11 @@ namespace AstralEngine
 	{
 		const LightHandler& handler = const_cast<const LightHandler&>(s_lightHandler);
 		return handler.GetLightData(light);
+	}
+
+	void Renderer::SendLightUniformsToShader(AReference<Shader>& shader) 
+	{ 
+		s_lightHandler.SendLightUniformsToShader(shader); 
 	}
 
 	void Renderer::BeginScene(const OrthographicCamera& cam)

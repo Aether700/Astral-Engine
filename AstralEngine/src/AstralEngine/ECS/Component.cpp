@@ -313,9 +313,6 @@ namespace AstralEngine
 		m_light = Renderer::AddLight(CreateLightData());
 	}
 
-	create and test a single directional light, light handler needs to keep track of the 
-	number of directional/point/spot lights
-
 	void Light::OnDisable()
 	{
 		Renderer::RemoveLight(m_light);
@@ -331,8 +328,13 @@ namespace AstralEngine
 
 	void Light::SetType(LightType type)
 	{
-		LightData& data = RetrieveLightData();
-		data.SetLightType(type);
+		if (m_type != type)
+		{
+			LightData& data = RetrieveLightData();
+			data.SetLightType(type);
+			Renderer::s_lightHandler.OnLightTypeChange(m_light, m_type, type);
+			m_type = type;
+		}
 	}
 
 	const Vector3& Light::GetColor() const
@@ -345,6 +347,7 @@ namespace AstralEngine
 	{
 		LightData& data = RetrieveLightData();
 		data.SetColor(color);
+		m_color = color;
 	}
 
 	const Vector3& Light::GetDirection() const
@@ -355,8 +358,10 @@ namespace AstralEngine
 
 	void Light::SetDirection(const Vector3& direction)
 	{
+		Vector3 normalizedDir = Vector3::Normalize(direction);
 		LightData& data = RetrieveLightData();
-		data.SetDirection(direction);
+		data.SetDirection(normalizedDir);
+		m_direction = normalizedDir;
 	}
 
 	bool Light::operator==(const Light& other) const { return m_light == other.m_light; }
