@@ -212,6 +212,7 @@ namespace AstralEngine
 		float GetAmbientIntensity() const;
 		float GetDiffuseIntensity() const;
 		float GetSpecularIntensity() const;
+		float GetRadius() const;
 
 		void SetLightType(LightType type);
 		void SetPosition(const Vector3& position);
@@ -220,6 +221,7 @@ namespace AstralEngine
 		void SetAmbientIntensity(float intensity);
 		void SetDiffuseIntensity(float intensity);
 		void SetSpecularIntensity(float intensity);
+		void SetRadius(float radius);
 
 	private:
 		LightType m_type;
@@ -229,6 +231,14 @@ namespace AstralEngine
 		float m_ambientIntensity;
 		float m_diffuseIntensity;
 		float m_specularIntensity;
+
+		float m_radius;
+		/*
+		// used for attenuation
+		float m_constantTerm;
+		float m_linearTerm;
+		float m_quadraticTerm;
+		*/
 	};
 
 	class LightHandler sealed

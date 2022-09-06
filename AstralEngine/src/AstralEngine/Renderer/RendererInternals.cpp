@@ -889,7 +889,8 @@ namespace AstralEngine
 	LightData::LightData() : m_type(LightType::Directional) { }
 	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
 		m_ambientIntensity(0.05f), m_diffuseIntensity(0.45f), m_specularIntensity(1.0f),
-		m_type(LightType::Directional) { }
+		m_type(LightType::Directional), m_radius(3.0f) { }
+		//m_constantTerm(1.0f), m_linearTerm(0.09f), m_quadraticTerm(0.032f) { }
 
 	LightType LightData::GetLightType() const { return m_type; }
 	const Vector3& LightData::GetPosition() const { return m_position; }
@@ -901,6 +902,7 @@ namespace AstralEngine
 	float LightData::GetAmbientIntensity() const { return m_ambientIntensity; }
 	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
 	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
+	float LightData::GetRadius() const { return m_radius; }
 
 	void LightData::SetLightType(LightType type) { m_type = type; }
 
@@ -916,6 +918,7 @@ namespace AstralEngine
 	void LightData::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
 	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
 	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
+	void LightData::SetRadius(float radius) { m_radius = radius; }
 
 	// LightHandler //////////////////////////////////////////////////////////////////
 	LightHandler::LightHandler() : m_lights(s_maxNumLights), m_lightsModified(false) { }
@@ -1005,8 +1008,6 @@ namespace AstralEngine
 
 	void LightHandler::SendLightUniformsToShader(AReference<Shader>& shader) const
 	{
-		check to implement point lights
-
 		if (!LightsModified() || shader == nullptr)
 		{
 			return;
@@ -1014,15 +1015,6 @@ namespace AstralEngine
 		
 		SendDirectionalLightUniforms(shader);
 		SendPointLightUniforms(shader);
-		
-		/*
-		LightData& lightData = Renderer::GetLightData(0);
-
-		shader->SetFloat3("u_lightPos", lightData.GetPosition());
-		shader->SetFloat3("u_lightAmbient", lightData.GetAmbientColor());
-		shader->SetFloat3("u_lightDiffuse", lightData.GetDiffuseColor());
-		shader->SetFloat3("u_lightSpecular", lightData.GetSpecularColor());
-		*/
 	}
 
 	void LightHandler::SendDirectionalLightUniforms(AReference<Shader>& shader) const
@@ -1059,9 +1051,40 @@ namespace AstralEngine
 
 	void LightHandler::SendPointLightUniforms(AReference<Shader>& shader) const
 	{
-		if (m_pointLights.GetCount() > 0)
+		
+		shader->SetInt("u_numPointLights", m_pointLights.GetCount());
+		size_t index = 0;
+		std::stringstream ss;
+		for (LightHandle light : m_pointLights)
 		{
-			AE_CORE_ERROR("Function Not Implemented yet");
+			const LightData& data = GetLightData(light);
+			ss.str("");
+			ss << "u_pointLightArr[" << index << "]";
+			std::string varName = ss.str();
+
+			ss.str("");
+			ss << varName << ".position";
+			shader->SetFloat3(ss.str(), data.GetPosition());
+
+			ss.str("");
+			ss << varName << ".ambient";
+			shader->SetFloat3(ss.str(), data.GetAmbientColor());
+
+			ss.str("");
+			ss << varName << ".diffuse";
+			shader->SetFloat3(ss.str(), data.GetDiffuseColor());
+
+			ss.str("");
+			ss << varName << ".specular";
+			shader->SetFloat3(ss.str(), data.GetSpecularColor());
+
+			ss.str("");
+			ss << varName << ".radius";
+			shader->SetFloat(ss.str(), data.GetRadius());
+
+			need to test multiple point light + mix point light with directional lights
+
+			index++;
 		}
 	}
 

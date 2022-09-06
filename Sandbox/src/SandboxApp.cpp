@@ -591,9 +591,12 @@ public:
 		MeshHandle cube = CreateCubeMesh();
 		MaterialHandle lightMat = CreateLightCubeMat();
 
+		/*
 		CreateDirectionalLight({ 3.0f, 5.0f, 1.0f }, cube, lightMat);
 		CreateDirectionalLight({ -3.0f, 5.0f, 1.0f }, cube, lightMat);
 		CreateDirectionalLight({ 0.0f, 5.0f, 0.0f }, cube, lightMat);
+		*/
+		CreatePointLight(Vector3::Normalize({ 3.0f, 5.0f, 1.0f }) * 1.5f, 50.0f, cube, lightMat);
 
 		/*
 		auto e = m_scene->CreateAEntity();
@@ -760,6 +763,26 @@ private:
 		l.SetDirection(-pos);
 	}
 	
+	void CreatePointLight(const Vector3& pos, float radius, MeshHandle cube, MaterialHandle lightMat)
+	{
+		static bool first = true;
+
+		auto e = m_scene->CreateAEntity();
+
+		if (first)
+		{
+			first = false;
+			e.EmplaceComponent<LightToggler>();
+		}
+
+		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
+		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
+		Light& l = e.EmplaceComponent<Light>();
+		l.SetType(LightType::Point);
+		l.SetRadius(radius);
+		e.GetTransform().SetLocalPosition(pos);
+	}
+
 	void CreateSprite(const Vector3& pos, Texture2DHandle texture = NullHandle, bool rotator = false)
 	{
 		auto e = m_scene->CreateAEntity();

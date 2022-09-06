@@ -41,6 +41,20 @@ struct DirectionalLight
 uniform DirectionalLight u_directionalLightArr[#NUM_LIGHTS];
 uniform int u_numDirectionalLights;
 
+struct PointLight
+{
+    vec3 position;
+    
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    
+    float radius;
+};
+
+uniform PointLight u_pointLightArr[#NUM_LIGHTS];
+uniform int u_numPointLights;
+
 vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor, 
     float specularIntensity, vec3 normal, vec3 viewDir)
 {
@@ -59,6 +73,33 @@ vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor,
     vec3 specular = light.specular * spec * specularIntensity;
     
     return ambient + diffuse + specular;
+}
+
+vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specularIntensity,
+    vec3 position, vec3 normal, vec3 viewDir)
+{
+    vec3 distVec = light.position - position;
+    vec3 lightDir = normalize(distVec);
+    
+    // ambient
+    vec3 ambient = light.ambient * baseColor;
+
+    // diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * baseColor;
+    
+    // specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // try to add shininess per mat here?
+    vec3 specular = light.specular * spec * specularIntensity;
+    
+    // attenuation
+    float distance = length(distVec);
+    float sqrtDenominator = (distance / light.radius) + 1.0f;
+    float attenuation = 1.0f / (sqrtDenominator * sqrtDenominator);
+    
+    // combine results
+    return (ambient + diffuse + specular) * attenuation;
 }
 
 void main()
@@ -100,6 +141,12 @@ void main()
     {
         result += CalculateDirectionalLightShading(u_directionalLightArr[i], baseColor, 
             specularIntensity, normal, viewDir);
+    }
+
+    for (int i = 0; i < u_numPointLights; i++)
+    {
+        result += CalculatePointLightShading(u_pointLightArr[i], baseColor, 
+            specularIntensity, position, normal, viewDir);
     }
 
     color = vec4(result, 1.0f);

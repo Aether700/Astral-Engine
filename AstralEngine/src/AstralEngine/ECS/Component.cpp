@@ -303,8 +303,9 @@ namespace AstralEngine
 		m_direction.Normalize();
 	}
 	
-	void Light::OnCreate()
+	void Light::OnStart()
 	{
+		Renderer::RemoveLight(m_light);
 		m_light = Renderer::AddLight(CreateLightData());
 	}
 
@@ -326,28 +327,10 @@ namespace AstralEngine
 		return data.GetLightType();
 	}
 
-	void Light::SetType(LightType type)
-	{
-		if (m_type != type)
-		{
-			LightData& data = RetrieveLightData();
-			data.SetLightType(type);
-			Renderer::s_lightHandler.OnLightTypeChange(m_light, m_type, type);
-			m_type = type;
-		}
-	}
-
 	const Vector3& Light::GetColor() const
 	{
 		LightData& data = RetrieveLightData();
 		return data.GetColor();
-	}
-
-	void Light::SetColor(const Vector3& color)
-	{
-		LightData& data = RetrieveLightData();
-		data.SetColor(color);
-		m_color = color;
 	}
 
 	const Vector3& Light::GetDirection() const
@@ -356,12 +339,40 @@ namespace AstralEngine
 		return data.GetDirection();
 	}
 
+	float Light::GetRadius() const { return m_radius; }
+
+	void Light::SetType(LightType type)
+	{
+		if (m_type != type)
+		{
+			if (Renderer::LightIsValid(m_light))
+			{
+				LightData& data = RetrieveLightData();
+				data.SetLightType(type);
+				Renderer::s_lightHandler.OnLightTypeChange(m_light, m_type, type);
+			}
+			m_type = type;
+		}
+	}
+
+	void Light::SetColor(const Vector3& color)
+	{
+		LightData& data = RetrieveLightData();
+		data.SetColor(color);
+		m_color = color;
+	}
+	
 	void Light::SetDirection(const Vector3& direction)
 	{
 		Vector3 normalizedDir = Vector3::Normalize(direction);
 		LightData& data = RetrieveLightData();
 		data.SetDirection(normalizedDir);
 		m_direction = normalizedDir;
+	}
+
+	void Light::SetRadius(float radius)
+	{
+		m_radius = radius;
 	}
 
 	bool Light::operator==(const Light& other) const { return m_light == other.m_light; }
@@ -378,6 +389,7 @@ namespace AstralEngine
 		LightData data = LightData(GetTransform().GetLocalPosition(), m_color);
 		data.SetDirection(m_direction);
 		data.SetLightType(m_type);
+		data.SetRadius(m_radius);
 		return data;
 	}
 }

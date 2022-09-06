@@ -164,20 +164,20 @@ namespace AstralEngine
 	{
 	public:
 		Light();
-		void OnCreate() override;
+		void OnStart() override;
 		void OnEnable() override;
 		void OnDisable() override;
 
 		LightHandle GetHandle() const;
-
 		LightType GetType() const;
-		void SetType(LightType type);
-
 		const Vector3& GetColor() const;
-		void SetColor(const Vector3& color);
-
 		const Vector3& GetDirection() const;
+		float GetRadius() const;
+
+		void SetType(LightType type);
+		void SetColor(const Vector3& color);
 		void SetDirection(const Vector3& direction);
+		void SetRadius(float radius);
 
 		bool operator==(const Light& other) const;
 		bool operator!=(const Light& other) const;
@@ -191,5 +191,6 @@ namespace AstralEngine
 		LightType m_type;
 		Vector3 m_color;
 		Vector3 m_direction;
+		float m_radius;
 	};
 }

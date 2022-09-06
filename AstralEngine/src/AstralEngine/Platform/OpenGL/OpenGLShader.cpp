@@ -171,7 +171,7 @@ namespace AstralEngine
 
 			glDeleteShader(shader);
 
-			AE_ERROR("Shader Compilation Failure: %s", infoLog.data());
+			AE_CORE_ERROR("Shader Compilation Failure: %s", infoLog.data());
 		}
 		return shader;
 	}
