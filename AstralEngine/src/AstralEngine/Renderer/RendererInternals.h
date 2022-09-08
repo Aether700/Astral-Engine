@@ -213,6 +213,8 @@ namespace AstralEngine
 		float GetDiffuseIntensity() const;
 		float GetSpecularIntensity() const;
 		float GetRadius() const;
+		float GetInnerAngle() const;
+		float GetOuterAngle() const;
 
 		void SetLightType(LightType type);
 		void SetPosition(const Vector3& position);
@@ -222,6 +224,8 @@ namespace AstralEngine
 		void SetDiffuseIntensity(float intensity);
 		void SetSpecularIntensity(float intensity);
 		void SetRadius(float radius);
+		void SetInnerAngle(float angle);
+		void SetOuterAngle(float angle);
 
 	private:
 		LightType m_type;
@@ -233,12 +237,8 @@ namespace AstralEngine
 		float m_specularIntensity;
 
 		float m_radius;
-		/*
-		// used for attenuation
-		float m_constantTerm;
-		float m_linearTerm;
-		float m_quadraticTerm;
-		*/
+		float m_innerAngle; // in degrees
+		float m_outerAngle; // in degrees
 	};
 
 	class LightHandler sealed
@@ -265,12 +265,14 @@ namespace AstralEngine
 
 		void SendDirectionalLightUniforms(AReference<Shader>& shader) const;
 		void SendPointLightUniforms(AReference<Shader>& shader) const;
+		void SendSpotLightUniforms(AReference<Shader>& shader) const;
 		void OnLightTypeChange(LightHandle light, LightType oldType, LightType newType);
 
 		ADynArr<LightData> m_lights;
 		AStack<LightHandle> m_handlesToRecycle;
 		ASinglyLinkedList<LightHandle> m_directionalLights;
 		ASinglyLinkedList<LightHandle> m_pointLights;
+		ASinglyLinkedList<LightHandle> m_spotLights;
 		bool m_lightsModified;
 	};
 }

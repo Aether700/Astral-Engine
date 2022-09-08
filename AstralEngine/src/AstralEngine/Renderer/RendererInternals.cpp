@@ -67,6 +67,8 @@ namespace AstralEngine
 		unsigned int height = window->GetHeight();
 		m_framebuffer = Framebuffer::Create(width, height);
 		m_framebuffer->Bind();
+		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height,
+			Texture2DInternalFormat::RGB16Normal), 0);
 		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height, 
 			Texture2DInternalFormat::RGB16Normal), 1);
 		m_framebuffer->SetColorAttachment(ResourceHandler::CreateTexture2D(width, height), 2);
@@ -888,9 +890,8 @@ namespace AstralEngine
 	// LightData ///////////////////////////////////////////
 	LightData::LightData() : m_type(LightType::Directional) { }
 	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
-		m_ambientIntensity(0.05f), m_diffuseIntensity(0.45f), m_specularIntensity(1.0f),
-		m_type(LightType::Directional), m_radius(3.0f) { }
-		//m_constantTerm(1.0f), m_linearTerm(0.09f), m_quadraticTerm(0.032f) { }
+		m_ambientIntensity(0.05f), m_diffuseIntensity(0.75f), m_specularIntensity(1.0f),
+		m_type(LightType::Directional), m_radius(3.0f), m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f) { }
 
 	LightType LightData::GetLightType() const { return m_type; }
 	const Vector3& LightData::GetPosition() const { return m_position; }
@@ -903,6 +904,8 @@ namespace AstralEngine
 	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
 	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
 	float LightData::GetRadius() const { return m_radius; }
+	float LightData::GetInnerAngle() const { return m_innerAngle; }
+	float LightData::GetOuterAngle() const { return m_outerAngle; }
 
 	void LightData::SetLightType(LightType type) { m_type = type; }
 
@@ -919,6 +922,8 @@ namespace AstralEngine
 	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
 	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
 	void LightData::SetRadius(float radius) { m_radius = radius; }
+	void LightData::SetInnerAngle(float angle) { m_innerAngle = angle; }
+	void LightData::SetOuterAngle(float angle) { m_outerAngle = angle; }
 
 	// LightHandler //////////////////////////////////////////////////////////////////
 	LightHandler::LightHandler() : m_lights(s_maxNumLights), m_lightsModified(false) { }
@@ -954,6 +959,10 @@ namespace AstralEngine
 			m_pointLights.Add(light);
 			break;
 
+		case LightType::Spot:
+			m_spotLights.Add(light);
+			break;
+
 		default:
 			AE_CORE_ERROR("Unknown light type detected");
 			break;
@@ -976,6 +985,10 @@ namespace AstralEngine
 
 			case LightType::Point:
 				m_pointLights.Remove(light);
+				break;
+
+			case LightType::Spot:
+				m_spotLights.Remove(light);
 				break;
 
 			default:
@@ -1015,6 +1028,7 @@ namespace AstralEngine
 		
 		SendDirectionalLightUniforms(shader);
 		SendPointLightUniforms(shader);
+		SendSpotLightUniforms(shader);
 	}
 
 	void LightHandler::SendDirectionalLightUniforms(AReference<Shader>& shader) const
@@ -1051,7 +1065,6 @@ namespace AstralEngine
 
 	void LightHandler::SendPointLightUniforms(AReference<Shader>& shader) const
 	{
-		
 		shader->SetInt("u_numPointLights", m_pointLights.GetCount());
 		size_t index = 0;
 		std::stringstream ss;
@@ -1082,7 +1095,55 @@ namespace AstralEngine
 			ss << varName << ".radius";
 			shader->SetFloat(ss.str(), data.GetRadius());
 
-			need to test multiple point light + mix point light with directional lights
+			index++;
+		}
+	}
+
+	void LightHandler::SendSpotLightUniforms(AReference<Shader>& shader) const
+	{
+		shader->SetInt("u_numSpotLights", m_spotLights.GetCount());
+		size_t index = 0;
+		std::stringstream ss;
+		for (LightHandle light : m_spotLights)
+		{
+			const LightData& data = GetLightData(light);
+			ss.str("");
+			ss << "u_spotLightArr[" << index << "]";
+			std::string varName = ss.str();
+
+			ss.str("");
+			ss << varName << ".position";
+			shader->SetFloat3(ss.str(), data.GetPosition());
+
+			ss.str("");
+			ss << varName << ".direction";
+			shader->SetFloat3(ss.str(), data.GetDirection());
+
+			ss.str("");
+			ss << varName << ".ambient";
+			shader->SetFloat3(ss.str(), data.GetAmbientColor());
+
+			ss.str("");
+			ss << varName << ".diffuse";
+			shader->SetFloat3(ss.str(), data.GetDiffuseColor());
+
+			ss.str("");
+			ss << varName << ".specular";
+			shader->SetFloat3(ss.str(), data.GetSpecularColor());
+
+			ss.str("");
+			ss << varName << ".innerAngle";
+			//shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetInnerAngle())));
+			shader->SetFloat(ss.str(), Math::DegreeToRadians(data.GetInnerAngle()));
+
+			ss.str("");
+			ss << varName << ".outerAngle";
+			//shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetOuterAngle())));
+			shader->SetFloat(ss.str(), Math::DegreeToRadians(data.GetOuterAngle()));
+
+			ss.str("");
+			ss << varName << ".radius";
+			shader->SetFloat(ss.str(), data.GetRadius());
 
 			index++;
 		}
@@ -1101,6 +1162,10 @@ namespace AstralEngine
 			m_pointLights.Remove(light);
 			break;
 
+		case LightType::Spot:
+			m_spotLights.Remove(light);
+			break;
+
 		default:
 			AE_CORE_ERROR("Unknown light type detected");
 			break;
@@ -1114,6 +1179,10 @@ namespace AstralEngine
 
 		case LightType::Point:
 			m_pointLights.Add(light);
+			break;
+
+		case LightType::Spot:
+			m_spotLights.Add(light);
 			break;
 
 		default:

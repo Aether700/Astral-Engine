@@ -173,11 +173,19 @@ namespace AstralEngine
 		const Vector3& GetColor() const;
 		const Vector3& GetDirection() const;
 		float GetRadius() const;
+		float GetDiffuseIntensity() const;
+		float GetSpecularIntensity() const;
+		float GetInnerAngle() const;
+		float GetOuterAngle() const;
 
 		void SetType(LightType type);
 		void SetColor(const Vector3& color);
 		void SetDirection(const Vector3& direction);
 		void SetRadius(float radius);
+		void SetDiffuseIntensity(float intensity);
+		void SetSpecularIntensity(float intensity);
+		void SetInnerAngle(float angle);
+		void SetOuterAngle(float angle);
 
 		bool operator==(const Light& other) const;
 		bool operator!=(const Light& other) const;
@@ -192,5 +200,11 @@ namespace AstralEngine
 		Vector3 m_color;
 		Vector3 m_direction;
 		float m_radius;
+		float m_diffuseIntensity;
+		float m_specularIntensity;
+
+		// used for spotlights
+		float m_innerAngle;
+		float m_outerAngle;
 	};
 }

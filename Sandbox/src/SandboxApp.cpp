@@ -12,6 +12,36 @@ using namespace AstralEngine;
 
 //Scripts////////////////////////////////////////////////////////////////////////
 
+class SpotLightController : public NativeScript
+{
+public:
+	void OnUpdate()
+	{
+		if (Input::GetKey(KeyCode::I))
+		{
+			if (HasComponent<Light>())
+			{
+				Light& l = GetComponent<Light>();
+				l.SetInnerAngle(l.GetInnerAngle() + m_changeSpeed * Time::GetDeltaTime());
+				l.SetOuterAngle(l.GetOuterAngle() + m_changeSpeed * Time::GetDeltaTime());
+			}
+		}
+
+		if (Input::GetKey(KeyCode::O))
+		{
+			if (HasComponent<Light>())
+			{
+				Light& l = GetComponent<Light>();
+				l.SetInnerAngle(l.GetInnerAngle() - m_changeSpeed * Time::GetDeltaTime());
+				l.SetOuterAngle(l.GetOuterAngle() - m_changeSpeed * Time::GetDeltaTime());
+			}
+		}
+	}
+
+private:
+	float m_changeSpeed = 2.0f;
+};
+
 class LightToggler : public NativeScript
 {
 public:
@@ -592,58 +622,18 @@ public:
 		MaterialHandle lightMat = CreateLightCubeMat();
 
 		/*
-		CreateDirectionalLight({ 3.0f, 5.0f, 1.0f }, cube, lightMat);
-		CreateDirectionalLight({ -3.0f, 5.0f, 1.0f }, cube, lightMat);
-		CreateDirectionalLight({ 0.0f, 5.0f, 0.0f }, cube, lightMat);
+		CreatePointLight(Vector3::Normalize({ 3.0f, 5.0f, 1.0f }) * 1.5f, 10.0f, cube, lightMat);
+		CreatePointLight(Vector3::Normalize({ 1.0f, 5.0f, 3.0f }) * 1.7f, 15.0f, cube, lightMat);
+		CreatePointLight(Vector3::Normalize({ -5.0f, 3.0f, 0.0f }) * 1.2f, 15.0f, cube, lightMat);
 		*/
-		CreatePointLight(Vector3::Normalize({ 3.0f, 5.0f, 1.0f }) * 1.5f, 50.0f, cube, lightMat);
+		CreateSpotLight(Vector3::Down() * 1.5f, Vector3::Up(), 20.5f, 5.0f, cube, lightMat);
 
-		/*
-		auto e = m_scene->CreateAEntity();
-		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
-		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
-		Light& l = e.EmplaceComponent<Light>();
-		e.GetTransform().SetLocalPosition(-5.0f * l.GetDirection() + e.GetTransform().GetLocalPosition());
-		*/
-
+		fix spot lights
 
 		MaterialHandle mat = CreateMaterial();
 
-		m_entity.EmplaceComponent<MeshRenderer>(cube, mat);
-
-		auto e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube, mat);
-
-		/*
-		e = m_scene->CreateAEntity();
-		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
-		e.GetTransform().SetLocalPosition({ 2.0f, 1.0f, 4.0f });
-		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
-		*/
-
-		/*
-		e.GetTransform().SetLocalPosition({ 2, 0, 0 });
-		e.EmplaceComponent<MatToggler>();
-
-		e = m_scene->CreateAEntity();
-		e.EmplaceComponent<MeshRenderer>(cube, mat);
-		e.GetTransform().SetLocalPosition({ -2, 0, 0 });
-
-		e = m_scene->CreateAEntity();
-		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/ChernoLogo.png"));
-		e.GetTransform().SetLocalPosition({ 0, 2, 0 });
-
-		e = m_scene->CreateAEntity();
-		e.EmplaceComponent<SpriteRenderer>(ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png"));
-		e.GetTransform().SetLocalPosition({ 2, 2, 0 });
-		*/
-		/*
-		auto e = m_scene->CreateAEntity();
-		e.EmplaceComponent<TargetMover>();
-		e.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 1, 1);
-		*/
-
-		//m_entity.EmplaceComponent<LookAtTester>().SetTarget(e);
+		CreateCrate(Vector3::Zero(), Quaternion::Identity(), cube, mat);
+		CreateCrate(Vector3(3.0f, 0.0f, 1.0f), Quaternion::EulerToQuaternion(30.0f, 10.0f, 0.0f), cube, mat);
 
 		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
 		//cam.GetComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
@@ -656,17 +646,6 @@ public:
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 		//SetupRendererTestScene();
-
-		// temp ///////////////////////////////////
-		Vector3 lightPos = { 3.0f, 5.0f, -4.0f };
-		Vector3 cubePos = { 0.0f, 0.0f, 0.0f };
-		Vector3 normal = { 0.0f, 0.0f, -1.0f };
-
-		Vector3 lightDir = Vector3::Normalize(lightPos - cubePos);
-		float angle = Vector3::Angle(lightDir, normal);
-		float diff = Math::RadiansToDegree(Math::Max(Vector3::DotProduct(normal, lightDir), 0.0f));
-		int x = 0;
-		///////////////////////////////////////////
 	}
 
 	void OnUpdate() override
@@ -743,6 +722,16 @@ public:
 	*/
 
 private:
+	void CreateCrate(const Vector3& pos, const Quaternion& rotation, MeshHandle cube, MaterialHandle crateMat)
+	{
+		auto e = m_scene->CreateAEntity();
+		Transform& t = e.GetTransform();
+		t.SetLocalPosition(pos);
+		t.SetRotation(rotation);
+
+		e.EmplaceComponent<MeshRenderer>(cube, crateMat);
+	}
+
 	void CreateDirectionalLight(const Vector3& pos, MeshHandle cube, MaterialHandle lightMat)
 	{
 		static bool first = true;
@@ -780,6 +769,31 @@ private:
 		Light& l = e.EmplaceComponent<Light>();
 		l.SetType(LightType::Point);
 		l.SetRadius(radius);
+		e.GetTransform().SetLocalPosition(pos);
+	}
+
+	void CreateSpotLight(const Vector3& pos, const Vector3& direction, float radius, 
+		float angle, MeshHandle cube, MaterialHandle lightMat)
+	{
+		static bool first = true;
+
+		auto e = m_scene->CreateAEntity();
+
+		if (first)
+		{
+			first = false;
+			e.EmplaceComponent<LightToggler>();
+			e.EmplaceComponent<SpotLightController>();
+		}
+
+		e.GetTransform().SetScale({ 0.2f, 0.2f, 0.2f });
+		e.EmplaceComponent<MeshRenderer>(cube, lightMat);
+		Light& l = e.EmplaceComponent<Light>();
+		l.SetType(LightType::Spot);
+		l.SetRadius(radius);
+		l.SetInnerAngle(angle);
+		l.SetOuterAngle(angle + 1.0f);
+		l.SetDirection(direction);
 		e.GetTransform().SetLocalPosition(pos);
 	}
 

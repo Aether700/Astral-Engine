@@ -55,6 +55,24 @@ struct PointLight
 uniform PointLight u_pointLightArr[#NUM_LIGHTS];
 uniform int u_numPointLights;
 
+struct SpotLight 
+{
+    vec3 position;
+    vec3 direction;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;       
+    
+    float innerAngle;
+    float outerAngle;
+  
+    float radius;
+};
+
+uniform SpotLight u_spotLightArr[#NUM_LIGHTS];
+uniform int u_numSpotLights;
+
 vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor, 
     float specularIntensity, vec3 normal, vec3 viewDir)
 {
@@ -84,11 +102,11 @@ vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specular
     // ambient
     vec3 ambient = light.ambient * baseColor;
 
-    // diffuse shading
+    // diffuse
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * baseColor;
     
-    // specular shading
+    // specular
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // try to add shininess per mat here?
     vec3 specular = light.specular * spec * specularIntensity;
@@ -98,8 +116,43 @@ vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specular
     float sqrtDenominator = (distance / light.radius) + 1.0f;
     float attenuation = 1.0f / (sqrtDenominator * sqrtDenominator);
     
-    // combine results
     return (ambient + diffuse + specular) * attenuation;
+}
+
+vec3 CalculateSpotLightShading(SpotLight light, vec3 baseColor, float specularIntensity,
+    vec3 position, vec3 normal, vec3 viewDir)
+{
+    vec3 distVec = light.position - position;
+    vec3 lightDir = normalize(distVec);
+    
+    // ambient
+    vec3 ambient = light.ambient * baseColor;
+    
+    // diffuse
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * diff * baseColor;
+    
+    // specular
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f); // try to add shininess per mat here?
+    vec3 specular = light.specular * spec * specularIntensity;
+    
+    // attenuation
+    float distance = length(distVec);
+    float sqrtDenominator = (distance / light.radius) + 1.0f;
+    float attenuation = 1.0f / (sqrtDenominator * sqrtDenominator);
+    
+    // intensity
+    float angle = dot(lightDir, normalize(-light.direction)); 
+    float angleDifference = light.innerAngle - light.outerAngle;
+    float intensity = clamp((angle - light.outerAngle) / angleDifference, 0.0, 1.0);
+    
+    //ambient *= attenuation * intensity;
+    //diffuse *= attenuation * intensity;
+    //specular *= attenuation * intensity;
+    
+    return (ambient + diffuse + specular) * attenuation * intensity;
+    //return light.direction;
 }
 
 void main()
@@ -113,26 +166,6 @@ void main()
 	vec3 baseColor = texture(u_colorGBuffer, v_textureCoords).rgb;
     vec3 position = texture(u_positionGBuffer, v_textureCoords).rgb;
     float specularIntensity = texture(u_colorGBuffer, v_textureCoords).a;
-    
-    /*
-	// ambient
-    vec3 ambient = u_lightAmbient * baseColor;
-  	
-    // diffuse
-    vec3 lightDir = normalize(u_lightPos - position);
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = u_lightDiffuse * diff * baseColor;  
-    
-    // specular
-    vec3 viewDir = normalize(u_camPos - position);
-    vec3 reflectDir = reflect(-lightDir, normal);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
-    vec3 specular = u_lightSpecular * spec * specularIntensity;  
-    
-    vec3 result = ambient + diffuse + specular;
-
-	color = vec4(result, baseColor.a);
-    */
 
     vec3 viewDir = normalize(u_camPos - position);
 
@@ -146,6 +179,12 @@ void main()
     for (int i = 0; i < u_numPointLights; i++)
     {
         result += CalculatePointLightShading(u_pointLightArr[i], baseColor, 
+            specularIntensity, position, normal, viewDir);
+    }
+
+    for (int i = 0; i < u_numSpotLights; i++)
+    {
+        result += CalculateSpotLightShading(u_spotLightArr[i], baseColor, 
             specularIntensity, position, normal, viewDir);
     }
 

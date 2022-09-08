@@ -298,7 +298,8 @@ namespace AstralEngine
 
 	// Light ///////////////////////////////////////////////////
 	Light::Light() : m_light(NullHandle), m_type(LightType::Directional), m_direction(-0.5f, -1.0f, -0.5f), 
-		m_color(1.0f, 1.0f, 1.0f)
+		m_color(1.0f, 1.0f, 1.0f), m_diffuseIntensity(0.75f), m_specularIntensity(1.0f), 
+		m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f)
 	{
 		m_direction.Normalize();
 	}
@@ -340,6 +341,10 @@ namespace AstralEngine
 	}
 
 	float Light::GetRadius() const { return m_radius; }
+	float Light::GetDiffuseIntensity() const { return m_diffuseIntensity; }
+	float Light::GetSpecularIntensity() const { return m_specularIntensity; }
+	float Light::GetInnerAngle() const { return m_innerAngle; }
+	float Light::GetOuterAngle() const { return m_outerAngle; }
 
 	void Light::SetType(LightType type)
 	{
@@ -357,22 +362,73 @@ namespace AstralEngine
 
 	void Light::SetColor(const Vector3& color)
 	{
-		LightData& data = RetrieveLightData();
-		data.SetColor(color);
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetColor(color);
+		}
 		m_color = color;
 	}
 	
 	void Light::SetDirection(const Vector3& direction)
 	{
 		Vector3 normalizedDir = Vector3::Normalize(direction);
-		LightData& data = RetrieveLightData();
-		data.SetDirection(normalizedDir);
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetDirection(normalizedDir);
+		}
 		m_direction = normalizedDir;
 	}
 
 	void Light::SetRadius(float radius)
 	{
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetRadius(radius);
+		}
 		m_radius = radius;
+	}
+
+	void Light::SetDiffuseIntensity(float intensity) 
+	{ 
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetDiffuseIntensity(intensity);
+		}
+		m_diffuseIntensity = intensity; 
+	}
+	
+	void Light::SetSpecularIntensity(float intensity)
+	{
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetSpecularIntensity(intensity);
+		}
+		m_specularIntensity = intensity;
+	}
+
+	void Light::SetInnerAngle(float angle) 
+	{
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetInnerAngle(angle);
+		}
+		m_innerAngle = angle;
+	}
+
+	void Light::SetOuterAngle(float angle)
+	{
+		if (Renderer::LightIsValid(m_light))
+		{
+			LightData& data = RetrieveLightData();
+			data.SetOuterAngle(angle);
+		}
+		m_outerAngle = angle;
 	}
 
 	bool Light::operator==(const Light& other) const { return m_light == other.m_light; }
@@ -389,7 +445,13 @@ namespace AstralEngine
 		LightData data = LightData(GetTransform().GetLocalPosition(), m_color);
 		data.SetDirection(m_direction);
 		data.SetLightType(m_type);
+		
 		data.SetRadius(m_radius);
+		data.SetDiffuseIntensity(m_diffuseIntensity);
+		data.SetSpecularIntensity(m_specularIntensity);
+		
+		data.SetInnerAngle(m_innerAngle);
+		data.SetOuterAngle(m_outerAngle);
 		return data;
 	}
 }
