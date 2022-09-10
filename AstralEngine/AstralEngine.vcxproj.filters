@@ -288,9 +288,6 @@
     <ClInclude Include="src\AstralEngine\Renderer\Renderer.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h">
-      <Filter>src\AstralEngine\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\Shader.h">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClInclude>
@@ -321,6 +318,8 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
+    <ClInclude Include="src\AstralEngine\Core\Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -437,9 +436,6 @@
     <ClCompile Include="src\AstralEngine\Renderer\Renderer.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp">
-      <Filter>src\AstralEngine\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\AstralEngine\Renderer\Shader.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
@@ -470,5 +466,9 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\AstralEngine\Renderer\RendererInternals.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Resource.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
   </ItemGroup>
 </Project>

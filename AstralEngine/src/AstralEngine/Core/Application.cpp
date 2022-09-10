@@ -129,6 +129,8 @@ namespace AstralEngine
 			return false;
 		}
 
+		Renderer::OnWindowResize(resize);
+
 		m_minimized = false;
 		RenderCommand::SetViewport(0, 0, resize.GetWidth(), resize.GetHeight());
 		return false;

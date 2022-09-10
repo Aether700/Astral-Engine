@@ -7,6 +7,7 @@ namespace AstralEngine
 	{
 	public:
 		OpenGLTexture2D(unsigned int width, unsigned int height);
+		OpenGLTexture2D(unsigned int width, unsigned int height, Texture2DInternalFormat internalFormat);
 		OpenGLTexture2D(unsigned int width, unsigned int height, void* data, unsigned int size);
 		OpenGLTexture2D(const std::string& path);
 		~OpenGLTexture2D();
@@ -19,13 +20,15 @@ namespace AstralEngine
 
 		virtual void Bind(unsigned int slot = 0) const override;
 
+		virtual Texture2DInternalFormat GetInternalFormat() const override;
+
 		virtual bool operator==(const Texture& other) const override;
 
 	private:
 		unsigned int m_rendererID;
 		unsigned int m_width;
 		unsigned int m_height;
-		unsigned int m_internalFormat;
+		Texture2DInternalFormat m_internalFormat;
 		unsigned int m_dataFormat;
 	};
 

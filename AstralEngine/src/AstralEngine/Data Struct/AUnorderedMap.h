@@ -13,9 +13,13 @@ namespace AstralEngine
 	class AUnorderedMap;
 
 	template<typename K, typename T>
+	class AUnorderedMapConstIterator;
+
+	template<typename K, typename T>
 	class AUnorderedMapIterator
 	{
 		friend class AUnorderedMap<K, T>;
+		friend class AUnorderedMapConstIterator<K, T>;
 		
 		using Bucket = ASinglyLinkedList<AKeyElementPair<K, T>>;
 		using BucketAIterator = ASinglyLinkedListIterator<AKeyElementPair<K, T>>;
@@ -28,7 +32,7 @@ namespace AstralEngine
 
 		AUnorderedMapIterator<K, T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			
 			m_currIt++;
 
@@ -70,12 +74,11 @@ namespace AstralEngine
 			return *m_currIt;
 		}
 
-	protected:
+	private:
 		AUnorderedMapIterator(Bucket* bucketArr,
 			size_t currBucket, BucketAIterator& currIt, size_t maxCount)
 			: m_bucketArr(bucketArr), m_currBucket(currBucket), m_currIt(currIt), m_maxCount(maxCount) { }
 
-	private:
 		Bucket* m_bucketArr;
 		size_t m_currBucket;
 		size_t m_maxCount;
@@ -111,7 +114,7 @@ namespace AstralEngine
 
 		AUnorderedMapConstIterator<K, T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			AUnorderedMapConstIterator<K, T> it = *this;
 			this->operator--();
 			return it;
@@ -129,13 +132,15 @@ namespace AstralEngine
 
 		const AKeyElementPair<K, T>& operator*() const
 		{
-			return const_cast<AUnorderedMapConstIterator*>(this)->AUnorderedMapIterator<K, T>::operator*();
+			AUnorderedMapIterator<K, T>* thisIt = const_cast<AUnorderedMapIterator<K, T>*>
+				((const AUnorderedMapIterator<K, T>*)this);
+			return thisIt->operator*();
 		}
 
 	private:
 		AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt, size_t maxCount)
-			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt, maxCount) { }
+			size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt, size_t numBuckets)
+			: AUnorderedMapIterator<K, T>(bucketArr, currBucket, currIt, numBuckets) { }
 
 	};
 
@@ -179,7 +184,7 @@ namespace AstralEngine
 		AUnorderedMap(AUnorderedMap<K, T>&& other) noexcept : m_bucketCount(other.m_bucketCount),
 			m_equalsFunc(other.m_equalsFunc), m_compressFunc(other.m_compressFunc), m_count(other.m_count)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_bucketArr = other.m_bucketArr;
 
 			other.m_bucketArr = nullptr;
@@ -198,12 +203,10 @@ namespace AstralEngine
 			return m_count;
 		}
 
-		bool IsEmpty() const { return m_count == 0; }
-
 		void Add(const K& key, const T& element)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!ContainsKey(key), "Key Already contained");
+			
+			AE_DATASTRUCT_ASSERT(!ContainsKey(key), "Key Already contained");
 			size_t bucketIndex = GetBucketIndex(key);
 
 			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, element);
@@ -219,7 +222,7 @@ namespace AstralEngine
 
 		void Remove(const K& key)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (!ContainsKey(key))
 			{
 				return;
@@ -232,6 +235,8 @@ namespace AstralEngine
 				if (m_equalsFunc(key, (*it).GetKey()))
 				{
 					m_bucketArr[bucketIndex].Remove(it);
+					m_count--;
+					break;
 				}
 			}
 		}
@@ -249,7 +254,7 @@ namespace AstralEngine
 		bool ContainsKey(const K& key) const
 		{
 			int bucketIndex = GetBucketIndex(key);
-			for (AKeyElementPair<K, T> pair : m_bucketArr[bucketIndex])
+			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
 			{
 				if (m_equalsFunc(pair.GetKey(), key))
 				{
@@ -261,7 +266,7 @@ namespace AstralEngine
 
 		void Clear()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (size_t i = 0; i < m_bucketCount; i++)
 			{
 				m_bucketArr[i].Clear();
@@ -270,7 +275,7 @@ namespace AstralEngine
 
 		T& operator[](const K& key)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t bucketIndex = GetBucketIndex(key);
 
 			//try to find existing key
@@ -307,8 +312,8 @@ namespace AstralEngine
 
 		const T& operator[](const K& key) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
+			
+			AE_DATASTRUCT_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
 			size_t bucketIndex = GetBucketIndex(key);
 
 			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
@@ -362,18 +367,13 @@ namespace AstralEngine
 					break;
 				}
 			}
-			
-			/*
-			AUnorderedMapConstIterator(ASinglyLinkedList<AKeyElementPair<K, T>>* bucketArr,
-				size_t currBucket, ASinglyLinkedListIterator<AKeyElementPair<K, T>>& currIt)
-			*/
 			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].begin(), m_bucketCount);
 		}
 
 		AUnorderedMap<K, T>::AConstIterator end() const
 		{
-			size_t bucketIndex;
-			for (size_t i = m_bucketCount - 1; i >= 0; i--)
+			size_t bucketIndex = 0;
+			for (size_t i = m_bucketCount - 1; i > 0; i--)
 			{
 				if (m_bucketArr[i].GetCount() != 0)
 				{
@@ -381,7 +381,8 @@ namespace AstralEngine
 					break;
 				}
 			}
-			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, m_bucketArr[bucketIndex].end(), m_bucketCount);
+			return AUnorderedMapConstIterator<K, T>(m_bucketArr, bucketIndex, 
+				m_bucketArr[bucketIndex].end(), m_bucketCount);
 		}
 
 		AUnorderedMap<K, T>::AConstIterator rbegin() const
@@ -429,7 +430,7 @@ namespace AstralEngine
 
 		AUnorderedMap<K, T>& operator=(AUnorderedMap<K, T>&& other)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if(other == *this)
 			{
 				return *this;
@@ -476,7 +477,7 @@ namespace AstralEngine
 
 		int GetBucketIndex(const K& key) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return m_compressFunc((int)m_hash(key), m_bucketCount);
 		}
 

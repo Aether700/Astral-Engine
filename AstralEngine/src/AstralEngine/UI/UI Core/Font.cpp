@@ -1,6 +1,6 @@
 #include "aepch.h"
 #include "UIContext.h"
-#include "AstralEngine/Renderer/Renderer2D.h"
+#include "AstralEngine/Renderer/Renderer.h"
 
 namespace AstralEngine
 {
@@ -165,31 +165,31 @@ namespace AstralEngine
 
         if (m_texture == nullptr && m_subTexture == nullptr && m_rotation == 0.0f)
         {
-            Renderer2D::DrawQuad(m_position, m_size, m_color);
+            Renderer::DrawQuad(m_position, m_size, m_color);
         }
         else if (m_texture == nullptr && m_subTexture == nullptr)
         {
-            Renderer2D::DrawRotatedQuad(m_position, m_rotation, m_size, m_color);
+            //Renderer::DrawRotatedQuad(m_position, m_rotation, m_size, m_color);
         }
         else if (m_rotation == 0.0f && m_subTexture == nullptr)
         {
             //here color acts as tint color
-            Renderer2D::DrawQuad(m_position, m_size, m_texture, m_tileFactor, m_color);
+            //Renderer::DrawQuad(m_position, m_size, m_texture, m_tileFactor, m_color);
         }
         else if (m_rotation == 0.0f && m_texture == nullptr)
         {
             //here color acts as tint color
-            Renderer2D::DrawQuad(m_position, m_size, m_subTexture, m_tileFactor, m_color);
+            //Renderer::DrawQuad(m_position, m_size, m_subTexture, m_tileFactor, m_color);
         }
         else if (m_subTexture == nullptr)
         {
             //here color acts as tint color
-            Renderer2D::DrawRotatedQuad(m_position, m_rotation, m_size, m_texture, m_tileFactor, m_color);
+            //Renderer::DrawRotatedQuad(m_position, m_rotation, m_size, m_texture, m_tileFactor, m_color);
         }
         else
         {
             //here color acts as tint color
-            Renderer2D::DrawRotatedQuad(m_position, m_rotation, m_size, m_subTexture, m_tileFactor, m_color);
+            //Renderer2D::DrawRotatedQuad(m_position, m_rotation, m_size, m_subTexture, m_tileFactor, m_color);
         }
     }
 

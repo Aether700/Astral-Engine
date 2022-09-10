@@ -5,7 +5,7 @@
 
 namespace AstralEngine
 {
-	AReference<VertexBuffer> VertexBuffer::Create(unsigned int size)
+	AReference<VertexBuffer> VertexBuffer::Create(unsigned int size, bool isInstanceArr)
 	{
 		switch (RenderAPI::GetAPI())
 		{
@@ -13,14 +13,14 @@ namespace AstralEngine
 			AE_CORE_ERROR("No RenderAPI is not yet supported");
 
 		case RenderAPI::API::OpenGL:
-			return AReference<OpenGLVertexBuffer>::Create(size);
+			return AReference<OpenGLVertexBuffer>::Create(size, isInstanceArr);
 		}
 
 		AE_CORE_ERROR("Unknown RenderAPI");
 		return nullptr;
 	}
 
-	AReference<VertexBuffer> VertexBuffer::Create(float* data, unsigned int dataSize)
+	AReference<VertexBuffer> VertexBuffer::Create(float* data, unsigned int dataSize, bool isInstanceArr)
 	{
 		switch (RenderAPI::GetAPI())
 		{
@@ -28,7 +28,7 @@ namespace AstralEngine
 				AE_CORE_ERROR("No RenderAPI is not yet supported");
 
 			case RenderAPI::API::OpenGL:
-				return AReference<OpenGLVertexBuffer>::Create(data, dataSize);
+				return AReference<OpenGLVertexBuffer>::Create(data, dataSize, isInstanceArr);
 		}
 
 		AE_CORE_ERROR("Unknown RenderAPI");

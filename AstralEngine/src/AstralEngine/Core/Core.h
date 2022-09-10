@@ -6,8 +6,13 @@
 #endif
 
 #ifdef AE_DEBUG
-	#define AE_ENABLE_ASSERTS
 	#define AE_PROFILE
+	
+	// assert macros
+	#define AE_ENABLE_ASSERTS // global assert macro. Asserts will only work if this macro is defined
+	//#define AE_ECS_ASSERTS
+	//#define AE_DATASTRUCT_ASSERTS
+	#define AE_RENDER_ASSERTS
 #endif
 
 #ifdef AE_ENABLE_ASSERTS
@@ -16,4 +21,23 @@
 #else
 	#define AE_CORE_ASSERT(exp, format, ...)
 	#define AE_ASSERT(exp, ...)
+#endif
+
+// specific core asserts so they can be partially turned on and off
+#ifdef AE_ECS_ASSERTS
+	#define AE_ECS_ASSERT(exp, ...) AE_CORE_ASSERT(exp, __VA_ARGS__)
+#else
+	#define AE_ECS_ASSERT(exp, ...)
+#endif
+
+#ifdef AE_DATASTRUCT_ASSERTS
+	#define AE_DATASTRUCT_ASSERT(exp, ...) AE_CORE_ASSERT(exp, __VA_ARGS__)
+#else
+	#define AE_DATASTRUCT_ASSERT(exp, ...)
+#endif
+
+#ifdef AE_RENDER_ASSERTS
+	#define AE_RENDER_ASSERT(exp, ...) AE_CORE_ASSERT(exp, __VA_ARGS__)
+#else
+	#define AE_RENDER_ASSERT(exp, ...)
 #endif
