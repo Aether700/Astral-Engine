@@ -626,20 +626,27 @@ public:
 		CreatePointLight(Vector3::Normalize({ 1.0f, 5.0f, 3.0f }) * 1.7f, 15.0f, cube, lightMat);
 		CreatePointLight(Vector3::Normalize({ -5.0f, 3.0f, 0.0f }) * 1.2f, 15.0f, cube, lightMat);
 		*/
-		CreateSpotLight(Vector3::Down() * 1.5f, Vector3::Up(), 20.5f, 5.0f, cube, lightMat);
+		Vector3 pos = Vector3::Normalize({ 2, 5, 1 }) * 1.5f;
 
-		fix spot lights
+		CreateDirectionalLight({3, 5, 4}, cube, lightMat);
+		
+		CreatePointLight({1.5f, -1.0f, 0.5f}, 20, cube, lightMat);
+
+		CreateSpotLight(pos, -pos, 20.0f, 7.0f, cube, lightMat);
+		CreateSpotLight(-pos, pos, 20.0f, 8.0f, cube, lightMat);
 
 		MaterialHandle mat = CreateMaterial();
 
 		CreateCrate(Vector3::Zero(), Quaternion::Identity(), cube, mat);
-		CreateCrate(Vector3(3.0f, 0.0f, 1.0f), Quaternion::EulerToQuaternion(30.0f, 10.0f, 0.0f), cube, mat);
+		CreateCrate(Vector3(3.0f, -2.0f, 1.0f), Quaternion::EulerToQuaternion(30.0f, 10.0f, 0.0f), cube, mat);
 
 		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
 		//cam.GetComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
 		m_scene->DestroyAEntity(cam);
 		cam = m_scene->CreateAEntity();
-		cam.EmplaceComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		Camera& camComponent = cam.EmplaceComponent<AstralEngine::Camera>();
+		camComponent.GetCamera().SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
+		camComponent.SetAsPrimary(true);
 		cam.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
 		cam.EmplaceComponent<CamController>();
 		cam.EmplaceComponent<RendererStatViewer>();

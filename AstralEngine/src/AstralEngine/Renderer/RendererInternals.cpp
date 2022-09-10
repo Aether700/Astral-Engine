@@ -1133,13 +1133,11 @@ namespace AstralEngine
 
 			ss.str("");
 			ss << varName << ".innerAngle";
-			//shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetInnerAngle())));
-			shader->SetFloat(ss.str(), Math::DegreeToRadians(data.GetInnerAngle()));
+			shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetInnerAngle())));
 
 			ss.str("");
 			ss << varName << ".outerAngle";
-			//shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetOuterAngle())));
-			shader->SetFloat(ss.str(), Math::DegreeToRadians(data.GetOuterAngle()));
+			shader->SetFloat(ss.str(), Math::Cos(Math::DegreeToRadians(data.GetOuterAngle())));
 
 			ss.str("");
 			ss << varName << ".radius";

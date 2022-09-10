@@ -147,12 +147,7 @@ vec3 CalculateSpotLightShading(SpotLight light, vec3 baseColor, float specularIn
     float angleDifference = light.innerAngle - light.outerAngle;
     float intensity = clamp((angle - light.outerAngle) / angleDifference, 0.0, 1.0);
     
-    //ambient *= attenuation * intensity;
-    //diffuse *= attenuation * intensity;
-    //specular *= attenuation * intensity;
-    
     return (ambient + diffuse + specular) * attenuation * intensity;
-    //return light.direction;
 }
 
 void main()

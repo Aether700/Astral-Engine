@@ -130,9 +130,9 @@ namespace AstralEngine
 		{
 			auto[transform, camera] = camView.Get<Transform, Camera>(entity);
 
-			if (camera.primary)
+			if (camera.IsPrimary())
 			{
-				mainCamera = &camera.camera;
+				mainCamera = &camera.GetCamera();
 				cameraTransform = &transform;
 				break;
 			}
@@ -181,9 +181,9 @@ namespace AstralEngine
 		for (auto entity : view)
 		{
 			auto& cameraComponent = view.Get<Camera>(entity);
-			if (!cameraComponent.fixedAspectRatio)
+			if (!cameraComponent.IsFixedAspectRatio())
 			{
-				cameraComponent.camera.SetViewportSize(width, height);
+				cameraComponent.GetCamera().SetViewportSize(width, height);
 			}
 		}
 	}

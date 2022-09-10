@@ -296,10 +296,72 @@ namespace AstralEngine
 		return !(*this == other);
 	}
 
+	// Camera ///////////////////////////////////////////////////
+	AEntity Camera::s_primaryCamera = NullEntity;
+
+	Camera::Camera() : m_fixedAspectRatio(false), m_ambientIntensity(0.05f)
+	{
+		
+	}
+
+	Camera::~Camera()
+	{
+		if (s_primaryCamera == GetAEntity()) 
+		{
+			s_primaryCamera = NullEntity;
+		}
+	}
+
+	void Camera::OnCreate()
+	{
+		if (s_primaryCamera == NullEntity)
+		{
+			m_primary = true;
+			s_primaryCamera = GetAEntity();
+		}
+		else
+		{
+			m_primary = false;
+		}
+	}
+
+	SceneCamera& Camera::GetCamera() { return m_camera; }
+	const SceneCamera& Camera::GetCamera() const { return m_camera; }
+	bool Camera::IsFixedAspectRatio() const { return m_fixedAspectRatio; }
+	bool Camera::IsPrimary() const { return m_primary; }
+	float Camera::GetAmbientIntensity() const { return m_ambientIntensity; }
+
+	void Camera::SetAsPrimary(bool primary)
+	{
+		m_primary = primary;
+		if (m_primary)
+		{
+			s_primaryCamera = GetAEntity();
+		}
+		else if (s_primaryCamera == GetAEntity())
+		{
+			s_primaryCamera = NullEntity;
+		}
+	}
+
+	void Camera::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
+
+	bool Camera::operator==(const Camera& other) const
+	{
+		return m_camera == other.m_camera && m_primary == other.m_primary
+			&& m_fixedAspectRatio == other.m_fixedAspectRatio;
+	}
+
+	bool Camera::operator!=(const Camera& other) const
+	{
+		return !(*this == other);
+	}
+
+
 	// Light ///////////////////////////////////////////////////
-	Light::Light() : m_light(NullHandle), m_type(LightType::Directional), m_direction(-0.5f, -1.0f, -0.5f), 
-		m_color(1.0f, 1.0f, 1.0f), m_diffuseIntensity(0.75f), m_specularIntensity(1.0f), 
-		m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f)
+	Light::Light() : m_light(NullHandle), m_type(LightType::Directional), m_direction(-0.5f, -1.0f, -0.5f),
+		m_color(1.0f, 1.0f, 1.0f), m_diffuseIntensity(0.75f), m_specularIntensity(1.0f),
+		m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f), m_radius(20.0f)
 	{
 		m_direction.Normalize();
 	}

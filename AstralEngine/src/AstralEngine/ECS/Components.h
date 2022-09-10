@@ -125,22 +125,33 @@ namespace AstralEngine
 		mutable bool m_hasChanged;
 	};
 
-	struct Camera : public ToggleableComponent
+	class Camera sealed : public AEntityLinkedComponent, public CallbackComponent
 	{
-		SceneCamera camera;
-		bool primary = true;
-		bool fixedAspectRatio = false;
+	public:
+		Camera();
+		~Camera();
 
-		bool operator==(const Camera& other) const
-		{
-			return camera == other.camera && primary == other.primary 
-				&& fixedAspectRatio == other.fixedAspectRatio;
-		}
+		void OnCreate() override;
 
-		bool operator!=(const Camera& other) const
-		{
-			return !(*this == other);
-		}
+		SceneCamera& GetCamera();
+		const SceneCamera& GetCamera() const;
+		bool IsFixedAspectRatio() const;
+		bool IsPrimary() const;
+		float GetAmbientIntensity() const;
+		
+		void SetAsPrimary(bool primary);
+		void SetAmbientIntensity(float intensity);
+
+		bool operator==(const Camera& other) const;
+		bool operator!=(const Camera& other) const;
+
+	private:
+		static AEntity s_primaryCamera;
+
+		SceneCamera m_camera;
+		bool m_primary;
+		bool m_fixedAspectRatio = false;
+		float m_ambientIntensity = 0.05f;
 	};
 
 	class NativeScript : public CallbackComponent, public AEntityLinkedComponent
