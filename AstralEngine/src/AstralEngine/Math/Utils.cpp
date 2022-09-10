@@ -157,46 +157,6 @@ namespace AstralEngine
 		return std::log(v);
 	}
 
-	int Math::Min(int i1, int i2)
-	{
-		if (i1 < i2)
-		{
-			return i1;
-		}
-
-		return i2;
-	}
-
-	float Math::Min(float f1, float f2) 
-	{
-		if (f1 < f2)
-		{
-			return f1;
-		}
-
-		return f2;
-	}
-
-	int Math::Max(int i1, int i2)
-	{
-		if (i1 > i2)
-		{
-			return i1;
-		}
-
-		return i2;
-	}
-
-	float Math::Max(float f1, float f2)
-	{
-		if (f1 > f2)
-		{
-			return f1;
-		}
-
-		return f2;
-	}
-
 	float Math::CopySign(float magnitude, float sign)
 	{
 		if (sign == 0.0f)

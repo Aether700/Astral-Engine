@@ -1,47 +1,96 @@
 #pragma once
 #include <string>
-#include "AstralEngine/Renderer/Renderer2D.h"
 #include "AstralEngine/Renderer/Texture.h"
 #include "AstralEngine/Math/AMath.h"
 #include "SceneCamera.h"
 #include "CoreComponents.h"
 #include "AEntity.h"
+#include "AstralEngine/Renderer/Renderer.h"
 
 namespace AstralEngine
 {
-	class SpriteRenderer : public ToggleableComponent
+	// Base class used to
+	class Renderable : public ToggleableComponent
 	{
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const = 0;
+	};
+
+	class SpriteRenderer : public Renderable
+	{
+		friend class AEntityRenderableComponentPair<SpriteRenderer>;
 	public:
 		SpriteRenderer();
 		SpriteRenderer(float r, float g, float b, float a);
 		SpriteRenderer(const Vector4& color);
-		SpriteRenderer(const AReference<Texture2D>& sprite);
-		SpriteRenderer(float r, float g, float b, float a, const AReference<Texture2D>& sprite);
-		SpriteRenderer(const Vector4& color, const AReference<Texture2D>& sprite);
+		SpriteRenderer(Texture2DHandle sprite);
+		SpriteRenderer(float r, float g, float b, float a, Texture2DHandle sprite);
+		SpriteRenderer(const Vector4& color, Texture2DHandle sprite);
 
 		Vector4 GetColor() const { return m_color; }
 		void SetColor(float r, float g, float b, float a);
 		void SetColor(Vector4 color);
 
-		AReference<Texture2D> GetSprite() const { return m_sprite; }
-		void SetSprite(AReference<Texture2D> sprite);
+		Texture2DHandle GetSprite() const { return m_sprite; }
+		void SetSprite(Texture2DHandle sprite);
 
 		bool operator==(const SpriteRenderer& other) const;
 		bool operator!=(const SpriteRenderer& other) const;
 
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const override;
+
 	private:
 		Vector4 m_color;
-		AReference<Texture2D> m_sprite;
+		Texture2DHandle m_sprite;
 	};
 
-	class Transform
+	class MeshRenderer : public Renderable
+	{
+		friend class AEntityRenderableComponentPair<MeshRenderer>;
+	public:
+		MeshRenderer();
+		MeshRenderer(MeshHandle mesh);
+		MeshRenderer(MeshHandle mesh, MaterialHandle mat);
+
+		MeshHandle GetMesh() const;
+		void SetMesh(MeshHandle mesh);
+
+		MaterialHandle GetMaterial() const;
+		void SetMaterial(MaterialHandle mat);
+
+		bool operator==(const MeshRenderer& other) const;
+		bool operator!=(const MeshRenderer& other) const;
+
+	protected:
+		virtual void SendDataToRenderer(const Transform& transform) const override;
+
+	private:
+		MeshHandle m_mesh;
+		MaterialHandle m_material;
+	};
+
+	class Transform : public AEntityLinkedComponent
 	{
 	public:
 		Transform();
 		Transform(const Vector3& translation);
 		Transform(const Vector3& pos, const Quaternion& rotation, const Vector3& scale);
+		Transform(const Vector3& pos, const Vector3& euler, const Vector3& scale);
 
 		Mat4 GetTransformMatrix() const;
+
+		const Vector3& GetLocalPosition() const;
+		void SetLocalPosition(const Vector3& position);
+		void SetLocalPosition(float x, float y, float z);
+
+		const Quaternion& GetRotation() const;
+		void SetRotation(const Quaternion& rotation);
+		void SetRotation(const Vector3& euler);
+		void SetRotation(float x, float y, float z);
+
+		const Vector3& GetScale() const;
+		void SetScale(const Vector3& scale);
 
 		AEntity GetParent() const { return m_parent; }
 		void SetParent(AEntity parent);
@@ -51,7 +100,10 @@ namespace AstralEngine
 
 		// rotates the transform around the point by the angle provided around the specified axis. 
 		// Note that this function does affects both the internal rotation of the transform and it's position
-		void RotateAround(const Vector3& point, float angle, const Vector3& axis);
+		void RotateAround(const Vector3& point, float angle, const Vector3& axis = Vector3(0.0f, 1.0f, 0.0f));
+
+		// returns true if the transform has changed since last frame, false otherwise
+		bool HasChanged() const;
 
 		Vector3 Forward() const;
 		Vector3 Right() const;
@@ -60,78 +112,116 @@ namespace AstralEngine
 		bool operator==(const Transform& other) const;
 		bool operator!=(const Transform& other) const;
 
-		Vector3 position;
-		Quaternion rotation;
-		Vector3 scale;
 
 	private:
+		Vector3 m_position;
+		Quaternion m_rotation;
+		Vector3 m_scale;
+
 		AEntity m_parent;
+		
+		mutable Mat4 m_transformMatrix;
+		mutable bool m_dirty;
+		mutable bool m_hasChanged;
 	};
 
-	struct Camera : public ToggleableComponent
+	class Camera sealed : public AEntityLinkedComponent, public CallbackComponent
 	{
-		SceneCamera camera;
-		bool primary = true;
-		bool fixedAspectRatio = false;
+	public:
+		Camera();
 
-		bool operator==(const Camera& other) const
-		{
-			return camera == other.camera && primary == other.primary 
-				&& fixedAspectRatio == other.fixedAspectRatio;
-		}
+		void OnCreate() override;
+		void OnDestroy() override;
+		
+		SceneCamera& GetCamera();
+		const SceneCamera& GetCamera() const;
+		bool IsFixedAspectRatio() const;
+		bool IsMain() const;
+		float GetAmbientIntensity() const;
+		const Vector3& GetBackgroundColor() const;
+		
+		void SetAsMain(bool main);
+		void SetAmbientIntensity(float intensity);
+		void GetBackgroundColor(const Vector3& color);
 
-		bool operator!=(const Camera& other) const
-		{
-			return !(*this == other);
-		}
+		static AEntity GetMainCamera();
+
+		bool operator==(const Camera& other) const;
+		bool operator!=(const Camera& other) const;
+
+	private:
+		static AEntity s_mainCamera;
+
+		SceneCamera m_camera;
+		bool m_main;
+		bool m_fixedAspectRatio;
+		float m_ambientIntensity;
+
+		Vector3 m_backgroundColor;
 	};
 
-	class NativeScript : public CallbackComponent
+	class NativeScript : public CallbackComponent, public AEntityLinkedComponent
 	{
 		friend class AEntity;
 	public:
-
-		NativeScript() : CallbackComponent(false) { }
-
-		template<typename... Component>
-		decltype(auto) GetComponent()
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		template<typename... Component>
-		decltype(auto) GetComponent() const
-		{
-			return entity.GetComponent<Component...>();
-		}
-
-		Transform& GetTransform() { return entity.GetTransform(); }
-		const Transform& GetTransform() const { return entity.GetTransform(); }
-
-		const std::string& GetName() const { return entity.GetName(); }
-		void SetName(const std::string& name) { entity.SetName(name); }
-
-		void Destroy(AEntity& e) const { e.Destroy(); }
-		AEntity CreateAEntity() const { return entity.m_scene->CreateAEntity(); }
-
+		NativeScript() : CallbackComponent(false) { SetActive(true); }
+		
 		bool operator==(const NativeScript& other) const
 		{
-			return entity == other.entity;
+			return GetAEntity() == other.GetAEntity();
 		}
 
 		bool operator!=(const NativeScript& other) const
 		{
 			return !(*this == other);
 		}
+	};
 
-	protected:
-		AEntity entity;
+	class Light : public AEntityLinkedComponent, public CallbackComponent
+	{
+	public:
+		Light();
+		void OnStart() override;
+		void OnEnable() override;
+		void OnDisable() override;
+
+		LightHandle GetHandle() const;
+		LightType GetType() const;
+		const Vector3& GetColor() const;
+		const Vector3& GetDirection() const;
+		float GetRadius() const;
+		float GetDiffuseIntensity() const;
+		float GetSpecularIntensity() const;
+		float GetInnerAngle() const;
+		float GetOuterAngle() const;
+
+		void SetType(LightType type);
+		void SetColor(const Vector3& color);
+		void SetDirection(const Vector3& direction);
+		void SetRadius(float radius);
+		void SetDiffuseIntensity(float intensity);
+		void SetSpecularIntensity(float intensity);
+		void SetInnerAngle(float angle);
+		void SetOuterAngle(float angle);
+
+		bool operator==(const Light& other) const;
+		bool operator!=(const Light& other) const;
 
 	private:
-		void SetEntity(AEntity& e)
-		{
-			entity = e;
-			m_isActive = true;
-		}
+		LightData& RetrieveLightData() const;
+		LightData CreateLightData() const;
+
+		LightHandle m_light;
+
+		LightType m_type;
+		Vector3 m_color;
+		Vector3 m_direction;
+		float m_radius;
+		float m_diffuseIntensity;
+		float m_specularIntensity;
+
+		// used for spotlights
+		float m_innerAngle;
+		float m_outerAngle;
 	};
 }

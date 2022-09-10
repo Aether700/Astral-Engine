@@ -31,6 +31,8 @@
 	#define AE_ERROR(...)
 #endif
 
+
+
 namespace AstralEngine
 {
 	//https://fmt.dev/latest/api.html#formatting-user-defined-types

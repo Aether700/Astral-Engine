@@ -170,7 +170,6 @@ namespace AstralEngine
 	
 	OpenGLGraphicsContext::~OpenGLGraphicsContext() 
 	{
-		//DestroyGraphicsContext(m_nativeContext);
 		#ifdef AE_PLATFORM_WINDOWS
 			HGLRC currContext = wglGetCurrentContext();
 			if (currContext == m_nativeContext)
@@ -188,12 +187,10 @@ namespace AstralEngine
 	void OpenGLGraphicsContext::Init() 
 	{
 		AE_PROFILE_FUNCTION();
-		//glfwMakeContextCurrent(m_window);
 		
 		m_nativeContext = CreateNativeContext(m_window);
 		MakeContextCurrent();
 
-		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		int status = gladLoadGLLoader((GLADloadproc)ProceedureLoader);
 		AE_CORE_ASSERT(status, "Failed to initialize Glad");
 

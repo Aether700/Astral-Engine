@@ -44,7 +44,6 @@
 #include "AstralEngine/Renderer/RenderAPI.h"
 #include "AstralEngine/Renderer/RenderCommand.h"
 #include "AstralEngine/Renderer/Renderer.h"
-#include "AstralEngine/Renderer/Renderer2D.h"
 #include "AstralEngine/Renderer/OrthographicCamera.h"
 #include "AstralEngine/Renderer/OrthographicCameraController.h"
 #include "AstralEngine/Renderer/Texture.h"

@@ -9,10 +9,11 @@ namespace AstralEngine
 	{
 	public:
 		OpenGLShader(const std::string& filepath);
-		OpenGLShader(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
 		~OpenGLShader();
 
 		virtual const std::string& GetName() const override { return m_name; }
+
+		virtual unsigned int GetRendererID() const override { return m_rendererID; }
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
@@ -38,9 +39,12 @@ namespace AstralEngine
 		int GetUniformLocation(const std::string& name);
 		std::string ReadFile(const std::string& filepath);
 		
+
 		//type is a GLenum
 		unsigned int CreateGLShader(const std::string& src, unsigned int type);
 		AUnorderedMap<unsigned int, std::string> PreProcess(const std::string& src);
+		void PreprocessToken(std::string& src, const char* token, size_t tokenLen, 
+			const std::string& tokenReplacement);
 		void CompileShaders(AUnorderedMap<unsigned int, std::string>& shaderSrcs);
 
 		unsigned int m_rendererID;

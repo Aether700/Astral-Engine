@@ -11,6 +11,8 @@ namespace AstralEngine
 		Quaternion();
 		Quaternion(float w, const Vector3& v);
 		Quaternion(float w, float x, float y, float z);
+		Quaternion(const Vector3& euler);
+		Quaternion(float x, float y, float z);
 
 		float GetW() const;
 		float GetX() const;

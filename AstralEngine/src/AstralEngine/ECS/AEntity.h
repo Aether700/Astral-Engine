@@ -7,10 +7,11 @@
 namespace AstralEngine
 {
 	class Transform;
+	class AEntityLinkedComponent;
 
 	class AEntity
 	{
-		friend class NativeScript;
+		friend class AEntityLinkedComponent;
 	public:
 		constexpr AEntity() : m_id(Null), m_scene(nullptr) { }
 
@@ -21,10 +22,14 @@ namespace AstralEngine
 		template<typename Component, typename... Args>
 		Component& EmplaceComponent(Args... args)
 		{
+			Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+			if constexpr (std::is_base_of_v<AEntityLinkedComponent, Component>)
+			{
+				comp.m_entity = *this;
+			}
+
 			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
 			{
-				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
-				
 				if (HasComponent<CallbackList>())
 				{
 					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
@@ -35,19 +40,16 @@ namespace AstralEngine
 					list.AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 
-				if constexpr (std::is_base_of_v<NativeScript, Component>)
-				{
-					comp.SetEntity(*this);
-				}
-
 				comp.OnCreate();
-
-				return comp;
 			}
-			else
+			else if constexpr (std::is_base_of_v<Renderable, Component>)
 			{
-				return m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+				AE_CORE_ASSERT(!HasComponent<RenderData>(), 
+					"Engine does not support having multiple renderable components on the same entity");
+				EmplaceComponent<RenderData>(new AEntityRenderableComponentPair<Component>(*this));
 			}
+
+			return comp;
 		}
 
 		template<typename Component>
@@ -173,4 +175,51 @@ namespace AstralEngine
 	};
 	
 	inline constexpr AEntity NullEntity = AEntity();
+
+	class AEntityLinkedComponent
+	{
+		friend class AEntity;
+	public:
+		AEntity GetAEntity() const;
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return GetAEntity().HasComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		Transform& GetTransform() { return m_entity.GetTransform(); }
+		const Transform& GetTransform() const { return m_entity.GetTransform(); }
+
+		const std::string& GetName() const { return m_entity.GetName(); }
+		void SetName(const std::string& name) { m_entity.SetName(name); }
+
+		void Destroy(AEntity& e) const { e.Destroy(); }
+		AEntity CreateAEntity() const { return m_entity.m_scene->CreateAEntity(); }
+
+		bool operator==(const AEntityLinkedComponent& other) const
+		{
+			return m_entity == other.m_entity;
+		}
+
+		bool operator!=(const AEntityLinkedComponent& other) const
+		{
+			return !(*this == other);
+		}
+
+	private:
+		AEntity m_entity;
+	};
 }

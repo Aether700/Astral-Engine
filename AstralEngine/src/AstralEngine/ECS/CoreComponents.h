@@ -4,87 +4,103 @@
 namespace AstralEngine
 {
 	class AEntity;
+	class Renderable;
+	class Transform;
 
 	class ToggleableComponent
 	{
 		friend class NativeScript;
 	public:
-		ToggleableComponent(bool enabled = true) : m_isActive(enabled) { }
+		ToggleableComponent(bool enabled = true);
 
-		virtual ~ToggleableComponent() { }
+		virtual ~ToggleableComponent();
 
-		virtual void OnEnable() { }
-		virtual void OnDisable() { }
+		virtual void OnEnable();
+		virtual void OnDisable();
 
-		bool IsActive() const { return m_isActive; }
-
-		void SetActive(bool val)
-		{
-			if (val == m_isActive)
-			{
-				return;
-			}
-
-			if (val)
-			{
-				m_isActive = true;
-				OnEnable();
-			}
-			else
-			{
-				m_isActive = false;
-				OnDisable();
-			}
-		}
+		bool IsActive() const;
+		void SetActive(bool val);
 
 	private:
 		bool m_isActive;
 	};
 
+	class AEntityRenderablePair
+	{
+	public:
+		virtual ~AEntityRenderablePair();
+		
+		virtual void SendToRenderer(const Transform& transform) const = 0;
+		virtual bool IsActive() const = 0;
+	};
+
+	template<typename Component>
+	class AEntityRenderableComponentPair : public AEntityRenderablePair
+	{
+	public:
+		AEntityRenderableComponentPair(AEntity e) : m_entity(e) { }
+		virtual void SendToRenderer(const Transform& transform) const override
+		{
+			m_entity.GetComponent<Component>().SendDataToRenderer(transform);
+		}
+
+		virtual bool IsActive() const override
+		{
+			return m_entity.GetComponent<Component>().IsActive();
+		}
+
+	private:
+		AEntity m_entity;
+	};
+
+	class RenderData sealed
+	{
+	public:
+		RenderData();
+		RenderData(AEntityRenderablePair* r);
+		RenderData(RenderData&& other) noexcept;
+		~RenderData();
+
+		void SendToRenderer(const Transform& transform) const;
+		bool IsActive() const;
+
+		RenderData& operator=(RenderData&& other) noexcept;
+		bool operator==(const RenderData& other) const;
+		bool operator!=(const RenderData& other) const;
+
+	private:
+		AEntityRenderablePair* m_renderable;
+	};
+
 	class CallbackComponent : public ToggleableComponent
 	{
 	public:
-		CallbackComponent(bool enabled = true) : ToggleableComponent(enabled) { }
-		virtual ~CallbackComponent() { }
+		CallbackComponent(bool enabled = true);
+		virtual ~CallbackComponent();
 
-		virtual void OnCreate() { }
-		virtual void OnStart() { }
-		virtual void OnUpdate() { }
-		virtual void OnLateUpdate() { }
-		virtual void OnDestroy() { }
+		virtual void OnCreate();
+		virtual void OnStart();
+		virtual void OnUpdate();
+		virtual void OnLateUpdate();
+		virtual void OnDestroy();
 
-		bool operator==(const CallbackComponent& other) const
-		{
-			return this == &other;
-		}
-
-		bool operator!=(const CallbackComponent& other) const
-		{
-			return !(*this == other);
-		}
+		bool operator==(const CallbackComponent& other) const;
+		bool operator!=(const CallbackComponent& other) const;
 	};
 
-	class AEntityData : public ToggleableComponent
+	class AEntityData sealed : public ToggleableComponent
 	{
 	public:
-		AEntityData() : m_name("AEntity"), m_tag("Untagged") { }
+		AEntityData();
 
-		const std::string& GetName() const { return m_name; }
-		const std::string& GetTag() const { return m_tag; }
+		const std::string& GetName() const;
+		const std::string& GetTag() const;
 
-		void SetName(const std::string& name) { m_name = name; }
-		void SetTag(const std::string& tag) { m_tag = tag; }
+		void SetName(const std::string& name);
+		void SetTag(const std::string& tag);
 
-		bool operator==(const AEntityData& other) const
-		{
-			return m_name == other.m_name && m_tag == other.m_tag
-				&& IsActive() == other.IsActive();
-		}
-
-		bool operator!=(const AEntityData& other) const
-		{
-			return !(*this == other);
-		}
+		bool operator==(const AEntityData& other) const;
+		bool operator!=(const AEntityData& other) const;
 
 	private:
 		std::string m_name;
@@ -156,23 +172,14 @@ namespace AstralEngine
 	class CallbackList
 	{
 	public:
-		CallbackList() { }
-		CallbackList(const CallbackList&) { }
-		CallbackList(CallbackList&& other) noexcept
-		{
-			m_callbacks = std::move(other.m_callbacks);
-		}
+		CallbackList();
+		CallbackList(const CallbackList&);
+		CallbackList(CallbackList&& other) noexcept;
 
-		~CallbackList()
-		{
-			Clear();
-		}
+		~CallbackList();
 
 
-		void AddCallback(CallbackAEntityPair* callback)
-		{
-			m_callbacks.Add(callback);
-		}
+		void AddCallback(CallbackAEntityPair* callback);
 
 		template<typename Component>
 		void RemoveCallback()
@@ -190,64 +197,17 @@ namespace AstralEngine
 			}
 		}
 
-		void CallOnStart()
-		{
-			for (CallbackAEntityPair* callback : m_callbacks)
-			{
-				callback->OnStart();
-			}
-		}
+		void CallOnStart();
+		void CallOnUpdate();
+		void CallOnLateUpdate();
 
-		void CallOnUpdate()
-		{
-			for (CallbackAEntityPair* callback : m_callbacks)
-			{
-				callback->OnUpdate();
-			}
-		}
+		bool IsEmpty() const;
+		void Clear();
 
-		void CallOnLateUpdate()
-		{
-			for (CallbackAEntityPair* callback : m_callbacks)
-			{
-				callback->OnLateUpdate();
-			}
-		}
-
-		bool IsEmpty() const { return m_callbacks.IsEmpty(); }
-
-		void Clear()
-		{
-			for (CallbackAEntityPair* ptr : m_callbacks)
-			{
-				delete ptr;
-			}
-			m_callbacks.Clear();
-		}
-
-		CallbackList& operator=(const CallbackList& other)
-		{
-			Clear();
-			m_callbacks = other.m_callbacks;
-			return *this;
-		}
-
-		CallbackList& operator=(CallbackList&& other) noexcept
-		{
-			Clear();
-			m_callbacks = std::move(other.m_callbacks);
-			return *this;
-		}
-
-		bool operator==(const CallbackList& other) const
-		{
-			return m_callbacks == other.m_callbacks;
-		}
-
-		bool operator!=(const CallbackList& other) const
-		{
-			return !(*this == other);
-		}
+		CallbackList& operator=(const CallbackList& other);
+		CallbackList& operator=(CallbackList&& other) noexcept;
+		bool operator==(const CallbackList& other) const;
+		bool operator!=(const CallbackList& other) const;
 
 	private:
 		ASinglyLinkedList<CallbackAEntityPair*> m_callbacks;

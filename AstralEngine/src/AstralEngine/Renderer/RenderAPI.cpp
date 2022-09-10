@@ -10,6 +10,7 @@ namespace AstralEngine
 		{
 		case RenderAPI::API::None:
 			AE_CORE_ERROR("No RenderAPI is not yet supported");
+			break;
 
 		case RenderAPI::API::OpenGL:
 			return new OpenGLRenderAPI();

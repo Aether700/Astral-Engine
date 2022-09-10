@@ -65,7 +65,7 @@ namespace AstralEngine
 
 		ADelegate<Func>& BindFunction(Func* func)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_obj = (void*)func;
 			m_func = [](void* function, Args... args) -> Return
 			{
@@ -77,7 +77,7 @@ namespace AstralEngine
 
 		ADelegate<Func>& BindFunction(InternalFunc* func, void* data = nullptr)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_func = func;
 			m_obj = data;
 
@@ -86,7 +86,7 @@ namespace AstralEngine
 
 		ADelegate<Func>& BindFunction(const std::function<Return(Args...)>& func)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			/*extract function ptr from std::function and store it in m_obj to use in lambda
 			*/
 			m_obj = (void*)*func.target<Func*>();
@@ -101,8 +101,8 @@ namespace AstralEngine
 		template<auto Function>
 		ADelegate<Func>& BindFunction()
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT((std::is_invocable_r_v<Return, decltype(Function), Args...>),
+			
+			AE_DATASTRUCT_ASSERT((std::is_invocable_r_v<Return, decltype(Function), Args...>),
 				"Invalid function passed to delegate");
 			m_obj = nullptr;
 			m_func = [](void* obj, Args... args)
@@ -116,8 +116,8 @@ namespace AstralEngine
 		template<auto Function, typename Type>
 		ADelegate<Func>& BindFunction(Type* obj)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT((std::is_invocable_r_v<Return, decltype(Function), Type&, Args...>),
+			
+			AE_DATASTRUCT_ASSERT((std::is_invocable_r_v<Return, decltype(Function), Type&, Args...>),
 				"Invalid Function type pair provided");
 			m_obj = obj;
 			m_func = [](void* o, Args... args) -> Return

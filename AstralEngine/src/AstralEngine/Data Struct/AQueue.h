@@ -13,15 +13,15 @@ namespace AstralEngine
 
 		void Enqueue(T& element) //
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_list.AddFirst(element);
 		}
 
 		T& Dequeue()
 		{
-			AE_PROFILE_FUNCTION();
+			
 
-			AE_CORE_ASSERT(!m_list.IsEmpty(), "Cannot Dequeue an Empty AQueue");
+			AE_DATASTRUCT_ASSERT(!m_list.IsEmpty(), "Cannot Dequeue an Empty AQueue");
 			T element = std::move(m_list[m_list.GetCount() - 1]);
 			m_list.Remove(m_list.GetCount() - 1);
 
