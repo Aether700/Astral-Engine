@@ -297,58 +297,59 @@ namespace AstralEngine
 	}
 
 	// Camera ///////////////////////////////////////////////////
-	AEntity Camera::s_primaryCamera = NullEntity;
+	AEntity Camera::s_mainCamera = NullEntity;
 
-	Camera::Camera() : m_fixedAspectRatio(false), m_ambientIntensity(0.05f)
-	{
-		
-	}
-
-	Camera::~Camera()
-	{
-		if (s_primaryCamera == GetAEntity()) 
-		{
-			s_primaryCamera = NullEntity;
-		}
-	}
+	Camera::Camera() : m_fixedAspectRatio(false), m_ambientIntensity(0.05f), m_backgroundColor(0.1f, 0.1f, 0.1f) { }
 
 	void Camera::OnCreate()
 	{
-		if (s_primaryCamera == NullEntity)
+		if (s_mainCamera == NullEntity)
 		{
-			m_primary = true;
-			s_primaryCamera = GetAEntity();
+			m_main = true;
+			s_mainCamera = GetAEntity();
 		}
 		else
 		{
-			m_primary = false;
+			m_main = false;
+		}
+	}
+
+	void Camera::OnDestroy()
+	{
+		if (s_mainCamera == GetAEntity())
+		{
+			s_mainCamera = NullEntity;
 		}
 	}
 
 	SceneCamera& Camera::GetCamera() { return m_camera; }
 	const SceneCamera& Camera::GetCamera() const { return m_camera; }
 	bool Camera::IsFixedAspectRatio() const { return m_fixedAspectRatio; }
-	bool Camera::IsPrimary() const { return m_primary; }
+	bool Camera::IsMain() const { return m_main; }
 	float Camera::GetAmbientIntensity() const { return m_ambientIntensity; }
+	const Vector3& Camera::GetBackgroundColor() const { return m_backgroundColor; }
 
-	void Camera::SetAsPrimary(bool primary)
+	void Camera::SetAsMain(bool main)
 	{
-		m_primary = primary;
-		if (m_primary)
+		m_main = main;
+		if (m_main)
 		{
-			s_primaryCamera = GetAEntity();
+			s_mainCamera = GetAEntity();
 		}
-		else if (s_primaryCamera == GetAEntity())
+		else if (s_mainCamera == GetAEntity())
 		{
-			s_primaryCamera = NullEntity;
+			s_mainCamera = NullEntity;
 		}
 	}
 
 	void Camera::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
+	void Camera::GetBackgroundColor(const Vector3& color) { m_backgroundColor = color; }
+
+	AEntity Camera::GetMainCamera() { return s_mainCamera; }
 
 	bool Camera::operator==(const Camera& other) const
 	{
-		return m_camera == other.m_camera && m_primary == other.m_primary
+		return m_camera == other.m_camera && m_main == other.m_main
 			&& m_fixedAspectRatio == other.m_fixedAspectRatio;
 	}
 

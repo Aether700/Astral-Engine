@@ -129,29 +129,35 @@ namespace AstralEngine
 	{
 	public:
 		Camera();
-		~Camera();
 
 		void OnCreate() override;
-
+		void OnDestroy() override;
+		
 		SceneCamera& GetCamera();
 		const SceneCamera& GetCamera() const;
 		bool IsFixedAspectRatio() const;
-		bool IsPrimary() const;
+		bool IsMain() const;
 		float GetAmbientIntensity() const;
+		const Vector3& GetBackgroundColor() const;
 		
-		void SetAsPrimary(bool primary);
+		void SetAsMain(bool main);
 		void SetAmbientIntensity(float intensity);
+		void GetBackgroundColor(const Vector3& color);
+
+		static AEntity GetMainCamera();
 
 		bool operator==(const Camera& other) const;
 		bool operator!=(const Camera& other) const;
 
 	private:
-		static AEntity s_primaryCamera;
+		static AEntity s_mainCamera;
 
 		SceneCamera m_camera;
-		bool m_primary;
-		bool m_fixedAspectRatio = false;
-		float m_ambientIntensity = 0.05f;
+		bool m_main;
+		bool m_fixedAspectRatio;
+		float m_ambientIntensity;
+
+		Vector3 m_backgroundColor;
 	};
 
 	class NativeScript : public CallbackComponent, public AEntityLinkedComponent

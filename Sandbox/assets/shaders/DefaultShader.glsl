@@ -29,11 +29,12 @@ uniform sampler2D u_specularMap;
 
 uniform vec3 u_camPos;
 
+uniform float u_ambientIntensity;
+
 struct DirectionalLight
 {
     vec3 direction;
   
-    vec3 ambient;
     vec3 diffuse;
     vec3 specular;
 };
@@ -45,7 +46,6 @@ struct PointLight
 {
     vec3 position;
     
-    vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     
@@ -60,7 +60,6 @@ struct SpotLight
     vec3 position;
     vec3 direction;
 
-    vec3 ambient;
     vec3 diffuse;
     vec3 specular;       
     
@@ -77,10 +76,7 @@ vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor,
     float specularIntensity, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction);
-    
-    // ambient
-    vec3 ambient = light.ambient * baseColor;
-    
+        
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * baseColor;
@@ -90,7 +86,7 @@ vec3 CalculateDirectionalLightShading(DirectionalLight light, vec3 baseColor,
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // try to add shininess per mat here?
     vec3 specular = light.specular * spec * specularIntensity;
     
-    return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specularIntensity,
@@ -99,9 +95,6 @@ vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specular
     vec3 distVec = light.position - position;
     vec3 lightDir = normalize(distVec);
     
-    // ambient
-    vec3 ambient = light.ambient * baseColor;
-
     // diffuse
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * baseColor;
@@ -116,7 +109,7 @@ vec3 CalculatePointLightShading(PointLight light, vec3 baseColor, float specular
     float sqrtDenominator = (distance / light.radius) + 1.0f;
     float attenuation = 1.0f / (sqrtDenominator * sqrtDenominator);
     
-    return (ambient + diffuse + specular) * attenuation;
+    return (diffuse + specular) * attenuation;
 }
 
 vec3 CalculateSpotLightShading(SpotLight light, vec3 baseColor, float specularIntensity,
@@ -124,10 +117,7 @@ vec3 CalculateSpotLightShading(SpotLight light, vec3 baseColor, float specularIn
 {
     vec3 distVec = light.position - position;
     vec3 lightDir = normalize(distVec);
-    
-    // ambient
-    vec3 ambient = light.ambient * baseColor;
-    
+
     // diffuse
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * baseColor;
@@ -147,7 +137,7 @@ vec3 CalculateSpotLightShading(SpotLight light, vec3 baseColor, float specularIn
     float angleDifference = light.innerAngle - light.outerAngle;
     float intensity = clamp((angle - light.outerAngle) / angleDifference, 0.0, 1.0);
     
-    return (ambient + diffuse + specular) * attenuation * intensity;
+    return (diffuse + specular) * attenuation * intensity;
 }
 
 void main()
@@ -164,7 +154,10 @@ void main()
 
     vec3 viewDir = normalize(u_camPos - position);
 
-    vec3 result = vec3(0, 0, 0);
+    // set ambient lighting here
+    vec3 result = u_ambientIntensity * baseColor;
+
+    // add contributions from the lights
     for (int i = 0; i < u_numDirectionalLights; i++)
     {
         result += CalculateDirectionalLightShading(u_directionalLightArr[i], baseColor, 

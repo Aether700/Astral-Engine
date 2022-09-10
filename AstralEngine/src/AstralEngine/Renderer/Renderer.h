@@ -18,6 +18,7 @@ namespace AstralEngine
 	class UIElement;
 
 	class RenderQueue;
+	class Camera;
 	class SpriteRenderer;
 	class MeshRenderer;
 	class GBuffer;
@@ -268,7 +269,7 @@ namespace AstralEngine
 		//use to start renderering and stop rendering
 		static void BeginScene(const OrthographicCamera& cam);
 		static void BeginScene(const RuntimeCamera& cam);
-		static void BeginScene(const RuntimeCamera& camera, const Transform& transform);
+		static void BeginScene(const Camera& camera, const Transform& transform);
 		static void EndScene();
 
 		//primitives
@@ -325,6 +326,8 @@ namespace AstralEngine
 		
 		static RenderQueue* s_forwardQueue;
 		static RenderQueue* s_deferredQueue;
+
+		static float s_ambientIntensity;
 		
 		static Mat4 s_viewProjMatrix;
 		static Vector3 s_camPos;

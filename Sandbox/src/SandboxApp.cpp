@@ -646,7 +646,8 @@ public:
 		cam = m_scene->CreateAEntity();
 		Camera& camComponent = cam.EmplaceComponent<AstralEngine::Camera>();
 		camComponent.GetCamera().SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
-		camComponent.SetAsPrimary(true);
+		camComponent.SetAsMain(true);
+		camComponent.SetAmbientIntensity(0.1f);
 		cam.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
 		cam.EmplaceComponent<CamController>();
 		cam.EmplaceComponent<RendererStatViewer>();

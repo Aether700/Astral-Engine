@@ -890,17 +890,15 @@ namespace AstralEngine
 	// LightData ///////////////////////////////////////////
 	LightData::LightData() : m_type(LightType::Directional) { }
 	LightData::LightData(const Vector3& position, const Vector3& color) : m_position(position), m_color(color),
-		m_ambientIntensity(0.05f), m_diffuseIntensity(0.75f), m_specularIntensity(1.0f),
-		m_type(LightType::Directional), m_radius(3.0f), m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f) { }
+		m_diffuseIntensity(0.75f), m_specularIntensity(1.0f), m_type(LightType::Directional), 
+		m_radius(3.0f), m_innerAngle(30.0f), m_outerAngle(m_innerAngle + 1.0f) { }
 
 	LightType LightData::GetLightType() const { return m_type; }
 	const Vector3& LightData::GetPosition() const { return m_position; }
 	const Vector3& LightData::GetDirection() const { return m_direction; }
 	const Vector3& LightData::GetColor() const { return m_color; }
-	const Vector3& LightData::GetAmbientColor() const { return m_color * m_ambientIntensity; }
 	const Vector3& LightData::GetDiffuseColor() const { return m_color * m_diffuseIntensity; }
 	const Vector3& LightData::GetSpecularColor() const { return m_color * m_specularIntensity; }
-	float LightData::GetAmbientIntensity() const { return m_ambientIntensity; }
 	float LightData::GetDiffuseIntensity() const { return m_diffuseIntensity; }
 	float LightData::GetSpecularIntensity() const { return m_specularIntensity; }
 	float LightData::GetRadius() const { return m_radius; }
@@ -918,7 +916,6 @@ namespace AstralEngine
 	}
 
 	void LightData::SetColor(const Vector3& color) { m_color = color; }
-	void LightData::SetAmbientIntensity(float intensity) { m_ambientIntensity = intensity; }
 	void LightData::SetDiffuseIntensity(float intensity) { m_diffuseIntensity = intensity; }
 	void LightData::SetSpecularIntensity(float intensity) { m_specularIntensity = intensity; }
 	void LightData::SetRadius(float radius) { m_radius = radius; }
@@ -1048,10 +1045,6 @@ namespace AstralEngine
 			shader->SetFloat3(ss.str(), data.GetDirection());
 
 			ss.str("");
-			ss << varName << ".ambient";
-			shader->SetFloat3(ss.str(), data.GetAmbientColor());
-
-			ss.str("");
 			ss << varName << ".diffuse";
 			shader->SetFloat3(ss.str(), data.GetDiffuseColor());
 
@@ -1078,10 +1071,6 @@ namespace AstralEngine
 			ss.str("");
 			ss << varName << ".position";
 			shader->SetFloat3(ss.str(), data.GetPosition());
-
-			ss.str("");
-			ss << varName << ".ambient";
-			shader->SetFloat3(ss.str(), data.GetAmbientColor());
 
 			ss.str("");
 			ss << varName << ".diffuse";
@@ -1118,10 +1107,6 @@ namespace AstralEngine
 			ss.str("");
 			ss << varName << ".direction";
 			shader->SetFloat3(ss.str(), data.GetDirection());
-
-			ss.str("");
-			ss << varName << ".ambient";
-			shader->SetFloat3(ss.str(), data.GetAmbientColor());
 
 			ss.str("");
 			ss << varName << ".diffuse";

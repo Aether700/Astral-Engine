@@ -648,6 +648,8 @@ namespace AstralEngine
 
 	RenderQueue* Renderer::s_forwardQueue;
 	RenderQueue* Renderer::s_deferredQueue;
+	
+	float Renderer::s_ambientIntensity;
 
 	Mat4 Renderer::s_viewProjMatrix;
 	Vector3 Renderer::s_camPos;
@@ -711,6 +713,10 @@ namespace AstralEngine
 
 	void Renderer::SendLightUniformsToShader(AReference<Shader>& shader) 
 	{ 
+		if (shader != nullptr)
+		{
+			shader->SetFloat("u_ambientIntensity", s_ambientIntensity);
+		}
 		s_lightHandler.SendLightUniformsToShader(shader); 
 	}
 
@@ -733,11 +739,12 @@ namespace AstralEngine
 		s_deferredQueue->Clear();
 	}
 
-	void Renderer::BeginScene(const RuntimeCamera& camera, const Transform& transform)
+	void Renderer::BeginScene(const Camera& camera, const Transform& transform)
 	{
 		s_frameStartTime = Time::GetTime();
-		s_viewProjMatrix = camera.GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
+		s_viewProjMatrix = camera.GetCamera().GetProjectionMatrix() * transform.GetTransformMatrix().Inverse();
 		s_camPos = transform.GetLocalPosition();
+		s_ambientIntensity = camera.GetAmbientIntensity();
 		s_forwardQueue->Clear();
 		s_deferredQueue->Clear();
 	}

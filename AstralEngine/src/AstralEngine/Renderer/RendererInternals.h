@@ -206,10 +206,8 @@ namespace AstralEngine
 		const Vector3& GetPosition() const;
 		const Vector3& GetDirection() const;
 		const Vector3& GetColor() const;
-		const Vector3& GetAmbientColor() const;
 		const Vector3& GetDiffuseColor() const;
 		const Vector3& GetSpecularColor() const;
-		float GetAmbientIntensity() const;
 		float GetDiffuseIntensity() const;
 		float GetSpecularIntensity() const;
 		float GetRadius() const;
@@ -220,7 +218,6 @@ namespace AstralEngine
 		void SetPosition(const Vector3& position);
 		void SetDirection(const Vector3& position);
 		void SetColor(const Vector3& color);
-		void SetAmbientIntensity(float intensity);
 		void SetDiffuseIntensity(float intensity);
 		void SetSpecularIntensity(float intensity);
 		void SetRadius(float radius);
@@ -232,7 +229,6 @@ namespace AstralEngine
 		Vector3 m_position;
 		Vector3 m_direction;
 		Vector3 m_color;
-		float m_ambientIntensity;
 		float m_diffuseIntensity;
 		float m_specularIntensity;
 
