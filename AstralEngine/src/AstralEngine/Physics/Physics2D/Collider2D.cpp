@@ -25,8 +25,8 @@ namespace AstralEngine
 
 		if (HasComponent<SpriteRenderer>())
 		{
-			m_width = GetTransform().scale.x;
-			m_height = GetTransform().scale.y;
+			m_width = GetTransform().GetScale().x;
+			m_height = GetTransform().GetScale().y;
 		}
 	}
 

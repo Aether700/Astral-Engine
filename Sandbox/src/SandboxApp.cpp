@@ -141,6 +141,8 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
+		rendering of the quad doesn't work see why
+
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
 		m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
 		m_entity.EmplaceComponent<AstralEngine::BoxCollider2D>();
