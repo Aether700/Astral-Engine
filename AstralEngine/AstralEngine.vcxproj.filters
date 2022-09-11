@@ -309,9 +309,6 @@
     <ClInclude Include="src\AstralEngine\UI\UICore.h">
       <Filter>src\AstralEngine\UI</Filter>
     </ClInclude>
-    <ClInclude Include="src\AstralEngine\UI\UIText.h">
-      <Filter>src\AstralEngine\UI</Filter>
-    </ClInclude>
     <ClInclude Include="src\aepch.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -455,9 +452,6 @@
       <Filter>src\AstralEngine\UI\UI Core\TTF</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\UI\UICore.cpp">
-      <Filter>src\AstralEngine\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AstralEngine\UI\UIText.cpp">
       <Filter>src\AstralEngine\UI</Filter>
     </ClCompile>
     <ClCompile Include="src\aepch.cpp">

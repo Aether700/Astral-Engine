@@ -42,11 +42,9 @@ namespace AstralEngine
 		}
 
 
-		const K& GetKey() const { return m_key; }
 		K& GetKey() { return m_key; }
-		const T& GetElement() const { return m_element; }
-		T& GetElement() { return m_element; }
 		const K& GetKey() const { return m_key; }
+		T& GetElement() { return m_element; }
 		const T& GetElement() const { return m_element; }
 
 	private:

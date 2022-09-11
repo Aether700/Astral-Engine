@@ -72,12 +72,15 @@ namespace AstralEngine
 
 	void UIContext::RenderUI()
 	{
+		AE_CORE_WARN("UIContext::RenderUI not finished yet");
+		/*
 		Renderer::BeginScene();
 		for (AReference<UIWindow>& window : m_windows)
 		{
 			window->DrawToScreen();
 		}
 		Renderer::EndScene();
+		*/
 	}
 
 	bool UIContext::OnMouseButtonPressed(MouseButtonPressedEvent& mousePressed)

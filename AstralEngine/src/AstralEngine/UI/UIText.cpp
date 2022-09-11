@@ -11,7 +11,7 @@ namespace AstralEngine
 	TextCharacter::TextCharacter(const TextCharacter& other) : UIElement(other), 
 		m_fontTextureAtlas(other.m_fontTextureAtlas), m_topLeftCornerCoords(other.m_topLeftCornerCoords), 
 		m_offset(other.m_offset), m_xAdvance(other.m_xAdvance) { }
-	TextCharacter::TextCharacter(AReference<Texture2D>& fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width,
+	TextCharacter::TextCharacter(Texture2DHandle& fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width,
 		int height, int offsetX, int offsetY, int xAdvance) : UIElement(Vector2(topLeftCornerX + width * 0.5f, 
 			topLeftCornerY + height * 0.5f), width, height), m_fontTextureAtlas(fontTextureAtlas), 
 		m_topLeftCornerCoords(Vector2Int(topLeftCornerX, topLeftCornerY)), m_offset(Vector2Int(offsetX, offsetY)), 
@@ -212,21 +212,21 @@ namespace AstralEngine
 		return data;
 	}
 
-	static AReference<Texture2D> RetrieveFontTextureAtlas(const std::string& fontFilepath, 
+	static Texture2DHandle RetrieveFontTextureAtlas(const std::string& fontFilepath, 
 		const std::string& fontAtlasFileName)
 	{
 		size_t lastSlash = fontFilepath.find_last_of("/");
 
 		if (lastSlash == std::string::npos)
 		{
-			return Texture2D::Create(fontAtlasFileName);
+			return ResourceHandler::LoadTexture2D(fontAtlasFileName);
 		}
 
 		std::stringstream ss;
 		ss << fontFilepath.substr(0, lastSlash + 1);
 		ss << fontAtlasFileName;
 
-		return Texture2D::Create(ss.str());
+		return ResourceHandler::LoadTexture2D(ss.str());
 	}
 
 	AReference<Font> Font::Create(const std::string& fontFilepath)
@@ -333,9 +333,11 @@ namespace AstralEngine
 					(float)character.GetScreenCoordsHeight() * fontScale / 2.0f);
 
 
+			/* uses old renderer
 			Renderer::DrawQuad((Vector3)ScreenToWorldCoords(characterScreenCoords), 0.0f,
 				Vector3(fontScale * character.GetWorldWidth(), fontScale * character.GetWorldHeight(), 1.0f),
 				m_font->GetFontAtlas(), character.GetTextureCoords().data(), 1.0f, m_color, true);
+			*/
 
 			virtualCursorPos.x += character.GetXAdvance() * fontScale;
 		}

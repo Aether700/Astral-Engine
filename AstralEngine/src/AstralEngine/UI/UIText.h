@@ -20,14 +20,14 @@ namespace AstralEngine
 		const std::array<Vector2, 4> GetTextureCoords() const;
 
 	private:
-		TextCharacter(AReference<Texture2D>& fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width, 
+		TextCharacter(Texture2DHandle fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width, 
 			int height, int offsetX, int offsetY, int xAdvance);
 		
 		Vector2Int m_topLeftCornerCoords; //in pixels
 
 		Vector2Int m_offset; //offset of the top left corner compared to the initial starting position of the virtual cursor
 		int m_xAdvance; //How much to move the virtual cursor after rendering the current character
-		AReference<Texture2D> m_fontTextureAtlas;
+		Texture2DHandle m_fontTextureAtlas;
 	};
 
 	class Font
@@ -39,7 +39,7 @@ namespace AstralEngine
 		const std::string& GetName() const { return m_name; }
 		size_t GetLineHeight() const { return m_lineHeight; }
 		const TextCharacter& GetCharacter(char c) const { return m_characters[c]; }
-		const AReference<Texture2D>& GetFontAtlas() const { return m_fontAtlas; }
+		const Texture2DHandle& GetFontAtlas() const { return m_fontAtlas; }
 
 		bool HasCharacter(char c) const { return m_characters.ContainsKey(c); }
 
@@ -52,7 +52,7 @@ namespace AstralEngine
 		std::string m_name;
 		size_t m_lineHeight;
 		AUnorderedMap<char, TextCharacter> m_characters;
-		AReference<Texture2D> m_fontAtlas;
+		Texture2DHandle m_fontAtlas;
 		int m_topPadding;
 		int m_bottomPadding;
 		int m_leftPadding;

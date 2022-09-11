@@ -184,6 +184,16 @@ namespace AstralEngine
 		return 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;
 	}
 
+	float Math::DegreeToRadians(float degrees)
+	{
+		return degrees * 0.01745329251994329576923690768489f;
+	}
+
+	float Math::RadiansToDegree(float radians)
+	{
+		return radians * 57.295779513082320876798154814105f;
+	}
+
 	float Math::Lerp(float a, float b, float t)
 	{
 		if (t > 1.0f)
