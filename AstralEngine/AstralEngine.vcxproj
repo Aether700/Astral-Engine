@@ -146,6 +146,7 @@
     <ClInclude Include="src\AstralEngine\Core\LayerStack.h" />
     <ClInclude Include="src\AstralEngine\Core\Log.h" />
     <ClInclude Include="src\AstralEngine\Core\MouseButtonCodes.h" />
+    <ClInclude Include="src\AstralEngine\Core\Resource.h" />
     <ClInclude Include="src\AstralEngine\Core\Time.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADelegate.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\ADoublyLinkedList.h" />
@@ -210,7 +211,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\RenderAPI.h" />
     <ClInclude Include="src\AstralEngine\Renderer\RenderCommand.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Renderer.h" />
-    <ClInclude Include="src\AstralEngine\Renderer\Renderer2D.h" />
+    <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Shader.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Texture.h" />
     <ClInclude Include="src\AstralEngine\Renderer\VertexArray.h" />
@@ -224,9 +225,11 @@
     <ClCompile Include="src\AstralEngine\Core\Input.cpp" />
     <ClCompile Include="src\AstralEngine\Core\LayerStack.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Log.cpp" />
+    <ClCompile Include="src\AstralEngine\Core\Resource.cpp" />
     <ClCompile Include="src\AstralEngine\Core\Time.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Component.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\SceneCamera.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Matrices\Mat3.cpp" />
@@ -257,12 +260,13 @@
     <ClCompile Include="src\AstralEngine\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\GraphicsContext.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\IndexBuffer.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\RenderAPI.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\AstralEngine\Renderer\Renderer2D.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\RendererInternals.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Shader.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Texture.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\VertexArray.cpp" />

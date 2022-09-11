@@ -118,7 +118,7 @@ namespace AstralEngine
 
 		virtual ADynArrConstIterator<T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADynArrConstIterator<T> it = *this;
 			this->operator--();
 			return it;
@@ -203,7 +203,7 @@ namespace AstralEngine
 
 		void Add(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 			m_arr[m_count] = std::move(element);
 			m_count++;
@@ -211,7 +211,7 @@ namespace AstralEngine
 
 		void Add(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 			m_arr[m_count] = element;
 			m_count++;
@@ -220,7 +220,7 @@ namespace AstralEngine
 		template<typename... Args>
 		T& Emplace(Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 
 			for (size_t i = m_count; i > 0; i--)
@@ -235,13 +235,13 @@ namespace AstralEngine
 
 		void AddFirst(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Insert(std::move(element), 0);
 		}
 
 		void AddFirst(const T& element) 
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Insert(element, 0);	
 		}
 
@@ -258,7 +258,7 @@ namespace AstralEngine
 		template<typename... Args>
 		T& EmplaceBack(Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 			m_arr[m_count] = T(std::forward<Args>(args)...);
 			m_count++;
@@ -269,12 +269,12 @@ namespace AstralEngine
 		template<typename... Args>
 		T& EmplaceAt(size_t index, Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 
 			if (m_count == 0)
 			{
-				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
 				return EmplaceBack(std::forward<Args>(args)...);
 			}
 
@@ -289,7 +289,7 @@ namespace AstralEngine
 		
 		size_t Find(const T& element) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (size_t i = 0; i < m_count; i++)
 			{
 				if (m_arr[i] == element)
@@ -312,12 +312,12 @@ namespace AstralEngine
 
 		void Insert(T&& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 
 			if (m_count == 0)
 			{
-				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
 				Add(element);
 				return;
 			}
@@ -332,12 +332,12 @@ namespace AstralEngine
 
 		void Insert(const T& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 			
 			if (m_count == 0)
 			{
-				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
 				Add(element);
 				return;
 			}
@@ -362,7 +362,7 @@ namespace AstralEngine
 
 		void Remove(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t index = Find(element);
 			if (index != -1)
 			{
@@ -372,7 +372,7 @@ namespace AstralEngine
 
 		void RemoveAt(size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			
 			if (index == m_count - 1)
 			{
@@ -409,7 +409,7 @@ namespace AstralEngine
 
 		void Reserve(size_t count)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t currentCount = m_maxCount - m_count;
 			if (currentCount < count)
 			{
@@ -496,19 +496,19 @@ namespace AstralEngine
 
 		T& operator[](size_t index) 
 		{
-			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
+			AE_DATASTRUCT_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index]; 
 		}
 		
 		const T& operator[](size_t index) const
 		{
-			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
+			AE_DATASTRUCT_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index];
 		}
 
 		bool operator==(const ADynArr<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (GetCount() != other.GetCount())
 			{
 				return false;
@@ -526,7 +526,7 @@ namespace AstralEngine
 
 		bool operator!=(const ADynArr<T>& other) const 
 		{
-			AE_PROFILE_FUNCTION(); 
+			 
 			return !(*this == other); 
 		}
 
@@ -566,7 +566,7 @@ namespace AstralEngine
 		
 		void CheckSize()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (m_count >= m_maxCount)
 			{
 				Resize();
@@ -575,7 +575,7 @@ namespace AstralEngine
 
 		void Resize()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + (size_t)1;
 			T* temp = new T[newMax];
 

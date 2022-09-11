@@ -32,7 +32,7 @@ namespace AstralEngine
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLIndexBuffer::SetData(unsigned int* data, unsigned int count)
+	void OpenGLIndexBuffer::SetData(const unsigned int* data, unsigned int count)
 	{
 		m_count = count;
 		Bind();

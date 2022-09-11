@@ -15,7 +15,7 @@ namespace AstralEngine
 	{
 	public:
 
-		EditorCameraController() { AE_CORE_INFO("Editor Camera Controller constructor called"); }
+		EditorCameraController() { }
 
 		void OnStart() override
 		{
@@ -42,31 +42,31 @@ namespace AstralEngine
 
 			if (Input::GetKey(KeyCode::A))
 			{
-				t.position -= right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() - right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			else if (Input::GetKey(KeyCode::D))
 			{
-				t.position += right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() + right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 
 			if (Input::GetKey(KeyCode::W))
 			{
-				t.position += forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() + forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			else if (Input::GetKey(KeyCode::S))
 			{
-				t.position -= forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel;
+				t.SetLocalPosition(t.GetLocalPosition() - forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			
 			if (m_rotation)
 			{
 				if (Input::GetKey(KeyCode::Q))
 				{
-					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
+					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
 				}
 				else if (Input::GetKey(KeyCode::E))
 				{
-					t.rotation.SetEulerAngles(0.0f, 0.0f, t.rotation.EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
+					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
 				}
 			}
 		}
@@ -85,7 +85,7 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetTransform().position.z = -1.0f;
+		camera.GetTransform().SetLocalPosition(0.0f, 0.0f, -1.0f);
 		camera.EmplaceComponent<Camera>();
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
@@ -123,41 +123,39 @@ namespace AstralEngine
 		}
 		////////////////////////////////////////////
 
-		RuntimeCamera* mainCamera = nullptr;
+		Camera* mainCamera = nullptr;
 		Transform* cameraTransform;
-		auto camView = m_registry.GetView<Camera, Transform>();
-		for (auto entity : camView)
+		
+		AEntity mainCameraEntity = Camera::GetMainCamera();
+		if (mainCameraEntity.IsValid())
 		{
-			auto[transform, camera] = camView.Get<Transform, Camera>(entity);
-
-			if (camera.primary)
-			{
-				mainCamera = &camera.camera;
-				cameraTransform = &transform;
-				break;
-			}
+			mainCamera = &mainCameraEntity.GetComponent<Camera>();
+			cameraTransform = &mainCameraEntity.GetTransform();
+			const Vector3& backgroundColor = mainCamera->GetBackgroundColor();
+			RenderCommand::SetClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
 		}
-
-		RenderCommand::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		else
+		{
+			RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		}
 		RenderCommand::Clear();
 
 		if (mainCamera != nullptr)
 		{
+			AE_PROFILE_SCOPE("Rendering");
+
 			Renderer::BeginScene(*mainCamera, *cameraTransform);
-			auto group = m_registry.GetGroup<Transform, SpriteRenderer, AEntityData>();
+			
+			auto group = m_registry.GetGroup<AEntityData, Transform, RenderData>();
 
 			for (BaseEntity e : group)
 			{
-				auto& components = group.Get<Transform, SpriteRenderer, AEntityData>(e);
-				AEntityData& data = std::get<AEntityData&>(components);
-
+				auto [data, transform, render] = group.Get<AEntityData, Transform, RenderData>(e);
 				if (data.IsActive())
 				{
-					SpriteRenderer& sprite = std::get<SpriteRenderer&>(components);
-					if (sprite.IsActive())
+					if (render.IsActive())
 					{
-						Transform& transform = std::get<Transform&>(components);
-						Renderer::DrawSprite(transform.GetTransformMatrix(), sprite);
+						render.SendToRenderer(transform);
 					}
 				}
 			}
@@ -182,9 +180,9 @@ namespace AstralEngine
 		for (auto entity : view)
 		{
 			auto& cameraComponent = view.Get<Camera>(entity);
-			if (!cameraComponent.fixedAspectRatio)
+			if (!cameraComponent.IsFixedAspectRatio())
 			{
-				cameraComponent.camera.SetViewportSize(width, height);
+				cameraComponent.GetCamera().SetViewportSize(width, height);
 			}
 		}
 	}

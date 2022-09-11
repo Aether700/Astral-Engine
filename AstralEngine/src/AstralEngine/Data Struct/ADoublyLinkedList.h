@@ -22,8 +22,6 @@ namespace AstralEngine
 
 		ADoublyLinkedList() : m_count(0)
 		{
-			AE_PROFILE_FUNCTION();
-
 			m_dummy = new Node();
 			m_head = m_dummy;
 		}
@@ -31,7 +29,7 @@ namespace AstralEngine
 
 		ADoublyLinkedList(const std::initializer_list<T>& list) : m_count(0)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			m_dummy = new Node();
 			m_head = m_dummy;
@@ -44,7 +42,7 @@ namespace AstralEngine
 
 		ADoublyLinkedList(const ADoublyLinkedList<T>& other) : m_count(other.m_count)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			m_dummy = new Node();
 			m_head = m_dummy;
@@ -58,7 +56,7 @@ namespace AstralEngine
 		ADoublyLinkedList(ADoublyLinkedList<T>&& other) noexcept 
 			: m_count(other.m_count), m_dummy(other.m_dummy), m_head(other.m_head)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			other.m_dummy = nullptr;
 			other.m_head = nullptr;
@@ -67,7 +65,7 @@ namespace AstralEngine
 
 		~ADoublyLinkedList() 
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			DeleteList();
 			delete m_dummy;
@@ -80,7 +78,7 @@ namespace AstralEngine
 
 		void Add(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
@@ -89,7 +87,7 @@ namespace AstralEngine
 
 		void Add(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = element;
@@ -100,7 +98,7 @@ namespace AstralEngine
 		template<typename... Args>
 		T& Emplace(Args... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* newNode = new Node();
 
 			newNode->element = T(std::forward<Args>(args)...);
@@ -136,7 +134,7 @@ namespace AstralEngine
 
 		void AddLast(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
@@ -145,7 +143,7 @@ namespace AstralEngine
 
 		void AddLast(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = element;
@@ -154,7 +152,7 @@ namespace AstralEngine
 
 		size_t Find(const T& element) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			size_t index = 0;
 			for (ADoublyLinkedList<T>::AIterator it = begin(); it != end(); it++)
@@ -170,7 +168,7 @@ namespace AstralEngine
 		
 		void Insert(T&& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
@@ -179,7 +177,7 @@ namespace AstralEngine
 
 		void Insert(const T& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = element;
@@ -188,7 +186,7 @@ namespace AstralEngine
 
 		void Insert(T element, AIterator it)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
@@ -199,7 +197,7 @@ namespace AstralEngine
 
 		void Insert(T element, AConstIterator it)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* indexNode = it.m_currNode;
 			newNode->element = element;
@@ -210,7 +208,7 @@ namespace AstralEngine
 
 		void Remove(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* ptr = m_head;
 
@@ -238,7 +236,7 @@ namespace AstralEngine
 
 		void RemoveAt(size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			Node* toRemove = GetNode(index);
 			RemoveNode(toRemove);
@@ -251,7 +249,7 @@ namespace AstralEngine
 
 		void Clear()
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			DeleteList();
 			m_head = m_dummy;
@@ -317,7 +315,7 @@ namespace AstralEngine
 
 		ADoublyLinkedList<T>& operator=(const ADoublyLinkedList<T>& other)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			DeleteList();
 
@@ -334,7 +332,7 @@ namespace AstralEngine
 
 		ADoublyLinkedList<T>& operator=(ADoublyLinkedList<T>&& other) noexcept
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			DeleteList();
 
@@ -353,7 +351,7 @@ namespace AstralEngine
 
 		bool operator==(const ADoublyLinkedList<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (other.m_count != m_count)
 			{
 				return false;
@@ -369,7 +367,7 @@ namespace AstralEngine
 					return false;
 				}
 
-				AE_CORE_ASSERT(p2 != other.m_dummy, "Iterator Desynch");
+				AE_DATASTRUCT_ASSERT(p2 != other.m_dummy, "Iterator Desynch");
 				p1 = p1->next;
 				p2 = p2->next;
 
@@ -446,11 +444,11 @@ namespace AstralEngine
 
 		Node* GetNode(size_t index) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			if (m_count == 0)
 			{
-				AE_CORE_ASSERT(index == 0, "Invalid Index provided");
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid Index provided");
 				return m_head;
 			}
 
@@ -478,7 +476,7 @@ namespace AstralEngine
 
 		void DeleteList()
 		{
-			AE_PROFILE_FUNCTION();
+			
 		
 			Node* ptr1 = m_head;
 			Node* ptr2;
@@ -532,14 +530,14 @@ namespace AstralEngine
 
 		ADoublyLinkedListIterator<T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_currNode = m_currNode->next;
 			return *this;
 		}
 
 		ADoublyLinkedListIterator<T>& operator+=(size_t i)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
 			for (size_t j = 0; j < i; j++)
 			{
@@ -551,7 +549,7 @@ namespace AstralEngine
 
 		ADoublyLinkedListIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADoublyLinkedListIterator<T> it = *this;
 			this->operator++();
 			return it;
@@ -565,7 +563,7 @@ namespace AstralEngine
 
 		ADoublyLinkedListIterator<T>& operator-=(size_t i)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			
 			for (size_t j = 0; j < i; j++)
 			{
@@ -576,7 +574,7 @@ namespace AstralEngine
 
 		ADoublyLinkedListIterator<T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADoublyLinkedListIterator<T> it = *this;
 			this->operator--();
 			return it;
@@ -626,7 +624,7 @@ namespace AstralEngine
 
 		ADoublyLinkedListConstIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADoublyLinkedListConstIterator<T> it = *this;
 			this->operator++();
 			return it;
@@ -646,7 +644,7 @@ namespace AstralEngine
 
 		ADoublyLinkedListConstIterator<T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADoublyLinkedListConstIterator<T> it = *this;
 			this->operator--();
 			return it;

@@ -49,11 +49,10 @@
 					{	
 						if (windowObj->m_callback != nullptr)
 						{
-							std::uint32_t doubleWord = (std::uint32_t)lParam;
-							std::uint16_t& lowerWord = GetLowOrderWord(doubleWord);
-							std::uint16_t& higherWord = GetHighOrderWord(doubleWord);
-							WindowResizeEvent resizeEvent = WindowResizeEvent((unsigned int)lowerWord,
-								(unsigned int)higherWord);
+							// we do not use the lparam since we want the size of the whole window and 
+							// not just the client area (the provided dimensions are for the client area)
+							WindowResizeEvent resizeEvent = WindowResizeEvent(windowObj->GetWidth(), 
+								windowObj->GetHeight());
 							windowObj->m_callback(resizeEvent);
 						}
 						return 0;
@@ -66,6 +65,7 @@
 						{
 							WindowCloseEvent close;
 							windowObj->m_callback(close);
+							windowObj->SetVisible(false);
 						}
 						return 0;
 					}
