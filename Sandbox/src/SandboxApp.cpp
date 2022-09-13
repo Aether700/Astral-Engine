@@ -581,8 +581,6 @@ public:
 		RenderFullscreenTexture();
 		*/
 
-		cannot test cam controller since nothing is being rendered
-
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
