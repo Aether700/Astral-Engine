@@ -20,11 +20,14 @@ namespace AstralEngine
 		void OnStart() override
 		{
 			m_zoomLevel = 1.0f;
-			m_camRotSpeed = Math::DegreeToRadians(180.0f);
+			m_camRotSpeed = 60.0f; // in radians
 			m_camMoveSpeed = 4.5f;
 			m_zoomSpeed = 0.25f; 
 			m_minZoom = 0.25f; 
 			m_maxZoom = 6.0f;
+			Transform& t = GetTransform();
+			m_startPos = t.GetLocalPosition();
+			m_startRotation = t.GetRotation();
 		}
 
 		void EnableRotation(bool val)
@@ -32,46 +35,93 @@ namespace AstralEngine
 			m_rotation = val;
 		}
 
-		//moving camera is independant of rotation of the camera (might want to fix later)
 		void OnUpdate() override
 		{
-			AE_PROFILE_FUNCTION();
-			Transform& t = GetTransform();
-			Vector3 forward = t.Forward();
-			Vector3 right = t.Right();
-
-			if (Input::GetKey(KeyCode::A))
-			{
-				t.SetLocalPosition(t.GetLocalPosition() - right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
-			}
-			else if (Input::GetKey(KeyCode::D))
-			{
-				t.SetLocalPosition(t.GetLocalPosition() + right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
-			}
+			auto& t = GetTransform();
+			Vector3 pos = t.GetLocalPosition();
+			Vector3 camPos = Renderer::GetCamPos();
 
 			if (Input::GetKey(KeyCode::W))
 			{
-				t.SetLocalPosition(t.GetLocalPosition() + forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
+				t.SetLocalPosition(t.GetLocalPosition() + t.Forward() * m_camMoveSpeed
+					* Time::GetDeltaTime());
 			}
-			else if (Input::GetKey(KeyCode::S))
+
+			if (Input::GetKey(KeyCode::S))
 			{
-				t.SetLocalPosition(t.GetLocalPosition() - forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
+				t.SetLocalPosition(t.GetLocalPosition() - t.Forward() * m_camMoveSpeed
+					* Time::GetDeltaTime());
 			}
-			
-			if (m_rotation)
+
+			if (Input::GetKey(KeyCode::D))
 			{
-				if (Input::GetKey(KeyCode::Q))
-				{
-					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
-				}
-				else if (Input::GetKey(KeyCode::E))
-				{
-					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
-				}
+				t.SetLocalPosition(t.GetLocalPosition() + t.Right() * m_camMoveSpeed
+					* Time::GetDeltaTime());
+			}
+
+			if (Input::GetKey(KeyCode::A))
+			{
+				t.SetLocalPosition(t.GetLocalPosition() - t.Right() * m_camMoveSpeed
+					* Time::GetDeltaTime());
+			}
+
+			if (Input::GetKey(KeyCode::Space))
+			{
+				t.SetLocalPosition(t.GetLocalPosition() + t.Up() * m_camMoveSpeed
+					* Time::GetDeltaTime());
+			}
+
+			if (Input::GetKey(KeyCode::LeftShift))
+			{
+				t.SetLocalPosition(t.GetLocalPosition() - t.Up() * m_camMoveSpeed
+					* Time::GetDeltaTime());
+			}
+
+			if (Input::GetKey(KeyCode::RightArrow))
+			{
+				auto euler = t.GetRotation().EulerAngles();
+				euler.y += m_camRotSpeed * Time::GetDeltaTime();
+				t.SetRotation(euler);
+			}
+
+			if (Input::GetKey(KeyCode::LeftArrow))
+			{
+				auto euler = t.GetRotation().EulerAngles();
+				euler.y -= m_camRotSpeed * Time::GetDeltaTime();
+				t.SetRotation(euler);
+			}
+
+			if (Input::GetKey(KeyCode::UpArrow))
+			{
+				Quaternion rotation = Quaternion::AngleAxisToQuaternion(-m_camRotSpeed 
+					* Time::GetDeltaTime(), t.Right());
+				t.SetRotation(rotation * t.GetRotation());
+			}
+
+			if (Input::GetKey(KeyCode::DownArrow))
+			{
+				Quaternion rotation = Quaternion::AngleAxisToQuaternion(m_camRotSpeed 
+					* Time::GetDeltaTime(), t.Right());
+				t.SetRotation(rotation * t.GetRotation());
+			}
+
+			if (Input::GetKey(KeyCode::R))
+			{
+				ResetCam();
 			}
 		}
 
 	private:
+		void ResetCam()
+		{
+			Transform& t = GetTransform();
+			t.SetLocalPosition(m_startPos);
+			t.SetRotation(m_startRotation);
+		}
+
+		Vector3 m_startPos;
+		Quaternion m_startRotation;
+
 		float m_camMoveSpeed;
 		float m_camRotSpeed;
 		float m_zoomLevel;
@@ -85,8 +135,8 @@ namespace AstralEngine
 	Scene::Scene(bool rotation)
 	{
 		AEntity camera = CreateAEntity();
-		camera.GetTransform().SetLocalPosition(0.0f, 0.0f, -1.0f);
-		camera.EmplaceComponent<Camera>();
+		camera.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
+		camera.EmplaceComponent<Camera>().SetAsMain(true);
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 

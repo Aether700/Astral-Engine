@@ -192,102 +192,6 @@ private:
 	MaterialHandle m_mat;
 };
 
-class CamController : public AstralEngine::NativeScript
-{
-public:
-	void OnStart() override
-	{
-		m_startPos = GetTransform().GetLocalPosition();
-	}
-	
-	void OnUpdate() override
-	{
-		auto& t = GetTransform();
-		Vector3 pos = t.GetLocalPosition();
-		Vector3 camPos = Renderer::GetCamPos();
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::W))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() + t.Forward() * m_speed
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::S))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() - t.Forward() * m_speed
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::D))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() + t.Right() * m_speed
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::A))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() - t.Right() * m_speed
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::Space))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() + t.Up() * m_speed
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftShift))
-		{
-			t.SetLocalPosition(t.GetLocalPosition() - t.Up() * m_speed 
-				* AstralEngine::Time::GetDeltaTime());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
-		{
-			auto euler = t.GetRotation().EulerAngles();
-			euler.y += m_rotSpeed * AstralEngine::Time::GetDeltaTime();
-			t.SetRotation(euler);
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
-		{
-			auto euler = t.GetRotation().EulerAngles();
-			euler.y -= m_rotSpeed * AstralEngine::Time::GetDeltaTime();
-			t.SetRotation(euler);
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::UpArrow))
-		{
-			Quaternion rotation = Quaternion::AngleAxisToQuaternion(-m_rotSpeed * Time::GetDeltaTime(), t.Right());
-			t.SetRotation(rotation * t.GetRotation());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::DownArrow))
-		{
-			Quaternion rotation = Quaternion::AngleAxisToQuaternion(m_rotSpeed * Time::GetDeltaTime(), t.Right());
-			t.SetRotation(rotation * t.GetRotation());
-		}
-
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::R))
-		{
-			t.SetLocalPosition(m_startPos);
-			t.SetRotation(AstralEngine::Quaternion::Identity());
-		}
-
-	}
-
-private:
-	void PrintEuler(const AstralEngine::Vector3& euler)
-	{
-		AE_INFO("x: %f  y: %f  z: %f", euler.x, euler.y, euler.z);
-	}
-
-	float m_speed = 5.0f;
-	float m_rotSpeed = 5 * 30.0f;
-
-	AstralEngine::Vector3 m_startPos;
-};
-
 class Controller : public AstralEngine::NativeScript
 {
 public:
@@ -640,17 +544,8 @@ public:
 		CreateCrate(Vector3::Zero(), Quaternion::Identity(), cube, mat);
 		CreateCrate(Vector3(3.0f, -2.0f, 1.0f), Quaternion::EulerToQuaternion(30.0f, 10.0f, 0.0f), cube, mat);
 
-		AstralEngine::AEntity cam = AstralEngine::AEntity((AstralEngine::BaseEntity)0, m_scene.Get());
-		//cam.GetComponent<AstralEngine::Camera>().camera.SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
-		m_scene->DestroyAEntity(cam);
-		cam = m_scene->CreateAEntity();
-		Camera& camComponent = cam.EmplaceComponent<AstralEngine::Camera>();
-		camComponent.GetCamera().SetProjectionType(AstralEngine::SceneCamera::ProjectionType::Perspective);
-		camComponent.SetAsMain(true);
-		camComponent.SetAmbientIntensity(0.1f);
-		cam.GetTransform().SetLocalPosition(0.0f, 0.0f, -8.0f);
-		cam.EmplaceComponent<CamController>();
-		cam.EmplaceComponent<RendererStatViewer>();
+		AstralEngine::AEntity cam = Camera::GetMainCamera();
+		cam.GetComponent<Camera>().GetCamera().SetProjectionType(SceneCamera::ProjectionType::Perspective);
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 		//SetupRendererTestScene();
@@ -685,8 +580,6 @@ public:
 		texture2->Bind();
 		RenderFullscreenTexture();
 		*/
-
-
 
 		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
