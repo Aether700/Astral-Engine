@@ -317,6 +317,7 @@
     </ClInclude>
     <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
     <ClInclude Include="src\AstralEngine\Core\Resource.h" />
+    <ClInclude Include="src\AstralEngine\UI\UIText.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -445,9 +446,6 @@
     <ClCompile Include="src\AstralEngine\Renderer\VertexBuffer.cpp">
       <Filter>src\AstralEngine\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\UI\UI Core\Font.cpp">
-      <Filter>src\AstralEngine\UI\UI Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\AstralEngine\UI\UI Core\TTF\TTFParser.cpp">
       <Filter>src\AstralEngine\UI\UI Core\TTF</Filter>
     </ClCompile>
@@ -464,5 +462,6 @@
     <ClCompile Include="src\AstralEngine\Core\Resource.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
+    <ClCompile Include="src\AstralEngine\UI\UIText.cpp" />
   </ItemGroup>
 </Project>

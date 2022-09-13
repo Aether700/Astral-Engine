@@ -765,6 +765,11 @@ namespace AstralEngine
 
 	void RenderQueue::Draw(const Mat4& viewProj)
 	{
+		if (IsEmpty())
+		{
+			return;
+		}
+
 		if (m_gBuffer != nullptr)
 		{
 			Vector4 clearColor = RenderCommand::GetClearColor();
@@ -847,6 +852,16 @@ namespace AstralEngine
 	}
 
 	void RenderQueue::BindGBufferTextureData() { m_gBuffer->BindTexureData(); }
+
+	bool RenderQueue::IsEmpty() const
+	{
+		bool empty = true;
+		if (m_transparent != nullptr)
+		{
+			empty = m_transparent->IsEmpty();
+		}
+		return m_opaque.IsEmpty() && empty;
+	}
 
 	void RenderQueue::SetupFullscreenRenderingObjects()
 	{

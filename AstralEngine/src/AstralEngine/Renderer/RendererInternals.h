@@ -183,6 +183,8 @@ namespace AstralEngine
 
 		void BindGBufferTextureData();
 
+		bool IsEmpty() const;
+
 	private:
 		void SetupFullscreenRenderingObjects();
 

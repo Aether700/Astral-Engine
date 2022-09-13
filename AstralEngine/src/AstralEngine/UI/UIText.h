@@ -20,8 +20,10 @@ namespace AstralEngine
 		const std::array<Vector2, 4> GetTextureCoords() const;
 
 	private:
+		/*
 		TextCharacter(Texture2DHandle fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width, 
 			int height, int offsetX, int offsetY, int xAdvance);
+		*/
 		
 		Vector2Int m_topLeftCornerCoords; //in pixels
 

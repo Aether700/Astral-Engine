@@ -505,12 +505,17 @@ public:
 		texturedQuad.EmplaceComponent<InputTest>();
 
 		//AstralEngine::TTFParser::LoadFont("assets/fonts/The Giant and the Mouse.ttf");
-		AstralEngine::TTFParser::LoadFont("assets/fonts/arial.ttf");
+		
+		debugFont = (AReference<DebugTTFFont>)AstralEngine::TTFParser::LoadFont("assets/fonts/arial.ttf");
 	}
 
 	void OnUpdate() override
 	{
 		m_scene->OnUpdate();
+		started seeing something but camera controller is old. modify it so camera can see more
+		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
+		debugFont->DebugDrawGlyph();
+		Renderer::EndScene();
 
 		/*
 		m_cameraController->OnUpdate();
@@ -557,6 +562,8 @@ private:
 	AstralEngine::AReference<AstralEngine::Framebuffer> m_framebuffer;
 	AstralEngine::AReference<AstralEngine::Scene> m_scene;
 	AstralEngine::AEntity m_entity;
+
+	AReference<DebugTTFFont> debugFont;
 };
 
 

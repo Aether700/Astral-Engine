@@ -11,14 +11,17 @@ namespace AstralEngine
 	TextCharacter::TextCharacter(const TextCharacter& other) : UIElement(other), 
 		m_fontTextureAtlas(other.m_fontTextureAtlas), m_topLeftCornerCoords(other.m_topLeftCornerCoords), 
 		m_offset(other.m_offset), m_xAdvance(other.m_xAdvance) { }
+	/*
 	TextCharacter::TextCharacter(Texture2DHandle& fontTextureAtlas, int topLeftCornerX, int topLeftCornerY, int width,
 		int height, int offsetX, int offsetY, int xAdvance) : UIElement(Vector2(topLeftCornerX + width * 0.5f, 
 			topLeftCornerY + height * 0.5f), width, height), m_fontTextureAtlas(fontTextureAtlas), 
 		m_topLeftCornerCoords(Vector2Int(topLeftCornerX, topLeftCornerY)), m_offset(Vector2Int(offsetX, offsetY)), 
 		m_xAdvance(xAdvance) { }
+	*/
 
 	const std::array<Vector2, 4> TextCharacter::GetTextureCoords() const
 	{
+		/*
 		const std::array<Vector2, 4> textureCoords = {
 			Vector2((float)m_topLeftCornerCoords.x / (float)m_fontTextureAtlas->GetWidth(),
 				((float)(m_fontTextureAtlas->GetHeight() - m_topLeftCornerCoords.y 
@@ -34,6 +37,8 @@ namespace AstralEngine
 				/ (float)m_fontTextureAtlas->GetHeight())
 		};
 		return textureCoords;
+		*/
+		return { Vector2::Zero(), Vector2::Zero(), Vector2::Zero(), Vector2::Zero() };
 	}
 
 	//Font/////////////////////////////////////////////
@@ -260,8 +265,10 @@ namespace AstralEngine
 
 		for (CharacterData& c : data)
 		{
+			/*
 			font->m_characters.Add(c.id, TextCharacter(font->m_fontAtlas, c.x, c.y, c.width, c.height, 
 				c.offsetX, c.offsetY, c.xAdvance));
+			*/
 		}
 
 		return font;

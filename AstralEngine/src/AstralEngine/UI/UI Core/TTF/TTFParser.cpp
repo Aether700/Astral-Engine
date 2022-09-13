@@ -452,7 +452,7 @@ namespace AstralEngine
 
 		TTFOutlineFlags GetFlags(size_t index)
 		{
-			AE_CORE_ASSERT(index < endPtsOfContours[numOfContours - 1], "Index out of bounds");
+			AE_CORE_ASSERT(index < GetNumPoints(), "Index out of bounds");
 
 			if (index >= numFlags)
 			{
@@ -469,6 +469,47 @@ namespace AstralEngine
 				}
 			}
 			return lastFlag;
+		}
+		
+		Vector2 GetCoords(size_t index)
+		{
+			return Vector2(ReadCoordComponent(index, xCoordinates, TTFOutlineXShortVec, TTFOutlineXSameOrPositive), 
+				ReadCoordComponent(index, yCoordinates, TTFOutlineYShortVec, TTFOutlineYSameOrPositive));
+		}
+		
+		std::uint16_t GetNumPoints() const
+		{
+			return endPtsOfContours[numOfContours - 1];
+		}
+
+	private:
+		float ReadCoordComponent(size_t index, SimpleGlyphCoord* coordArr, 
+			TTFOutlineFlags shortVec, TTFOutlineFlags sameOrPos)
+		{
+			float coord = 0.0f;
+			size_t coordIndex = 0;
+			for (size_t i = 0; i < index; i++)
+			{
+				TTFOutlineFlags currFlag = GetFlags(i);
+				float currChange = 0.0f;
+				if (currFlag & shortVec)
+				{
+					currChange = (float)coordArr[coordIndex].bytes1;
+					if (!(currFlag & sameOrPos))
+					{
+						currChange *= -1.0f;
+					}
+					coord += currChange;
+					coordIndex++;
+				}
+				else if (!(currFlag & sameOrPos))
+				{
+					coord += (float)coordArr[coordIndex].bytes2;
+					coordIndex++;
+				}
+			}
+
+			return coord;
 		}
 	};
 
@@ -602,10 +643,13 @@ namespace AstralEngine
 	class Glyph
 	{
 	public:
+		Glyph() { }
+
 		Glyph(const GlyphDescription& description)
 		{
+			//trying to render points with quads but shader crashes see why
 			// temp ///////////////////////////
-			AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
+			//AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
 			///////////////////////////////////
 
 			m_numContours = description.numberOfContours;
@@ -617,19 +661,35 @@ namespace AstralEngine
 				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
 				m_points.Reserve((size_t)data->endPtsOfContours[m_numContours - 1]);
 
-				read points here
+				size_t numPoints = (size_t)data->GetNumPoints();
+				for (size_t i = 0; i < numPoints; i++)
+				{
+					TTFOutlineFlags flags = data->GetFlags(i);
+					m_points.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
+				}
 			}
 
 		}
 
 		bool IsSimpleGlyph() const { return m_numContours > 0; }
 
+		// temp for debug
+		void DrawPoints()
+		{
+			Vector2 scale = Vector2(0.1f, 0.1f);
+			for (GlyphPoint& point : m_points)
+			{
+				Renderer::DrawQuad(point.coords * 0.01f, 0.0f, scale);
+			}
+		}
+		////////////////////
+
 	private:
 		struct GlyphPoint
 		{
 			Vector2 coords;
 			bool isOnCurve;
-			bool isMidpoint;
+			bool isMidpoint; // might want to remove?
 
 			GlyphPoint() : isOnCurve(false), isMidpoint(false) { }
 			GlyphPoint(const Vector2& c, bool onCurve, bool midpoint) : coords(c), isOnCurve(onCurve), 
@@ -1223,6 +1283,14 @@ namespace AstralEngine
 	///////////////////////////////////////
 
 
+	// temp font object used for debugging
+
+	void DebugTTFFont::DebugDrawGlyph()
+	{
+		glyphs[0].DrawPoints();
+	}
+
+	///////////////////////////////////////
 	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
@@ -1237,7 +1305,7 @@ namespace AstralEngine
 		HeaderTable head;
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
-		ADynArr<GlyphDescription> glyf;
+		ADynArr<Glyph> glyf;
 		MaximumProfileTable maxp;
 		Cmap cmap;
 		IndexToLocationTable loca;
@@ -1328,7 +1396,7 @@ namespace AstralEngine
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					glyf.Add(std::move(ReadGlyphDescription(file)));
+					glyf.Add(ReadGlyphDescription(file));
 				}
 				break;
 			}
@@ -1336,10 +1404,13 @@ namespace AstralEngine
 
 			//look into drawing glyphs from the glyf data:
 			//https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
+
 		}
 
 		// temp
-		return nullptr;
+		AReference<DebugTTFFont> tempFont = AReference<DebugTTFFont>::Create();
+		tempFont->glyphs = std::move(glyf);
+		return tempFont;
 	}
 
 }

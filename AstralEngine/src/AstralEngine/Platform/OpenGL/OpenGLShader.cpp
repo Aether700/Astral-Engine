@@ -303,6 +303,7 @@ namespace AstralEngine
 	{
 		AE_PROFILE_FUNCTION();
 		m_rendererID = glCreateProgram();
+
 		unsigned int* shaders = new unsigned int[shaderSrcs.GetCount()];
 		int index = 0;
 
