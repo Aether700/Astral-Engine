@@ -32,41 +32,63 @@ namespace AstralEngine
 			m_rotation = val;
 		}
 
-		//moving camera is independant of rotation of the camera (might want to fix later)
 		void OnUpdate() override
 		{
 			AE_PROFILE_FUNCTION();
 			Transform& t = GetTransform();
-			Vector3 forward = t.Forward();
-			Vector3 right = t.Right();
 
 			if (Input::GetKey(KeyCode::A))
 			{
+				Vector3 right = t.Right();
 				t.SetLocalPosition(t.GetLocalPosition() - right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
-			else if (Input::GetKey(KeyCode::D))
+			
+			if (Input::GetKey(KeyCode::D))
 			{
+				Vector3 right = t.Right();
 				t.SetLocalPosition(t.GetLocalPosition() + right * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 
 			if (Input::GetKey(KeyCode::W))
 			{
+				Vector3 forward = t.Forward();
 				t.SetLocalPosition(t.GetLocalPosition() + forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
-			else if (Input::GetKey(KeyCode::S))
+			
+			if (Input::GetKey(KeyCode::S))
 			{
+				Vector3 forward = t.Forward();
 				t.SetLocalPosition(t.GetLocalPosition() - forward * m_camMoveSpeed * Time::GetDeltaTime() * m_zoomLevel);
 			}
 			
 			if (m_rotation)
 			{
-				if (Input::GetKey(KeyCode::Q))
+				if (Input::GetKey(KeyCode::LeftArrow))
 				{
-					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z + m_camRotSpeed * Time::GetDeltaTime());
+					Quaternion newRotation = Quaternion::AngleAxisToQuaternion(m_camRotSpeed * 
+						Time::GetDeltaTime(), t.Up()) * t.GetRotation();
+					t.SetRotation(newRotation);
 				}
-				else if (Input::GetKey(KeyCode::E))
+
+				if (Input::GetKey(KeyCode::RightArrow))
 				{
-					t.SetRotation(0.0f, 0.0f, t.GetRotation().EulerAngles().z - m_camRotSpeed * Time::GetDeltaTime());
+					Quaternion newRotation = Quaternion::AngleAxisToQuaternion(-m_camRotSpeed *
+						Time::GetDeltaTime(), t.Up()) * t.GetRotation();
+					t.SetRotation(newRotation);
+				}
+
+				if (Input::GetKey(KeyCode::UpArrow))
+				{
+					Quaternion newRotation = Quaternion::AngleAxisToQuaternion(m_camRotSpeed *
+						Time::GetDeltaTime(), t.Right()) * t.GetRotation();
+					t.SetRotation(newRotation);
+				}
+
+				if (Input::GetKey(KeyCode::DownArrow))
+				{
+					Quaternion newRotation = Quaternion::AngleAxisToQuaternion(-m_camRotSpeed *
+						Time::GetDeltaTime(), t.Right()) * t.GetRotation();
+					t.SetRotation(newRotation);
 				}
 			}
 		}
@@ -86,7 +108,7 @@ namespace AstralEngine
 	{
 		AEntity camera = CreateAEntity();
 		camera.GetTransform().SetLocalPosition(0.0f, 0.0f, -1.0f);
-		camera.EmplaceComponent<Camera>();
+		camera.EmplaceComponent<Camera>().SetAsMain(true);
 		EditorCameraController& controller = camera.EmplaceComponent<EditorCameraController>();
 		controller.EnableRotation(rotation);
 
