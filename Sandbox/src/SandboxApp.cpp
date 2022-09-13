@@ -511,10 +511,16 @@ public:
 
 	void OnUpdate() override
 	{
-		m_scene->OnUpdate();
-		started seeing something but camera controller is old. modify it so camera can see more
+		//m_scene->OnUpdate();
+		AWindow* window = Application::GetWindow();
+		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
+
+		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
+		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		debugFont->DebugDrawGlyph();
+		//Renderer::BeginScene(Mat4::Identity());
+		//debugFont->DebugDrawGlyph();
+		Renderer::DrawQuad({ 0, 0, 0 }, 0, { 1, 1 }, {1, 0, 0, 1}); cannot render simple quad with current setup see why
 		Renderer::EndScene();
 
 		/*

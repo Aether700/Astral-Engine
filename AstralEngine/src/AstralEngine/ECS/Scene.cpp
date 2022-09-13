@@ -72,38 +72,41 @@ namespace AstralEngine
 					* Time::GetDeltaTime());
 			}
 
-			if (Input::GetKey(KeyCode::LeftShift))
+			if (m_rotation)
 			{
-				t.SetLocalPosition(t.GetLocalPosition() - t.Up() * m_camMoveSpeed
-					* Time::GetDeltaTime());
-			}
+				if (Input::GetKey(KeyCode::LeftShift))
+				{
+					t.SetLocalPosition(t.GetLocalPosition() - t.Up() * m_camMoveSpeed
+						* Time::GetDeltaTime());
+				}
 
-			if (Input::GetKey(KeyCode::RightArrow))
-			{
-				auto euler = t.GetRotation().EulerAngles();
-				euler.y += m_camRotSpeed * Time::GetDeltaTime();
-				t.SetRotation(euler);
-			}
+				if (Input::GetKey(KeyCode::RightArrow))
+				{
+					auto euler = t.GetRotation().EulerAngles();
+					euler.y += m_camRotSpeed * Time::GetDeltaTime();
+					t.SetRotation(euler);
+				}
 
-			if (Input::GetKey(KeyCode::LeftArrow))
-			{
-				auto euler = t.GetRotation().EulerAngles();
-				euler.y -= m_camRotSpeed * Time::GetDeltaTime();
-				t.SetRotation(euler);
-			}
+				if (Input::GetKey(KeyCode::LeftArrow))
+				{
+					auto euler = t.GetRotation().EulerAngles();
+					euler.y -= m_camRotSpeed * Time::GetDeltaTime();
+					t.SetRotation(euler);
+				}
 
-			if (Input::GetKey(KeyCode::UpArrow))
-			{
-				Quaternion rotation = Quaternion::AngleAxisToQuaternion(-m_camRotSpeed 
-					* Time::GetDeltaTime(), t.Right());
-				t.SetRotation(rotation * t.GetRotation());
-			}
+				if (Input::GetKey(KeyCode::UpArrow))
+				{
+					Quaternion rotation = Quaternion::AngleAxisToQuaternion(-m_camRotSpeed
+						* Time::GetDeltaTime(), t.Right());
+					t.SetRotation(rotation * t.GetRotation());
+				}
 
-			if (Input::GetKey(KeyCode::DownArrow))
-			{
-				Quaternion rotation = Quaternion::AngleAxisToQuaternion(m_camRotSpeed 
-					* Time::GetDeltaTime(), t.Right());
-				t.SetRotation(rotation * t.GetRotation());
+				if (Input::GetKey(KeyCode::DownArrow))
+				{
+					Quaternion rotation = Quaternion::AngleAxisToQuaternion(m_camRotSpeed
+						* Time::GetDeltaTime(), t.Right());
+					t.SetRotation(rotation * t.GetRotation());
+				}
 			}
 
 			if (Input::GetKey(KeyCode::R))

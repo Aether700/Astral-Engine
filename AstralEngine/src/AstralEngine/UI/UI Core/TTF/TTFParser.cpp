@@ -679,7 +679,7 @@ namespace AstralEngine
 			Vector2 scale = Vector2(0.1f, 0.1f);
 			for (GlyphPoint& point : m_points)
 			{
-				Renderer::DrawQuad(point.coords * 0.01f, 0.0f, scale);
+				Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.01f, 0.0f, scale);
 			}
 		}
 		////////////////////
