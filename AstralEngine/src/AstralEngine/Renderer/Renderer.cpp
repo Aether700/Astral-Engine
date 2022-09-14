@@ -762,7 +762,7 @@ namespace AstralEngine
 		float tileFactor, const Vector4& tintColor)
 	{
 		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity,
-			(tintColor.a == 1.0f));
+			(tintColor.a == 1.0f), texture);
 		if (cmd->UsesDeferred())
 		{
 			s_deferredQueue->AddData(cmd);
