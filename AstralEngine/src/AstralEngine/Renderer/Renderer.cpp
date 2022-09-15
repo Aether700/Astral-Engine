@@ -762,7 +762,7 @@ namespace AstralEngine
 		float tileFactor, const Vector4& tintColor)
 	{
 		DrawCommand* cmd = new DrawCommand(transform, mat, Mesh::QuadMesh(), tintColor, NullEntity,
-			(tintColor.a == 1.0f));
+			(tintColor.a == 1.0f), texture);
 		if (cmd->UsesDeferred())
 		{
 			s_deferredQueue->AddData(cmd);
@@ -790,7 +790,7 @@ namespace AstralEngine
 	void Renderer::DrawQuad(const Vector3& position, const Quaternion& rotation, const Vector3& scale,
 		Texture2DHandle texture, float tileFactor, const Vector4& tintColor)
 	{
-		DrawQuad(position, rotation, scale, Material::DefaultMat(), texture, tileFactor, tintColor);
+		DrawQuad(position, rotation, scale, Material::SpriteMat(), texture, tileFactor, tintColor);
 	}
 
 	void Renderer::DrawQuad(const Mat4& transform, MaterialHandle mat, const Vector4& color)

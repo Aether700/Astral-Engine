@@ -549,6 +549,7 @@ public:
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 		//SetupRendererTestScene();
+
 	}
 
 	void OnUpdate() override
