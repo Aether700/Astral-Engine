@@ -549,6 +549,7 @@ public:
 		//cam.EmplaceComponent<RotateAroundTester>().SetTarget(m_entity);
 		m_entity = cam;
 		//SetupRendererTestScene();
+
 	}
 
 	void OnUpdate() override
@@ -581,15 +582,9 @@ public:
 		RenderFullscreenTexture();
 		*/
 
-		//m_scene->OnUpdate();
+		m_scene->OnUpdate();
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-
-		RenderCommand::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		RenderCommand::Clear();
-		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		Renderer::DrawQuad({ 0, 0, 0 }, 0.0f, { 1, 1 }, {0, 1, 0, 1});
-		Renderer::EndScene();
 
 		AstralEngine::Renderer::ResetStats();
 	}

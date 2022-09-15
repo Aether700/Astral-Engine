@@ -354,7 +354,6 @@ namespace AstralEngine
 		const ADynArr<Vector2>& textureCoords = mesh->GetTextureCoords();
 		const ADynArr<unsigned int>& indices = mesh->GetIndices();
 		int textureIndex = GetTextureIndex(m_batchTextureSlots, m_batchTextureSlotIndex, cmd->GetTexture());
-		AE_RENDER_ASSERT(textureIndex != -2, "Invalid Texture provided");
 
 		if (textureIndex == -1)
 		{

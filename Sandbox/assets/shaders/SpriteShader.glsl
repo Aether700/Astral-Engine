@@ -18,8 +18,7 @@ void main()
 	v_textureCoords = a_textureCoords;
 	v_textureIndex = a_textureIndex;
 	v_color = a_color;
-	//gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
-	gl_Position = vec4(a_position, 1.0);
+	gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
 }
 
 
