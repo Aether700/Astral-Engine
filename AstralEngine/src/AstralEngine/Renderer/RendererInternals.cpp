@@ -347,7 +347,6 @@ namespace AstralEngine
 
 	void DrawDataBuffer::AddToBatching(const Mat4& viewProj, DrawCommand* cmd)
 	{
-		
 		AReference<Mesh> mesh = ResourceHandler::GetMesh(cmd->GetMesh());
 		AE_RENDER_ASSERT(mesh != nullptr, "");
 		const ADynArr<Vector3>& positions = mesh->GetPositions();
