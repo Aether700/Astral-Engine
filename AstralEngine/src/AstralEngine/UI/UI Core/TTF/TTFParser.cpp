@@ -676,9 +676,20 @@ namespace AstralEngine
 		void DrawPoints()
 		{
 			Vector2 scale = Vector2(0.01f, 0.01f);
+
+			size_t skips = 2;
+			size_t endSkip = 14;
+			size_t skipCount = 0;
+
+			size_t toDraw = m_points.GetCount() - endSkip;
+
 			for (GlyphPoint& point : m_points)
 			{
-				Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
+				if (skipCount >= skips && skipCount < toDraw)
+				{
+					Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
+				}
+				skipCount++;
 			}
 		}
 		////////////////////
@@ -1287,7 +1298,6 @@ namespace AstralEngine
 	void DebugTTFFont::DebugDrawGlyph()
 	{
 		// displaying points of 'a'
-		additional points are present see why
 		glyphs[68].DrawPoints();
 	}
 
@@ -1396,6 +1406,14 @@ namespace AstralEngine
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
+					
+					// temp
+					if (glyf.GetCount() == 67)
+					{ 
+						int x = 0;
+					}
+					reading glyph description incorrectly (use the usual website to verify the data of the glyphs see first tab)
+					//
 					glyf.Add(ReadGlyphDescription(file));
 				}
 				break;
