@@ -647,7 +647,6 @@ namespace AstralEngine
 
 		Glyph(const GlyphDescription& description)
 		{
-			//trying to render points with quads but shader crashes see why
 			// temp ///////////////////////////
 			//AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
 			///////////////////////////////////
@@ -676,10 +675,10 @@ namespace AstralEngine
 		// temp for debug
 		void DrawPoints()
 		{
-			Vector2 scale = Vector2(0.1f, 0.1f);
+			Vector2 scale = Vector2(0.01f, 0.01f);
 			for (GlyphPoint& point : m_points)
 			{
-				Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.01f, 0.0f, scale);
+				Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
 			}
 		}
 		////////////////////
@@ -1287,7 +1286,9 @@ namespace AstralEngine
 
 	void DebugTTFFont::DebugDrawGlyph()
 	{
-		glyphs[0].DrawPoints();
+		// displaying points of 'a'
+		additional points are present see why
+		glyphs[68].DrawPoints();
 	}
 
 	///////////////////////////////////////
@@ -1370,7 +1371,6 @@ namespace AstralEngine
 
 		for (TableDirectory& dir : tableDirectories)
 		{
-
 			if (FindTable(dependencyTables, dir.tag) != nullptr)
 			{
 				continue;

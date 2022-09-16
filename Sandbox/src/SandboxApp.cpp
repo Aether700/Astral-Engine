@@ -507,40 +507,27 @@ public:
 		//AstralEngine::TTFParser::LoadFont("assets/fonts/The Giant and the Mouse.ttf");
 		
 		debugFont = (AReference<DebugTTFFont>)AstralEngine::TTFParser::LoadFont("assets/fonts/arial.ttf");
+
+		// temp
+		m_scene = AReference<Scene>::Create();
+		e = m_scene->CreateAEntity();
+		e.EmplaceComponent<SpriteRenderer>(Vector4(0, 1, 0, 1));
+		Camera::GetMainCamera().GetComponent<Camera>().GetCamera().
+			SetProjectionType(SceneCamera::ProjectionType::Perspective);
 	}
 
 	void OnUpdate() override
 	{
-		//m_scene->OnUpdate();
+		m_scene->OnUpdate();
 		AWindow* window = Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
+
 
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		//Renderer::BeginScene(Mat4::Identity());
-		//debugFont->DebugDrawGlyph();
-		Renderer::DrawQuad({ 0, 0, 0 }, 0, { 1, 1 }, {1, 0, 0, 1}); cannot render simple quad with current setup see why
+		debugFont->DebugDrawGlyph();
 		Renderer::EndScene();
-
-		/*
-		m_cameraController->OnUpdate();
-
-
-		AstralEngine::RenderCommand::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		AstralEngine::RenderCommand::Clear();
-		AstralEngine::Renderer::BeginScene(m_cameraController->GetCamera());
-
-		AstralEngine::Application::GetUIContext()->TempUpdate();
-
-		/*
-		AstralEngine::Renderer2D::DrawQuad(AstralEngine::Mat4::Identity(), { 1, 1, 1, 1 });
-		AstralEngine::Renderer::DrawQuad(AstralEngine::Mat4::Identity());
-		//AstralEngine::Renderer2D::DrawUIWindow(m_uiWindow);
-
-
-		AstralEngine::Renderer::EndScene();
-		*/
 
 		AstralEngine::Renderer::ResetStats();
 	}

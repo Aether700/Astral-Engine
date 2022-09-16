@@ -18,6 +18,7 @@ void main()
 	v_textureCoords = a_textureCoords;
 	v_textureIndex = a_textureIndex;
 	v_color = a_color;
+	//gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
 	gl_Position = u_viewProjMatrix * a_transform * vec4(a_position, 1.0);
 }
 
@@ -35,6 +36,5 @@ uniform sampler2D u_textures[#NUM_TEXTURE_SLOTS];
 
 void main()
 {
-	//color = texture(u_textures[int(v_textureIndex)], v_textureCoords) * v_color;
-	color = vec4(1,0, 0, 1);
+	color = texture(u_textures[int(v_textureIndex)], v_textureCoords) * v_color;
 }
