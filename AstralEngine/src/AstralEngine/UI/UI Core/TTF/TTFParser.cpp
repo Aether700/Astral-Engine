@@ -471,9 +471,9 @@ namespace AstralEngine
 			return lastFlag;
 		}
 		
-		Vector2 GetCoords(size_t index)
+		Vector2Int GetCoords(size_t index)
 		{
-			return Vector2(ReadCoordComponent(index, xCoordinates, TTFOutlineXShortVec, TTFOutlineXSameOrPositive), 
+			return Vector2Int(ReadCoordComponent(index, xCoordinates, TTFOutlineXShortVec, TTFOutlineXSameOrPositive), 
 				ReadCoordComponent(index, yCoordinates, TTFOutlineYShortVec, TTFOutlineYSameOrPositive));
 		}
 		
@@ -483,28 +483,28 @@ namespace AstralEngine
 		}
 
 	private:
-		float ReadCoordComponent(size_t index, SimpleGlyphCoord* coordArr, 
+		int ReadCoordComponent(size_t index, SimpleGlyphCoord* coordArr, 
 			TTFOutlineFlags shortVec, TTFOutlineFlags sameOrPos)
 		{
-			float coord = 0.0f;
+			int coord = 0;
 			size_t coordIndex = 0;
 			for (size_t i = 0; i < index; i++)
 			{
 				TTFOutlineFlags currFlag = GetFlags(i);
-				float currChange = 0.0f;
+				int currChange = 0;
 				if (currFlag & shortVec)
 				{
-					currChange = (float)coordArr[coordIndex].bytes1;
+					currChange = (int)coordArr[coordIndex].bytes1;
 					if (!(currFlag & sameOrPos))
 					{
-						currChange *= -1.0f;
+						currChange *= -1;
 					}
 					coord += currChange;
 					coordIndex++;
 				}
 				else if (!(currFlag & sameOrPos))
 				{
-					coord += (float)coordArr[coordIndex].bytes2;
+					coord += (int)coordArr[coordIndex].bytes2;
 					coordIndex++;
 				}
 			}
@@ -694,9 +694,9 @@ namespace AstralEngine
 
 				if (point.isOnCurve || !printOnCurveOnly)
 				{
-					Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
 					if (skipCount >= skips && skipCount < toDraw)
 					{
+						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
 					}
 				}
 				skipCount++;
@@ -707,12 +707,12 @@ namespace AstralEngine
 	private:
 		struct GlyphPoint
 		{
-			Vector2 coords;
+			Vector2Int coords;
 			bool isOnCurve;
 			bool isMidpoint; // might want to remove?
 
 			GlyphPoint() : isOnCurve(false), isMidpoint(false) { }
-			GlyphPoint(const Vector2& c, bool onCurve, bool midpoint) : coords(c), isOnCurve(onCurve), 
+			GlyphPoint(const Vector2Int& c, bool onCurve, bool midpoint) : coords(c), isOnCurve(onCurve), 
 				isMidpoint(midpoint) { }
 
 			bool operator==(const GlyphPoint& other) const
@@ -1101,7 +1101,16 @@ namespace AstralEngine
 			}
 			else if (!(currFlag & TTFOutlineXSameOrPositive))
 			{
-				tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
+				//tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
+				//temp
+				std::int16_t x = ReadTTFVar<std::int16_t>(file);
+				std::int16_t y;
+				AssertDataEndianness(&x, &y, sizeof(std::int16_t), Endianness::BigEndian);
+				tempCoordArr[coordIndex].bytes2 = y;
+
+				coordinates are not being read correctly but the start of the glyph description is correct 
+				so something is wrong with the ReadSimpleGlyphData function
+				//
 				coordIndex++;
 			}
 		}
@@ -1304,8 +1313,8 @@ namespace AstralEngine
 	{
 		for (size_t i = 0; i < data->GetNumPoints(); i++)
 		{
-			Vector2 coords = data->GetCoords(i);
-			AE_CORE_INFO("%f, %f", coords.x, coords.y);
+			Vector2Int coords = data->GetCoords(i);
+			AE_CORE_INFO("%d, %d", coords.x, coords.y);
 		}
 	}
 
@@ -1429,12 +1438,17 @@ namespace AstralEngine
 					// temp
 					if (glyf.GetCount() == 68)
 					{ 
+						/*
 						contour data is way off coordinate wise
 						double check that the coordinates are being read properly, next thing will be 
 						to check that the loca table is being used to find the index of a glyph properly
+						*/
 
 						size_t pos = file.tellg();
-						PrintContourData((SimpleGlyphData*)ReadGlyphDescription(file).data);
+						GlyphDescription des = ReadGlyphDescription(file);
+						//PrintContourData((SimpleGlyphData*)des.data);
+						Vector2Int coords = ((SimpleGlyphData*)des.data)->GetCoords(3) 
+							- ((SimpleGlyphData*)des.data)->GetCoords(2);
 						file.seekg(pos);
 					}
 					//reading glyph description incorrectly (use the usual website to verify the data of the glyphs see first tab)
