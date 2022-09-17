@@ -675,6 +675,8 @@ namespace AstralEngine
 		// temp for debug
 		void DrawPoints()
 		{
+			// see for more details: https://learn.microsoft.com/en-us/typography/opentype/spec/ttch01
+			static bool printOnCurveOnly = false;
 			Vector2 scale = Vector2(0.01f, 0.01f);
 
 			size_t skips = 2;
@@ -685,9 +687,17 @@ namespace AstralEngine
 
 			for (GlyphPoint& point : m_points)
 			{
-				if (skipCount >= skips && skipCount < toDraw)
+				if (Input::GetKeyDown(KeyCode::T))
+				{
+					printOnCurveOnly = !printOnCurveOnly;
+				}
+
+				if (point.isOnCurve || !printOnCurveOnly)
 				{
 					Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
+					if (skipCount >= skips && skipCount < toDraw)
+					{
+					}
 				}
 				skipCount++;
 			}
@@ -1290,6 +1300,15 @@ namespace AstralEngine
 		}
 	}
 
+	void PrintContourData(SimpleGlyphData* data)
+	{
+		for (size_t i = 0; i < data->GetNumPoints(); i++)
+		{
+			Vector2 coords = data->GetCoords(i);
+			AE_CORE_INFO("%f, %f", coords.x, coords.y);
+		}
+	}
+
 	///////////////////////////////////////
 
 
@@ -1408,11 +1427,17 @@ namespace AstralEngine
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
 					
 					// temp
-					if (glyf.GetCount() == 67)
+					if (glyf.GetCount() == 68)
 					{ 
-						int x = 0;
+						contour data is way off coordinate wise
+						double check that the coordinates are being read properly, next thing will be 
+						to check that the loca table is being used to find the index of a glyph properly
+
+						size_t pos = file.tellg();
+						PrintContourData((SimpleGlyphData*)ReadGlyphDescription(file).data);
+						file.seekg(pos);
 					}
-					reading glyph description incorrectly (use the usual website to verify the data of the glyphs see first tab)
+					//reading glyph description incorrectly (use the usual website to verify the data of the glyphs see first tab)
 					//
 					glyf.Add(ReadGlyphDescription(file));
 				}
