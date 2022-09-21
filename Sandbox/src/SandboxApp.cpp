@@ -586,6 +586,11 @@ public:
 		auto* window = AstralEngine::Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
+		RenderCommand::Clear();
+		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
+		Renderer::DrawQuad(Mat4::Identity());
+		Renderer::EndScene();
+
 		AstralEngine::Renderer::ResetStats();
 	}
 	
