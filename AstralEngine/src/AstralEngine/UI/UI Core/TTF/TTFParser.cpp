@@ -658,9 +658,13 @@ namespace AstralEngine
 			if (IsSimpleGlyph())
 			{
 				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
-				m_points.Reserve((size_t)data->endPtsOfContours[m_numContours - 1]);
-
 				size_t numPoints = (size_t)data->GetNumPoints();
+				m_points.Reserve(numPoints);
+				
+				// temp
+				numFlags = data->numFlags;
+				/////////
+				
 				for (size_t i = 0; i < numPoints; i++)
 				{
 					TTFOutlineFlags flags = data->GetFlags(i);
@@ -679,10 +683,11 @@ namespace AstralEngine
 			static bool printOnCurveOnly = false;
 			Vector2 scale = Vector2(0.01f, 0.01f);
 
-			size_t skips = 2;
-			size_t endSkip = 14;
+			size_t skips = 0;//2;
+			size_t endSkip = 0;//14;
 			size_t skipCount = 0;
 
+			// should be 56 points for the 'a' char might be some duplicates in that number
 			size_t toDraw = m_points.GetCount() - endSkip;
 
 			for (GlyphPoint& point : m_points)
@@ -730,6 +735,9 @@ namespace AstralEngine
 		Vector2Short m_outlineMin;
 		Vector2Short m_outlineMax;
 		ADynArr<GlyphPoint> m_points;
+
+		// temp
+		size_t numFlags;
 	};
 
 
