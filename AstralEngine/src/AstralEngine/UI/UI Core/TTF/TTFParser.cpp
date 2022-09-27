@@ -1233,8 +1233,8 @@ namespace AstralEngine
 
 	void DebugTTFFont::DebugDrawGlyph()
 	{
-		// displaying points of 'a'
-		glyphs[68].DrawPoints();
+		// displaying points of 'B'
+		glyphs[37].DrawPoints();
 	}
 
 	///////////////////////////////////////
@@ -1344,7 +1344,7 @@ namespace AstralEngine
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
 					
 					// temp
-					if (glyf.GetCount() == 68)
+					if (glyf.GetCount() == 37)
 					{ 
 						/*
 						contour data is way off coordinate wise
@@ -1374,6 +1374,8 @@ namespace AstralEngine
 
 		// temp
 		AReference<DebugTTFFont> tempFont = AReference<DebugTTFFont>::Create();
+		CmapFormat4* format = (CmapFormat4*)cmap.format;
+		size_t id = format->GetGlyphID('B');
 		tempFont->glyphs = std::move(glyf);
 		return tempFont;
 	}
