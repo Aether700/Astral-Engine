@@ -7,6 +7,62 @@
 [ASTRAL_ENGINE] Notification: Buffer detailed info: Buffer object 2 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
 [APP] OnCreate called
 [APP] Test component created
+[ASTRAL_ENGINE] 828, 131
+[ASTRAL_ENGINE] 728, 46
+[ASTRAL_ENGINE] 543, -24
+[ASTRAL_ENGINE] 437, -24
+[ASTRAL_ENGINE] 262, -24
+[ASTRAL_ENGINE] 74, 147
+[ASTRAL_ENGINE] 74, 280
+[ASTRAL_ENGINE] 74, 358
+[ASTRAL_ENGINE] 145, 487
+[ASTRAL_ENGINE] 260, 565
+[ASTRAL_ENGINE] 332, 585
+[ASTRAL_ENGINE] 385, 599
+[ASTRAL_ENGINE] 492, 612
+[ASTRAL_ENGINE] 710, 638
+[ASTRAL_ENGINE] 813, 674
+[ASTRAL_ENGINE] 814, 711
+[ASTRAL_ENGINE] 814, 721
+[ASTRAL_ENGINE] 814, 831
+[ASTRAL_ENGINE] 763, 876
+[ASTRAL_ENGINE] 694, 937
+[ASTRAL_ENGINE] 558, 937
+[ASTRAL_ENGINE] 431, 937
+[ASTRAL_ENGINE] 310, 848
+[ASTRAL_ENGINE] 281, 735
+[ASTRAL_ENGINE] 105, 759
+[ASTRAL_ENGINE] 129, 872
+[ASTRAL_ENGINE] 239, 1011
+[ASTRAL_ENGINE] 447, 1086
+[ASTRAL_ENGINE] 584, 1086
+[ASTRAL_ENGINE] 720, 1086
+[ASTRAL_ENGINE] 890, 1022
+[ASTRAL_ENGINE] 970, 925
+[ASTRAL_ENGINE] 986, 851
+[ASTRAL_ENGINE] 995, 805
+[ASTRAL_ENGINE] 995, 685
+[ASTRAL_ENGINE] 995, 445
+[ASTRAL_ENGINE] 995, 194
+[ASTRAL_ENGINE] 1018, 61
+[ASTRAL_ENGINE] 1052, 0
+[ASTRAL_ENGINE] 864, 0
+[ASTRAL_ENGINE] 836, 56
+[ASTRAL_ENGINE] 813, 533
+[ASTRAL_ENGINE] 715, 493
+[ASTRAL_ENGINE] 519, 465
+[ASTRAL_ENGINE] 408, 449
+[ASTRAL_ENGINE] 316, 409
+[ASTRAL_ENGINE] 266, 332
+[ASTRAL_ENGINE] 266, 285
+[ASTRAL_ENGINE] 266, 213
+[ASTRAL_ENGINE] 375, 117
+[ASTRAL_ENGINE] 480, 117
+[ASTRAL_ENGINE] 584, 117
+[ASTRAL_ENGINE] 746, 208
+[ASTRAL_ENGINE] 784, 287
+[ASTRAL_ENGINE] 813, 348
+[ASTRAL_ENGINE] 813, 467
 [ASTRAL_ENGINE] Notification: Buffer detailed info: Buffer object 3 (bound to GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (0), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (1), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (2), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (3), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (4), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (5), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (6), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (7), GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_ARB (8), and GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
 [ASTRAL_ENGINE] Notification: Buffer detailed info: Buffer object 4 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
 [ASTRAL_ENGINE] UIContext::RenderUI not finished yet
@@ -570,4 +626,84 @@
 [ASTRAL_ENGINE] UIContext::RenderUI not finished yet
 [ASTRAL_ENGINE] UIContext::RenderUI not finished yet
 [ASTRAL_ENGINE] UIContext::RenderUI not finished yet
-[ASTRAL_ENGI
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet
+[ASTRAL_ENGINE] UIContext::RenderUI not finished yet

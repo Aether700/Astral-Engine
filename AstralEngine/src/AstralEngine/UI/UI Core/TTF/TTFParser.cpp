@@ -420,26 +420,17 @@ namespace AstralEngine
 	};
 
 	struct SimpleGlyphData : public GlyphData
-	{
-		union SimpleGlyphCoord
-		{
-			std::uint8_t bytes1;
-			std::int16_t bytes2;
-		}; // which type to use is specified by the flags
-		
+	{	
 		std::uint16_t* endPtsOfContours; // array of length numberOfContours
 		std::uint16_t instructionLength; // in bytes
 		std::uint8_t* instructions; // array of length instructionLength
-		TTFOutlineFlags* flags; // array of variable length
-		SimpleGlyphCoord* xCoordinates;
-		SimpleGlyphCoord* yCoordinates;
+		// unpacked arrays of length NumPoints
+		TTFOutlineFlags* flags; 
+		std::int16_t* xCoordinates;
+		std::int16_t* yCoordinates;
 
 		// for internal use only, not part of the documentation
-		std::uint8_t* repeatCounts; 
 		size_t numOfContours;
-		size_t numFlags;
-		size_t numXCoords;
-		size_t numYCoords;
 
 		~SimpleGlyphData()
 		{
@@ -447,69 +438,22 @@ namespace AstralEngine
 			delete[] instructions;
 			delete[] xCoordinates;
 			delete[] yCoordinates;
-			delete[] repeatCounts;
 		}
 
 		TTFOutlineFlags GetFlags(size_t index)
 		{
 			AE_CORE_ASSERT(index < GetNumPoints(), "Index out of bounds");
-
-			if (index >= numFlags)
-			{
-				return flags[numFlags - 1];
-			}
-
-			TTFOutlineFlags lastFlag = flags[0];
-			for (size_t i = 0; i < index; i++)
-			{
-				lastFlag = flags[i];
-				if (flags[i] & TTFOutlineRepeat)
-				{
-					i += repeatCounts[i];
-				}
-			}
-			return lastFlag;
+			return flags[index];
 		}
 		
 		Vector2Int GetCoords(size_t index)
 		{
-			return Vector2Int(ReadCoordComponent(index, xCoordinates, TTFOutlineXShortVec, TTFOutlineXSameOrPositive), 
-				ReadCoordComponent(index, yCoordinates, TTFOutlineYShortVec, TTFOutlineYSameOrPositive));
+			return Vector2Int(xCoordinates[index], yCoordinates[index]);
 		}
 		
 		std::uint16_t GetNumPoints() const
 		{
-			return endPtsOfContours[numOfContours - 1];
-		}
-
-	private:
-		int ReadCoordComponent(size_t index, SimpleGlyphCoord* coordArr, 
-			TTFOutlineFlags shortVec, TTFOutlineFlags sameOrPos)
-		{
-			int coord = 0;
-			size_t coordIndex = 0;
-			for (size_t i = 0; i < index; i++)
-			{
-				TTFOutlineFlags currFlag = GetFlags(i);
-				int currChange = 0;
-				if (currFlag & shortVec)
-				{
-					currChange = (int)coordArr[coordIndex].bytes1;
-					if (!(currFlag & sameOrPos))
-					{
-						currChange *= -1;
-					}
-					coord += currChange;
-					coordIndex++;
-				}
-				else if (!(currFlag & sameOrPos))
-				{
-					coord += (int)coordArr[coordIndex].bytes2;
-					coordIndex++;
-				}
-			}
-
-			return coord;
+			return endPtsOfContours[numOfContours - 1] + 1;
 		}
 	};
 
@@ -661,10 +605,6 @@ namespace AstralEngine
 				size_t numPoints = (size_t)data->GetNumPoints();
 				m_points.Reserve(numPoints);
 				
-				// temp
-				numFlags = data->numFlags;
-				/////////
-				
 				for (size_t i = 0; i < numPoints; i++)
 				{
 					TTFOutlineFlags flags = data->GetFlags(i);
@@ -735,9 +675,6 @@ namespace AstralEngine
 		Vector2Short m_outlineMin;
 		Vector2Short m_outlineMax;
 		ADynArr<GlyphPoint> m_points;
-
-		// temp
-		size_t numFlags;
 	};
 
 
@@ -1040,6 +977,43 @@ namespace AstralEngine
 		return c;
 	}
 
+	void ReadSimpleGlyphCoords(std::ifstream& file, SimpleGlyphData* data, 
+		std::int16_t* coordArr, TTFOutlineFlags shortFlag, TTFOutlineFlags positiveRepeatFlag)
+	{
+		std::int16_t prevCoord = 0;
+		for (size_t i = 0; i < data->GetNumPoints(); i++)
+		{
+			TTFOutlineFlags currFlag = data->GetFlags(i);
+
+			if (currFlag & shortFlag)
+			{
+				std::int16_t coordDelta = (std::int16_t)ReadTTFVar<std::uint8_t>(file);
+				if (!(currFlag & positiveRepeatFlag))
+				{
+					coordDelta *= -1;
+				}
+				coordArr[i] = coordDelta + prevCoord;
+			}
+			else if (currFlag & positiveRepeatFlag)
+			{
+				if (i != 0)
+				{
+					coordArr[i] = coordArr[i - 1];
+				}
+				else
+				{
+					coordArr[i] = 0;
+				}
+			}
+			else
+			{
+				coordArr[i] = ReadTTFVar<std::int16_t>(file) + prevCoord;
+			}
+
+			prevCoord = coordArr[i];
+		}
+	}
+
 	SimpleGlyphData* ReadSimpleGlyphData(std::ifstream& file, std::int16_t numContours)
 	{
 		AE_CORE_ASSERT(numContours > 0, "Number of contours cannot be <= 0 for a simple glyph");
@@ -1057,106 +1031,32 @@ namespace AstralEngine
 			data->instructions = nullptr;
 		}
 
-
 		// read flags
-		size_t flagIndex = 0;
-		size_t numPoints = data->endPtsOfContours[numContours - 1];
-		TTFOutlineFlags* tempArr = new TTFOutlineFlags[numPoints];
-		std::uint8_t* tempRepeatArr = new std::uint8_t[numPoints];
-
+		size_t numPoints = data->GetNumPoints();
+		data->flags = new TTFOutlineFlags[numPoints];
 
 		for (std::int16_t i = 0; i < numPoints; i++)
 		{
 			TTFOutlineFlags currFlag = ReadTTFVar<TTFOutlineFlags>(file);
-			tempArr[flagIndex] = currFlag;
+			data->flags[i] = currFlag;
 
 			if (currFlag & TTFOutlineRepeat)
 			{
-				tempRepeatArr[flagIndex] = ReadTTFVar<std::uint8_t>(file);
-				i += tempRepeatArr[flagIndex];
+				std::uint8_t repeatCount = ReadTTFVar<std::uint8_t>(file);
+				for (std::uint8_t j = 0; j < repeatCount; j++)
+				{
+					i++;
+					data->flags[i] = data->flags[i - 1];
+				}
 			}
-			else
-			{
-				tempRepeatArr[flagIndex] = 0;
-			}
-			flagIndex++;
 		}
-
-		data->numFlags = flagIndex;
-		data->flags = new TTFOutlineFlags[data->numFlags];
-		data->repeatCounts = new std::uint8_t[data->numFlags];
-
-		for (size_t i = 0; i < data->numFlags; i++)
-		{
-			data->flags[i] = tempArr[i];
-			data->repeatCounts[i] = tempRepeatArr[i];
-		}
-
-		delete[] tempArr;
-		delete[] tempRepeatArr;
-
-		SimpleGlyphData::SimpleGlyphCoord* tempCoordArr = new SimpleGlyphData::SimpleGlyphCoord[numPoints];
-		size_t coordIndex = 0;
 
 		// read X coords
-		for (size_t i = 0; i < numPoints; i++)
-		{
-			TTFOutlineFlags currFlag = data->GetFlags(i);
-			if (currFlag & TTFOutlineXShortVec)
-			{
-				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
-				coordIndex++;
-			}
-			else if (!(currFlag & TTFOutlineXSameOrPositive))
-			{
-				//tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
-				//temp
-				std::int16_t x = ReadTTFVar<std::int16_t>(file);
-				std::int16_t y;
-				AssertDataEndianness(&x, &y, sizeof(std::int16_t), Endianness::BigEndian);
-				tempCoordArr[coordIndex].bytes2 = y;
-
-				coordinates are not being read correctly but the start of the glyph description is correct 
-				so something is wrong with the ReadSimpleGlyphData function
-				//
-				coordIndex++;
-			}
-		}
-
-		data->numXCoords = coordIndex;
-		data->xCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numXCoords];
-
-		for (size_t i = 0; i < data->numXCoords; i++)
-		{
-			data->xCoordinates[i] = tempCoordArr[i];
-		}
-
+		data->xCoordinates = new std::int16_t[numPoints];
+		ReadSimpleGlyphCoords(file, data, data->xCoordinates, TTFOutlineXShortVec, TTFOutlineXSameOrPositive);
 		// read y coords
-		coordIndex = 0;
-		for (size_t i = 0; i < numPoints; i++)
-		{
-			TTFOutlineFlags currFlag = data->GetFlags(i);
-			if (currFlag & TTFOutlineYShortVec)
-			{
-				tempCoordArr[coordIndex].bytes1 = ReadTTFVar<std::uint8_t>(file);
-				coordIndex++;
-			}
-			else if (!(currFlag & TTFOutlineYSameOrPositive))
-			{
-				tempCoordArr[coordIndex].bytes2 = ReadTTFVar<std::int16_t>(file);
-				coordIndex++;
-			}
-		}
-
-		data->numYCoords = coordIndex;
-		data->yCoordinates = new SimpleGlyphData::SimpleGlyphCoord[data->numYCoords];
-
-		for (size_t i = 0; i < data->numYCoords; i++)
-		{
-			data->yCoordinates[i] = tempCoordArr[i];
-		}
-
-		delete[] tempCoordArr;
+		data->yCoordinates = new std::int16_t[numPoints];
+		ReadSimpleGlyphCoords(file, data, data->yCoordinates, TTFOutlineYShortVec, TTFOutlineYSameOrPositive);
 
 		return data;
 	}
@@ -1454,7 +1354,7 @@ namespace AstralEngine
 
 						size_t pos = file.tellg();
 						GlyphDescription des = ReadGlyphDescription(file);
-						//PrintContourData((SimpleGlyphData*)des.data);
+						PrintContourData((SimpleGlyphData*)des.data);
 						Vector2Int coords = ((SimpleGlyphData*)des.data)->GetCoords(3) 
 							- ((SimpleGlyphData*)des.data)->GetCoords(2);
 						file.seekg(pos);
