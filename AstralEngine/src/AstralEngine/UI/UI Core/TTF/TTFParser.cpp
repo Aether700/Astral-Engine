@@ -213,6 +213,7 @@ namespace AstralEngine
 		std::uint16_t maxComponentDepth; 
 	};
 	
+	/*
 	struct CmapIndex
 	{
 		std::uint16_t version;
@@ -226,6 +227,7 @@ namespace AstralEngine
 		Reserved = 2, //do not use
 		Microsoft = 3
 	};
+	*/
 
 	enum class UnicodeEncoding : std::uint16_t
 	{
@@ -249,6 +251,7 @@ namespace AstralEngine
 		UnicodeUCS4 = 10
 	};
 
+	/*
 	struct CmapSubtable
 	{
 		CmapPlatforms platformID;
@@ -258,8 +261,16 @@ namespace AstralEngine
 
 	struct CmapFormat
 	{
-	};
+		// returns the id of the glyph corresponding to the character 
+		// provided or 0 if the character was not found
+		std::uint16_t GetGlyphID(char c)
+		{
+			return GetGlyphID((wchar_t)c);
+		}
 
+		virtual std::uint16_t GetGlyphID(wchar_t c) = 0;
+	};
+	*/
 
 	struct CmapFormat4 : public CmapFormat
 	{
@@ -299,12 +310,7 @@ namespace AstralEngine
 
 		// returns the id of the glyph corresponding to the character 
 		// provided or 0 if the character was not found
-		std::uint16_t GetGlyphID(char c)
-		{
-			return GetGlyphID((wchar_t)c);
-		}
-
-		std::uint16_t GetGlyphID (wchar_t c)
+		virtual std::uint16_t GetGlyphID(wchar_t c) override
 		{
 			std::uint16_t &charID = reinterpret_cast<std::uint16_t &>(c);
 
@@ -344,7 +350,7 @@ namespace AstralEngine
 		}
 
 	};
-
+	/*
 	struct Cmap
 	{
 		CmapIndex index;
@@ -364,6 +370,16 @@ namespace AstralEngine
 			delete format;
 		}
 
+		std::uint16_t GetGlyphID(char c)
+		{
+			return format->GetGlyphID(c);
+		}
+
+		std::uint16_t GetGlyphID(wchar_t c)
+		{
+			return format->GetGlyphID(c);
+		}
+
 		CmapSubtable* GetSubtable(CmapPlatforms platformID)
 		{
 			if (subtables == nullptr)
@@ -381,7 +397,7 @@ namespace AstralEngine
 			return nullptr;
 		}
 
-		Cmap& operator=(Cmap&& other)
+		Cmap& operator=(Cmap&& other) noexcept
 		{
 			delete[] subtables;
 			delete format;
@@ -396,6 +412,7 @@ namespace AstralEngine
 			return *this;
 		}
 	};
+	*/
 	
 	enum TTFOutlineFlags : std::uint8_t // used for simple glyphs
 	{
@@ -517,7 +534,7 @@ namespace AstralEngine
 
 	struct GlyphDescription // used in glyf
 	{
-		std::int16_t numberOfContours; // if > 0-> simple glyph, if < 0 compound glyph if == 0 no glyph data
+		std::int16_t numberOfContours; // if > 0 -> simple glyph, if < 0 compound glyph if == 0 no glyph data
 		FWord xMin;
 		FWord yMin;
 		FWord xMax;
@@ -1231,14 +1248,8 @@ namespace AstralEngine
 
 	// temp font object used for debugging
 
-	void DebugTTFFont::DebugDrawGlyph()
-	{
-		// displaying points of 'B'
-		glyphs[37].DrawPoints();
-	}
-
 	///////////////////////////////////////
-	AReference<Font> TTFParser::LoadFont(const std::string& filepath)
+	AReference<Font> TTFFont::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
 		if (!file)
@@ -1373,11 +1384,18 @@ namespace AstralEngine
 		}
 
 		// temp
-		AReference<DebugTTFFont> tempFont = AReference<DebugTTFFont>::Create();
-		CmapFormat4* format = (CmapFormat4*)cmap.format;
-		size_t id = format->GetGlyphID('B');
-		tempFont->glyphs = std::move(glyf);
+		AReference<TTFFont> tempFont = AReference<TTFFont>::Create();
+		tempFont->m_glyphs = std::move(glyf);
+		tempFont->m_cmap = std::move(cmap);
 		return tempFont;
 	}
+
+	void TTFFont::DebugDrawPointsOfChar(char c)
+	{
+		std::uint16_t id = m_cmap.GetGlyphID(c);
+		m_glyphs[id].DrawPoints();
+	}
+
+	TTFFont::TTFFont() { }
 
 }

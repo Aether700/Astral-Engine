@@ -35,6 +35,7 @@ namespace AstralEngine
 		{
 		case RenderAPI::API::None:
 			AE_CORE_ERROR("No RenderAPI is not yet supported");
+			return nullptr;
 
 		case RenderAPI::API::OpenGL:
 			return AReference<OpenGLTexture2D>::Create(width, height);
