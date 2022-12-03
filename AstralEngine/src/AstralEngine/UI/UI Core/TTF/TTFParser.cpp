@@ -606,7 +606,7 @@ namespace AstralEngine
 	public:
 		Glyph() { }
 
-		Glyph(const GlyphDescription& description)
+		Glyph(const GlyphDescription& description) : m_endPointsOfContours(nullptr), m_basicContours(false)
 		{
 			// temp ///////////////////////////
 			//AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
@@ -620,18 +620,111 @@ namespace AstralEngine
 			{
 				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
 				size_t numPoints = (size_t)data->GetNumPoints();
+				m_endPointsOfContours = new ADynArr<std::uint16_t>(data->numOfContours);
 				m_points.Reserve(numPoints);
+				m_contours.Reserve(data->numOfContours);
 				
 				for (size_t i = 0; i < numPoints; i++)
 				{
 					TTFOutlineFlags flags = data->GetFlags(i);
 					m_points.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
 				}
+
+				for (size_t i = 0; i < data->numOfContours; i++)
+				{
+					m_endPointsOfContours->Add(data->endPtsOfContours[i]);
+				}
+				ResetContours();
 			}
 
 		}
 
+		~Glyph() { delete m_endPointsOfContours; }
+
 		bool IsSimpleGlyph() const { return m_numContours > 0; }
+
+		void SetResolution(float glyphResolution)
+		{
+			if (m_endPointsOfContours == nullptr)
+			{
+				return;
+			}
+			/* 
+			* note that there was another loop in the original code that was not implemented here
+			* 
+			foreach (var shape in re.Shapes)
+            {
+                var shapes = shape.ToArray();
+                shape.Clear();
+                shape.Add(shapes[0]);
+                for (var i = 1; i < shapes.Length; i++)
+                {
+                    if (!shapes[i].IsOnCurve && !shapes[i].isMidpoint)
+                    {
+                        var res = 15f;
+
+                        var a = i == 0 ? shapes[^1] : shapes[i - 1];
+                        var b = shapes[i];
+                        var c = i + 1 >= shapes.Length ? shapes[0] : shapes[i + 1];
+
+                        for (int j = 0; j <= res; j++)
+                        {
+                            var t = j / res;
+                            shape.Add(new GlyfPoint(
+                                Bezier(a.X, b.X, c.X, t),
+                                Bezier(a.Y, b.Y, c.Y, t))
+                            {
+                                //isMidpoint = true
+                            });
+                        }
+                    }
+                    else
+                    {
+                        shape.Add(shapes[i]);
+                    }
+                }
+
+                //shape.Add(shapes.Last());
+            }
+			*/
+
+			ResetContours();
+
+			not finished need to review code to make sure nothing was missed + need to test the code
+			
+			for (size_t i = 0; i < m_endPointsOfContours->GetCount(); i++)
+			{
+				ADynArr<GlyphPoint> currContourCopy = m_contours[i];
+
+				for (std::uint16_t j = 0; j < currContourCopy.GetCount(); j++)
+				{
+					if (!currContourCopy[i].isOnCurve && !currContourCopy[j].isMidpoint)
+					{
+						GlyphPoint* firstPoint = j == 0 ? &currContourCopy[currContourCopy.GetCount() - 1] 
+							: firstPoint = &currContourCopy[j - 1];
+						GlyphPoint* secondPoint = &currContourCopy[j];
+						GlyphPoint* thirdPoint = j + 1 >= currContourCopy.GetCount() ? &currContourCopy[0] 
+							: &currContourCopy[j + 1];
+
+						for (int k = 0; k <= (int)glyphResolution; k++)
+						{
+							float t = (float)k / glyphResolution;
+							m_contours[i].EmplaceBack(
+								Vector2Int((int)Math::BezierQuadratic(firstPoint->coords.x,
+										secondPoint->coords.x, thirdPoint->coords.x, t),
+									(int)Math::BezierQuadratic(firstPoint->coords.y,
+										secondPoint->coords.y, thirdPoint->coords.y, t)), false, true);
+						}
+					}
+					else
+					{
+						m_contours[i].EmplaceBack(currContourCopy[j]);
+					}
+				}
+
+			}
+
+		}
 
 		// temp for debug
 		void DrawPoints()
@@ -688,10 +781,42 @@ namespace AstralEngine
 			}
 		};
 
+		void ResetContours()
+		{
+			if (m_endPointsOfContours == nullptr || m_basicContours)
+			{
+				return;
+			}
+
+			m_contours.Clear();
+
+			std::uint16_t startIndex = 0;
+			for (std::uint16_t endIndex = 0; endIndex < m_endPointsOfContours->GetCount(); endIndex++)
+			{
+				m_contours.Add(ADynArr<GlyphPoint>());
+				ADynArr<GlyphPoint>* currContour = &m_contours[m_contours.GetCount() - 1];
+
+				for (std::uint16_t i = startIndex; i < endIndex; i++)
+				{
+					currContour->Add(m_points[i]);
+				}
+
+				startIndex = endIndex + 1;
+			}
+
+			m_basicContours = true;
+		}
+
 		std::int16_t m_numContours;
 		Vector2Short m_outlineMin;
 		Vector2Short m_outlineMax;
+		ADynArr<std::uint16_t>* m_endPointsOfContours;
+		ADynArr<ADynArr<GlyphPoint>> m_contours;
 		ADynArr<GlyphPoint> m_points;
+		
+		// keeps track of whether or not the contours contain only the basic 
+		// points provided in the ttf file or not.
+		bool m_basicContours; 
 	};
 
 
@@ -1353,33 +1478,14 @@ namespace AstralEngine
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					
-					// temp
-					if (glyf.GetCount() == 37)
-					{ 
-						/*
-						contour data is way off coordinate wise
-						double check that the coordinates are being read properly, next thing will be 
-						to check that the loca table is being used to find the index of a glyph properly
-						*/
-
-						size_t pos = file.tellg();
-						GlyphDescription des = ReadGlyphDescription(file);
-						PrintContourData((SimpleGlyphData*)des.data);
-						Vector2Int coords = ((SimpleGlyphData*)des.data)->GetCoords(3) 
-							- ((SimpleGlyphData*)des.data)->GetCoords(2);
-						file.seekg(pos);
-					}
-					//reading glyph description incorrectly (use the usual website to verify the data of the glyphs see first tab)
-					//
 					glyf.Add(ReadGlyphDescription(file));
 				}
 				break;
 			}
 			AE_CORE_ASSERT(file.good(), "");
 
-			//look into drawing glyphs from the glyf data:
-			//https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
+			look into drawing glyphs from the glyf data:
+			https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
 
 		}
 
