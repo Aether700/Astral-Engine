@@ -7,6 +7,8 @@
 
 #define MANUAL_MAX_NUM_VERTICES 60000
 #define MANUAL_MAX_NUM_INDICES 120000
+#define MANUAL_MAX_NUM_TEXTURE_SLOTS 32
+
 
 namespace AstralEngine
 {
@@ -58,7 +60,7 @@ namespace AstralEngine
 	{
 		int textureSlots;
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &textureSlots);
-		return (size_t)textureSlots;
+		return Math::Min((size_t)textureSlots, (size_t)MANUAL_MAX_NUM_TEXTURE_SLOTS);
 	}
 
 	size_t OpenGLRenderAPI::GetMaxNumVertices()

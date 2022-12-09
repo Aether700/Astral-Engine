@@ -20,7 +20,7 @@ public:
 		if (m_font != nullptr)
 		{
 			TTFFont* p = (TTFFont*)m_font.Get();
-			p->DebugDrawPointsOfChar(c);
+			p->DebugDrawPointsOfChar(c, resolution);
 		}
 		CheckUserInputForCharacter();
 	}
@@ -55,6 +55,18 @@ private:
 				c += shiftOffset;
 			}
 		}
+
+		if (Input::GetKeyDown(KeyCode::I))
+		{
+			resolution = Math::Clamp(resolution + 1, 0, SIZE_MAX);
+			AE_INFO("resolution: %d", resolution);
+		}
+
+		if (Input::GetKeyDown(KeyCode::K))
+		{
+			resolution = Math::Clamp(resolution - 1, 0, SIZE_MAX);
+			AE_INFO("resolution: %d", resolution);
+		}
 	}
 
 	static constexpr int shiftOffset = 97 - 65;
@@ -62,6 +74,7 @@ private:
 	char c = 'A';
 	int index = 0;
 	bool isShifted = true;
+	size_t resolution = 0;
 };
 
 class InputTest : public AstralEngine::NativeScript
@@ -203,12 +216,13 @@ public:
 		AWindow* window = Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
-
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
 		viewer.OnUpdate();
 		Renderer::EndScene();
+		/*
+		*/
 
 		AstralEngine::Renderer::ResetStats();
 	}

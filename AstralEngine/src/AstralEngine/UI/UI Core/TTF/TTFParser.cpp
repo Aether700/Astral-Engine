@@ -604,7 +604,7 @@ namespace AstralEngine
 	class Glyph
 	{
 	public:
-		Glyph() { }
+		Glyph() : m_endPointsOfContours(nullptr) { }
 
 		Glyph(const GlyphDescription& description) : m_endPointsOfContours(nullptr), m_basicContours(false)
 		{
@@ -639,12 +639,20 @@ namespace AstralEngine
 
 		}
 
+		Glyph(Glyph&& other) : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)), 
+			m_endPointsOfContours(other.m_endPointsOfContours), m_outlineMin(other.m_outlineMin), 
+			m_outlineMax(other.m_outlineMax), m_points(std::move(other.m_points))
+		{
+			other.m_endPointsOfContours = nullptr;
+		}
+
 		~Glyph() { delete m_endPointsOfContours; }
 
 		bool IsSimpleGlyph() const { return m_numContours > 0; }
 
 		void SetResolution(float glyphResolution)
 		{
+			AE_PROFILE_FUNCTION();
 			if (m_endPointsOfContours == nullptr)
 			{
 				return;
@@ -690,7 +698,9 @@ namespace AstralEngine
 
 			ResetContours();
 
-			not finished need to review code to make sure nothing was missed + need to test the code
+
+
+			//not finished need to review code to make sure nothing was missed + need to test the code
 			
 			for (size_t i = 0; i < m_endPointsOfContours->GetCount(); i++)
 			{
@@ -726,6 +736,22 @@ namespace AstralEngine
 
 		}
 
+		Glyph& operator=(Glyph&& other) noexcept
+		{
+			delete[] m_endPointsOfContours;
+
+			m_endPointsOfContours = other.m_endPointsOfContours;
+			m_basicContours = other.m_basicContours;
+			m_contours = std::move(other.m_contours);
+			m_outlineMin = other.m_outlineMin;
+			m_outlineMax = other.m_outlineMax;
+			m_points = std::move(other.m_points);
+
+			other.m_endPointsOfContours = nullptr;
+
+			return *this;
+		}
+
 		// temp for debug
 		void DrawPoints()
 		{
@@ -740,21 +766,24 @@ namespace AstralEngine
 			// should be 56 points for the 'a' char might be some duplicates in that number
 			size_t toDraw = m_points.GetCount() - endSkip;
 
-			for (GlyphPoint& point : m_points)
+			for (auto& contour : m_contours)
 			{
-				if (Input::GetKeyDown(KeyCode::T))
+				for (auto& point : contour)
 				{
-					printOnCurveOnly = !printOnCurveOnly;
-				}
-
-				if (point.isOnCurve || !printOnCurveOnly)
-				{
-					if (skipCount >= skips && skipCount < toDraw)
+					if (Input::GetKeyDown(KeyCode::T))
 					{
-						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
+						printOnCurveOnly = !printOnCurveOnly;
 					}
+
+					if (point.isOnCurve || !printOnCurveOnly)
+					{
+						if (skipCount >= skips && skipCount < toDraw)
+						{
+							Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
+						}
+					}
+					skipCount++;
 				}
-				skipCount++;
 			}
 		}
 		////////////////////
@@ -789,19 +818,14 @@ namespace AstralEngine
 			}
 
 			m_contours.Clear();
-
-			std::uint16_t startIndex = 0;
-			for (std::uint16_t endIndex = 0; endIndex < m_endPointsOfContours->GetCount(); endIndex++)
+			ADynArr<GlyphPoint>* currContour = &m_contours.EmplaceBack();
+			for (size_t i = 0; i < m_points.GetCount(); i++)
 			{
-				m_contours.Add(ADynArr<GlyphPoint>());
-				ADynArr<GlyphPoint>* currContour = &m_contours[m_contours.GetCount() - 1];
-
-				for (std::uint16_t i = startIndex; i < endIndex; i++)
+				currContour->Add(m_points[i]);
+				if (m_endPointsOfContours->Contains((std::uint16_t)i))
 				{
-					currContour->Add(m_points[i]);
+					currContour = &m_contours.EmplaceBack();
 				}
-
-				startIndex = endIndex + 1;
 			}
 
 			m_basicContours = true;
@@ -1477,15 +1501,24 @@ namespace AstralEngine
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
+					// temp
+					if (i == 'A')
+					{
+ 						int x = 5;
+					}
+					//////////////
+
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					glyf.Add(ReadGlyphDescription(file));
+					glyf.EmplaceBack(ReadGlyphDescription(file));
 				}
 				break;
 			}
 			AE_CORE_ASSERT(file.good(), "");
 
+			/*
 			look into drawing glyphs from the glyf data:
 			https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
+			*/
 
 		}
 
@@ -1496,9 +1529,19 @@ namespace AstralEngine
 		return tempFont;
 	}
 
-	void TTFFont::DebugDrawPointsOfChar(char c)
+	void TTFFont::DebugDrawPointsOfChar(char c, size_t resolution)
 	{
+		static size_t lastResolution = 0;
+		static char lastChar = '\0';
+
 		std::uint16_t id = m_cmap.GetGlyphID(c);
+		if (lastResolution != resolution || lastChar != c)
+		{
+			m_glyphs[id].SetResolution(resolution);
+			lastResolution = resolution;
+			lastChar = c;
+		}
+
 		m_glyphs[id].DrawPoints();
 	}
 

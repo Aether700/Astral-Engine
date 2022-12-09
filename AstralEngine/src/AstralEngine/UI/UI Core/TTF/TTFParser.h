@@ -113,10 +113,10 @@ namespace AstralEngine
 		static AReference<Font> LoadFont(const std::string& filepath);
 
 		// temp /////////////////////////////
-		void DebugDrawPointsOfChar(char c);
+		void DebugDrawPointsOfChar(char c, size_t resolution);
 		/////////////////////////////////////
 
-		check to create/store contours then check to add additional points to the contours based on algorithm
+		//check to create/store contours then check to add additional points to the contours based on algorithm
 
 	private:
 		TTFFont();
