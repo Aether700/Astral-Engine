@@ -9,9 +9,20 @@ namespace AstralEngine
 		static int Abs(int v);
 		static float Abs(float v);
 		static double Abs(double v);
-		static int Clamp(int value, int min, int max);
-		static float Clamp(float value, float min, float max);
-		static double Clamp(double value, double min, double max);
+
+		template<typename T>
+		static T Clamp(T value, T min, T max)
+		{
+			if (value < min)
+			{
+				return min;
+			}
+			else if (value > max)
+			{
+				return max;
+			}
+			return value;
+		}
 		
 		// Uses Radians
 		static float Sin(float v);

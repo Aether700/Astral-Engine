@@ -603,6 +603,8 @@ namespace AstralEngine
 	// for now only supports simple glyph
 	class Glyph
 	{
+		struct GlyphPoint;
+		using Contour = ADoublyLinkedList<GlyphPoint>;
 	public:
 		Glyph() : m_endPointsOfContours(nullptr) { }
 
@@ -621,13 +623,13 @@ namespace AstralEngine
 				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
 				size_t numPoints = (size_t)data->GetNumPoints();
 				m_endPointsOfContours = new ADynArr<std::uint16_t>(data->numOfContours);
-				m_points.Reserve(numPoints);
+				m_basePoints.Reserve(numPoints);
 				m_contours.Reserve(data->numOfContours);
 				
 				for (size_t i = 0; i < numPoints; i++)
 				{
 					TTFOutlineFlags flags = data->GetFlags(i);
-					m_points.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
+					m_basePoints.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
 				}
 
 				for (size_t i = 0; i < data->numOfContours; i++)
@@ -641,7 +643,7 @@ namespace AstralEngine
 
 		Glyph(Glyph&& other) : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)), 
 			m_endPointsOfContours(other.m_endPointsOfContours), m_outlineMin(other.m_outlineMin), 
-			m_outlineMax(other.m_outlineMax), m_points(std::move(other.m_points))
+			m_outlineMax(other.m_outlineMax), m_basePoints(std::move(other.m_basePoints))
 		{
 			other.m_endPointsOfContours = nullptr;
 		}
@@ -657,83 +659,59 @@ namespace AstralEngine
 			{
 				return;
 			}
-			/* 
-			* note that there was another loop in the original code that was not implemented here
-			* 
-			foreach (var shape in re.Shapes)
-            {
-                var shapes = shape.ToArray();
-                shape.Clear();
-                shape.Add(shapes[0]);
-                for (var i = 1; i < shapes.Length; i++)
-                {
-                    if (!shapes[i].IsOnCurve && !shapes[i].isMidpoint)
-                    {
-                        var res = 15f;
-
-                        var a = i == 0 ? shapes[^1] : shapes[i - 1];
-                        var b = shapes[i];
-                        var c = i + 1 >= shapes.Length ? shapes[0] : shapes[i + 1];
-
-                        for (int j = 0; j <= res; j++)
-                        {
-                            var t = j / res;
-                            shape.Add(new GlyfPoint(
-                                Bezier(a.X, b.X, c.X, t),
-                                Bezier(a.Y, b.Y, c.Y, t))
-                            {
-                                //isMidpoint = true
-                            });
-                        }
-                    }
-                    else
-                    {
-                        shape.Add(shapes[i]);
-                    }
-                }
-
-                //shape.Add(shapes.Last());
-            }
-			*/
 
 			ResetContours();
+			m_basicContours = false;
 
-
-
-			//not finished need to review code to make sure nothing was missed + need to test the code
-			
-			for (size_t i = 0; i < m_endPointsOfContours->GetCount(); i++)
+			// generate midpoints
+			for (Contour& c : m_contours)
 			{
-				ADynArr<GlyphPoint> currContourCopy = m_contours[i];
-
-				for (std::uint16_t j = 0; j < currContourCopy.GetCount(); j++)
+				for (size_t i = 1; i < c.GetCount(); i++)
 				{
-					if (!currContourCopy[i].isOnCurve && !currContourCopy[j].isMidpoint)
-					{
-						GlyphPoint* firstPoint = j == 0 ? &currContourCopy[currContourCopy.GetCount() - 1] 
-							: firstPoint = &currContourCopy[j - 1];
-						GlyphPoint* secondPoint = &currContourCopy[j];
-						GlyphPoint* thirdPoint = j + 1 >= currContourCopy.GetCount() ? &currContourCopy[0] 
-							: &currContourCopy[j + 1];
+					GlyphPoint& firstPoint = c[i - 1];
+					GlyphPoint& secondPoint = c[i];
 
-						for (int k = 0; k <= (int)glyphResolution; k++)
+					if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
+					{
+						GlyphPoint midpoint = GlyphPoint(
+							Vector2Int((int)((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f), 
+								(int)((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
+						c.Insert(midpoint, i);
+						i++;
+					}
+				}
+			}
+
+			// add midpoints to smooth the glyph's contours
+			for (Contour& c : m_contours)
+			{
+				Contour contourCopy = Contour(c);
+				c.Clear();
+				c.Add(contourCopy[0]);
+				for (size_t i = 1; i < contourCopy.GetCount(); i++)
+				{
+					if (!contourCopy[i].isOnCurve && !contourCopy[i].isMidpoint)
+					{
+						GlyphPoint firstPoint = i == 0 ? contourCopy[0] : contourCopy[i - 1];
+						GlyphPoint secondPoint = contourCopy[i];
+						GlyphPoint thirdPoint = i + 1 < contourCopy.GetCount() ? contourCopy[i + 1] : contourCopy[0];
+						
+						for (int j = 0; j <= glyphResolution; j++)
 						{
-							float t = (float)k / glyphResolution;
-							m_contours[i].EmplaceBack(
-								Vector2Int((int)Math::BezierQuadratic(firstPoint->coords.x,
-										secondPoint->coords.x, thirdPoint->coords.x, t),
-									(int)Math::BezierQuadratic(firstPoint->coords.y,
-										secondPoint->coords.y, thirdPoint->coords.y, t)), false, true);
+							float t = (float)j / glyphResolution;
+							c.EmplaceBack(Vector2Int(
+								Math::BezierQuadratic(firstPoint.coords.x, 
+									secondPoint.coords.x, thirdPoint.coords.x, t),
+								Math::BezierQuadratic(firstPoint.coords.y, 
+									secondPoint.coords.y, thirdPoint.coords.y, t)));
 						}
 					}
 					else
 					{
-						m_contours[i].EmplaceBack(currContourCopy[j]);
+						c.Add(contourCopy[i]);
 					}
 				}
-
 			}
-
 		}
 
 		Glyph& operator=(Glyph&& other) noexcept
@@ -745,7 +723,7 @@ namespace AstralEngine
 			m_contours = std::move(other.m_contours);
 			m_outlineMin = other.m_outlineMin;
 			m_outlineMax = other.m_outlineMax;
-			m_points = std::move(other.m_points);
+			m_basePoints = std::move(other.m_basePoints);
 
 			other.m_endPointsOfContours = nullptr;
 
@@ -759,13 +737,6 @@ namespace AstralEngine
 			static bool printOnCurveOnly = false;
 			Vector2 scale = Vector2(0.01f, 0.01f);
 
-			size_t skips = 0;//2;
-			size_t endSkip = 0;//14;
-			size_t skipCount = 0;
-
-			// should be 56 points for the 'a' char might be some duplicates in that number
-			size_t toDraw = m_points.GetCount() - endSkip;
-
 			for (auto& contour : m_contours)
 			{
 				for (auto& point : contour)
@@ -777,12 +748,8 @@ namespace AstralEngine
 
 					if (point.isOnCurve || !printOnCurveOnly)
 					{
-						if (skipCount >= skips && skipCount < toDraw)
-						{
-							Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
-						}
+						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
 					}
-					skipCount++;
 				}
 			}
 		}
@@ -796,7 +763,7 @@ namespace AstralEngine
 			bool isMidpoint; // might want to remove?
 
 			GlyphPoint() : isOnCurve(false), isMidpoint(false) { }
-			GlyphPoint(const Vector2Int& c, bool onCurve, bool midpoint) : coords(c), isOnCurve(onCurve), 
+			GlyphPoint(const Vector2Int& c, bool onCurve = false, bool midpoint = false) : coords(c), isOnCurve(onCurve), 
 				isMidpoint(midpoint) { }
 
 			bool operator==(const GlyphPoint& other) const
@@ -818,10 +785,10 @@ namespace AstralEngine
 			}
 
 			m_contours.Clear();
-			ADynArr<GlyphPoint>* currContour = &m_contours.EmplaceBack();
-			for (size_t i = 0; i < m_points.GetCount(); i++)
+			ADoublyLinkedList<GlyphPoint>* currContour = &m_contours.EmplaceBack();
+			for (size_t i = 0; i < m_basePoints.GetCount(); i++)
 			{
-				currContour->Add(m_points[i]);
+				currContour->Add(m_basePoints[i]);
 				if (m_endPointsOfContours->Contains((std::uint16_t)i))
 				{
 					currContour = &m_contours.EmplaceBack();
@@ -835,8 +802,12 @@ namespace AstralEngine
 		Vector2Short m_outlineMin;
 		Vector2Short m_outlineMax;
 		ADynArr<std::uint16_t>* m_endPointsOfContours;
-		ADynArr<ADynArr<GlyphPoint>> m_contours;
-		ADynArr<GlyphPoint> m_points;
+		ADynArr<GlyphPoint> m_basePoints;
+		
+		// the contours are an ordered list of glyph points which form the individual contours of the glyph 
+		// needed to render the glyph. The winding of the points indicate whether the contour is to be rendered 
+		// or to be cut out of another contour.
+		ADynArr<Contour> m_contours; 
 		
 		// keeps track of whether or not the contours contain only the basic 
 		// points provided in the ttf file or not.

@@ -56,8 +56,6 @@ namespace AstralEngine
 		ADoublyLinkedList(ADoublyLinkedList<T>&& other) noexcept 
 			: m_count(other.m_count), m_dummy(other.m_dummy), m_head(other.m_head)
 		{
-			
-
 			other.m_dummy = nullptr;
 			other.m_head = nullptr;
 			other.m_count = 0;
@@ -65,8 +63,6 @@ namespace AstralEngine
 
 		~ADoublyLinkedList() 
 		{
-			
-
 			DeleteList();
 			delete m_dummy;
 		}
@@ -78,8 +74,6 @@ namespace AstralEngine
 
 		void Add(T&& element)
 		{
-			
-
 			Node* newNode = new Node();
 			newNode->element = std::move(element);
 			AddNode(newNode);			
@@ -87,8 +81,6 @@ namespace AstralEngine
 
 		void Add(const T& element)
 		{
-			
-
 			Node* newNode = new Node();
 			newNode->element = element;
 			AddNode(newNode);
@@ -96,9 +88,8 @@ namespace AstralEngine
 		
 		//emplace element at the end of the list
 		template<typename... Args>
-		T& Emplace(Args... args)
+		T& EmplaceBack(Args... args)
 		{
-			
 			Node* newNode = new Node();
 
 			newNode->element = T(std::forward<Args>(args)...);
@@ -405,7 +396,7 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		void InsertNode(Node* newNode, size_t)
+		void InsertNode(Node* newNode, size_t index)
 		{
 			Node* indexNode = GetNode(index);
 			if (indexNode == m_head)

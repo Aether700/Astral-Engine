@@ -21,6 +21,7 @@ public:
 		{
 			TTFFont* p = (TTFFont*)m_font.Get();
 			p->DebugDrawPointsOfChar(c, resolution);
+			//p->DebugDrawPointsOfChar('8', resolution);
 		}
 		CheckUserInputForCharacter();
 	}
@@ -44,6 +45,7 @@ private:
 				c -= shiftOffset;
 			}
 			isShifted = !isShifted;
+			ResetResolution();
 		}
 
 		if (Input::GetKeyDown(KeyCode::Tab))
@@ -54,27 +56,35 @@ private:
 			{
 				c += shiftOffset;
 			}
+			ResetResolution();
 		}
 
 		if (Input::GetKeyDown(KeyCode::I))
 		{
-			resolution = Math::Clamp(resolution + 1, 0, SIZE_MAX);
+			resolution = Math::Clamp(resolution + 1, 0, maxResolution);
 			AE_INFO("resolution: %d", resolution);
 		}
 
 		if (Input::GetKeyDown(KeyCode::K))
 		{
-			resolution = Math::Clamp(resolution - 1, 0, SIZE_MAX);
+			resolution = Math::Clamp(resolution - 1, 0, maxResolution);
 			AE_INFO("resolution: %d", resolution);
 		}
 	}
 
+	void ResetResolution()
+	{
+		resolution = 0;
+		AE_INFO("Resolution reset to 0");
+	}
+
 	static constexpr int shiftOffset = 97 - 65;
+	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	char c = 'A';
 	int index = 0;
 	bool isShifted = true;
-	size_t resolution = 0;
+	int resolution = 0;
 };
 
 class InputTest : public AstralEngine::NativeScript

@@ -34,48 +34,6 @@ namespace AstralEngine
 		return v;
 	}
 
-	int Math::Clamp(int value, int min, int max)
-	{
-		AE_PROFILE_FUNCTION();
-		if (value < min)
-		{
-			return min;
-		}
-		else if (value > max)
-		{
-			return max;
-		}
-		return value;
-	}
-
-	float Math::Clamp(float value, float min, float max)
-	{
-		AE_PROFILE_FUNCTION();
-		if (value < min)
-		{
-			return min;
-		}
-		else if (value > max)
-		{
-			return max;
-		}
-		return value;
-	}
-
-	double Math::Clamp(double value, double min, double max)
-	{
-		AE_PROFILE_FUNCTION();
-		if (value < min)
-		{
-			return min;
-		}
-		else if (value > max)
-		{
-			return max;
-		}
-		return value;
-	}
-
 	float Math::Sin(float v)
 	{
 		AE_PROFILE_FUNCTION();
