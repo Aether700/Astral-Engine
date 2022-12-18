@@ -703,7 +703,7 @@ namespace AstralEngine
 								Math::BezierQuadratic(firstPoint.coords.x, 
 									secondPoint.coords.x, thirdPoint.coords.x, t),
 								Math::BezierQuadratic(firstPoint.coords.y, 
-									secondPoint.coords.y, thirdPoint.coords.y, t)));
+									secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
 						}
 					}
 					else
@@ -734,24 +734,27 @@ namespace AstralEngine
 		void DrawPoints()
 		{
 			// see for more details: https://learn.microsoft.com/en-us/typography/opentype/spec/ttch01
-			static bool printOnCurveOnly = false;
 			Vector2 scale = Vector2(0.01f, 0.01f);
-
 			for (auto& contour : m_contours)
 			{
 				for (auto& point : contour)
 				{
-					if (Input::GetKeyDown(KeyCode::T))
-					{
-						printOnCurveOnly = !printOnCurveOnly;
-					}
-
-					if (point.isOnCurve || !printOnCurveOnly)
+					if (point.isOnCurve)
 					{
 						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
 					}
+					else if (point.isMidpoint)
+					{
+						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale, {0, 1, 0, 1});
+					}
+					else
+					{
+						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale, {1, 0, 0, 1});
+					}
 				}
 			}
+			/*
+			*/
 		}
 		////////////////////
 
