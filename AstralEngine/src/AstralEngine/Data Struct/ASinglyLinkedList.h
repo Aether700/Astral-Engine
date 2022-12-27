@@ -50,7 +50,6 @@ namespace AstralEngine
 
 		void Add(T&& element)
 		{
-			
 			Node* newNode = new Node(std::forward<T>(element));
 			AddNode(newNode);
 		}
@@ -59,6 +58,14 @@ namespace AstralEngine
 		{
 			
 			Node* newNode = new Node(element);
+			AddNode(newNode);
+		}
+
+		template<typename... Args>
+		void Emplace(Args... args)
+		{
+			Node* newNode = new Node();
+			newNode->element = T(std::forward<Args>(args)...);
 			AddNode(newNode);
 		}
 

@@ -77,6 +77,18 @@ namespace AstralEngine
 		return Math::ArcCos( DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()) );
 	}
 
+	float Vector2::Distance(const Vector2& v1, const Vector2& v2)
+	{
+		return Math::Sqrt(SqrDistance(v1, v2));
+	}
+
+	float Vector2::SqrDistance(const Vector2& v1, const Vector2& v2)
+	{
+		Vector2 distVec = v1 - v2;
+		return distVec.SqrMagnitude();
+	}
+
+
 	const Vector2 Vector2::operator-() const { return Vector2(-x, -y); }
 	const Vector2 Vector2::operator+(const Vector2& v) const { return Vector2(x + v.x, y + v.y); }
 	const Vector2 Vector2::operator-(const Vector2& v) const { return Vector2(x - v.x, y - v.y); }

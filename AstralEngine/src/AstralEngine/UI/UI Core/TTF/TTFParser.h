@@ -116,8 +116,6 @@ namespace AstralEngine
 		void DebugDrawPointsOfChar(char c, size_t resolution);
 		/////////////////////////////////////
 
-		//check to create/store contours then check to add additional points to the contours based on algorithm
-
 	private:
 		TTFFont();
 

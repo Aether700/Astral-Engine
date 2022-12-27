@@ -318,6 +318,7 @@
     <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
     <ClInclude Include="src\AstralEngine\Core\Resource.h" />
     <ClInclude Include="src\AstralEngine\UI\UIText.h" />
+    <ClInclude Include="src\AstralEngine\Renderer\Tessellation\Tessellation.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -463,5 +464,6 @@
     <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UIText.cpp" />
+    <ClCompile Include="src\AstralEngine\Renderer\Tessellation\Tessellation.cpp" />
   </ItemGroup>
 </Project>

@@ -44,6 +44,8 @@ namespace AstralEngine
 
 		// returns the angle between both vectors in degrees
 		static float Angle(const Vector3& v1, const Vector3& v2);
+		static float Distance(const Vector3& v1, const Vector3& v2);
+		static float SqrDistance(const Vector3& v1, const Vector3& v2);
 		static const Vector3 Lerp(const Vector3& a, const Vector3& b, float t);
 
 		const Vector3 operator-() const;

@@ -87,6 +87,17 @@ namespace AstralEngine
 		return Math::RadiansToDegree(Math::ArcCos(DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude())));
 	}
 
+	float Vector3::Distance(const Vector3& v1, const Vector3& v2)
+	{
+		return Math::Sqrt(SqrDistance(v1, v2));
+	}
+
+	float Vector3::SqrDistance(const Vector3& v1, const Vector3& v2)
+	{
+		Vector3 distVec = v1 - v2;
+		return distVec.SqrMagnitude();
+	}
+
 	const Vector3 Vector3::Lerp(const Vector3& a, const Vector3& b, float t)
 	{
 		return Vector3(Math::Lerp(a.x, b.x, t), Math::Lerp(a.y, b.y, t), Math::Lerp(a.z, b.z, t));
