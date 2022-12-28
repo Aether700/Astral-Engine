@@ -3,6 +3,118 @@
 
 namespace AstralEngine
 {
+	// MeshDataView ////////////////////////////////////////////////////////////////////////////////////
+	size_t MeshDataView::AddTriangle(const Vector3& p1, const Vector3& p2, const Vector3& p3)
+	{
+		return AddTriangle(CreatePoint(p1), CreatePoint(p2), CreatePoint(p3));
+	}
+
+	size_t MeshDataView::AddTriangle(size_t p1Index, size_t p2Index, size_t p3Index)
+	{
+		size_t e1 = CreateEdge(p1Index, p2Index);
+		size_t e2 = CreateEdge(p1Index, p3Index);
+		size_t e3 = CreateEdge(p2Index, p3Index);
+
+		return CreateTriangle(e1, e2, e3);
+	}
+
+	bool MeshDataView::TrianglesAreAdjacent(size_t t1, size_t t2) const
+	{
+		const Triangle& triangle1 = m_triangles[t1];
+		const Triangle& triangle2 = m_triangles[t2];
+
+		return triangle1.edge1 == triangle2.edge1 || triangle1.edge1 == triangle2.edge2 
+			|| triangle1.edge1 == triangle2.edge3 || triangle1.edge2 == triangle2.edge1
+			|| triangle1.edge2 == triangle2.edge2 || triangle1.edge2 == triangle2.edge3
+			|| triangle1.edge3 == triangle2.edge1 || triangle1.edge3 == triangle2.edge2
+			|| triangle1.edge3 == triangle2.edge3;
+	}
+
+	bool MeshDataView::PointIsInTriangleCircumsphere(size_t triangle, const Vector3& point) const
+	{
+		const Triangle& t = m_triangles[triangle];
+		return Vector3::SqrDistance(t.circumsphereCenter, point) <= t.circumsphereRadiusSqr;
+	}
+
+	bool MeshDataView::PointIsInTriangleCircumsphere(size_t triangle, size_t point) const
+	{
+		return PointIsInTriangleCircumsphere(triangle, m_points[point]);
+	}
+
+	size_t MeshDataView::CreatePoint(const Vector3& point)
+	{
+		size_t id = m_points.FindID(point);
+
+		if (id == NullID)
+		{
+			return m_points.Add(point);
+		}
+		return id;
+	}
+
+	size_t MeshDataView::CreateEdge(size_t p1, size_t p2)
+	{
+		Edge e;
+		e.point1 = p1;
+		e.point1 = p2;
+
+		size_t id = m_edges.FindID(e);
+
+		if (id == NullID)
+		{
+			return m_edges.Add(e);
+		}
+		return id;
+	}
+	
+	size_t MeshDataView::CreateTriangle(size_t e1, size_t e2, size_t e3)
+	{
+		Triangle t;
+		t.edge1 = e1;
+		t.edge2 = e2;
+		t.edge3 = e3;
+
+		size_t id = m_triangles.FindID(t);
+
+		if (id == NullID)
+		{
+			id = m_triangles.Add(t);
+			ComputeCircumsphereOfTriangle(id);
+			return id;
+		}
+		return id;
+	}
+
+	void MeshDataView::ComputeCircumsphereOfTriangle(size_t triangle)
+	{
+		Triangle& t = m_triangles[triangle];
+		size_t pointA = m_edges[t.edge1].point1;
+		size_t pointB = m_edges[t.edge1].point2;
+		size_t pointC;
+		
+		{
+			Edge e2 = m_edges[t.edge2];
+			if (e2.point1 == pointA || e2.point1 == pointB)
+			{
+				pointC = e2.point2;
+			}
+			else
+			{
+				pointC = e2.point1;
+			}
+		}
+
+		Vector3 ac = m_points[pointC] - m_points[pointA];
+		Vector3 ab = m_points[pointB] - m_points[pointA];
+		Vector3 abCrossAc = Vector3::CrossProduct(ab, ac);
+		
+		Vector3 centerMinusA = (Vector3::CrossProduct(abCrossAc, ab) * ac.SqrMagnitude()
+			+ Vector3::CrossProduct(ac, abCrossAc) * ab.SqrMagnitude()) / (2.0f * abCrossAc.SqrMagnitude());
+		t.circumsphereRadiusSqr = centerMinusA.SqrMagnitude();
+		t.circumsphereCenter = centerMinusA + m_points[pointA];
+	}
+
+	// Mesh ///////////////////////////////////////////////////////////////////////////////////////
 	Mesh::Mesh(const ADynArr<Vector3>& positions, const ADynArr<Vector2>& textureCoords,
 		const ADynArr<Vector3>& normals, const ADynArr<unsigned int>& indices)
 		: m_positions(positions), m_normals(normals), m_indices(indices), m_textureCoords(textureCoords)

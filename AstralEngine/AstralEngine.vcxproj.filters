@@ -319,6 +319,7 @@
     <ClInclude Include="src\AstralEngine\Core\Resource.h" />
     <ClInclude Include="src\AstralEngine\UI\UIText.h" />
     <ClInclude Include="src\AstralEngine\Renderer\Tessellation\Tessellation.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\ADataStorage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">

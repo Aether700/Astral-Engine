@@ -163,6 +163,7 @@
     <ClInclude Include="src\AstralEngine\Data Struct\AUniqueRef.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AUnorderedMap.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AWeakRef.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\ADataStorage.h" />
     <ClInclude Include="src\AstralEngine\Debug\Instrumentor.h" />
     <ClInclude Include="src\AstralEngine\ECS\AEntity.h" />
     <ClInclude Include="src\AstralEngine\ECS\Components.h" />

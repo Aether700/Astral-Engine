@@ -1,5 +1,6 @@
 #pragma once
 #include "AstralEngine/Data Struct/ADynArr.h"
+#include "AstralEngine/Data Struct/ADataStorage.h"
 #include "AstralEngine/Math/AMath.h"
 #include "AstralEngine/Core/Resource.h"
 
@@ -8,6 +9,71 @@
 
 namespace AstralEngine
 {
+	// stores the reprensentation of the triangles in a mesh in such a way that information about the individual 
+	// triangles, points and edges can easily be extracted. Also supports adding and removing triangles from the mesh
+	class MeshDataView
+	{
+	public:
+		// returns the id of the triangle
+		size_t AddTriangle(const Vector3& p1, const Vector3& p2, const Vector3& p3);
+		size_t AddTriangle(size_t p1Index, size_t p2Index, size_t p3Index);
+
+		bool TrianglesAreAdjacent(size_t t1, size_t t2) const;
+		bool PointIsInTriangleCircumsphere(size_t triangle, const Vector3& point) const;
+		bool PointIsInTriangleCircumsphere(size_t triangle, size_t point) const;
+
+	private:
+		size_t CreatePoint(const Vector3& point);
+		size_t CreateEdge(size_t p1, size_t p2);
+		size_t CreateTriangle(size_t e1, size_t e2, size_t e3);
+		void ComputeCircumsphereOfTriangle(size_t triangle);
+
+		struct Edge
+		{
+			size_t point1;
+			size_t point2;
+
+			bool operator==(const Edge& other) const
+			{
+				return (point1 == other.point1 && point2 == other.point2)
+					|| (point1 == other.point2 && point2 == other.point1);
+			}
+
+			bool operator!=(const Edge& other) const
+			{
+				return !(*this == other);
+			}
+		};
+
+		struct Triangle
+		{
+			size_t edge1;
+			size_t edge2;
+			size_t edge3;
+			Vector3 circumsphereCenter;
+			float circumsphereRadiusSqr;
+
+			bool operator==(const Triangle& other) const
+			{
+				return (edge1 == other.edge1 && edge2 == other.edge2 && edge3 == other.edge3)
+					|| (edge1 == other.edge1 && edge2 == other.edge3 && edge3 == other.edge2)
+					|| (edge1 == other.edge2 && edge2 == other.edge1 && edge3 == other.edge3)
+					|| (edge1 == other.edge2 && edge2 == other.edge3 && edge3 == other.edge1)
+					|| (edge1 == other.edge3 && edge2 == other.edge1 && edge3 == other.edge2)
+					|| (edge1 == other.edge3 && edge2 == other.edge2 && edge3 == other.edge1);
+			}
+
+			bool operator!=(const Triangle& other) const
+			{
+				return !(*this == other);
+			}
+		};
+
+		ADataStorage<Vector3> m_points;
+		ADataStorage<Edge> m_edges;
+		ADataStorage<Triangle> m_triangles;
+	};
+
 	/* represents the mesh obtained when loading a model from a file
 	*/
 	class Mesh

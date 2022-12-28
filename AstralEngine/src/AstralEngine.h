@@ -31,6 +31,7 @@
 #include "AstralEngine/Data Struct/AUnorderedMap.h"
 #include "AstralEngine/Data Struct/AWeakRef.h"
 #include "AstralEngine/Data Struct/ADelegate.h"
+#include "AstralEngine/Data Struct/ADataStorage.h"
 
 // Algorithms ///////////////////////////////////////////////////////////
 #include "AstralEngine/Algorithms/Algorithms.h"
