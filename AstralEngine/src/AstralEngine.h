@@ -48,6 +48,7 @@
 #include "AstralEngine/Renderer/OrthographicCamera.h"
 #include "AstralEngine/Renderer/OrthographicCameraController.h"
 #include "AstralEngine/Renderer/Texture.h"
+#include "AstralEngine/Renderer/Tessellation/Tessellation.h"
 
 // ECS ////////////////////////////////////////////////////////////////
 #include "AstralEngine/ECS/AEntity.h"

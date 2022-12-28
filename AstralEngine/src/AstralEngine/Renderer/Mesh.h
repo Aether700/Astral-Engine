@@ -11,16 +11,45 @@ namespace AstralEngine
 {
 	// stores the reprensentation of the triangles in a mesh in such a way that information about the individual 
 	// triangles, points and edges can easily be extracted. Also supports adding and removing triangles from the mesh
-	class MeshDataView
+	class MeshDataManipulator
 	{
 	public:
-		// returns the id of the triangle
-		size_t AddTriangle(const Vector3& p1, const Vector3& p2, const Vector3& p3);
+		// returns the id of the triangle or NullID if the triangle is invalid (example has 2 points equal)
+		size_t AddTriangle(Vector3 p1, Vector3 p2, Vector3 p3);
 		size_t AddTriangle(size_t p1Index, size_t p2Index, size_t p3Index);
+		
+		void RemoveTriangle(size_t triangle);
+
+		// returns the id of the i-th edge of the triangle
+		size_t GetEdge1ID(size_t triangleID) const;
+		size_t GetEdge2ID(size_t triangleID) const;
+		size_t GetEdge3ID(size_t triangleID) const;
+
+		// returns the id of the i-th point of the edge
+		size_t GetPoint1ID(size_t edgeID) const;
+		size_t GetPoint2ID(size_t edgeID) const;
+
+		// returns the id of the i-th point of the triangle
+		size_t GetTrianglePoint1ID(size_t triangle) const;
+		size_t GetTrianglePoint2ID(size_t triangle) const;
+		size_t GetTrianglePoint3ID(size_t triangle) const;
+		const Vector3& GetTriangleCicumsphereCenter(size_t triangle) const;
+
+		const Vector3& GetCoords(size_t pointID) const;
 
 		bool TrianglesAreAdjacent(size_t t1, size_t t2) const;
+		bool TrianglesSharePoint(size_t t1, size_t t2) const;
+		bool EdgesSharePoint(size_t e1, size_t e2) const;
 		bool PointIsInTriangleCircumsphere(size_t triangle, const Vector3& point) const;
 		bool PointIsInTriangleCircumsphere(size_t triangle, size_t point) const;
+		
+		bool EdgeContainsPoint(size_t edge, size_t point) const;
+		bool TriangleContainsEdge(size_t triangle, size_t edge) const;
+		bool TriangleContainsPoint(size_t triangle, size_t point) const;
+
+		bool TriangleIDIsValid(size_t id) const;
+		bool EdgeIDIsValid(size_t id) const;
+		bool PointIDIsValid(size_t id) const;
 
 	private:
 		size_t CreatePoint(const Vector3& point);
@@ -28,10 +57,31 @@ namespace AstralEngine
 		size_t CreateTriangle(size_t e1, size_t e2, size_t e3);
 		void ComputeCircumsphereOfTriangle(size_t triangle);
 
+		void RemoveTriangleFromEdge(size_t triangle, size_t edge);
+		void RemoveEdgeFromPoint(size_t edge, size_t point);
+
+		struct Point
+		{
+			Vector3 coords;
+			ASinglyLinkedList<size_t> edgesSharingThisPoint;
+
+			bool operator==(const Point& other) const
+			{
+				return coords == other.coords;
+			}
+
+			bool operator!=(const Point& other) const
+			{
+				return !(*this == other);
+			}
+		};
+
 		struct Edge
 		{
 			size_t point1;
 			size_t point2;
+
+			ASinglyLinkedList<size_t> trianglesSharingThisEdge;
 
 			bool operator==(const Edge& other) const
 			{
@@ -69,7 +119,7 @@ namespace AstralEngine
 			}
 		};
 
-		ADataStorage<Vector3> m_points;
+		ADataStorage<Point> m_points;
 		ADataStorage<Edge> m_edges;
 		ADataStorage<Triangle> m_triangles;
 	};

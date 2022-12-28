@@ -27,7 +27,7 @@ namespace AstralEngine
 			else
 			{
 				id = m_idToReuse.Pop();
-				m_data[handle] = data;
+				m_data[id] = data;
 			}
 			return id;
 		}
@@ -65,9 +65,9 @@ namespace AstralEngine
 			return FindID(data) != NullID;
 		}
 
-		bool IDIsValid(size_t id)
+		bool IDIsValid(size_t id) const
 		{
-			return handle < m_data.GetCount() && !m_idToReuse.Contains(id);
+			return id < m_data.GetCount() && !m_idToReuse.Contains(id);
 		}
 
 		T& operator[](size_t id) { return Get(id); }

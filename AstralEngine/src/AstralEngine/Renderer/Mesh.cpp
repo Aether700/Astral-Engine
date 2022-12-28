@@ -3,14 +3,17 @@
 
 namespace AstralEngine
 {
-	// MeshDataView ////////////////////////////////////////////////////////////////////////////////////
-	size_t MeshDataView::AddTriangle(const Vector3& p1, const Vector3& p2, const Vector3& p3)
+	// MeshDataManipulator ////////////////////////////////////////////////////////////////////////////////////
+	size_t MeshDataManipulator::AddTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
 	{
 		return AddTriangle(CreatePoint(p1), CreatePoint(p2), CreatePoint(p3));
 	}
 
-	size_t MeshDataView::AddTriangle(size_t p1Index, size_t p2Index, size_t p3Index)
+	size_t MeshDataManipulator::AddTriangle(size_t p1Index, size_t p2Index, size_t p3Index)
 	{
+		AE_CORE_ASSERT((m_points.IDIsValid(p1Index) && m_points.IDIsValid(p2Index) 
+			&& m_points.IDIsValid(p3Index)), "Invalid Point ID provided");
+
 		size_t e1 = CreateEdge(p1Index, p2Index);
 		size_t e2 = CreateEdge(p1Index, p3Index);
 		size_t e3 = CreateEdge(p2Index, p3Index);
@@ -18,7 +21,46 @@ namespace AstralEngine
 		return CreateTriangle(e1, e2, e3);
 	}
 
-	bool MeshDataView::TrianglesAreAdjacent(size_t t1, size_t t2) const
+	void MeshDataManipulator::RemoveTriangle(size_t triangle)
+	{
+		if (m_triangles.IDIsValid(triangle))
+		{
+			Triangle& t = m_triangles[triangle];
+			RemoveTriangleFromEdge(triangle, t.edge1);
+			RemoveTriangleFromEdge(triangle, t.edge2);
+			RemoveTriangleFromEdge(triangle, t.edge3);
+			m_triangles.Remove(triangle);
+		}
+	}
+
+	size_t MeshDataManipulator::GetEdge1ID(size_t triangleID) const { return m_triangles[triangleID].edge1; }
+	size_t MeshDataManipulator::GetEdge2ID(size_t triangleID) const { return m_triangles[triangleID].edge2; }
+	size_t MeshDataManipulator::GetEdge3ID(size_t triangleID) const { return m_triangles[triangleID].edge3; }
+
+	size_t MeshDataManipulator::GetPoint1ID(size_t edgeID) const { return m_edges[edgeID].point1; }
+	size_t MeshDataManipulator::GetPoint2ID(size_t edgeID) const { return m_edges[edgeID].point2; }
+
+	size_t MeshDataManipulator::GetTrianglePoint1ID(size_t triangle) const { return m_edges[m_triangles[triangle].edge1].point1; }
+	size_t MeshDataManipulator::GetTrianglePoint2ID(size_t triangle) const { return m_edges[m_triangles[triangle].edge1].point2; }
+	size_t MeshDataManipulator::GetTrianglePoint3ID(size_t triangle) const
+	{
+		const Triangle& t = m_triangles[triangle];
+		const Edge& e = m_edges[t.edge2];
+		if (e.point1 == GetTrianglePoint1ID(triangle) || e.point1 == GetTrianglePoint2ID(triangle))
+		{
+			return e.point2;
+		}
+		return e.point1;
+	}
+
+	const Vector3& MeshDataManipulator::GetTriangleCicumsphereCenter(size_t triangle) const
+	{ 
+		return m_triangles[triangle].circumsphereCenter; 
+	}
+
+	const Vector3& MeshDataManipulator::GetCoords(size_t pointID) const { return m_points[pointID].coords; }
+
+	bool MeshDataManipulator::TrianglesAreAdjacent(size_t t1, size_t t2) const
 	{
 		const Triangle& triangle1 = m_triangles[t1];
 		const Triangle& triangle2 = m_triangles[t2];
@@ -30,44 +72,91 @@ namespace AstralEngine
 			|| triangle1.edge3 == triangle2.edge3;
 	}
 
-	bool MeshDataView::PointIsInTriangleCircumsphere(size_t triangle, const Vector3& point) const
+	bool MeshDataManipulator::TrianglesSharePoint(size_t t1, size_t t2) const
+	{
+		const Triangle& tObj1 = m_triangles[t1];
+		const Triangle& tObj2 = m_triangles[t2];
+
+		return EdgesSharePoint(tObj1.edge1, tObj2.edge1) || EdgesSharePoint(tObj1.edge1, tObj2.edge2)
+			|| EdgesSharePoint(tObj1.edge1, tObj2.edge3) || EdgesSharePoint(tObj1.edge2, tObj2.edge2)
+			|| EdgesSharePoint(tObj1.edge2, tObj2.edge3) || EdgesSharePoint(tObj1.edge3, tObj2.edge3);
+	}
+
+	bool MeshDataManipulator::EdgesSharePoint(size_t e1, size_t e2) const
+	{
+		const Edge& eObj1 = m_edges[e1];
+		const Edge& eObj2 = m_edges[e2];
+
+		return eObj1.point1 == eObj2.point1 || eObj1.point1 == eObj2.point2 
+			|| eObj1.point2 == eObj2.point1 || eObj1.point2 == eObj2.point2;
+	}
+
+	bool MeshDataManipulator::PointIsInTriangleCircumsphere(size_t triangle, const Vector3& point) const
 	{
 		const Triangle& t = m_triangles[triangle];
-		return Vector3::SqrDistance(t.circumsphereCenter, point) <= t.circumsphereRadiusSqr;
+		return Vector3::SqrDistance(t.circumsphereCenter, point) < t.circumsphereRadiusSqr;
 	}
 
-	bool MeshDataView::PointIsInTriangleCircumsphere(size_t triangle, size_t point) const
+	bool MeshDataManipulator::PointIsInTriangleCircumsphere(size_t triangle, size_t point) const
 	{
-		return PointIsInTriangleCircumsphere(triangle, m_points[point]);
+		return PointIsInTriangleCircumsphere(triangle, m_points[point].coords);
 	}
 
-	size_t MeshDataView::CreatePoint(const Vector3& point)
+	bool MeshDataManipulator::EdgeContainsPoint(size_t edge, size_t point) const
 	{
-		size_t id = m_points.FindID(point);
+		const Edge& e = m_edges[edge];
+		return e.point1 == point || e.point2 == point;
+	}
+
+	bool MeshDataManipulator::TriangleContainsEdge(size_t triangle, size_t edge) const
+	{
+		return m_edges[edge].trianglesSharingThisEdge.Contains(triangle);
+	}
+
+	bool MeshDataManipulator::TriangleContainsPoint(size_t triangle, size_t point) const
+	{
+		const Triangle& t = m_triangles[triangle];
+		return EdgeContainsPoint(t.edge1, point) || EdgeContainsPoint(t.edge2, point) 
+			|| EdgeContainsPoint(t.edge3, point);
+	}
+
+	bool MeshDataManipulator::TriangleIDIsValid(size_t id) const { return m_triangles.IDIsValid(id); }
+	bool MeshDataManipulator::EdgeIDIsValid(size_t id) const { return m_edges.IDIsValid(id); }
+	bool MeshDataManipulator::PointIDIsValid(size_t id) const { return m_points.IDIsValid(id); }
+
+	size_t MeshDataManipulator::CreatePoint(const Vector3& point)
+	{
+		Point p;
+		p.coords = point;
+		size_t id = m_points.FindID(p);
 
 		if (id == NullID)
 		{
-			return m_points.Add(point);
+			return m_points.Add(p);
 		}
 		return id;
 	}
 
-	size_t MeshDataView::CreateEdge(size_t p1, size_t p2)
+	size_t MeshDataManipulator::CreateEdge(size_t p1, size_t p2)
 	{
 		Edge e;
 		e.point1 = p1;
-		e.point1 = p2;
+		e.point2 = p2;
 
 		size_t id = m_edges.FindID(e);
 
 		if (id == NullID)
 		{
-			return m_edges.Add(e);
+			id = m_edges.Add(e);
 		}
+
+		m_points[p1].edgesSharingThisPoint.Add(id);
+		m_points[p2].edgesSharingThisPoint.Add(id);
+
 		return id;
 	}
 	
-	size_t MeshDataView::CreateTriangle(size_t e1, size_t e2, size_t e3)
+	size_t MeshDataManipulator::CreateTriangle(size_t e1, size_t e2, size_t e3)
 	{
 		Triangle t;
 		t.edge1 = e1;
@@ -79,13 +168,16 @@ namespace AstralEngine
 		if (id == NullID)
 		{
 			id = m_triangles.Add(t);
+			m_edges[e1].trianglesSharingThisEdge.Add(id);
+			m_edges[e2].trianglesSharingThisEdge.Add(id);
+			m_edges[e3].trianglesSharingThisEdge.Add(id);
 			ComputeCircumsphereOfTriangle(id);
 			return id;
 		}
 		return id;
 	}
 
-	void MeshDataView::ComputeCircumsphereOfTriangle(size_t triangle)
+	void MeshDataManipulator::ComputeCircumsphereOfTriangle(size_t triangle)
 	{
 		Triangle& t = m_triangles[triangle];
 		size_t pointA = m_edges[t.edge1].point1;
@@ -104,14 +196,36 @@ namespace AstralEngine
 			}
 		}
 
-		Vector3 ac = m_points[pointC] - m_points[pointA];
-		Vector3 ab = m_points[pointB] - m_points[pointA];
+		Vector3 ac = m_points[pointC].coords - m_points[pointA].coords;
+		Vector3 ab = m_points[pointB].coords - m_points[pointA].coords;
 		Vector3 abCrossAc = Vector3::CrossProduct(ab, ac);
 		
 		Vector3 centerMinusA = (Vector3::CrossProduct(abCrossAc, ab) * ac.SqrMagnitude()
 			+ Vector3::CrossProduct(ac, abCrossAc) * ab.SqrMagnitude()) / (2.0f * abCrossAc.SqrMagnitude());
 		t.circumsphereRadiusSqr = centerMinusA.SqrMagnitude();
-		t.circumsphereCenter = centerMinusA + m_points[pointA];
+		t.circumsphereCenter = centerMinusA + m_points[pointA].coords;
+	}
+
+	void MeshDataManipulator::RemoveTriangleFromEdge(size_t triangle, size_t edge)
+	{
+		Edge& e = m_edges[edge];
+		e.trianglesSharingThisEdge.Remove(triangle);
+		if (e.trianglesSharingThisEdge.IsEmpty())
+		{
+			RemoveEdgeFromPoint(edge, e.point1);
+			RemoveEdgeFromPoint(edge, e.point2);
+			m_edges.Remove(edge);
+		}
+	}
+
+	void MeshDataManipulator::RemoveEdgeFromPoint(size_t edge, size_t point)
+	{
+		Point& p = m_points[point];
+		p.edgesSharingThisPoint.Remove(edge);
+		if (p.edgesSharingThisPoint.IsEmpty())
+		{
+			m_points.Remove(point);
+		}
 	}
 
 	// Mesh ///////////////////////////////////////////////////////////////////////////////////////

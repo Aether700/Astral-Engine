@@ -4,7 +4,7 @@
 
 namespace AstralEngine
 {
-	size_t ComputeSuperTriangle(MeshDataView& data, const ASinglyLinkedList<Vector2>& points)
+	size_t ComputeSuperTriangle(MeshDataManipulator& dataManipulator, const ASinglyLinkedList<Vector2>& points)
 	{
 		Vector2 rectangleMin = points[0];
 		Vector2 rectangleMax = points[0];
@@ -23,18 +23,71 @@ namespace AstralEngine
 		float midWidth = (rectangleMax.x + rectangleMin.x) / 2.0f;
 		float midHeight = (rectangleMax.y + rectangleMin.y) / 2.0f;
 
-		return data.AddTriangle(
+		return dataManipulator.AddTriangle(
 			Vector3(midWidth - 20.0f * biggerSide, midHeight - biggerSide, 0.0f), 
 			Vector3(midWidth, midHeight + 20.0f * biggerSide, 0.0f), 
 			Vector3(midWidth + 20.0f * biggerSide, midHeight - biggerSide, 0.0f));
 	}
 
+	bool IsEdgeSharedByOtherTriangles(const MeshDataManipulator& dataManipulator, 
+		const ASinglyLinkedList<size_t>& triangles, size_t currTriangle, size_t edge)
+	{
+		for (size_t triangleID : triangles)
+		{
+			if (triangleID != currTriangle && dataManipulator.TriangleContainsEdge(triangleID, edge))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void ConvertPointToVertexIndexRepresentation(ADynArr<size_t>& pointIDs,
+		ADynArr<unsigned int>& outIndices, size_t point)
+	{
+		int index = pointIDs.Find(point);
+		if (index == -1)
+		{
+			outIndices.Add(pointIDs.GetCount());
+			pointIDs.Add(point);
+		}
+		else
+		{
+			outIndices.Add((unsigned int)index);
+		}
+	}
+
+	void ConvertTriangulationIntoVerticesIndexRepresentation(const MeshDataManipulator& dataManipulator,
+		const ASinglyLinkedList<size_t>& triangulation, ADynArr<Vector2>& outVertices, 
+		ADynArr<unsigned int>& outIndices)
+	{
+		ADynArr<size_t> pointIDs = ADynArr<size_t>(triangulation.GetCount());
+
+		for (size_t triangleID : triangulation)
+		{
+			size_t p1 = dataManipulator.GetTrianglePoint1ID(triangleID);
+			size_t p2 = dataManipulator.GetTrianglePoint2ID(triangleID);
+			size_t p3 = dataManipulator.GetTrianglePoint3ID(triangleID);
+
+			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+				dataManipulator.GetTrianglePoint1ID(triangleID));
+			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+				dataManipulator.GetTrianglePoint2ID(triangleID));
+			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+				dataManipulator.GetTrianglePoint3ID(triangleID));
+		}
+
+		for (size_t id : pointIDs)
+		{
+			outVertices.Add(dataManipulator.GetCoords(id));
+		}
+	}
 
 	void Tessellation::BoyerWatson(const ASinglyLinkedList<Vector2>& points,
-		ASinglyLinkedList<Vector2>& vertices, ASinglyLinkedList<unsigned int>& indices)
+		ADynArr<Vector2>& outVertices, ADynArr<unsigned int>& outIndices)
 	{
-		MeshDataView dataView;
-		size_t superTriangle = ComputeSuperTriangle(dataView, points);
+		MeshDataManipulator dataManipulator;
+		size_t superTriangle = ComputeSuperTriangle(dataManipulator, points);
 		ASinglyLinkedList<size_t> triangulation;
 		triangulation.Add(superTriangle);
 
@@ -45,7 +98,7 @@ namespace AstralEngine
 			// find all invalid triangles
 			for (size_t& triangle : triangulation)
 			{
-				if (dataView.PointIsInTriangleCircumsphere(triangle, point))
+				if (dataManipulator.PointIsInTriangleCircumsphere(triangle, point))
 				{
 					badTriangles.Add(triangle);
 				}
@@ -56,36 +109,65 @@ namespace AstralEngine
 
 			for (size_t& triangle : badTriangles)
 			{
-				not finished need a utility function to query view and figure out if the edge is shared by a triangle
-				/*
-				if (IsEdgeSharedByOtherTriangles(badTriangles, &triangle, triangle.GetPointA(), triangle.GetPointB()))
+				size_t currEdge = dataManipulator.GetEdge1ID(triangle);
+				if (!IsEdgeSharedByOtherTriangles(dataManipulator, badTriangles, triangle, currEdge))
 				{
-					polygon.Emplace(triangle.GetPointA(), triangle.GetPointB());
+					polygon.Add(currEdge);
+				}
+				
+				currEdge = dataManipulator.GetEdge2ID(triangle);
+				if (!IsEdgeSharedByOtherTriangles(dataManipulator, badTriangles, triangle, currEdge))
+				{
+					polygon.Add(currEdge);
 				}
 
-				if (IsEdgeSharedByOtherTriangles(badTriangles, &triangle, triangle.GetPointA(), triangle.GetPointC()))
+				currEdge = dataManipulator.GetEdge3ID(triangle);
+				if (!IsEdgeSharedByOtherTriangles(dataManipulator, badTriangles, triangle, currEdge))
 				{
-					polygon.Emplace(triangle.GetPointA(), triangle.GetPointC());
+					polygon.Add(currEdge);
 				}
-
-				if (IsEdgeSharedByOtherTriangles(badTriangles, &triangle, triangle.GetPointB(), triangle.GetPointC()))
-				{
-					polygon.Emplace(triangle.GetPointB(), triangle.GetPointC());
-				}
-				*/
 			}
 
 			// remove the invalid triangles from the triangulation
-			for (TriangleData& triangle : badTriangles)
+			for (size_t triangle : badTriangles)
 			{
 				triangulation.Remove(triangle);
 			}
 
-			// create and add triangles between the point of the point list and the edges of the polygon left from the invalid triangles
-			for (EdgeData& edge : polygon)
+			// create and add triangles between the point of the point list and the edges of 
+			// the polygon left from the invalid triangles
+			for (size_t edge : polygon)
 			{
-				triangulation.Emplace(edge.point1, edge.point2, point);
+				size_t p1 = dataManipulator.GetPoint1ID(edge);
+				size_t p2 = dataManipulator.GetPoint2ID(edge);
+
+				size_t id = dataManipulator.AddTriangle(dataManipulator.GetCoords(p1), 
+					dataManipulator.GetCoords(p2), point);
+
+				if (id != NullID)
+				{
+					triangulation.Add(id);
+				}
 			}
 		}
+
+		// remove any triangle that contains a point from the super triangle to clean up the triangulation
+		{
+			ASinglyLinkedList<size_t> toRemove;
+			for (size_t triangle : triangulation)
+			{
+				if (dataManipulator.TrianglesSharePoint(superTriangle, triangle))
+				{
+					toRemove.Add(triangle);
+				}
+			}
+
+			for (size_t triangle : toRemove)
+			{
+				triangulation.Remove(triangle);
+			}
+		}
+
+		ConvertTriangulationIntoVerticesIndexRepresentation(dataManipulator, triangulation, outVertices, outIndices);
 	}
 }

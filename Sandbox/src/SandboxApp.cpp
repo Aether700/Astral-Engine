@@ -12,6 +12,74 @@ using namespace AstralEngine;
 
 
 //Scripts////////////////////////////////////////////////////////////////////////
+class TessellationTester : public NativeScript
+{
+public:
+	void OnStart()
+	{
+		m_transform = Transform(Vector3::Zero(), Vector3::Zero(), { 1, 1, 1 });
+
+		m_initialPoints.Add(Vector2(-5, -2.5));
+		m_initialPoints.Add(Vector2(-5, 2.5));
+		m_initialPoints.Add(Vector2(5, -2.5));
+		m_initialPoints.Add(Vector2(5, 2.5));
+
+		Tessellation::BoyerWatson(m_initialPoints, m_tessellationPoints, m_tessellationIndices);
+		
+		// create first mesh
+		ADynArr<Vector3> pos;
+		pos.Add(m_tessellationPoints[m_tessellationIndices[0]]);
+		pos.Add(m_tessellationPoints[m_tessellationIndices[1]]);
+		pos.Add(m_tessellationPoints[m_tessellationIndices[2]]);
+		
+		ADynArr<Vector2> texCoords = {Vector2(0, 0), Vector2(0, 0) , Vector2(0, 0) };
+		ADynArr<Vector3> normals = {Vector3(0, 0, -1), Vector3(0, 0, -1) , Vector3(0, 0, -1) };
+		ADynArr<unsigned int> indices = { 0, 1, 2 };
+
+		m_mesh1 = MeshRenderer(ResourceHandler::CreateMesh(pos, texCoords, normals, indices));
+
+		// create second mesh
+		pos.Clear();
+		pos.Add(m_tessellationPoints[m_tessellationIndices[3]]);
+		pos.Add(m_tessellationPoints[m_tessellationIndices[4]]);
+		pos.Add(m_tessellationPoints[m_tessellationIndices[5]]);
+		m_mesh2 = MeshRenderer(ResourceHandler::CreateMesh(pos, texCoords, normals, indices));
+		
+	}
+
+	void OnUpdate()
+	{
+		if (m_pointView)
+		{
+			Vector3 scale = { 0.5f, 0.5f, 0.5f };
+
+			for (Vector2& point : m_initialPoints)
+			{
+				Renderer::DrawQuad((Vector3)point, scale, { 1, 0, 0, 1 });
+			}
+
+			for (Vector2& point : m_tessellationPoints)
+			{
+				Renderer::DrawQuad((Vector3)point, scale, { 0, 1, 0, 1 });
+			}
+		}
+		else
+		{
+			Renderer::DrawMesh(m_transform, m_mesh1);
+			Renderer::DrawMesh(m_transform, m_mesh2);
+		}
+	}
+
+private:
+	ASinglyLinkedList<Vector2> m_initialPoints;
+	ADynArr<Vector2> m_tessellationPoints;
+	ADynArr<unsigned int> m_tessellationIndices;
+	MeshRenderer m_mesh1;
+	MeshRenderer m_mesh2;
+	Transform m_transform;
+	bool m_pointView = false;
+};
+
 class FontViewer : public NativeScript
 {
 public:
@@ -212,7 +280,7 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		
 		viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
-
+		tesTester.OnStart();
 		// temp
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(Vector4(0, 1, 0, 1));
@@ -229,7 +297,8 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		viewer.OnUpdate();
+		//viewer.OnUpdate();
+		tesTester.OnUpdate();
 		Renderer::EndScene();
 		/*
 		*/
@@ -262,6 +331,7 @@ private:
 	AstralEngine::AEntity m_entity;
 
 	FontViewer viewer;
+	TessellationTester tesTester;
 };
 
 
