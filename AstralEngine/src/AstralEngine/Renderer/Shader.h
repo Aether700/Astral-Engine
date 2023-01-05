@@ -41,6 +41,7 @@ namespace AstralEngine
 		static ShaderHandle SpriteShader();
 		static ShaderHandle GBufferShader();
 		static ShaderHandle FullscreenQuadShader();
+		static ShaderHandle GlyphShader();
 
 	private:
 		static AReference<Shader> Create(const std::string& filepath);

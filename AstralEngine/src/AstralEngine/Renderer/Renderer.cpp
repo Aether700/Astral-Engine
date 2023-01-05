@@ -567,6 +567,7 @@ namespace AstralEngine
 			spriteMat = ResourceHandler::CreateMaterial();
 			AReference<Material>& sprite = ResourceHandler::GetMaterial(spriteMat);
 			sprite->SetShader(Shader::SpriteShader());
+			sprite->SetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 			size_t numTextureSlots = RenderCommand::GetNumTextureSlots();
 			int* textureSlots = new int[numTextureSlots];
 
@@ -607,6 +608,18 @@ namespace AstralEngine
 			shader->SetInt(s_specularMapName, 1);
 		}
 		return gBufferMat;
+	}
+
+	MaterialHandle Material::GlyphMat()
+	{
+		static MaterialHandle glyphMat = NullHandle;
+		if (glyphMat == NullHandle)
+		{
+			glyphMat = ResourceHandler::CreateMaterial();
+			AReference<Material>& glyph = ResourceHandler::GetMaterial(glyphMat);
+			glyph->SetShader(Shader::GlyphShader());
+		}
+		return glyphMat;
 	}
 
 	bool Material::operator==(const Material& other) const
@@ -854,15 +867,14 @@ namespace AstralEngine
 		DrawQuad(position, rotation, size, sprite.GetSprite(), 1.0f, sprite.GetColor());
 	}
 
-
-	void Renderer::DrawMesh(const Transform& transform, const MeshRenderer& mesh)
+	void Renderer::DrawMesh(const Transform& transform, MaterialHandle mat, MeshHandle mesh)
 	{
-		if (mesh.GetMesh() != NullHandle)
+		if (mesh != NullHandle && mat != NullHandle)
 		{
-			AReference<Material> material = ResourceHandler::GetMaterial(mesh.GetMaterial());
-			DrawCommand* cmd = new DrawCommand(transform.GetTransformMatrix(), mesh.GetMaterial(),
-				mesh.GetMesh(), Vector4(1.0f, 1.0f, 1.0f, 1.0f), transform.GetAEntity(), 
-				(material->GetColor().a == 1.0f));
+			AReference<Material> material = ResourceHandler::GetMaterial(mat);
+			bool opaque = material->HasColor() ? material->GetColor().a == 1.0f : true;
+			DrawCommand* cmd = new DrawCommand(transform.GetTransformMatrix(), mat,
+				mesh, Vector4(1.0f, 1.0f, 1.0f, 1.0f), transform.GetAEntity(), opaque);
 
 			if (cmd->UsesDeferred())
 			{
@@ -873,6 +885,11 @@ namespace AstralEngine
 				s_forwardQueue->AddData(cmd);
 			}
 		}
+	}
+
+	void Renderer::DrawMesh(const Transform& transform, const MeshRenderer& mesh)
+	{
+		DrawMesh(transform, mesh.GetMaterial(), mesh.GetMesh());
 	}
 
 	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)

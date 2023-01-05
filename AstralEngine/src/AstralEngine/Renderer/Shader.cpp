@@ -32,6 +32,12 @@ namespace AstralEngine
 		return fullscreen;
 	}
 
+	ShaderHandle Shader::GlyphShader()
+	{
+		static ShaderHandle glyph = ResourceHandler::LoadShader("assets/shaders/GlyphShader.glsl");
+		return glyph;
+	}
+
 	AReference<Shader> Shader::Create(const std::string& filepath)
 	{
 		switch (RenderAPI::GetAPI())

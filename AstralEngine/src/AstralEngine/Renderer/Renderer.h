@@ -169,6 +169,7 @@ namespace AstralEngine
 		static MaterialHandle SpriteMat();
 		static MaterialHandle MissingMat();
 		static MaterialHandle GBufferMat();
+		static MaterialHandle GlyphMat();
 
 		bool operator==(const Material& other) const;
 		bool operator!=(const Material& other) const;
@@ -316,6 +317,7 @@ namespace AstralEngine
 			const SpriteRenderer& sprite);
 
 		//mesh
+		static void DrawMesh(const Transform& transform, MaterialHandle mat, MeshHandle mesh);
 		static void DrawMesh(const Transform& transform, const MeshRenderer& mesh);
 
 		//UI

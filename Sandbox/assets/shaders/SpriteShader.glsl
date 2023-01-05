@@ -35,7 +35,6 @@ uniform sampler2D u_textures[#NUM_TEXTURE_SLOTS];
 
 void main()
 {
-	//color = texture(u_textures[int(v_textureIndex)], v_textureCoords) * v_color;
 	switch(int(v_textureIndex))
 	{
 		case 0: color = texture(u_textures[0], v_textureCoords) * v_color; break;
@@ -72,6 +71,7 @@ void main()
 		case 31: color = texture(u_textures[31], v_textureCoords) * v_color; break;
 
 		default:
+			// display missing texture index color
 			color = vec4(1, 0, 1, 1);
 			break;
 	}

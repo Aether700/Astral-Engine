@@ -24,27 +24,7 @@ public:
 		m_initialPoints.Add(Vector2(5, -2.5));
 		m_initialPoints.Add(Vector2(5, 2.5));
 
-		Tessellation::BoyerWatson(m_initialPoints, m_tessellationPoints, m_tessellationIndices);
-		
-		// create first mesh
-		ADynArr<Vector3> pos;
-		pos.Add(m_tessellationPoints[m_tessellationIndices[0]]);
-		pos.Add(m_tessellationPoints[m_tessellationIndices[1]]);
-		pos.Add(m_tessellationPoints[m_tessellationIndices[2]]);
-		
-		ADynArr<Vector2> texCoords = {Vector2(0, 0), Vector2(0, 0) , Vector2(0, 0) };
-		ADynArr<Vector3> normals = {Vector3(0, 0, -1), Vector3(0, 0, -1) , Vector3(0, 0, -1) };
-		ADynArr<unsigned int> indices = { 0, 1, 2 };
-
-		m_mesh1 = MeshRenderer(ResourceHandler::CreateMesh(pos, texCoords, normals, indices));
-
-		// create second mesh
-		pos.Clear();
-		pos.Add(m_tessellationPoints[m_tessellationIndices[3]]);
-		pos.Add(m_tessellationPoints[m_tessellationIndices[4]]);
-		pos.Add(m_tessellationPoints[m_tessellationIndices[5]]);
-		m_mesh2 = MeshRenderer(ResourceHandler::CreateMesh(pos, texCoords, normals, indices));
-		
+		m_mesh = Tessellation::BoyerWatson(m_initialPoints);
 	}
 
 	void OnUpdate()
@@ -65,8 +45,7 @@ public:
 		}
 		else
 		{
-			Renderer::DrawMesh(m_transform, m_mesh1);
-			Renderer::DrawMesh(m_transform, m_mesh2);
+			Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
 		}
 	}
 
@@ -74,8 +53,7 @@ private:
 	ASinglyLinkedList<Vector2> m_initialPoints;
 	ADynArr<Vector2> m_tessellationPoints;
 	ADynArr<unsigned int> m_tessellationIndices;
-	MeshRenderer m_mesh1;
-	MeshRenderer m_mesh2;
+	MeshHandle m_mesh;
 	Transform m_transform;
 	bool m_pointView = false;
 };

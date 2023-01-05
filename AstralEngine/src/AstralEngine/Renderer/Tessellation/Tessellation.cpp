@@ -43,25 +43,26 @@ namespace AstralEngine
 	}
 
 	void ConvertPointToVertexIndexRepresentation(ADynArr<size_t>& pointIDs,
-		ADynArr<unsigned int>& outIndices, size_t point)
+		ADynArr<unsigned int>& indices, size_t point)
 	{
 		int index = pointIDs.Find(point);
 		if (index == -1)
 		{
-			outIndices.Add(pointIDs.GetCount());
+			indices.Add(pointIDs.GetCount());
 			pointIDs.Add(point);
 		}
 		else
 		{
-			outIndices.Add((unsigned int)index);
+			indices.Add((unsigned int)index);
 		}
 	}
 
-	void ConvertTriangulationIntoVerticesIndexRepresentation(const MeshDataManipulator& dataManipulator,
-		const ASinglyLinkedList<size_t>& triangulation, ADynArr<Vector2>& outVertices, 
-		ADynArr<unsigned int>& outIndices)
+	MeshHandle Generate2DMesh(const MeshDataManipulator& dataManipulator,
+		const ASinglyLinkedList<size_t>& triangulation)
 	{
 		ADynArr<size_t> pointIDs = ADynArr<size_t>(triangulation.GetCount());
+		ADynArr<Vector3> meshVertices = ADynArr<Vector3>(triangulation.GetCount());
+		ADynArr<unsigned int> meshIndices = ADynArr<unsigned int>(triangulation.GetCount());
 
 		for (size_t triangleID : triangulation)
 		{
@@ -69,22 +70,31 @@ namespace AstralEngine
 			size_t p2 = dataManipulator.GetTrianglePoint2ID(triangleID);
 			size_t p3 = dataManipulator.GetTrianglePoint3ID(triangleID);
 
-			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices, 
 				dataManipulator.GetTrianglePoint1ID(triangleID));
-			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
 				dataManipulator.GetTrianglePoint2ID(triangleID));
-			ConvertPointToVertexIndexRepresentation(pointIDs, outIndices, 
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
 				dataManipulator.GetTrianglePoint3ID(triangleID));
 		}
 
 		for (size_t id : pointIDs)
 		{
-			outVertices.Add(dataManipulator.GetCoords(id));
+			meshVertices.Add(dataManipulator.GetCoords(id));
 		}
+
+		ADynArr<Vector2> textureCoords = ADynArr<Vector2>(meshVertices.GetCount());
+		ADynArr<Vector3> normals = ADynArr<Vector3>(meshVertices.GetCount());
+		for (size_t i = 0; i < meshVertices.GetCount(); i++)
+		{
+			textureCoords.EmplaceBack(0.0f, 0.0f);
+			normals.EmplaceBack(0.0f, 0.0f, -1.0f);
+		}
+
+		return ResourceHandler::CreateMesh(meshVertices, textureCoords, normals, meshIndices);
 	}
 
-	void Tessellation::BoyerWatson(const ASinglyLinkedList<Vector2>& points,
-		ADynArr<Vector2>& outVertices, ADynArr<unsigned int>& outIndices)
+	MeshHandle Tessellation::BoyerWatson(const ASinglyLinkedList<Vector2>& points)
 	{
 		MeshDataManipulator dataManipulator;
 		size_t superTriangle = ComputeSuperTriangle(dataManipulator, points);
@@ -168,6 +178,6 @@ namespace AstralEngine
 			}
 		}
 
-		ConvertTriangulationIntoVerticesIndexRepresentation(dataManipulator, triangulation, outVertices, outIndices);
+		return Generate2DMesh(dataManipulator, triangulation);
 	}
 }
