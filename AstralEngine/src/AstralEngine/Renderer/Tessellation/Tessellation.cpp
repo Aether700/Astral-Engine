@@ -4,7 +4,7 @@
 
 namespace AstralEngine
 {
-	size_t ComputeSuperTriangle(MeshDataManipulator& dataManipulator, const ASinglyLinkedList<Vector2>& points)
+	size_t ComputeSuperTriangle(MeshDataManipulator& dataManipulator, const ADynArr<Vector2>& points)
 	{
 		Vector2 rectangleMin = points[0];
 		Vector2 rectangleMax = points[0];
@@ -94,7 +94,7 @@ namespace AstralEngine
 		return ResourceHandler::CreateMesh(meshVertices, textureCoords, normals, meshIndices);
 	}
 
-	MeshHandle Tessellation::BoyerWatson(const ASinglyLinkedList<Vector2>& points)
+	MeshHandle Tessellation::BoyerWatson(const ADynArr<Vector2>& points)
 	{
 		MeshDataManipulator dataManipulator;
 		size_t superTriangle = ComputeSuperTriangle(dataManipulator, points);

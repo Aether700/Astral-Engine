@@ -35,12 +35,12 @@ namespace AstralEngine
 	{
 		// returns the id of the glyph corresponding to the character 
 		// provided or 0 if the character was not found
-		std::uint16_t GetGlyphID(char c)
+		std::uint16_t GetGlyphID(char c) const
 		{
 			return GetGlyphID((wchar_t)c);
 		}
 
-		virtual std::uint16_t GetGlyphID(wchar_t c) = 0;
+		virtual std::uint16_t GetGlyphID(wchar_t c) const = 0;
 	};
 
 
@@ -63,12 +63,12 @@ namespace AstralEngine
 			delete format;
 		}
 
-		std::uint16_t GetGlyphID(char c)
+		std::uint16_t GetGlyphID(char c) const
 		{
 			return format->GetGlyphID(c);
 		}
 
-		std::uint16_t GetGlyphID(wchar_t c)
+		std::uint16_t GetGlyphID(wchar_t c) const
 		{
 			return format->GetGlyphID(c);
 		}
@@ -111,6 +111,9 @@ namespace AstralEngine
 		friend class AReference<TTFFont>;
 	public:
 		static AReference<Font> LoadFont(const std::string& filepath);
+
+		MeshHandle GetCharMesh(char c) const;
+		MeshHandle GetCharMesh(wchar_t c) const;
 
 		// temp /////////////////////////////
 		void DebugDrawPointsOfChar(char c, size_t resolution);

@@ -653,7 +653,8 @@ namespace AstralEngine
 
 		const T& operator*() const
 		{
-			return ADoublyLinkedListIterator<T>::operator*();
+			return const_cast<ADoublyLinkedListIterator<T>*>
+				((const ADoublyLinkedListIterator<T>*)this)->ADoublyLinkedListIterator<T>::operator*();
 		}
 
 	};

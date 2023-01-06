@@ -1,5 +1,6 @@
 #include "aepch.h"
 #include "TTFParser.h"
+#include "AstralEngine/Renderer/Tessellation/Tessellation.h"
 
 namespace AstralEngine
 {
@@ -310,7 +311,7 @@ namespace AstralEngine
 
 		// returns the id of the glyph corresponding to the character 
 		// provided or 0 if the character was not found
-		virtual std::uint16_t GetGlyphID(wchar_t c) override
+		virtual std::uint16_t GetGlyphID(wchar_t c) const override
 		{
 			std::uint16_t &charID = reinterpret_cast<std::uint16_t &>(c);
 
@@ -712,6 +713,16 @@ namespace AstralEngine
 					}
 				}
 			}
+		}
+
+		MeshHandle GenerateMesh() const
+		{
+			ADynArr<Vector2> points = ADynArr<Vector2>(m_contours[0].GetCount());
+			for (const GlyphPoint& p : m_contours[0])
+			{
+				points.Add(p.coords);
+			}
+			return Tessellation::BoyerWatson(points);
 		}
 
 		Glyph& operator=(Glyph&& other) noexcept
@@ -1400,11 +1411,6 @@ namespace AstralEngine
 			tableDirectories.Add(ReadTableDir(file));
 			TableDirectory* currDir = &tableDirectories[0];
 
-			// temp ///////////////////////////////////////
-			char tableID[5];
-			memcpy(tableID, (std::uint32_t*)&currDir->tag, 4);
-			tableID[4] = '\0';
-			///////////////////////////////////////////////
 			switch(currDir->tag)
 			{
 			case s_hheaTag:
@@ -1475,13 +1481,6 @@ namespace AstralEngine
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
-					// temp
-					if (i == 'A')
-					{
- 						int x = 5;
-					}
-					//////////////
-
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
 					glyf.EmplaceBack(ReadGlyphDescription(file));
 				}
@@ -1501,6 +1500,18 @@ namespace AstralEngine
 		tempFont->m_glyphs = std::move(glyf);
 		tempFont->m_cmap = std::move(cmap);
 		return tempFont;
+	}
+
+	MeshHandle TTFFont::GetCharMesh(char c) const
+	{
+		return GetCharMesh((wchar_t)c);
+	}
+	
+	MeshHandle TTFFont::GetCharMesh(wchar_t c) const
+	{
+		// temporary implementation, need to cache the mesh to optimize speed
+		std::uint16_t id = m_cmap.GetGlyphID(c);
+		return m_glyphs[id].GenerateMesh();
 	}
 
 	void TTFFont::DebugDrawPointsOfChar(char c, size_t resolution)
