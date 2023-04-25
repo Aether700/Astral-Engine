@@ -93,7 +93,7 @@ namespace AstralEngine
 		{
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
+				AE_CORE_ASSERT(HasComponent<CallbackList>(),
 					"CallbackListComponent was not added to entity with a CallbackComponent");
 				CallbackList* list;
 				list = GetComponent<CallbackList>();
@@ -181,6 +181,30 @@ namespace AstralEngine
 	public:
 		AEntity GetAEntity() const;
 
+		template<typename Component, typename... Args>
+		Component& EmplaceComponent(Args... args)
+		{
+			return m_entity.EmplaceComponent<Component>(std::forward<Args>(args)...);
+		}
+
+		template<typename Component>
+		void AddComponent(const Component& c)
+		{
+			m_entity.AddComponent(c);
+		}
+		
+		template<typename Component>
+		void RemoveComponent()
+		{
+			m_entity.RemoveComponent<Component>();
+		}
+
+		template<typename Component>
+		void RemoveComponent(const Component& c)
+		{
+			m_entity.RemoveComponent(c);
+		}
+
 		template<typename... Component>
 		bool HasComponent() const
 		{
@@ -205,7 +229,7 @@ namespace AstralEngine
 		const std::string& GetName() const { return m_entity.GetName(); }
 		void SetName(const std::string& name) { m_entity.SetName(name); }
 
-		void Destroy(AEntity& e) const { e.Destroy(); }
+		void DestroyAEntity(AEntity& e) const { e.Destroy(); }
 		AEntity CreateAEntity() const { return m_entity.m_scene->CreateAEntity(); }
 
 		bool operator==(const AEntityLinkedComponent& other) const

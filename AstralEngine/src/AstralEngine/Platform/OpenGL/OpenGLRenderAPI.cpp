@@ -1,7 +1,12 @@
 #include "aepch.h"
 #include "OpenGLRenderAPI.h"
 
+#include "AstralEngine/Math/AMath.h"
+
 #include <glad/glad.h>
+
+#define MANUAL_MAX_NUM_VERTICES 60000
+#define MANUAL_MAX_NUM_INDICES 120000
 
 namespace AstralEngine
 {
@@ -60,15 +65,14 @@ namespace AstralEngine
 	{
 		int numVertices;
 		glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &numVertices);
-		return (size_t)numVertices;
-
+		return Math::Min((size_t)numVertices, (size_t)MANUAL_MAX_NUM_VERTICES);
 	}
 
 	size_t OpenGLRenderAPI::GetMaxNumIndices()
 	{
 		int numIndices;
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &numIndices);
-		return (size_t)numIndices;
+		return Math::Min((size_t)numIndices, (size_t)MANUAL_MAX_NUM_INDICES);
 	}
 
 	void OpenGLRenderAPI::EnableBlending(bool enabled)
