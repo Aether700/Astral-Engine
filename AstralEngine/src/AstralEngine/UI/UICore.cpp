@@ -1,6 +1,6 @@
 #include "aepch.h"
 #include "UICore.h"
-#include "Renderer/Renderer.h"
+#include "AstralEngine/Renderer/Renderer.h"
 
 namespace AstralEngine
 {
@@ -72,7 +72,8 @@ namespace AstralEngine
 
 	void UIContext::RenderUI()
 	{
-		Renderer::BeginScene();
+		AE_ERROR("function does not exist");
+		//Renderer::BeginScene();
 		for (AReference<UIWindow>& window : m_windows)
 		{
 			window->DrawToScreen();

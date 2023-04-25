@@ -18,7 +18,7 @@ public:
 		{
 			if (m_currTimerVal >= m_timer)
 			{
-				Destroy(entity);
+				DestroyAEntity(GetAEntity());
 			}
 			else
 			{
@@ -49,7 +49,7 @@ public:
 	void OnCreate() override
 	{
 		GenerateTexture();
-		entity.EmplaceComponent<AstralEngine::SpriteRenderer>(m_texture);
+		EmplaceComponent<AstralEngine::SpriteRenderer>(m_texture);
 	}
 
 private:
@@ -72,13 +72,14 @@ private:
 			}
 		}
 
-		m_texture = AstralEngine::Texture2D::Create(size, size, data, size * size * 4);
+		
+		m_texture = AstralEngine::ResourceHandler::CreateTexture2D(size, size, data, size * size * 4);
 		delete data;
 	}
 
 	unsigned int size = 256;
 	float scale = 20.0f;
-	AstralEngine::AReference<AstralEngine::Texture2D> m_texture;
+	AstralEngine::Texture2DHandle m_texture;
 };
 
 class TestComponent : public AstralEngine::NativeScript
@@ -165,7 +166,7 @@ public:
 
 		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::X))
 		{
-			Destroy(entity);
+			DestroyAEntity(GetAEntity());
 		}
 		else if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K) && curr >= delay)
 		{
@@ -235,12 +236,12 @@ public:
 
 	void OnStart() override
 	{
-		if (!entity.HasComponent<AstralEngine::SpriteRenderer>())
+		if (!HasComponent<AstralEngine::SpriteRenderer>())
 		{
 			AddSprite();
 		}
 
-		GetTransform().position = { 5, 0, 0 };
+		GetTransform().SetLocalPosition({ 5, 0, 0 });
 		curr = timer;
 	}
 
@@ -275,14 +276,14 @@ private:
 
 	void AddSprite()
 	{
-		AstralEngine::SpriteRenderer& sprite = entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
+		AstralEngine::SpriteRenderer& sprite = EmplaceComponent<AstralEngine::SpriteRenderer>();
 		sprite.SetColor(0, 1, 0, 1);
 		m_hasSprite = true;
 	}
 
 	void RemoveSprite()
 	{
-		entity.RemoveComponent<AstralEngine::SpriteRenderer>();
+		RemoveComponent<AstralEngine::SpriteRenderer>();
 		m_hasSprite = false;
 	}
 
@@ -319,15 +320,15 @@ private:
 
 	void AddSprite()
 	{
-		entity.EmplaceComponent<AstralEngine::SpriteRenderer>();
+		EmplaceComponent<AstralEngine::SpriteRenderer>();
 		AE_INFO("Added a sprite");
 	}
 
 	void RemoveSprite()
 	{
-		if (entity.HasComponent<AstralEngine::SpriteRenderer>())
+		if (HasComponent<AstralEngine::SpriteRenderer>())
 		{
-			entity.RemoveComponent<AstralEngine::SpriteRenderer>();
+			RemoveComponent<AstralEngine::SpriteRenderer>();
 			AE_INFO("Removed a sprite");
 		}
 		else
@@ -392,17 +393,17 @@ public:
 private:
 	void CreateMulti()
 	{
-		entity.EmplaceComponent<MultiComponent>();
+		EmplaceComponent<MultiComponent>();
 	}
 
 	void DeleteMulti()
 	{
-		if (!entity.HasComponent<MultiComponent>())
+		if (!HasComponent<MultiComponent>())
 		{
 			AE_INFO("Entity has no multi component component");
 			return;
 		}
-		entity.RemoveComponent<MultiComponent>();
+		RemoveComponent<MultiComponent>();
 	}
 
 	float timer = 0.3f;
@@ -469,7 +470,7 @@ public:
 		uiWindow->AddElement((AstralEngine::AReference<AstralEngine::RenderableUIElement>)button);
 		button->SetParent(uiWindow);
 		button->AddListener(AstralEngine::ADelegate<void()>(&OnButtonClicked));
-		m_texture = AstralEngine::Texture2D::Create("assets/textures/septicHanzo.png");
+		m_texture = AstralEngine::ResourceHandler::LoadTexture2D("assets/textures/septicHanzo.png");
 
 		AstralEngine::AReference<AstralEngine::UIWindow> textWindow
 			= AstralEngine::UIContext::CreateUIWindow({ 300, 500 }, 500, 500,
@@ -501,16 +502,14 @@ public:
 		
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
 		auto& sprite = e.EmplaceComponent<AstralEngine::SpriteRenderer>(text->GetFont()->GetFontAtlas());
-		e.GetTransform().scale.x = 5.0f;
-		e.GetTransform().scale.y = 5.0f;
-		e.GetTransform().position.y = 5.0f;
+		e.GetTransform().SetScale(AstralEngine::Vector3(5.0f, 5.0f, 5.0f));
 		e.EmplaceComponent<DisableSprite>();
 
 		//e.GetComponent<AstralEngine::SpriteRenderer>().SetEnable(false);
 
 		AstralEngine::AEntity texturedQuad = m_scene->CreateAEntity();
-		texturedQuad.GetTransform().position = e.GetTransform().position;
-		texturedQuad.GetTransform().position.z += -0.1f;
+		AstralEngine::Vector3 ePos = e.GetTransform().GetLocalPosition();
+		texturedQuad.GetTransform().SetLocalPosition(ePos.x, ePos.y, -0.1f);
 		AstralEngine::SpriteRenderer& spriteRenderer 
 			= texturedQuad.EmplaceComponent<AstralEngine::SpriteRenderer>();
 		spriteRenderer.SetSprite(m_texture);
@@ -562,7 +561,7 @@ private:
 	float m_currTimer = 0.0f;
 
 	
-	AstralEngine::AReference<AstralEngine::Texture2D> m_texture;
+	AstralEngine::Texture2DHandle m_texture;
 	AstralEngine::AReference<AstralEngine::Framebuffer> m_framebuffer;
 	AstralEngine::AReference<AstralEngine::Scene> m_scene;
 	AstralEngine::AEntity m_entity;

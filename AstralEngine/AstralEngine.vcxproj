@@ -264,7 +264,6 @@
     <ClCompile Include="src\AstralEngine\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\AstralEngine\Renderer\VertexBuffer.cpp" />
     <ClCompile Include="src\AstralEngine\UI\UI Core\Font.cpp" />
-    <ClCompile Include="src\AstralEngine\UI\UICore.cpp" />
     <ClCompile Include="src\aepch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

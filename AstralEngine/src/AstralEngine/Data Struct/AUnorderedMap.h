@@ -315,23 +315,6 @@ namespace AstralEngine
 
 		const T& operator[](const K& key) const
 		{
-			
-			AE_DATASTRUCT_ASSERT(ContainsKey(key), "AUnorderedMap could not find the provided key");
-			size_t bucketIndex = GetBucketIndex(key);
-
-			for (AKeyElementPair<K, T>& pair : m_bucketArr[bucketIndex])
-			{
-				if (m_equalsFunc(pair.GetKey(), key))
-				{
-					return pair.GetElement();
-				}
-			}
-
-			return m_bucketArr[bucketIndex][0].GetElement();
-		}
-
-		const T& operator[](const K& key) const
-		{
 			AE_PROFILE_FUNCTION();
 			size_t bucketIndex = GetBucketIndex(key);
 

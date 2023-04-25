@@ -669,13 +669,6 @@ namespace AstralEngine
 		delete s_forwardQueue;
 		delete s_deferredQueue;
 	}
-
-	void Renderer::DrawUIElement(const UIElement& element, const Vector4& color)
-	{
-		Vector3 worldPos = (Vector3)element.GetWorldPos();
-		DrawQuad(worldPos, Vector3::Zero(), Vector3(element.GetWorldWidth(),
-			element.GetWorldHeight(), 1), color, true);
-	}
 	
 	void Renderer::OnWindowResize(WindowResizeEvent& resize)
 	{
