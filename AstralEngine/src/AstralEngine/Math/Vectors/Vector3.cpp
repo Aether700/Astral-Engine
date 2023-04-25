@@ -12,21 +12,29 @@ namespace AstralEngine
 	Vector3::Vector3() : x(0.0f), y(0.0f), z(0.0f) { }
 	Vector3::Vector3(float X, float Y, float Z) : x(X), y(Y), z(Z) { }
 	Vector3::Vector3(const Vector2& v2) : x(v2.x), y(v2.y), z(0.0f) { }
-	Vector3::Vector3(const Vector2Int& v2i) : x(v2i.x), y(v2i.y), z(0.0f) { }
-	Vector3::Vector3(const Vector3Int& v3i) : x(v3i.x), y(v3i.y), z(v3i.z) { }
+	Vector3::Vector3(const Vector2Int& v2i) : x((float)v2i.x), y((float)v2i.y), z(0.0f) { }
+	Vector3::Vector3(const Vector3Int& v3i) : x((float)v3i.x), y((float)v3i.y), z((float)v3i.z) { }
 	Vector3::Vector3(const Vector4& v4) : x(v4.x), y(v4.y), z(v4.z) { }
-	Vector3::Vector3(const Vector4Int& v4i) : x(v4i.x), y(v4i.y), z(v4i.z) { }
+	Vector3::Vector3(const Vector4Int& v4i) : x((float)v4i.x), y((float)v4i.y), z((float)v4i.z) { }
 
 	Vector3::~Vector3() { }
 
-	const float Vector3::Length() const
+	const float Vector3::Magnitude() const
 	{
-		return Math::Sqrt((x * x) + (y * y) + (z * z)); 
+		return Math::Sqrt(SqrMagnitude()); 
 	}
 
-	const Vector3 Vector3::Normalize() const
+	const float Vector3::SqrMagnitude() const
 	{
-		return Vector3(x / Length(), y / Length(), z / Length()); 
+		return ((x * x) + (y * y) + (z * z));
+	}
+
+	void Vector3::Normalize()
+	{
+		float len = Magnitude();
+		x = x / len;
+		y = y / len;
+		z = z / len;
 	}
 
 	const float* Vector3::Data() const { return &x; }
@@ -37,10 +45,29 @@ namespace AstralEngine
 	const Vector3 Vector3::Right() { return Vector3(1.0f, 0.0f, 0.0f); }
 	const Vector3 Vector3::Back() { return Vector3(0.0f, 0.0f, -1.0f); }
 	const Vector3 Vector3::Forward() { return Vector3(0.0f, 0.0f, 1.0f); }
+	
 	const Vector3 Vector3::Zero() { return Vector3(); }
 
+	void Vector3::OrthoNormalize(Vector3* normal, Vector3* tangeant)
+	{
+		if (normal == nullptr || tangeant == nullptr)
+		{
+			return;
+		}
 
-	const float Vector3::DotProduct(const Vector3& v1, const Vector3& v2) { return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z + v2.z); }
+		normal->Normalize();
+		Vector3 temp = (Vector3::DotProduct(*normal, *tangeant) / normal->SqrMagnitude()) * *tangeant;
+		*tangeant = Vector3::Normalize(temp);
+	}
+
+	const Vector3 Vector3::Normalize(const Vector3& v)
+	{
+		Vector3 unit = v;
+		unit.Normalize();
+		return unit;
+	}
+
+	const float Vector3::DotProduct(const Vector3& v1, const Vector3& v2) { return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z); }
 	const Vector3 Vector3::CrossProduct(const Vector3& v1, const Vector3& v2)
 	{
 		//v1.x  v1.y  v1.z
@@ -51,8 +78,21 @@ namespace AstralEngine
 		float yCoord = (v1.x * v2.z) - (v2.x * v1.z);
 		float zCoord = (v1.x * v2.y) - (v2.x * v1.y);
 
-		return Vector3(xCoord, yCoord, zCoord);
+		//return Vector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+		return Vector3((v1.y * v2.z) - (v2.y * v1.z), -(v1.x * v2.z) + (v2.x * v1.z), (v1.x * v2.y) - (v2.x * v1.y));
 	}
+
+	float Vector3::Angle(const Vector3& v1, const Vector3& v2)
+	{
+		return Math::RadiansToDegree(Math::ArcCos(DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude())));
+	}
+
+	const Vector3 Vector3::Lerp(const Vector3& a, const Vector3& b, float t)
+	{
+		return Vector3(Math::Lerp(a.x, b.x, t), Math::Lerp(a.y, b.y, t), Math::Lerp(a.z, b.z, t));
+	}
+
+	const Vector3 Vector3::operator-() const { return Vector3(-x, -y, -z); }
 
 	const Vector3 Vector3::operator+(const Vector3& v) const 
 	{
@@ -64,14 +104,16 @@ namespace AstralEngine
 		return Vector3(x - v.x, y - v.y, z - v.z); 
 	}
 	
-	const Vector3 Vector3::operator+=(const Vector3& v) const
+	const Vector3& Vector3::operator+=(const Vector3& v)
 	{
-		return *this + v; 
+		*this = *this + v; 
+		return *this;
 	}
 	
-	const Vector3 Vector3::operator-=(const Vector3& v) const
+	const Vector3& Vector3::operator-=(const Vector3& v)
 	{
-		return *this - v;
+		*this = *this - v;
+		return *this;
 	}
 	
 	const Vector3 Vector3::operator*(float k) const { return Vector3(x * k, y * k, z * k); }
@@ -91,6 +133,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return 0.0f;
 	}
 
 	float& Vector3::operator[](unsigned int index)
@@ -108,6 +151,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return x;
 	}
 
 	Vector3& Vector3::operator=(const Vector3& v)
@@ -122,4 +166,5 @@ namespace AstralEngine
 	const Vector3 operator*(float k, const Vector3& v) { return v * k; }
 
 	bool Vector3::operator==(const Vector3& other) const { return x == other.x && y == other.y && z == other.z; }
+	bool Vector3::operator!=(const Vector3& other) const { return !(*this == other); }
 }

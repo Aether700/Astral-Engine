@@ -1,11 +1,11 @@
 #pragma once
 #include "AstralEngine/Core/Core.h"
 #include "AstralEngine/Core/Keycodes.h"
-#include "Math/AMath.h"
-#include "Data Struct/ADynArr.h"
-#include "Data Struct/ADelegate.h"
-#include "Data Struct/AUnorderedMap.h"
-#include "Renderer/Texture.h"
+#include "AstralEngine/Math/AMath.h"
+#include "AstralEngine/Data Struct/ADynArr.h"
+#include "AstralEngine/Data Struct/ADelegate.h"
+#include "AstralEngine/Data Struct/AUnorderedMap.h"
+#include "AstralEngine/Renderer/Texture.h"
 
 #define UNICODE_CODEPOINT_MAX 0xFFFF
 #define TEXT_EDIT_UNDOSTATECOUNT 99

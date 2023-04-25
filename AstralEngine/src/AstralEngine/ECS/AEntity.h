@@ -1,16 +1,19 @@
 #pragma once
+#include "ECS Core/ECSUtils.h"
 #include "ECS Core/Registry.h"
 #include "Scene.h"
+#include "CoreComponents.h"
 
 namespace AstralEngine
 {
 	class Transform;
+	class AEntityLinkedComponent;
 
 	class AEntity
 	{
-		friend class NativeScript;
+		friend class AEntityLinkedComponent;
 	public:
-		AEntity() : m_id(Null), m_scene(nullptr) { }
+		constexpr AEntity() : m_id(Null), m_scene(nullptr) { }
 
 		AEntity(BaseEntity entity, Scene* scene) : m_id(entity), m_scene(scene) { }
 
@@ -19,48 +22,49 @@ namespace AstralEngine
 		template<typename Component, typename... Args>
 		Component& EmplaceComponent(Args... args)
 		{
+			Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+			if constexpr (std::is_base_of_v<AEntityLinkedComponent, Component>)
+			{
+				comp.m_entity = *this;
+			}
+
 			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
 			{
-				Component& comp = m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
-				
 				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackList>().AddCallback(&comp);
+					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 				else
 				{
 					CallbackList& list = EmplaceComponent<CallbackList>();
-					list.AddCallback(&comp);
-				}
-
-				if constexpr (std::is_base_of_v<NativeScript, Component>)
-				{
-					comp.SetEntity(*this);
+					list.AddCallback(new ComponentAEntityPair<Component>(*this));
 				}
 
 				comp.OnCreate();
-
-				return comp;
 			}
-			else
+			else if constexpr (std::is_base_of_v<Renderable, Component>)
 			{
-				return m_scene->m_registry.EmplaceComponent<Component>(*this, std::forward<Args>(args)...);
+				AE_CORE_ASSERT(!HasComponent<RenderData>(), 
+					"Engine does not support having multiple renderable components on the same entity");
+				EmplaceComponent<RenderData>(new AEntityRenderableComponentPair<Component>(*this));
 			}
+
+			return comp;
 		}
 
 		template<typename Component>
 		void AddComponent(const Component& c)
 		{
-			m_scene->m_registry.Add(*this, c);
+			m_scene->m_registry.EmplaceComponent<Component>(*this, c);
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				if (HasComponent<CallbackListComponent>())
+				if (HasComponent<CallbackList>())
 				{
-					GetComponent<CallbackListComponent>().AddCallback(&c);
+					GetComponent<CallbackList>().AddCallback(&c);
 				}
 				else
 				{
-					CallbackListComponent& list = EmplaceComponent<CallbackListComponent>();
+					CallbackList& list = EmplaceComponent<CallbackList>();
 					list.AddCallback(&c);
 				}
 			}
@@ -75,7 +79,7 @@ namespace AstralEngine
 					"CallbackListComponent was not added to entity with a CallbackComponent");
 				CallbackList* list;
 				list = &GetComponent<CallbackList>();
-				list->RemoveCallback(&GetComponent<Component>());
+				list->RemoveCallback<Component>();
 
 				if (list->IsEmpty()) 
 				{
@@ -90,15 +94,15 @@ namespace AstralEngine
 		{
 			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
 			{
-				AE_CORE_ASSERT(HasComponent<CallbackListComponent>(),
+				AE_CORE_ASSERT(HasComponent<CallbackList>(),
 					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackListComponent* list;
-				list = GetComponent<CallbackListComponent>();
+				CallbackList* list;
+				list = GetComponent<CallbackList>();
 				list->RemoveCallback(&comp);
 
 				if (list->IsEmpty())
 				{
-					RemoveComponent<CallbackListComponent>();
+					RemoveComponent<CallbackList>();
 				}
 			}
 			m_scene->m_registry.RemoveComponent<Component>(*this, comp);
@@ -146,6 +150,7 @@ namespace AstralEngine
 
 		BaseEntity GetID() const { return m_id; }
 
+
 		operator BaseEntity() const
 		{
 			return m_id;
@@ -167,5 +172,78 @@ namespace AstralEngine
 	private:
 		BaseEntity m_id;
 		Scene* m_scene;
+	};
+	
+	inline constexpr AEntity NullEntity = AEntity();
+
+	class AEntityLinkedComponent
+	{
+		friend class AEntity;
+	public:
+		AEntity GetAEntity() const;
+
+		template<typename Component, typename... Args>
+		Component& EmplaceComponent(Args... args)
+		{
+			return m_entity.EmplaceComponent<Component>(std::forward<Args>(args)...);
+		}
+
+		template<typename Component>
+		void AddComponent(const Component& c)
+		{
+			m_entity.AddComponent(c);
+		}
+		
+		template<typename Component>
+		void RemoveComponent()
+		{
+			m_entity.RemoveComponent<Component>();
+		}
+
+		template<typename Component>
+		void RemoveComponent(const Component& c)
+		{
+			m_entity.RemoveComponent(c);
+		}
+
+		template<typename... Component>
+		bool HasComponent() const
+		{
+			return GetAEntity().HasComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent()
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		template<typename... Component>
+		decltype(auto) GetComponent() const
+		{
+			return m_entity.GetComponent<Component...>();
+		}
+
+		Transform& GetTransform() { return m_entity.GetTransform(); }
+		const Transform& GetTransform() const { return m_entity.GetTransform(); }
+
+		const std::string& GetName() const { return m_entity.GetName(); }
+		void SetName(const std::string& name) { m_entity.SetName(name); }
+
+		void DestroyAEntity(AEntity& e) const { e.Destroy(); }
+		AEntity CreateAEntity() const { return m_entity.m_scene->CreateAEntity(); }
+
+		bool operator==(const AEntityLinkedComponent& other) const
+		{
+			return m_entity == other.m_entity;
+		}
+
+		bool operator!=(const AEntityLinkedComponent& other) const
+		{
+			return !(*this == other);
+		}
+
+	private:
+		AEntity m_entity;
 	};
 }

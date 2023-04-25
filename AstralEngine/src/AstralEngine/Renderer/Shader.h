@@ -2,6 +2,7 @@
 #include "AstralEngine/Data Struct/AReference.h"
 #include "AstralEngine/Data Struct/AUnorderedMap.h"
 #include "AstralEngine/Math/AMath.h"
+#include "AstralEngine/Core/Resource.h"
 
 #include <string>
 
@@ -9,10 +10,13 @@ namespace AstralEngine
 {
 	class Shader
 	{
+		friend class ResourceHandler;
 	public:
 		virtual ~Shader() { }
 
 		virtual const std::string& GetName() const = 0;
+
+		virtual unsigned int GetRendererID() const = 0;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
@@ -33,25 +37,12 @@ namespace AstralEngine
 
 		virtual void SetBool(const std::string& uniformName, bool v) = 0;
 
-		static AReference<Shader> Create(const std::string& filepath);
-		static AReference<Shader> Create(const std::string& name, const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
-	};
-	
-	class ShaderLibrary
-	{
-	public:
-		void Add(const std::string& name, AReference<Shader> shader);
-
-		void Add(AReference<Shader> shader);
-
-		AReference<Shader> Load(const std::string& name, const std::string& filepath);
-		AReference<Shader> Load(const std::string& filepath);
-
-		AReference<Shader> Get(const std::string& name);
-
-		bool Exists(const std::string& name) const;
+		static ShaderHandle DefaultShader();
+		static ShaderHandle SpriteShader();
+		static ShaderHandle GBufferShader();
+		static ShaderHandle FullscreenQuadShader();
 
 	private:
-		AUnorderedMap<std::string, AReference<Shader>> m_shaders;
+		static AReference<Shader> Create(const std::string& filepath);
 	};
 }

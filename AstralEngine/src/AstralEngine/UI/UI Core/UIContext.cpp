@@ -1,6 +1,6 @@
 #include "aepch.h"
 #include "UIContext.h"
-#include "Algorithms/Algorithms.h"
+#include "AstralEngine/Algorithms/Algorithms.h"
 #include "AstralEngine/Core/Time.h"
 
 #define DOCKING_SPLITTER_SIZE 2.0f
@@ -2899,7 +2899,7 @@ namespace AstralEngine
        - Passing 'bool* pOpen' displays a Close button on the upper-right corner of the window, 
          the pointed value will be set to false when the button is pressed.
     */ 
-    bool Begin(const char* name, bool* pOpen = nullptr, UIWindowFlags flags = UIWindowFlags::None)
+    bool Begin(const char* name, bool* pOpen, UIWindowFlags flags)
     {
         UIContext& g = *uiContext;
         const UIStyle& style = g.style;

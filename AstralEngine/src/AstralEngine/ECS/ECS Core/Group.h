@@ -15,7 +15,7 @@ namespace AstralEngine
 
 	//non-owning group, should avoid usage since it uses more memory (other groups do not)
 	template<typename Entity, typename... Exclude, typename... Component>
-	class Group<Entity, TypeList<Exclude...>, TypeList<Component...>>
+	class Group<Entity, ExcludeList<Exclude...>, GetList<Component...>>
 	{
 		friend class Registry<Entity>;
 
@@ -59,18 +59,17 @@ namespace AstralEngine
 		template<typename... Comp>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e));
+			AE_ECS_ASSERT(Contains(e), "");
 
 			if constexpr (sizeof... (Comp) == 1)
 			{
-				//need to unwrap the Type "packet" even if just one (I believe?)
+				//need to unwrap the Type "packet" even if just one
 				return (std::get<PoolType<Comp>*>(m_pools)->Get(e), ...);
 			}
 			else
 			{
 				//recursive call
-				return std::tuple<decltype(Get<Comp>({}))... > { Get<Comp>(e), ... };
+				return std::tuple<decltype(Get<Comp>({}))...> { Get<Comp>(e)... };
 			}
 		}
 
@@ -82,14 +81,13 @@ namespace AstralEngine
 		}
 
 	private:
-		
 		Group(ASparseSet<Entity>& ref, Storage<Entity, std::remove_const_t<Component>>&... gpool)
 			: m_handler(&ref), m_pools(gpool...) { }
 
 		template<typename Func, typename... Weak>
 		void Traverse(Func function, TypeList<Weak...>) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			for (const Entity e : *m_handler)
 			{
 				if constexpr (std::is_invocable_v < Func, decltype(Get<Weak>({}))... > )
@@ -113,7 +111,7 @@ namespace AstralEngine
 	  Owned are the components owned by the group while Component are the components observed by the group
 	*/
 	template<typename Entity, typename... Exclude, typename... Component, typename... Owned>
-	class Group<Entity, TypeList<Exclude...>, TypeList<Component...>, Owned...>
+	class Group<Entity, ExcludeList<Exclude...>, GetList<Component...>, Owned...>
 	{
 		friend class Registry<Entity>;
 
@@ -154,7 +152,6 @@ namespace AstralEngine
 			}
 		}
 
-
 		AIterator begin() const
 		{
 			return std::get<0>(m_pools)->ASparseSet<Entity>::begin();
@@ -167,14 +164,15 @@ namespace AstralEngine
 
 		bool Contains(const Entity e) const
 		{
+			
 			return std::get<0>(m_pools)->Contains(e) && (std::get<0>(m_pools)->GetIndex(e) < (*m_length));
 		}
 
 		template<typename... Comp>
 		decltype(auto) Get(const Entity e) const
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e), "Entity provided not contained within Group");
+			
+			AE_ECS_ASSERT(Contains(e), "Entity provided not contained within Group");
 
 			if constexpr(sizeof...(Comp) == 1)
 			{
@@ -190,7 +188,7 @@ namespace AstralEngine
 		template<typename Func>
 		void ForEach(Func function) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			using OwnedTypeList = TypeListCat<std::conditional_t<std::is_empty_v<Owned>, TypeList<>, TypeList<Owned>>...>;
 			using ComponentTypeList = TypeListCat<std::conditional_t<std::is_empty_v<Component>,
 				TypeList<>, TypeList<Component>>...>;
@@ -199,7 +197,6 @@ namespace AstralEngine
 		}
 
 	private:
-
 		Group(const size_t& extend, Storage<Entity, std::remove_const_t<Owned>>&... ownedPool,
 			Storage<Entity, std::remove_const_t<Component>>&... componentPool)
 			: m_pools{ &ownedPool..., &componentPool... }, m_length(&extend) {	}
@@ -211,7 +208,7 @@ namespace AstralEngine
 			auto it = std::make_tuple((std::get<PoolType<Strong>*>(m_pools)->end() - *m_length)...);
 			auto data = std::get<0>(m_pools)->SparseSet<Entity>::end() - *m_length;
 
-			for (size_t i = 0; i < *length; i++)
+			for (size_t i = 0; i < *m_length; i++)
 			{
 				if constexpr (std::is_invocable_v < Func, decltype(Get<Strong>({}))..., decltype(Get<Weak>({}))... > )
 				{
@@ -235,8 +232,9 @@ namespace AstralEngine
 			}
 		}
 
-		const std::tuple<PoolType<Owned>*..., PoolType<Component>...> m_pools;
+		const std::tuple<PoolType<Owned>*..., PoolType<Component>*...> m_pools;
 		const size_t* m_length;
+		const size_t* m_super;
 	};
 
 

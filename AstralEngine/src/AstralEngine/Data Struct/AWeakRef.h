@@ -44,6 +44,26 @@ namespace AstralEngine
 			}
 		}
 
+		T* Get() const { return (T*)m_block->ptr; }
+
+		size_t GetStrongCount() const
+		{
+			if (m_block == nullptr)
+			{
+				return 0;
+			}
+			return m_block->count;
+		}
+
+		size_t GetWeakCount() const
+		{
+			if (m_block == nullptr)
+			{
+				return 0;
+			}
+			return m_block->weakCount;
+		}
+
 		T* operator->() const
 		{
 			return (T*)m_block->ptr;
@@ -104,13 +124,13 @@ namespace AstralEngine
 
 		bool operator!=(const AWeakRef<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 		
 		bool operator!=(const AReference<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "AstralEngine/Core/Core.h"
-#include "AList.h"
 #include "AstralEngine/Debug/Instrumentor.h"
 
 
@@ -14,8 +13,6 @@ namespace AstralEngine
 	{
 		friend class ADynArr<T>;
 	public:
-		ADynArrIterator(size_t pos, T* arr) : m_pos(pos), m_arr(arr) { }
-
 		ADynArrIterator(const ADynArrIterator<T>& other) : m_pos(other.m_pos), m_arr(other.m_arr) { }
 
 		virtual ~ADynArrIterator() { }
@@ -70,20 +67,22 @@ namespace AstralEngine
 
 		T& operator*() const
 		{
-			return m_arr[m_pos];
+			return m_arr->Get(m_pos);
 		}
+
+	protected:
+		ADynArrIterator(size_t pos, ADynArr<T>* arr) : m_pos(pos), m_arr(arr) { }
 
 	private:
 		size_t m_pos;
-		T* m_arr;
+		ADynArr<T>* m_arr;
 	};
 
 	template<typename T>
 	class ADynArrConstIterator : public ADynArrIterator<T>
 	{
+		friend class ADynArr<T>;
 	public:
-		ADynArrConstIterator(size_t pos, T* arr) : ADynArrIterator<T>(pos, arr) { }
-		
 		ADynArrConstIterator(const ADynArrConstIterator<T>& other) : ADynArrIterator<T>(other) { }
 
 		virtual ADynArrConstIterator<T>& operator++()
@@ -119,7 +118,7 @@ namespace AstralEngine
 
 		virtual ADynArrConstIterator<T> operator--(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ADynArrConstIterator<T> it = *this;
 			this->operator--();
 			return it;
@@ -140,10 +139,12 @@ namespace AstralEngine
 			return ADynArrIterator<T>::operator*();
 		}
 
+	private:
+		ADynArrConstIterator(size_t pos, const ADynArr<T>* arr) : ADynArrIterator<T>(pos, const_cast<ADynArr<T>*>(arr)) { }
 	};
 
 	template<typename T>
-	class ADynArr : public AList<T>
+	class ADynArr sealed
 	{
 		friend class ADynArrIterator<T>;
 	public:
@@ -190,7 +191,7 @@ namespace AstralEngine
 			delete[] m_arr;
 		}
 
-		virtual size_t GetCount() const override 
+		size_t GetCount() const 
 		{
 			return m_count; 
 		}
@@ -200,9 +201,17 @@ namespace AstralEngine
 			return m_maxCount;
 		}
 
-		virtual void Add(T element) override 
+		void Add(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
+			CheckSize();
+			m_arr[m_count] = std::move(element);
+			m_count++;
+		}
+
+		void Add(const T& element)
+		{
+			
 			CheckSize();
 			m_arr[m_count] = element;
 			m_count++;
@@ -211,7 +220,7 @@ namespace AstralEngine
 		template<typename... Args>
 		T& Emplace(Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 
 			for (size_t i = m_count; i > 0; i--)
@@ -224,13 +233,24 @@ namespace AstralEngine
 			return m_arr[0];
 		}
 
-		virtual void AddFirst(T element) override 
+		void AddFirst(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
+			Insert(std::move(element), 0);
+		}
+
+		void AddFirst(const T& element) 
+		{
+			
 			Insert(element, 0);	
 		}
 
-		virtual void AddLast(T element) override 
+		void AddLast(T&& element)
+		{
+			Add(std::forward<T>(element));
+		}
+
+		void AddLast(const T& element) 
 		{
 			Add(element); 
 		}
@@ -238,17 +258,38 @@ namespace AstralEngine
 		template<typename... Args>
 		T& EmplaceBack(Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			CheckSize();
 			m_arr[m_count] = T(std::forward<Args>(args)...);
 			m_count++;
 
 			return m_arr[m_count - 1];
 		}
-		
-		virtual size_t Find(const T& element) const override
+
+		template<typename... Args>
+		T& EmplaceAt(size_t index, Args&&... args)
 		{
-			AE_PROFILE_FUNCTION();
+			
+			CheckSize();
+
+			if (m_count == 0)
+			{
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
+				return EmplaceBack(std::forward<Args>(args)...);
+			}
+
+			for (size_t i = m_count - 1; i >= index; i--)
+			{
+				m_arr[i + 1] = std::move(m_arr[i]);
+			}
+			m_arr[index] = T(std::forward<Args>(args)...);
+			m_count++;
+			return m_arr[index];
+		}
+		
+		size_t Find(const T& element) const
+		{
+			
 			for (size_t i = 0; i < m_count; i++)
 			{
 				if (m_arr[i] == element)
@@ -259,33 +300,44 @@ namespace AstralEngine
 			return -1;
 		}
 
-		void Insert(T element, AIterator it)
+		void Insert(const T& element, AIterator it)
 		{
 			Insert(element, it.m_pos);
 		}
 
-		void Insert(T element, AConstIterator it)
+		void Insert(const T& element, AConstIterator it)
 		{
 			Insert(element, it.m_pos);
 		}
 
-		virtual void Insert(T element, size_t index) override
+		void Insert(T&& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
 			
-			//allow user to create holes in the array where no valid data is present
-			if (index > m_count)
+			CheckSize();
+
+			if (m_count == 0)
 			{
-				Reserve(index);
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
+				Add(element);
+				return;
 			}
-			else
+
+			for (size_t i = m_count - 1; i >= index; i--)
 			{
-				CheckSize();
+				m_arr[i + 1] = std::move(m_arr[i]);
 			}
+			m_arr[index] = std::move(element);
+			m_count++;
+		}
+
+		void Insert(const T& element, size_t index)
+		{
+			
+			CheckSize();
 			
 			if (m_count == 0)
 			{
-				AE_CORE_ASSERT(index == 0, "Invalid index provided");
+				AE_DATASTRUCT_ASSERT(index == 0, "Invalid index provided");
 				Add(element);
 				return;
 			}
@@ -296,17 +348,21 @@ namespace AstralEngine
 			}
 			m_arr[index] = element;
 			m_count++;
-
-			//allow user to create holes in the array where no valid data is present
-			if (m_count <= index)
-			{
-				m_count = index + 1;
-			}
 		}
 
-		virtual void Remove(T element) override
+		void Insert(T&& element, const AIterator& it)
 		{
-			AE_PROFILE_FUNCTION();
+			Insert(std::forward(element), it.m_pos);
+		}
+
+		void Insert(T&& element, const AConstIterator& it)
+		{
+			Insert(std::forward(element), it.m_pos);
+		}
+
+		void Remove(const T& element)
+		{
+			
 			size_t index = Find(element);
 			if (index != -1)
 			{
@@ -314,9 +370,9 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void RemoveAt(size_t index) override
+		void RemoveAt(size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			
 			if (index == m_count - 1)
 			{
@@ -326,7 +382,7 @@ namespace AstralEngine
 
 			for (size_t i = index; i < m_count; i++)
 			{
-				m_arr[i] = m_arr[i + 1];
+				m_arr[i] = std::move(m_arr[i + 1]);
 			}
 			m_count--;
 		}
@@ -351,9 +407,9 @@ namespace AstralEngine
 			m_maxCount = m_count;
 		}
 
-		virtual void Reserve(size_t count) override
+		void Reserve(size_t count)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t currentCount = m_maxCount - m_count;
 			if (currentCount < count)
 			{
@@ -371,14 +427,26 @@ namespace AstralEngine
 			}
 		}
 
-		virtual void Clear() override
+		void Clear()
 		{
 			m_count = 0;
 		}
 
-		virtual bool Contains(const T& element) const override
+		bool Contains(const T& element) const
 		{
 			return Find(element) != -1;
+		}
+
+		bool IsEmpty() const { return m_count == 0; }
+
+		T& Get(size_t index)
+		{
+			return this->operator[](index);
+		}
+
+		const T& Get(size_t index) const
+		{
+			return this->operator[](index);
 		}
 
 		T* GetData() { return m_arr; }
@@ -387,60 +455,60 @@ namespace AstralEngine
 		
 		AIterator begin()
 		{
-			return ADynArrIterator(0, m_arr); 
+			return ADynArrIterator<T>(0, this); 
 		}
 		
 		AIterator end()
 		{
-			return ADynArrIterator<T>(m_count, m_arr); 
+			return ADynArrIterator<T>(m_count, this); 
 		}
 
 		AIterator rbegin() 
 		{
-			return ADynArrIterator<T>(m_count - 1, m_arr);
+			return ADynArrIterator<T>(m_count - 1, this);
 		}
 		
 		AIterator rend() 
 		{
-			return ADynArrIterator(-1, m_arr);
+			return ADynArrIterator<T>(-1, this);
 		}
 
 		AConstIterator begin() const
 		{
-			return ADynArrConstIterator(0, m_arr);
+			return ADynArrConstIterator<T>(0, this);
 		}
 
 		AConstIterator end() const
 		{
-			return ADynArrConstIterator(m_count, m_arr);
+			return ADynArrConstIterator<T>(m_count, this);
 		}
 
 		AConstIterator rbegin() const
 		{
-			return ADynArrConstIterator(m_count - 1, m_arr);
+			return ADynArrConstIterator<T>(m_count - 1, this);
 		}
 
 		AConstIterator rend() const
 		{
-			return ADynArrConstIterator(-1, m_arr);
+			return ADynArrConstIterator<T>(-1, this);
 		}
 
 
-		virtual T& operator[](size_t index) override 
+		T& operator[](size_t index) 
 		{
-			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
+			AE_DATASTRUCT_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index]; 
 		}
 		
-		virtual const T& operator[](size_t index) const override
+		const T& operator[](size_t index) const
 		{
-			AE_CORE_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
+			AE_DATASTRUCT_ASSERT(index >= 0 && index < m_count, "Index out of bounds");
 			return m_arr[index];
 		}
 
 		bool operator==(const ADynArr<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (GetCount() != other.GetCount())
 			{
 				return false;
@@ -458,7 +526,7 @@ namespace AstralEngine
 
 		bool operator!=(const ADynArr<T>& other) const 
 		{
-			AE_PROFILE_FUNCTION(); 
+			 
 			return !(*this == other); 
 		}
 
@@ -498,7 +566,7 @@ namespace AstralEngine
 		
 		void CheckSize()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (m_count >= m_maxCount)
 			{
 				Resize();
@@ -507,8 +575,8 @@ namespace AstralEngine
 
 		void Resize()
 		{
-			AE_PROFILE_FUNCTION();
-			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + 1;
+			
+			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + (size_t)1;
 			T* temp = new T[newMax];
 
 			for (size_t i = 0; i < m_count; i++)

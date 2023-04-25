@@ -5,13 +5,37 @@
 
 namespace AstralEngine
 {
+	unsigned int EngineInternalFormatToOpenGLInternalFormat(Texture2DInternalFormat internalFormat)
+	{
+		switch(internalFormat)
+		{
+		case Texture2DInternalFormat::RGBA8:
+			return GL_RGBA8;
+
+		case Texture2DInternalFormat::Depth24Stencil8:
+			return GL_DEPTH24_STENCIL8;
+
+		case Texture2DInternalFormat::RGB16Normal:
+			return GL_RGB16_SNORM;
+		}
+		AE_CORE_ERROR("Unknown texture internal format");
+		return 0;
+	}
+
 	//OpenGLTexture2D///////////////////////////////////////////////////////////////////
-	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height) 
-		: m_internalFormat(GL_RGBA8), m_dataFormat(GL_RGBA), m_width(width), m_height(height) 
+	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height) : OpenGLTexture2D(width, height, 
+		Texture2DInternalFormat::RGBA8)
+	{
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height, 
+		Texture2DInternalFormat internalFormat) : m_dataFormat(GL_RGBA), m_width(width), m_height(height),
+		m_internalFormat(internalFormat)
 	{
 		AE_PROFILE_FUNCTION();
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_rendererID);
-		glTextureStorage2D(m_rendererID, 1, m_internalFormat, m_width, m_height);
+		glTextureStorage2D(m_rendererID, 1, EngineInternalFormatToOpenGLInternalFormat(m_internalFormat), 
+			m_width, m_height);
 
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -21,11 +45,11 @@ namespace AstralEngine
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(unsigned int width, unsigned int height, void* data, unsigned int size) 
-		: m_internalFormat(GL_RGBA8), m_dataFormat(GL_RGBA), m_width(width), m_height(height)
+		: m_internalFormat(Texture2DInternalFormat::RGBA8), m_dataFormat(GL_RGBA), m_width(width), m_height(height)
 	{
 		AE_PROFILE_FUNCTION();
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_rendererID);
-		glTextureStorage2D(m_rendererID, 1, m_internalFormat, m_width, m_height);
+		glTextureStorage2D(m_rendererID, 1, GL_RGBA8, m_width, m_height);
 
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -47,17 +71,19 @@ namespace AstralEngine
 		m_width = width;
 		m_height = height;
 
-		m_internalFormat = 0;
+		unsigned int internalFormat = 0;
 
 		switch(channels)
 		{
 		case 3:
-			m_internalFormat = GL_RGB8;
+			internalFormat = GL_RGB8;
+			m_internalFormat = Texture2DInternalFormat::RGB8;
 			m_dataFormat = GL_RGB;
 			break;
 
 		case 4:
-			m_internalFormat = GL_RGBA8;
+			internalFormat = GL_RGBA8;
+			m_internalFormat = Texture2DInternalFormat::RGBA8;
 			m_dataFormat = GL_RGBA;
 			break;
 
@@ -66,7 +92,7 @@ namespace AstralEngine
 		}
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_rendererID);
-		glTextureStorage2D(m_rendererID, 1, m_internalFormat, m_width, m_height);
+		glTextureStorage2D(m_rendererID, 1, internalFormat, m_width, m_height);
 
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_rendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -124,6 +150,11 @@ namespace AstralEngine
 		glBindTextureUnit(slot, m_rendererID);
 	}
 
+	Texture2DInternalFormat OpenGLTexture2D::GetInternalFormat() const 
+	{
+		return m_internalFormat;
+	}
+
 	bool OpenGLTexture2D::operator==(const Texture& other) const
 	{
 		return m_rendererID == ((OpenGLTexture2D&) other).m_rendererID;
@@ -159,7 +190,7 @@ namespace AstralEngine
 				AE_CORE_ERROR("Failed to load image \"%s\"", faceTextures[i]);
 			}
 
-			unsigned int size = Math::Min(width, height);
+			unsigned int size = (unsigned int)Math::Min(width, height);
 
 
 			if ((m_size != 0) && (size != m_size))

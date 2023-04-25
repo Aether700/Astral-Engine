@@ -35,22 +35,22 @@ namespace AstralEngine
 
 		void Enqueue(const K& key, const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, element);
 			Enqueue(pair);
 		}
 
 		void Enqueue(const AKeyElementPair<K, T>& pair)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_arr.Add(pair);
 			UpHeap();
 		}
 
 		AKeyElementPair<K, T> Dequeue()
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!IsEmpty(), "Cannot dequeue an empty heap");
+			
+			AE_DATASTRUCT_ASSERT(!IsEmpty(), "Cannot dequeue an empty heap");
 			AKeyElementPair<K, T> pair = m_arr[0];
 
 			//swap then remove to increase performance
@@ -129,8 +129,8 @@ namespace AstralEngine
 
 		void UpHeap()
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!IsEmpty(), "Cannot perform up heap an empty heap");
+			
+			AE_DATASTRUCT_ASSERT(!IsEmpty(), "Cannot perform up heap an empty heap");
 			
 			size_t last = m_arr.GetCount() - 1;
 
@@ -150,7 +150,7 @@ namespace AstralEngine
 
 		void DownHeap()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (IsEmpty())
 			{
 				return;

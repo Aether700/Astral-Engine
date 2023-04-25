@@ -10,23 +10,32 @@ namespace AstralEngine
 {
 	Vector2::Vector2() : x(0.0f), y(0.0f) { }
 	Vector2::Vector2(float X, float Y) : x(X), y(Y) { }
-	Vector2::Vector2(const Vector2Int& v2i) : x(v2i.x), y(v2i.y) { }
+	Vector2::Vector2(const Vector2Int& v2i) : x((float)v2i.x), y((float)v2i.y) { }
 	Vector2::Vector2(const Vector3& v3) : x(v3.x), y(v3.y) { }
-	Vector2::Vector2(const Vector3Int& v3i) : x(v3i.x), y(v3i.y) { }
+	Vector2::Vector2(const Vector3Int& v3i) : x((float)v3i.x), y((float)v3i.y) { }
 	Vector2::Vector2(const Vector4& v4) : x(v4.x), y(v4.y) { }
-	Vector2::Vector2(const Vector4Int& v4i) : x(v4i.x), y(v4i.y) { }
+	Vector2::Vector2(const Vector4Int& v4i) : x((float)v4i.x), y((float)v4i.y) { }
 
 
 	Vector2::~Vector2() { }
 
-	const float Vector2::Length() const
+
+
+	const float Vector2::Magnitude() const
 	{
-		return Math::Sqrt((x * x) + (y * y)); 
+		return Math::Sqrt(SqrMagnitude()); 
 	}
 	
-	const Vector2 Vector2::Normalize() const
+	const float Vector2::SqrMagnitude() const
 	{
-		return Vector2(x / Length(), y / Length()); 
+		return (x * x) + (y * y);
+	}
+
+	void Vector2::Normalize()
+	{
+		float len = Magnitude();
+		x = x / len;
+		y = y / len;
 	}
 
 	const float* Vector2::Data() const
@@ -40,6 +49,12 @@ namespace AstralEngine
 	const Vector2 Vector2::Up() { return Vector2(0.0f, 1.0f); }
 	const Vector2 Vector2::Zero() { return Vector2(); }
 
+	const Vector2 Vector2::Normalize(const Vector2& v)
+	{
+		Vector2 unit = v;
+		unit.Normalize();
+		return unit;
+	}
 
 	const float Vector2::DotProduct(const Vector2& v1, const Vector2& v2) { return (v1.x * v2.x) + (v1.y * v2.y); }
 	Vector2 Vector2::Min(const Vector2& lhs, const Vector2& rhs) 
@@ -57,11 +72,27 @@ namespace AstralEngine
 		return Vector2(Math::Clamp(v.x, min.x, max.x), Math::Clamp(v.y, min.y, max.y));
 	}
 
+	float Vector2::Angle(const Vector2& v1, const Vector2& v2)
+	{
+		return Math::ArcCos( DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()) );
+	}
 
+	const Vector2 Vector2::operator-() const { return Vector2(-x, -y); }
 	const Vector2 Vector2::operator+(const Vector2& v) const { return Vector2(x + v.x, y + v.y); }
 	const Vector2 Vector2::operator-(const Vector2& v) const { return Vector2(x - v.x, y - v.y); }
-	const Vector2 Vector2::operator+=(const Vector2& v) const { return *this + v; }
-	const Vector2 Vector2::operator-=(const Vector2& v) const { return *this - v; }
+	
+	const Vector2& Vector2::operator+=(const Vector2& v) 
+	{
+		*this = *this + v;
+		return *this;
+	}
+
+	const Vector2& Vector2::operator-=(const Vector2& v) 
+	{ 
+		*this = *this - v;
+		return *this;
+	}
+	
 	const Vector2 Vector2::operator*(float k) const { return Vector2(x * k, y * k); }
 	const Vector2 Vector2::operator/(float k) const { return Vector2(x / k, y / k); }
 	
@@ -77,6 +108,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return 0.0f;
 	}
 
 	float& Vector2::operator[](unsigned int index) 
@@ -91,6 +123,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return x;
 	}
 
 	const Vector2 operator*(float k, const Vector2& v) { return v * k; }

@@ -21,17 +21,21 @@ namespace AstralEngine
 
 		~Vector4();
 
-		const float Length() const;
-		const Vector4 Normalize() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
+		void Normalize();
 
 		const float* Data() const;
 
 		static const Vector4 Zero();
 
+		static const Vector4 Normalize(const Vector4& v);
+
+		const Vector4 operator-() const;
 		const Vector4 operator+(const Vector4& v) const;
 		const Vector4 operator-(const Vector4& v) const;
-		const Vector4 operator+=(const Vector4& v) const;
-		const Vector4 operator-=(const Vector4& v) const;
+		const Vector4& operator+=(const Vector4& v);
+		const Vector4& operator-=(const Vector4& v);
 		const Vector4 operator*(float k) const;
 		const Vector4 operator/(float k) const;
 		float& operator[](unsigned int index);
@@ -65,5 +69,6 @@ namespace AstralEngine
 			float a;
 		};
 	};
-		Vector4 operator*(float k, const Vector4& v);
+	
+	Vector4 operator*(float k, const Vector4& v);
 }

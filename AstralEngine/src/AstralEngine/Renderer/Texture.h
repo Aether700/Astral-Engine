@@ -1,5 +1,7 @@
 #pragma once
 #include "AstralEngine/Data Struct/AReference.h"
+#include "AstralEngine/Core/Resource.h"
+
 #include <string>
 
 namespace AstralEngine
@@ -21,13 +23,29 @@ namespace AstralEngine
 		virtual bool operator==(const Texture& other) const = 0;
 	};
 
+	enum class Texture2DInternalFormat
+	{
+		Depth24Stencil8,
+		RGBA8,
+		RGB8,
+		RGB16Normal
+	};
+
 	class Texture2D : public Texture
 	{
+		friend class ResourceHandler;
 	public:
 		virtual ~Texture2D() { }
+		
+		virtual Texture2DInternalFormat GetInternalFormat() const = 0;
 
+		static ResourceHandle WhiteTexture();
+
+	private:
 		static AReference<Texture2D> Create(const std::string& path);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height);
+		static AReference<Texture2D> Create(unsigned int width, unsigned int height, 
+			Texture2DInternalFormat internalFormat);
 		static AReference<Texture2D> Create(unsigned int width, unsigned int height, void* data, unsigned int size);
 	};
 

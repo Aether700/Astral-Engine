@@ -11,31 +11,59 @@ namespace AstralEngine
 	Vector4::Vector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) { }
 	Vector4::Vector4(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) { }
 	Vector4::Vector4(const Vector2& v2) : x(v2.x), y(v2.y), z(0.0f), w(0.0f) { }
-	Vector4::Vector4(const Vector2Int& v2i) : x(v2i.x), y(v2i.y), z(0.0f), w(0.0f) { }
+	Vector4::Vector4(const Vector2Int& v2i) : x((float)v2i.x), y((float)v2i.y), z(0.0f), w(0.0f) { }
 	Vector4::Vector4(const Vector3& v3) : x(v3.x), y(v3.y), z(v3.z), w(0.0f) { }
-	Vector4::Vector4(const Vector3Int& v3i) : x(v3i.x), y(v3i.y), z(v3i.z), w(0.0f) { }
-	Vector4::Vector4(const Vector4Int& v4i) : x(v4i.x), y(v4i.y), z(v4i.z), w(v4i.w) { }
+	Vector4::Vector4(const Vector3Int& v3i) : x((float)v3i.x), y((float)v3i.y), z((float)v3i.z), w(0.0f) { }
+	Vector4::Vector4(const Vector4Int& v4i) : x((float)v4i.x), y((float)v4i.y), z((float)v4i.z), w((float)v4i.w) { }
 
 	Vector4::~Vector4() { }
 
-	const float Vector4::Length() const
+	const float Vector4::Magnitude() const
 	{
-		return Math::Sqrt((x * x) + (y * y) + (z * z) + (w * w)); 
+		return Math::Sqrt(SqrMagnitude()); 
 	}
 	
-	const Vector4 Vector4::Normalize() const
+	const float Vector4::SqrMagnitude() const
 	{
-		return Vector4(x / Length(), y / Length(), z / Length(), w / Length());
+		return ((x * x) + (y * y) + (z * z) + (w * w));
+	}
+
+	void Vector4::Normalize()
+	{
+		float len = Magnitude();
+		x = x / len;
+		y = y / len;
+		z = z / len;
+		w = w / len;
 	}
 
 	const float* Vector4::Data() const { return &x; }
 
 	const Vector4 Vector4::Zero() { return Vector4(); }
 
+	const Vector4 Vector4::Normalize(const Vector4& v)
+	{
+		Vector4 unit = v;
+		unit.Normalize();
+		return unit;
+	}
+
+	const Vector4 Vector4::operator-() const { return Vector4(-x, -y, -z, -w); }
 	const Vector4 Vector4::operator+(const Vector4& v) const { return Vector4(x + v.x, y + v.y, z + v.z, w + v.w); }
 	const Vector4 Vector4::operator-(const Vector4& v) const { return Vector4(x - v.x, y - v.y, z - v.z, w - v.w); }
-	const Vector4 Vector4::operator+=(const Vector4& v) const { return *this + v; }
-	const Vector4 Vector4::operator-=(const Vector4& v) const { return *this - v; }
+	
+	const Vector4& Vector4::operator+=(const Vector4& v) 
+	{ 
+		*this = *this + v;
+		return *this;
+	}
+
+	const Vector4& Vector4::operator-=(const Vector4& v) 
+	{ 
+		*this = *this - v;
+		return *this;
+	}
+	
 	const Vector4 Vector4::operator*(float k) const { return Vector4(x * k, y * k, z * k, w * k); }
 	const Vector4 Vector4::operator/(float k) const { return Vector4(x / k, y / k, z / k, w / k); }
 	float& Vector4::operator[](unsigned int index)
@@ -56,6 +84,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return x;
 	}
 
 	const float Vector4::operator[](unsigned int index) const
@@ -76,6 +105,7 @@ namespace AstralEngine
 		}
 
 		AE_CORE_ERROR("Invalid Index");
+		return 0.0f;
 	}
 	
 	Vector4& Vector4::operator=(const Vector4& v)

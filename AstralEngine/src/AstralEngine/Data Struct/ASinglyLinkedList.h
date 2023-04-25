@@ -1,5 +1,4 @@
 #pragma once
-#include "AList.h"
 #include "AstralEngine/Debug/Instrumentor.h"
 
 namespace AstralEngine
@@ -11,7 +10,7 @@ namespace AstralEngine
 	class ASinglyLinkedListConstIterator;
 
 	template<typename T>
-	class ASinglyLinkedList : public AList<T>
+	class ASinglyLinkedList sealed
 	{
 		friend class ASinglyLinkedListIterator<T>;
 		friend class ASinglyLinkedListConstIterator<T>;
@@ -23,48 +22,73 @@ namespace AstralEngine
 		ASinglyLinkedList() : m_count(0), 
 			m_dummy(new Node(nullptr)), m_head(m_dummy) { }
 
-		virtual ~ASinglyLinkedList() 
+		ASinglyLinkedList(const ASinglyLinkedList& other) : m_count(0),
+			m_dummy(new Node(nullptr)), m_head(m_dummy)
 		{
-			AE_PROFILE_FUNCTION();
+			for(T element : other)
+			{
+				Add(element);
+			}
+		}
+
+		ASinglyLinkedList(ASinglyLinkedList&& other) : m_count(other.m_count),
+			m_dummy(other.m_dummy), m_head(other.m_head)
+		{
+			other.m_head = nullptr;
+			other.m_dummy = nullptr;
+			other.m_count = 0;
+		}
+
+		~ASinglyLinkedList() 
+		{
+			
 			Clear();
 			delete m_dummy;
 		}
 		
-		virtual size_t GetCount() const override { return m_count; }
+		size_t GetCount() const { return m_count; }
 
-		virtual void Add(T element) override
+		void Add(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
-			Node* newNode = new Node(element);
-			newNode->next = m_head;
-			m_head = newNode;
-			m_count++;
+			
+			Node* newNode = new Node(std::forward<T>(element));
+			AddNode(newNode);
 		}
 
-		virtual void AddFirst(T element) override
+		void Add(const T& element)
+		{
+			
+			Node* newNode = new Node(element);
+			AddNode(newNode);
+		}
+
+		void AddFirst(T&& element)
+		{
+			Add(std::forward<T>(element));
+		}
+
+		void AddFirst(const T& element)
 		{
 			Add(element);
 		}
 
-		virtual void AddLast(T element) override
+		void AddLast(T&& element)
 		{
-			AE_PROFILE_FUNCTION();
-			Node* ptr = m_head;
-
-			while (ptr->next != m_dummy)
-			{
-				ptr = ptr->next;
-			}
-
-			Node* newNode = new Node(element);
-			newNode->next = m_dummy;
-			ptr->next = newNode;
-			m_count++;
+			
+			Node* newNode = new Node(std::forward<T>(element));
+			AddNodeLast(newNode);
 		}
 
-		virtual size_t Find(const T& element) const override
+		void AddLast(const T& element)
 		{
-			AE_PROFILE_FUNCTION();
+			
+			Node* newNode = new Node(element);
+			AddNodeLast(newNode);
+		}
+
+		int Find(const T& element) const
+		{
+			
 			Node* ptr = m_head;
 
 			for (size_t i = 0; i < m_count; i++)
@@ -79,28 +103,29 @@ namespace AstralEngine
 			return -1;
 		}
 
-		virtual void Insert(T element, size_t index) override
+		void Insert(T&& element, size_t index)
 		{
-			AE_PROFILE_FUNCTION();
-			if (index == 0)
+			
+			Node* newNode = new Node(std::forward<T>(element));
+			InsertNode(newNode, index);
+		}
+
+		void Insert(const T& element, size_t index)
+		{
+			
+			Node* newNode = new Node(element);
+			InsertNode(newNode, index);
+		}
+
+		void Remove(const T& element)
+		{
+			if (IsEmpty())
 			{
-				Add(element);
 				return;
 			}
 
-			Node* prev = GetNode(index - 1);
-			Node* newNode = new Node(element);
-
-			newNode->next = prev->next;
-			prev->next = prev;
-			m_count++;
-		}
-
-		virtual void Remove(T element) override
-		{
-			AE_PROFILE_FUNCTION();
 			Node* ptr1 = m_head;
-			Node* ptr2;
+			Node* ptr2 = m_head;
 
 			while (ptr1 != m_dummy)
 			{
@@ -113,24 +138,29 @@ namespace AstralEngine
 				ptr1 = ptr1->next;
 			}
 		
-			if(ptr1 == m_dummy)
+			if (ptr1 == m_dummy)
 			{
 				return;
 			}
 
 			ptr2->next = ptr1->next;
+			if (ptr1 == m_head)
+			{
+				m_head = ptr1->next;
+			}
 			delete ptr1;
 			m_count--;
 		}
 
-		virtual void RemoveAt(size_t index) override
+		void RemoveAt(size_t index)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if(index == 0)
 			{
 				Node* ptr = m_head;
 				m_head = m_head->next;
 				delete ptr;
+				m_count--;
 				return;
 			}
 
@@ -142,12 +172,10 @@ namespace AstralEngine
 		{
 			Remove(iterator.m_currNode->element);
 		}
-
-		virtual void Reserve(size_t count) override { }
 		
-		virtual void Clear() override 
+		void Clear() 
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* ptr = m_head;
 			Node* ptr2 = m_head;
 
@@ -161,9 +189,9 @@ namespace AstralEngine
 			m_count = 0;
 		}
 
-		virtual bool Contains(const T& element) const override { return Find(element) != -1; }
+		bool Contains(const T& element) const { return Find(element) != -1; }
 
-		virtual bool IsEmpty() const override { return m_head == m_dummy; }
+		bool IsEmpty() const { return m_head == m_dummy; }
 
 		ASinglyLinkedList::AIterator begin() { return ASinglyLinkedListIterator<T>(m_head); }
 
@@ -173,28 +201,29 @@ namespace AstralEngine
 		
 		ASinglyLinkedList::AConstIterator end() const { return ASinglyLinkedListConstIterator<T>(m_dummy); }
 
-		virtual T& operator[](size_t index) override { return GetNode(index)->element; }
+		T& operator[](size_t index) { return GetNode(index)->element; }
 		
-		virtual const T& operator[](size_t index) const override { return GetNode(index)->element; }
+		const T& operator[](size_t index) const { return GetNode(index)->element; }
 
 		ASinglyLinkedList<T>& operator=(const ASinglyLinkedList<T>& other)
 		{
 			Clear();
 
-			for (T& element : other)
+			for (const T& element : other)
 			{
 				Add(element);
 			}
 			return *this;
 		}
 
-		ASinglyLinkedList<T>& operator=(ASinglyLinkedList<T>&& other)
+		ASinglyLinkedList<T>& operator=(ASinglyLinkedList<T>&& other) noexcept
 		{
 			Clear();
 			delete m_dummy;
 			m_dummy = other.m_dummy;
 			m_head = other.m_head;
 			m_count = other.m_count;
+
 			other.m_count = 0;
 			other.m_dummy = nullptr;
 			other.m_head = nullptr;
@@ -228,10 +257,47 @@ namespace AstralEngine
 			Node* next;
 
 			Node() { }
-			Node(std::nullptr_t) : next(nullptr) { }
-			Node(T& e) : element(e) { }
-			Node(T& e, Node* ptr) : element(e), next(ptr) { }
+			Node(std::nullptr_t) : next(nullptr), element() { }
+			Node(T&& e) : element(std::move(e)), next(nullptr) { }
+			Node(const T& e) : element(e), next(nullptr) { }
+			Node(const T& e, Node* ptr) : element(e), next(ptr) { }
 		};
+
+		void AddNode(Node* newNode) 
+		{
+			newNode->next = m_head;
+			m_head = newNode;
+			m_count++;
+		}
+
+		void AddNodeLast(Node* newNode)
+		{
+			Node* ptr = m_head;
+
+			while (ptr->next != m_dummy)
+			{
+				ptr = ptr->next;
+			}
+
+			newNode->next = m_dummy;
+			ptr->next = newNode;
+			m_count++;
+		}
+
+		void InsertNode(Node* newNode, size_t index)
+		{
+			if (index == 0)
+			{
+				AddNode(newNode);
+				return;
+			}
+
+			Node* prev = GetNode(index - 1);
+
+			newNode->next = prev->next;
+			prev->next = prev;
+			m_count++;
+		}
 
 		//takes the previous node of the node to we want to remove as argument
 		void RemoveNode(Node* prevOfTarget)
@@ -244,7 +310,7 @@ namespace AstralEngine
 
 		Node* GetNode(size_t index) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			Node* ptr = m_head;
 
 			for (size_t i = 0; i < index && ptr != m_dummy; i++)
@@ -277,16 +343,16 @@ namespace AstralEngine
 
 		ASinglyLinkedListIterator<T>& operator++()
 		{
-			AE_PROFILE_FUNCTION();
+			
 			m_currNode = m_currNode->next;
 			return *this;
 		}
 
 		ASinglyLinkedListIterator<T>& operator+=(size_t i)
 		{
-			AE_PROFILE_FUNCTION();
+			
 
-			for (size_t j = 0 j < i; j++)
+			for (size_t j = 0; j < i; j++)
 			{
 				m_currNode = m_currNode->next;
 			}
@@ -296,7 +362,7 @@ namespace AstralEngine
 
 		ASinglyLinkedListIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ASinglyLinkedListIterator<T> it = *this;
 			this->operator++();
 			return it;
@@ -346,7 +412,7 @@ namespace AstralEngine
 
 		ASinglyLinkedListConstIterator<T> operator++(int)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			ASinglyLinkedListConstIterator<T> it = *this;
 			this->operator++();
 			return it;
@@ -368,7 +434,7 @@ namespace AstralEngine
 		}
 
 	private:
-		ASinglyLinkedListConstIterator(Node* node)
+		ASinglyLinkedListConstIterator(ASinglyLinkedListIterator<T>::Node* node)
 			: ASinglyLinkedListIterator<T>(node) { }
 
 	};

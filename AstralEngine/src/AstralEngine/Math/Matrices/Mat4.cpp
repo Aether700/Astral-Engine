@@ -1,7 +1,6 @@
 #include "aepch.h"
 #include "AstralEngine/Math/Utils.h"
 #include "Mat4.h"
-#include "Mat3.h"
 
 namespace AstralEngine
 {
@@ -19,6 +18,14 @@ namespace AstralEngine
 		m_vectors[1] = v2;
 		m_vectors[2] = v3;
 		m_vectors[3] = v4;
+	}
+
+	Mat4::Mat4(const Mat3& m)
+	{
+		m_vectors[0] = Vector4(m[0].x, m[0].y, m[0].z, 0.0f);
+		m_vectors[1] = Vector4(m[1].x, m[1].y, m[1].z, 0.0f);
+		m_vectors[2] = Vector4(m[2].x, m[2].y, m[2].z, 0.0f);
+		m_vectors[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	Mat4::Mat4(const Mat4& other)
@@ -133,7 +140,7 @@ namespace AstralEngine
 	const Mat4 Mat4::Rotate(const Mat4& m, float angle, const Vector3& axis)
 	{
 		AE_PROFILE_FUNCTION();
-		Vector3 normalizedAxis = axis.Normalize();
+		Vector3 normalizedAxis = Vector3::Normalize(axis);
 		float cosVal = Math::Cos(angle);
 		float sinVal = Math::Sin(angle);
 		Vector3 temp = normalizedAxis * (1.0f - cosVal);
@@ -188,28 +195,32 @@ namespace AstralEngine
 	const Mat4 Mat4::Ortho(float left, float right, float bottom, float top, float nearVal, float farVal)
 	{
 		AE_PROFILE_FUNCTION();
+
 		Mat4 result = Mat4::Identity();
 		result[0][0] = 2.0f / (right - left);
 		result[1][1] = 2.0f / (top - bottom);
-		result[2][2] = -2.0f / (farVal - nearVal);
+		result[2][2] = 2.0f / (farVal - nearVal);
 		result[3][0] = -(right + left) / (right - left);
 		result[3][1] = -(top + bottom) / (top - bottom);
 		result[3][2] = -(farVal + nearVal) / (farVal - nearVal);
+		
 		return result;
 	}
 
 	const Mat4 Mat4::Perspective(float fov, float aspect, float nearVal, float farVal)
 	{
 		AE_CORE_ASSERT(Math::Abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f, "");
-
-		float const tanHalfFov = Math::Tan(fov / 2.0f);
-
+		
+		float tanHalfFov = Math::Tan(fov / 2.0f);
+		
 		Mat4 result;
+
 		result[0][0] = 1.0f / (aspect * tanHalfFov);
-		result[1][1] = 1.0f / (tanHalfFov);
-		result[2][2] = -(farVal + nearVal) / (farVal - nearVal);
-		result[2][3] = -1.0f;
+		result[1][1] = 1.0f / tanHalfFov;
+		result[2][2] = (farVal + nearVal) / (farVal - nearVal);
+		result[2][3] = 1.0f;
 		result[3][2] = -(2.0f * farVal * nearVal) / (farVal - nearVal);
+
 		return result;
 	}
 

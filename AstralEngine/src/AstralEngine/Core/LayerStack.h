@@ -10,7 +10,7 @@ namespace AstralEngine
 		LayerStack();
 		~LayerStack();
 
-		inline int GetCount() const { return m_layers.GetCount(); }
+		inline size_t GetCount() const { return m_layers.GetCount(); }
 
 		void AttachLayer(Layer* l);
 		void DetachLayer(Layer* l);

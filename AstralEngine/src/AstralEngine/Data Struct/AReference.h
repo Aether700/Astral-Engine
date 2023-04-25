@@ -96,6 +96,24 @@ namespace AstralEngine
 			}
 		}
 
+		size_t GetStrongCount() const 
+		{
+			if (m_block == nullptr)
+			{
+				return 0;
+			}
+			return m_block->count;
+		}
+
+		size_t GetWeakCount() const
+		{
+			if (m_block == nullptr)
+			{
+				return 0;
+			}
+			return m_block->weakCount;
+		}
+
 		T* Get() const { return (T*)m_block->ptr; }
 
 		T* operator->() const
@@ -108,7 +126,19 @@ namespace AstralEngine
 			return *((T*)m_block->ptr);
 		}
 
-		void operator=(const AReference<T>& other)
+
+		AReference<T>& operator=(std::nullptr_t)
+		{
+			if (m_block != nullptr)
+			{
+				m_block->DecrementStrong();
+				m_block = nullptr;
+			}
+
+			return *this;
+		}
+
+		AReference<T>& operator=(const AReference<T>& other)
 		{
 			if (m_block != nullptr)
 			{
@@ -121,9 +151,10 @@ namespace AstralEngine
 			{
 				m_block->count++;
 			}
+			return *this;
 		}
 
-		void operator=(const AWeakRef<T>& other)
+		AReference<T>& operator=(const AWeakRef<T>& other)
 		{
 			if (m_block != nullptr)
 			{
@@ -135,6 +166,7 @@ namespace AstralEngine
 			{
 				m_block->count++;
 			}
+			return *this;
 		}
 
 		bool operator==(std::nullptr_t n) const
@@ -174,13 +206,13 @@ namespace AstralEngine
 
 		bool operator!=(const AReference<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 
 		bool operator!=(const AWeakRef<T>& other) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			return !(*this == other);
 		}
 

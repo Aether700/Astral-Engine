@@ -17,9 +17,9 @@ namespace AstralEngine
 		switch (type)
 		{
 		case ADataType::Float:		return sizeof(float);
-		case ADataType::Float2:	return 2 * sizeof(float);
-		case ADataType::Float3:	return 3 * sizeof(float);
-		case ADataType::Float4:	return 4 * sizeof(float);
+		case ADataType::Float2:	    return 2 * sizeof(float);
+		case ADataType::Float3:	    return 3 * sizeof(float);
+		case ADataType::Float4:	    return 4 * sizeof(float);
 		case ADataType::Mat3:		return 3 * 3 * sizeof(float); // 3x3 matrix
 		case ADataType::Mat4:		return 4 * 4 * sizeof(float); //4x4 matrix
 		case ADataType::Int:		return sizeof(int);
@@ -28,6 +28,8 @@ namespace AstralEngine
 		case ADataType::Int4:		return 4 * sizeof(int);
 		case ADataType::Bool:		return sizeof(bool);
 		}
+		AE_CORE_ERROR("Unknown ADataType provided");
+		return 0;
 	}
 
 	struct LayoutElement
@@ -36,11 +38,12 @@ namespace AstralEngine
 		ADataType type;
 		unsigned int size;
 		bool normalized;
+		size_t advanceRate; // used for instance rendering
 
-		LayoutElement() { }
+		LayoutElement() : size(0), type(ADataType::Bool), normalized(false), advanceRate(0) { }
 
-		LayoutElement(ADataType t, const std::string& n, bool nor = false) : type(t), name(n), 
-			normalized(nor), size(ADataTypeSize(t)) { }
+		LayoutElement(ADataType t, const std::string& n, bool nor = false, size_t advRate = 0) : type(t), name(n), 
+			normalized(nor), size(ADataTypeSize(t)), advanceRate(advRate) { }
 
 		unsigned int GetComponentCount() const
 		{
@@ -81,7 +84,7 @@ namespace AstralEngine
 
 		unsigned int GetStride() const { return m_stride; }
 		
-		inline int GetCount() const { return m_elements.GetCount(); }
+		inline size_t GetCount() const { return m_elements.GetCount(); }
 
 		const LayoutElement& operator[](unsigned int index) const
 		{
@@ -111,9 +114,9 @@ namespace AstralEngine
 		virtual void Unbind() const = 0;
 
 		virtual void SetData(const void* data, unsigned int size, unsigned int offset = 0) = 0;
-		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
+		virtual void SetLayout(const VertexBufferLayout& layout, size_t layoutOffset = 0) = 0;
 
-		static AReference<VertexBuffer> Create(unsigned int size);
-		static AReference<VertexBuffer> Create(float* data, unsigned int dataSize);
+		static AReference<VertexBuffer> Create(unsigned int size, bool isInstanceArr = false);
+		static AReference<VertexBuffer> Create(float* data, unsigned int dataSize, bool isInstanceArr = false);
 	};
 }

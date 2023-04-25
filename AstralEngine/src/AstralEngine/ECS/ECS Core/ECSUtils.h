@@ -19,7 +19,7 @@ namespace AstralEngine
 		template<typename Entity>
 		constexpr operator Entity() const
 		{
-			return Entity{ (size_t)((size_t)0 - (size_t)1) }; //get MaxValue of the unsigned IDType
+			return static_cast<Entity>(MAXSIZE_T); //get MaxValue of the unsigned IDType
 		}
 
 		constexpr bool operator==(NullObj) const { return true; }
@@ -59,13 +59,20 @@ namespace AstralEngine
 	template<typename...>
 	struct TypeList {};
 
+	template<typename... Type>
+	struct ExcludeList : public TypeList<Type...> { };
+
+	template<typename... Type>
+	struct GetList : public TypeList<Type...> { };
+
+	
 	//variable used to increase readability
 	template<typename... Type>
-	const TypeList<Type...> get = {};
+	constexpr GetList<Type...> get = {};
 
 	//variable used to increase readability
 	template<typename... Type>
-	const TypeList<Type...> exclude = {};
+	constexpr ExcludeList<Type...> exclude = {};
 
 	/*Concatenation of different types into a single list
 	  not defined on purpose to force use of specializations

@@ -42,10 +42,10 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		void Add(T& element)
+		void Add(T&& element)
 		{
 			CheckSize();
-			m_arr[m_count] = element;
+			m_arr[m_count] = std::move(element);
 			m_count++;
 		}
 
@@ -74,7 +74,7 @@ namespace AstralEngine
 
 			for (size_t i = index; i < m_count; i++)
 			{
-				m_arr[i] = m_arr[i + 1];
+				m_arr[i] = std::move(m_arr[i + 1]);
 			}
 			m_count--;
 		}
@@ -287,6 +287,20 @@ namespace AstralEngine
 
 		};
 
+		ResizableArr<T>& operator=(const ResizableArr<T>& other)
+		{
+			delete[] m_arr;
+			m_arr = new T[other.m_maxCount];
+			for (int i = 0; i < other.m_count; i++)
+			{
+				m_arr[i] = other.m_arr[i];
+			}
+
+			m_count = other.m_count;
+			m_maxCount = other.m_maxCount;
+			return *this;
+		}
+
 	private:
 		void CheckSize()
 		{
@@ -331,11 +345,14 @@ namespace AstralEngine
 
 		ASparseSet(ToIntFunc func = ToIntFunc(&ToInt<T>)) : m_toInt(func) { }
 
+		ASparseSet(const ASparseSet<T>& other) 
+			: m_packed(other.m_packed), m_sparse(other.m_sparse), m_toInt(other.m_toInt) { }
+
 		virtual ~ASparseSet() { }
 
 		bool Contains(const T& e) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t page = Page(e);
 			if (!(page < m_sparse.GetCount()) || m_sparse[page] == nullptr)
 			{
@@ -374,34 +391,37 @@ namespace AstralEngine
 
 		void Add(const T e)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!Contains(e), "Cannot add the same element twice");
+			
+			AE_DATASTRUCT_ASSERT(!Contains(e), "Cannot add the same element twice");
 			Assure(Page(e))[Offset(e)] = (T)m_packed.GetCount();
 			m_packed.Add(e);
 		}
 
 		void Remove(const T e)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(e), "Cannot remove an element that is not contained in the SparseSet");
-
+			
+			AE_DATASTRUCT_ASSERT(Contains(e), "Cannot remove an element that is not contained in the SparseSet");
+			
 			size_t page = Page(e);
 			size_t offset = Offset(e);
-
+			
 			/*move last element to the position of the element to remove
 			  so that removing the element is more efficient
 			  (also need to move the element in the sparse set)
 			*/
+			T lastElement = m_packed[m_packed.GetCount() - 1];
 
-			m_packed[m_toInt(m_sparse[page][offset])] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1])][Offset(m_packed[m_packed.GetCount() - 1])] = m_sparse[page][offset];
+			m_packed[m_toInt(m_sparse[page][offset])] = lastElement;
+			m_sparse[Page(lastElement)][Offset(lastElement)] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.RemoveAt(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const T e) const
 		{
-			return (size_t)m_sparse[Page(e)][Offset(e)];
+			
+			AE_DATASTRUCT_ASSERT(Contains(e), "Trying to get index of an object not in the sparse set");
+			return size_t(m_sparse[Page(e)][Offset(e)]);
 		}
 
 		void Swap(const T lhs, const T rhs)
@@ -417,8 +437,15 @@ namespace AstralEngine
 			return m_packed.GetData();
 		}
 
-	private:
+		ASparseSet<T>& operator=(const ASparseSet<T>& other)
+		{
+			m_sparse = other.m_sparse;
+			m_packed = other.m_packed;
+			m_toInt = other.m_toInt;
+			return *this;
+		}
 
+	private:
 		size_t Page(const T e) const
 		{
 			return size_t{ m_toInt(e) / ElementPerPage };
@@ -431,7 +458,7 @@ namespace AstralEngine
 
 		PageType& Assure(const size_t pos)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (!(pos < m_sparse.GetCount()))
 			{
 				m_sparse.Reserve(pos);
@@ -457,7 +484,6 @@ namespace AstralEngine
 		static constexpr auto ElementPerPage = AE_PAGE_SIZE / sizeof(T);
 		using PageType = typename AUniqueRef<K[]>;
 
-
 	public:
 		using AIterator = typename ADynArr<AKeyElementPair<K, T>>::AIterator;
 		using AConstIterator = typename ADynArr<AKeyElementPair<K, T>>::AConstIterator;
@@ -468,7 +494,7 @@ namespace AstralEngine
 
 		bool Contains(const K& key) const
 		{
-			AE_PROFILE_FUNCTION();
+			
 			size_t page = Page(key);
 			//use GetIndex to get actual index of T in packed
 			return page < m_sparse.GetCount() && m_sparse[page] != nullptr
@@ -501,8 +527,8 @@ namespace AstralEngine
 
 		void Add(const AKeyElementPair<K, T>& pair)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(!Contains(pair.GetKey()), "Cannot add the same T twice");
+			
+			AE_DATASTRUCT_ASSERT(!Contains(pair.GetKey()), "Cannot add the same T twice");
 			Assure(Page(pair.GetKey()))[Offset(pair.GetKey())] = (K)m_packed.GetCount();
 			m_packed.Add(pair);
 		}
@@ -515,8 +541,8 @@ namespace AstralEngine
 
 		void Remove(const K key)
 		{
-			AE_PROFILE_FUNCTION();
-			AE_CORE_ASSERT(Contains(key), "Cannot remove an element that is not contained in the SparseSet");
+			
+			AE_DATASTRUCT_ASSERT(Contains(key), "Cannot remove an element that is not contained in the SparseSet");
 
 			size_t page = Page(key);
 			size_t offset = Offset(key);
@@ -526,14 +552,14 @@ namespace AstralEngine
 			  (will also need to move the element in the sparse set)
 			*/
 			m_packed[m_sparse[page][offset]] = T(m_packed[m_packed.GetCount() - 1]);
-			m_sparse[Page(m_packed[m_packed.GetCount() - 1)].GetKey()][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
+			m_sparse[Page(m_packed[m_packed.GetCount() - 1].GetKey())][Offset(m_packed[m_packed.GetCount() - 1].GetKey())] = m_sparse[page][offset];
 			m_sparse[page][offset] = Null;
 			m_packed.Remove(m_packed.GetCount() - 1);
 		}
 
 		size_t GetIndex(const K key) const
 		{
-			return (size_t)m_sparse[Page(e)][Offset(e)];
+			return (size_t)m_sparse[Page(key)][Offset(key)];
 		}
 
 		void Swap(const K lhs, const K rhs)
@@ -563,7 +589,7 @@ namespace AstralEngine
 
 		PageType& Assure(const size_t pos)
 		{
-			AE_PROFILE_FUNCTION();
+			
 			if (!(pos < m_sparse.GetCount()))
 			{
 				m_sparse.Reserve(pos);

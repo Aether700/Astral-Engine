@@ -24,8 +24,8 @@ namespace AstralEngine
 
 		~Vector2Int();
 
-		const float Length() const;
-		const Vector2Int Normalize() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
 
 		const int* Data() const;
 
@@ -35,18 +35,22 @@ namespace AstralEngine
 		static const Vector2Int Up();
 		static const Vector2Int Zero();
 
+		const Vector2Int operator-() const;
 		const Vector2Int operator+(const Vector2Int& v) const;
 		const Vector2Int operator-(const Vector2Int& v) const;
-		const Vector2Int operator+=(const Vector2Int& v) const;
-		const Vector2Int operator-=(const Vector2Int& v) const;
+		const Vector2Int& operator+=(const Vector2Int& v);
+		const Vector2Int& operator-=(const Vector2Int& v);
 		const Vector2Int operator*(int k) const;
+		const Vector2Int operator*(float k) const;
 		const Vector2Int operator/(int k) const;
+		const Vector2Int operator/(float k) const;
 		const int operator[](unsigned int index) const;
 		int& operator[](unsigned int index);
 
-		Vector2Int& Vector2Int::operator=(const Vector2Int& v);
+		Vector2Int& operator=(const Vector2Int& v);
 
 		bool operator==(const Vector2Int& other) const;
+		bool operator!=(const Vector2Int& other) const;
 
 		int x, y;
 	};
@@ -61,7 +65,8 @@ namespace AstralEngine
 		Vector2Short(short _x, short _y) : x(_x), y(_y) { }
 		Vector2Short(const Vector2Int& other) :x ((short)other.x), y((short)other.y) { }
 
-		const float Length() const;
+		const float Magnitude() const;
+		const float SqrMagnitude() const;
 		const Vector2Short Normalize() const;
 
 		const short* Data() const;
@@ -83,6 +88,7 @@ namespace AstralEngine
 		Vector2Short& operator=(const Vector2Short& v);
 
 		bool operator==(const Vector2Short& other) const;
+		bool operator!=(const Vector2Short& other) const;
 
 		short x, y;
 	};

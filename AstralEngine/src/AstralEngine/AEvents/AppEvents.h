@@ -119,11 +119,11 @@ namespace AstralEngine
 	class WindowMovedEvent : public AEvent
 	{
 	public:
-		WindowMovedEvent(float xPos, float yPos) : m_xPos(xPos), m_yPos(yPos) { }
+		WindowMovedEvent(int xPos, int yPos) : m_xPos(xPos), m_yPos(yPos) { }
 		~WindowMovedEvent() { }
 
-		inline float GetXPos() { return m_xPos; }
-		inline float GetYPos() { return m_yPos; }
+		inline int GetXPos() { return m_xPos; }
+		inline int GetYPos() { return m_yPos; }
 
 		std::string ToString() const override
 		{
@@ -136,6 +136,6 @@ namespace AstralEngine
 		DEF_AEVENT_TYPE(WindowMoved);
 
 	private:
-		float m_xPos, m_yPos;
+		int m_xPos, m_yPos;
 	};
 }

@@ -20,6 +20,11 @@ namespace AstralEngine
 		s_api->Clear(); 
 	}
 	
+	Vector4 RenderCommand::GetClearColor()
+	{
+		return s_api->GetClearColor();
+	}
+
 	void RenderCommand::SetClearColor(float r, float g, float b, float a) 
 	{
 		s_api->SetClearColor(r, g, b, a); 
@@ -28,6 +33,26 @@ namespace AstralEngine
 	void RenderCommand::SetClearColor(const Vector4& color) 
 	{
 		s_api->SetClearColor(color.r, color.g, color.b, color.a);
+	}
+
+	size_t RenderCommand::GetNumTextureSlots()
+	{
+		return s_api->GetNumTextureSlots();
+	}
+
+	size_t RenderCommand::GetMaxNumVertices()
+	{
+		return s_api->GetMaxNumVertices();
+	}
+
+	size_t RenderCommand::GetMaxNumIndices()
+	{
+		return s_api->GetMaxNumIndices();
+	}
+
+	void RenderCommand::EnableBlending(bool enabled)
+	{
+		s_api->EnableBlending(enabled);
 	}
 
 	void RenderCommand::DrawIndexed(const AReference<IndexBuffer>& indexBuffer, unsigned int count)
@@ -44,5 +69,11 @@ namespace AstralEngine
 		}
 
 		s_api->DrawIndexed(primitive, indexBuffer, count);
+	}
+
+	void RenderCommand::DrawInstancedIndexed(const AReference<IndexBuffer>& indexBuffer,
+		unsigned int instanceAmount, unsigned int count)
+	{
+		s_api->DrawInstancedIndexed(indexBuffer, instanceAmount, count);
 	}
 }

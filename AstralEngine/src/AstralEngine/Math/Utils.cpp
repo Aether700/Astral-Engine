@@ -4,6 +4,16 @@
 
 namespace AstralEngine
 {
+	int Math::Abs(int v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0)
+		{
+			return -1 * v;
+		}
+		return v;
+	}
+
 	float Math::Abs(float v)
 	{
 		AE_PROFILE_FUNCTION();
@@ -12,6 +22,30 @@ namespace AstralEngine
 			return -1.0f * v;
 		}
 		return v;
+	}
+
+	double Math::Abs(double v)
+	{
+		AE_PROFILE_FUNCTION();
+		if (v < 0.0)
+		{
+			return -1.0 * v;
+		}
+		return v;
+	}
+
+	int Math::Clamp(int value, int min, int max)
+	{
+		AE_PROFILE_FUNCTION();
+		if (value < min)
+		{
+			return min;
+		}
+		else if (value > max)
+		{
+			return max;
+		}
+		return value;
 	}
 
 	float Math::Clamp(float value, float min, float max)
@@ -28,64 +62,113 @@ namespace AstralEngine
 		return value;
 	}
 
+	double Math::Clamp(double value, double min, double max)
+	{
+		AE_PROFILE_FUNCTION();
+		if (value < min)
+		{
+			return min;
+		}
+		else if (value > max)
+		{
+			return max;
+		}
+		return value;
+	}
+
 	float Math::Sin(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sin(v);
+		return std::sin(v);
+	}
+
+	float Math::ArcSin(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return std::asin(v);
 	}
 
 	float Math::Cos(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return cos(v);
+		return std::cos(v);
+	}
+
+	float Math::ArcCos(float v)
+	{
+		AE_PROFILE_FUNCTION();
+		return std::acos(v);
 	}
 
 	float Math::Tan(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return tan(v);
+		return std::tan(v);
 	}
 
-	float Math::DegreeToRadiants(float degrees)
+	float Math::ArcTan(float v)
 	{
 		AE_PROFILE_FUNCTION();
+		return std::atan(v);
+	}
+
+	float Math::ArcTan2(float y, float x)
+	{
+		AE_CORE_ASSERT(!(x == 0 && y == 0), "Arguments to ArcTan2 cannot be both 0.0f");
+		if (x > 0.0f)
+		{
+			return ArcTan(y / x);
+		}
+		else if (y > 0.0f)
+		{
+			return ((float)Pi() / 2.0f) - ArcTan(x / y);
+		}
+		else if (y < 0.0f)
+		{
+			return -((float)Pi() / 2.0f) - ArcTan(x / y);
+		}
+		return ArcTan(y / x) + (float)Pi();
+		//return atan2(y, x);
+	}
+
+	float Math::ArcTan2(Vector2 v)
+	{
+		return ArcTan2(v.y, v.x);
+	}
+
+	float Math::DegreeToRadians(float degrees)
+	{
 		return degrees * 0.01745329251994329576923690768489f;
+	}
+
+	float Math::RadiansToDegree(float radians)
+	{
+		return radians * 57.295779513082320876798154814105f;
 	}
 
 	float Math::Sqrt(float v)
 	{
 		AE_PROFILE_FUNCTION();
-		return sqrt(v);
+		return std::sqrt(v);
 	}
 
-	float Math::Min(float f1, float f2) 
+	float Math::Log(float v)
 	{
-		if (f1 < f2)
+		return std::log(v);
+	}
+
+	float Math::CopySign(float magnitude, float sign)
+	{
+		if (sign == 0.0f)
 		{
-			return f1;
+			return Abs(magnitude);
 		}
-
-		return f2;
+		return Abs(magnitude) * Abs(sign) / sign;
 	}
 
-	float Math::Max(float f1, float f2)
+	long double Math::Pi()
 	{
-		if (f1 > f2)
-		{
-			return f1;
-		}
-
-		return f2;
-	}
-
-	float Math::Floor(float f)
-	{
-		return (int)f;
-	}
-
-	Vector2 Math::Floor(Vector2 v)
-	{
-		return Vector2(Math::Floor(v.x), Math::Floor(v.y));
+		return 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679;
 	}
 
 	float Math::Lerp(float a, float b, float t)
@@ -99,7 +182,17 @@ namespace AstralEngine
 			return a;
 		}
 
-		return (b - a) * t + a;
+		return a + t * (b - a);
+	}
+
+	float Math::Floor(float f)
+	{
+		return (float)((long)f);
+	}
+
+	Vector2 Math::Floor(Vector2 v)
+	{
+		return Vector2(Math::Floor(v.x), Math::Floor(v.y));
 	}
 	
 	float Math::Ceiling(float f)
@@ -187,5 +280,4 @@ namespace AstralEngine
 	{
 		return (float)rand() / 32000.0f;
 	}
-
 }
