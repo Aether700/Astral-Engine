@@ -150,7 +150,7 @@ public:
 		{
 			if (m_currTimerVal >= m_timer)
 			{
-				Destroy(GetAEntity());
+				DestroyAEntity(GetAEntity());
 			}
 			else
 			{
