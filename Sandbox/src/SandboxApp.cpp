@@ -128,8 +128,6 @@ private:
 		AE_INFO("Resolution reset to 0");
 	}
 
-	check to see how to cut holes in tessallation to properly form glyphs
-
 	static constexpr int shiftOffset = 97 - 65;
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
