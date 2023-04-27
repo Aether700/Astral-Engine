@@ -13,6 +13,8 @@ namespace AstralEngine
 
 		https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
 		needs to compute bridge edge between hole contour and shape contour
+		to find bridge edge use algorithm in link above. For "raycasting" part see
+		https://www.jeffreythompson.org/collision-detection/line-line.php#:~:text=To%20check%20if%20two%20lines,x3)*(y2-y1))%3B
 		static MeshHandle EarClipping(<not determined yet>);
 	};
 }
