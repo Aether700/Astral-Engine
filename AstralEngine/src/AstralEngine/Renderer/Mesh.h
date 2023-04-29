@@ -45,11 +45,19 @@ namespace AstralEngine
 		
 		bool EdgeContainsPoint(size_t edge, size_t point) const;
 		bool TriangleContainsEdge(size_t triangle, size_t edge) const;
+
+		// checks if the provided point is one of the points of the provided triangle
 		bool TriangleContainsPoint(size_t triangle, size_t point) const;
+
+		// checks if the provided point is inside the geometric shape of the triangle
+		bool PointIsInsideTriangle(size_t triangle, const Vector3& point);
 
 		bool TriangleIDIsValid(size_t id) const;
 		bool EdgeIDIsValid(size_t id) const;
 		bool PointIDIsValid(size_t id) const;
+
+		// tries to generates a 2D mesh from the data contained in the object.
+		MeshHandle Generate2DMesh() const;
 
 	private:
 		size_t CreatePoint(const Vector3& point);
@@ -59,6 +67,8 @@ namespace AstralEngine
 
 		void RemoveTriangleFromEdge(size_t triangle, size_t edge);
 		void RemoveEdgeFromPoint(size_t edge, size_t point);
+
+		void ConvertPointToVertexIndexRepresentation(ADynArr<size_t>& pointIDs, ADynArr<unsigned int>& indices, size_t point) const;
 
 		struct Point
 		{

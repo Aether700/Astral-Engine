@@ -120,9 +120,64 @@ namespace AstralEngine
 			|| EdgeContainsPoint(t.edge3, point);
 	}
 
+	bool MeshDataManipulator::PointIsInsideTriangle(size_t triangle, const Vector3& point)
+	{
+		/*
+		 algorithm works by moving the triangle to the point being tested and the point to the origin 
+		 and creating 3 triangles between the points of the triangle and the origin. We then check the normals of the 
+		 newly created triangles and if they are pointing in the same direction then the point is inside the triangle
+
+		 Note that we don't need to include the origin in the computation
+		*/
+
+		Vector3 newTrianglePoint1 = GetCoords(GetTrianglePoint1ID(triangle)) - point;
+		Vector3 newTrianglePoint2 = GetCoords(GetTrianglePoint2ID(triangle)) - point;
+		Vector3 newTrianglePoint3 = GetCoords(GetTrianglePoint3ID(triangle)) - point;
+
+		Vector3 normal1 = Vector3::CrossProduct(newTrianglePoint2, newTrianglePoint3);
+		Vector3 normal2 = Vector3::CrossProduct(newTrianglePoint3, newTrianglePoint1);
+		Vector3 normal3 = Vector3::CrossProduct(newTrianglePoint1, newTrianglePoint2);
+
+		// check direction of normals (dot < 0 means that they are pointing in away from one another)
+		return !(Vector3::DotProduct(normal1, normal2) < 0.0f || Vector3::DotProduct(normal1, normal3) < 0.0f);
+	}
+
 	bool MeshDataManipulator::TriangleIDIsValid(size_t id) const { return m_triangles.IDIsValid(id); }
 	bool MeshDataManipulator::EdgeIDIsValid(size_t id) const { return m_edges.IDIsValid(id); }
 	bool MeshDataManipulator::PointIDIsValid(size_t id) const { return m_points.IDIsValid(id); }
+
+	MeshHandle MeshDataManipulator::Generate2DMesh() const
+	{
+		ADynArr<size_t> pointIDs = ADynArr<size_t>(m_points.GetCount());
+		ADynArr<Vector3> meshVertices = ADynArr<Vector3>(m_points.GetCount());
+		ADynArr<unsigned int> meshIndices = ADynArr<unsigned int>(m_triangles.GetCount() * 3);
+
+		for (size_t triangleID = 0; triangleID < m_triangles.GetCount(); triangleID++)
+		{
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
+				GetTrianglePoint1ID(triangleID));
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
+				GetTrianglePoint2ID(triangleID));
+			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
+				GetTrianglePoint3ID(triangleID));
+		}
+
+		for (size_t id : pointIDs)
+		{
+			meshVertices.Add(GetCoords(id));
+		}
+
+		ADynArr<Vector2> textureCoords = ADynArr<Vector2>(meshVertices.GetCount());
+		ADynArr<Vector3> normals = ADynArr<Vector3>(meshVertices.GetCount());
+		for (size_t i = 0; i < meshVertices.GetCount(); i++)
+		{
+			textureCoords.EmplaceBack(0.0f, 0.0f);
+			normals.EmplaceBack(0.0f, 0.0f, -1.0f);
+		}
+
+		return ResourceHandler::CreateMesh(meshVertices, textureCoords, normals, meshIndices);
+
+	}
 
 	size_t MeshDataManipulator::CreatePoint(const Vector3& point)
 	{
@@ -225,6 +280,21 @@ namespace AstralEngine
 		if (p.edgesSharingThisPoint.IsEmpty())
 		{
 			m_points.Remove(point);
+		}
+	}
+
+	void MeshDataManipulator::ConvertPointToVertexIndexRepresentation(ADynArr<size_t>& pointIDs, 
+		ADynArr<unsigned int>& indices, size_t point) const
+	{
+		int index = pointIDs.Find(point);
+		if (index == -1)
+		{
+			indices.Add(pointIDs.GetCount());
+			pointIDs.Add(point);
+		}
+		else
+		{
+			indices.Add((unsigned int)index);
 		}
 	}
 

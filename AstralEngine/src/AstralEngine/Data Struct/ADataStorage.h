@@ -16,6 +16,9 @@ namespace AstralEngine
 	class ADataStorage
 	{
 	public:
+		using AIterator = ADynArrIterator<T>;
+		using AConstIterator = ADynArrConstIterator<T>;
+
 		size_t Add(const T& data)
 		{
 			size_t id;
@@ -50,6 +53,9 @@ namespace AstralEngine
 			return m_data[id];
 		}
 
+		size_t GetCount() const { return m_data.GetCount(); }
+
+
 		size_t FindID(const T& data) const
 		{
 			int index = m_data.Find(data);
@@ -72,6 +78,13 @@ namespace AstralEngine
 
 		T& operator[](size_t id) { return Get(id); }
 		const T& operator[](size_t id) const { return Get(id); }
+
+		AIterator begin() { return m_data.begin(); }
+		AIterator end() { return m_data.end(); }
+
+		AConstIterator begin() const { return m_data.begin(); }
+		AConstIterator end() const { return m_data.end(); }
+
 
 	private:
 		ADynArr<T> m_data;

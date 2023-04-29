@@ -21,27 +21,35 @@ public:
 
 		m_initialPoints.Add(Vector2(-5, -2.5));
 		m_initialPoints.Add(Vector2(-5, 2.5));
-		m_initialPoints.Add(Vector2(5, -2.5));
 		m_initialPoints.Add(Vector2(5, 2.5));
+		m_initialPoints.Add(Vector2(5, -2.5));
 
-		AE_CORE_ERROR("Mesh below in code not properly generated needs fixing");
-		//m_mesh = Tessellation::BoyerWatson(m_initialPoints);
+		ASinglyLinkedList<ADynArr<Vector2>> listOfPointRings;
+		listOfPointRings.Add(m_initialPoints);
+		m_mesh = Tessellation::EarClipping(listOfPointRings);
+
+		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();
 	}
 
 	void OnUpdate()
 	{
+		if (Input::GetKeyDown(KeyCode::L))
+		{
+			m_pointView = !m_pointView;
+		}
+
 		if (m_pointView)
 		{
 			Vector3 scale = { 0.5f, 0.5f, 0.5f };
 
 			for (Vector2& point : m_initialPoints)
 			{
-				Renderer::DrawQuad((Vector3)point, scale, { 1, 0, 0, 1 });
+				Renderer::DrawQuad(Vector3(point.x, point.y, 1.0f), scale, { 1, 0, 0, 1 });
 			}
 
-			for (Vector2& point : m_tessellationPoints)
+			for (Vector3& point : m_tessellationPoints)
 			{
-				Renderer::DrawQuad((Vector3)point, scale, { 0, 1, 0, 1 });
+				Renderer::DrawQuad(point, scale, { 0, 1, 0, 1 });
 			}
 		}
 		else
@@ -51,9 +59,8 @@ public:
 	}
 
 private:
-	ASinglyLinkedList<Vector2> m_initialPoints;
-	ADynArr<Vector2> m_tessellationPoints;
-	ADynArr<unsigned int> m_tessellationIndices;
+	ADynArr<Vector2> m_initialPoints;
+	ADynArr<Vector3> m_tessellationPoints;
 	MeshHandle m_mesh;
 	Transform m_transform;
 	bool m_pointView = false;
@@ -270,6 +277,8 @@ public:
 		e.EmplaceComponent<SpriteRenderer>(Vector4(0, 1, 0, 1));
 		Camera::GetMainCamera().GetComponent<Camera>().GetCamera().
 			SetProjectionType(SceneCamera::ProjectionType::Perspective);
+
+		tesTester.OnStart();
 	}
 
 	void OnUpdate() override
@@ -278,14 +287,13 @@ public:
 		AWindow* window = Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
+
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		viewer.OnUpdate();
-		//tesTester.OnUpdate();
+		//viewer.OnUpdate();
+		tesTester.OnUpdate();
 		Renderer::EndScene();
-		/*
-		*/
 
 		AstralEngine::Renderer::ResetStats();
 	}

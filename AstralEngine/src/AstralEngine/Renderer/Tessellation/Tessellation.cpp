@@ -1,9 +1,50 @@
 #include "aepch.h"
 #include "Tessellation.h"
-#include "AstralEngine/Renderer/Mesh.h"
 
 namespace AstralEngine
 {
+	Vector3Int GetEarIndices(size_t listSize, size_t tipIndex)
+	{
+		size_t prevIndex = tipIndex == 0 ? listSize - 1 : tipIndex - 1;
+		size_t nextIndex = tipIndex == listSize - 1 ? 0 : tipIndex + 1;
+		return Vector3Int((int)prevIndex, (int)tipIndex, (int)nextIndex);
+	}
+
+	bool IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear)
+	{
+		MeshDataManipulator tempMesh;
+		tempMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
+		size_t triangleIndex = 0;
+		for (const Vector2& currPoint : points)
+		{
+			if (triangleIndex != ear.x && triangleIndex != ear.y && triangleIndex != ear.z)
+			{
+				if (tempMesh.PointIsInsideTriangle(0, currPoint))
+				{
+					return false;
+				}
+			}
+			triangleIndex++;
+		}
+		return true;
+	}
+
+	// returns the indices of the points forming the ear stored in a Vector3Int with the tip of the 
+	// ear being stored in the y component of the vector. returns Vector3Int::Zero if no ear is found
+	Vector3Int FindEar(const ADoublyLinkedList<Vector2>& points)
+	{
+		for (size_t i = 0; i < points.GetCount(); i++)
+		{
+			Vector3Int potentialEar = GetEarIndices(points.GetCount(), i);
+			if (IsAnEar(points, potentialEar))
+			{
+				return potentialEar;
+			}
+		}
+
+		return Vector3Int::Zero();
+	}
+
 	size_t ComputeSuperTriangle(MeshDataManipulator& dataManipulator, const ADynArr<Vector2>& points)
 	{
 		Vector2 rectangleMin = points[0];
@@ -66,10 +107,6 @@ namespace AstralEngine
 
 		for (size_t triangleID : triangulation)
 		{
-			size_t p1 = dataManipulator.GetTrianglePoint1ID(triangleID);
-			size_t p2 = dataManipulator.GetTrianglePoint2ID(triangleID);
-			size_t p3 = dataManipulator.GetTrianglePoint3ID(triangleID);
-
 			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices, 
 				dataManipulator.GetTrianglePoint1ID(triangleID));
 			ConvertPointToVertexIndexRepresentation(pointIDs, meshIndices,
@@ -179,5 +216,37 @@ namespace AstralEngine
 		}
 
 		return Generate2DMesh(dataManipulator, triangulation);
+	}
+
+	MeshHandle Tessellation::EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points)
+	{
+		// for now assume we only have one ring of points
+		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
+		for (auto& pointRing : points)
+		{
+			ADoublyLinkedList<Vector2> currRing;
+			for (auto& point : pointRing)
+			{
+				currRing.AddLast(point);
+			}
+			copyPoints.AddLast(currRing);
+		}
+
+		MeshDataManipulator mesh;
+		EarClippingImpl(copyPoints[0], mesh);
+		
+		return mesh.Generate2DMesh();
+	}
+
+	void Tessellation::EarClippingImpl(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh)
+	{
+		if (points.GetCount() < 3)
+		{
+			return;
+		}
+		Vector3Int ear = FindEar(points);
+		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
+		points.RemoveAt(ear.y); // remove tip
+		EarClippingImpl(points, currMesh);
 	}
 }
