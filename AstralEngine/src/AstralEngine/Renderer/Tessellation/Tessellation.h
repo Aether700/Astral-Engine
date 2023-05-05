@@ -21,6 +21,16 @@ namespace AstralEngine
 		static MeshHandle EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points);
 
 	private:
-		static void EarClippingImpl(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh);
+
+		// ear clipping helpers
+
+		// checks if first two points' visibility is blocked by the edge of the last two points
+		static bool EdgeBlocksVisibility(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4);
+
+		// p1 is a point from ring1 and p2 is a point from ring2
+		static bool IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1,
+			ADoublyLinkedList<Vector2>::AIterator& p2, ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2);
+		static ADoublyLinkedList<Vector2> BuildBridge(ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2);
+		static void ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh);
 	};
 }

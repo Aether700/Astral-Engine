@@ -220,7 +220,7 @@ namespace AstralEngine
 
 	MeshHandle Tessellation::EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points)
 	{
-		// for now assume we only have one ring of points
+		// for now assume we have 2 rings one for the polygone one for the hole. The polygon ring is the first list
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
 		{
@@ -233,12 +233,133 @@ namespace AstralEngine
 		}
 
 		MeshDataManipulator mesh;
-		EarClippingImpl(copyPoints[0], mesh);
+		ADoublyLinkedList<Vector2> finalPolygonRing;
+		if (copyPoints.GetCount() > 1)
+		{
+			// build finalPolygonRing here (for now only handles 2 ring case)
+			finalPolygonRing = BuildBridge(copyPoints[0], copyPoints[1]);
+		}
+		else
+		{
+			finalPolygonRing = std::move(copyPoints[0]);
+		}
+
+		ClipEars(finalPolygonRing, mesh);
 		
 		return mesh.Generate2DMesh();
 	}
 
-	void Tessellation::EarClippingImpl(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh)
+	bool Tessellation::EdgeBlocksVisibility(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4)
+	{
+		not implemented yet
+	}
+
+	bool Tessellation::IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1, 
+		ADoublyLinkedList<Vector2>::AIterator& p2, ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2)
+	{
+		// check for edges blocking visibility in ring 1
+		auto it = ring1.begin();
+		if (it == p1)
+		{
+			it++;
+		}
+		Vector2 lastPoint = *it;
+
+		for (; it != ring1.end(); it++)
+		{
+			if (it != p1)
+			{
+				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
+				{
+					return false;
+				}
+				lastPoint = *it;
+			}
+		}
+
+
+		// check for edges blocking visibility in ring 2
+		it = ring2.begin();
+		if (it == p2)
+		{
+			it++;
+		}
+		Vector2 lastPoint = *it;
+
+		for (; it != ring2.end(); it++)
+		{
+			if (it != p2)
+			{
+				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
+				{
+					return false;
+				}
+				lastPoint = *it;
+			}
+		}
+
+		return true;
+	}
+
+	ADoublyLinkedList<Vector2> Tessellation::BuildBridge(ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2)
+	{
+		// find 2 vertices that form the bridge then combine them into a single ring that gets returned
+		AE_CORE_ASSERT(!ring1.IsEmpty() && !ring2.IsEmpty(), "");
+		
+		// first find point in r1 with greatest x component
+		ADoublyLinkedList<Vector2>::AIterator bridgePointA = ring1.begin();
+		for (auto it = ring1.begin(); it != ring1.end(); it++)
+		{
+			if ((*it).x > (*bridgePointA).x) 
+			{
+				bridgePointA = it;
+			}
+		}
+
+		ADoublyLinkedList<Vector2>::AIterator bridgePointB = ring2.end();
+		// find a point on r2 which can form a bridge with previously found point
+		for (auto it = ring2.begin(); it != ring2.end(); it++) 
+		{
+			if (IsValidBridgePair(bridgePointA, it, ring1, ring2)) 
+			{
+				bridgePointB = it;
+				break;
+			}
+		}
+
+		AE_CORE_ASSERT(bridgePointB != ring2.end(), "");
+
+		// let a be the bridge vertex in r1 and b be bridge vertex in r2 and x be first vertex in r1
+		// build the following ring {x, ...in r1..., a, b, ...in r2..., b, a, ...in r1, x}
+		ADoublyLinkedList<Vector2> resultRing;
+		
+		for (auto it = ring1.begin(); it != bridgePointA; it++)
+		{
+			resultRing.AddLast(*it);
+		}
+		resultRing.AddLast(*bridgePointA);
+
+		// do second half of ring2
+		for (auto it = bridgePointB; it != ring2.end(); it++)
+		{
+			resultRing.AddLast(*it);
+		}
+		// wrap back around and do first half of ring2
+		for (auto it = ring2.begin(); it != bridgePointB; it++)
+		{
+			resultRing.AddLast(*it);
+		}
+		resultRing.AddLast(*bridgePointB);
+
+		for (auto it = bridgePointA; it != ring1.end(); it++)
+		{
+			resultRing.AddLast(*it);
+		}
+
+		return resultRing;
+	}
+
+	void Tessellation::ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh)
 	{
 		if (points.GetCount() < 3)
 		{
@@ -247,6 +368,6 @@ namespace AstralEngine
 		Vector3Int ear = FindEar(points);
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip
-		EarClippingImpl(points, currMesh);
+		ClipEars(points, currMesh);
 	}
 }

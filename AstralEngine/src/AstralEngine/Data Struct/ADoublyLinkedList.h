@@ -257,6 +257,8 @@ namespace AstralEngine
 			return Find(element) != -1;
 		}
 
+		bool IsEmpty() const { return m_count == 0; }
+
 		const T& operator[](size_t index) const
 		{
 			Node* n = GetNode(index);
