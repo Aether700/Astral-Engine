@@ -19,13 +19,14 @@ public:
 	{
 		m_transform = Transform(Vector3::Zero(), Vector3::Zero(), { 1, 1, 1 });
 
-		m_initialPoints.Add(Vector2(-5, -2.5));
-		m_initialPoints.Add(Vector2(-5, 2.5));
-		m_initialPoints.Add(Vector2(5, 2.5));
-		m_initialPoints.Add(Vector2(5, -2.5));
+		m_initialPoints.AddLast(Vector2(-5, -2.5));
+		m_initialPoints.AddLast(Vector2(-5, 2.5));
+		m_initialPoints.AddLast(Vector2(5, 2.5));
+		m_initialPoints.AddLast(Vector2(5, -2.5));
 
 		ASinglyLinkedList<ADynArr<Vector2>> listOfPointRings;
 		listOfPointRings.Add(m_initialPoints);
+		listOfPointRings.Add({ Vector2(-0.5f, -0.5f), Vector2(0.5f, -0.5f), Vector2(0, 1.5f) });
 		m_mesh = Tessellation::EarClipping(listOfPointRings);
 
 		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();
