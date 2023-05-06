@@ -34,9 +34,6 @@ namespace AstralEngine
 		static float ArcTan2(float y, float x);
 		static float ArcTan2(Vector2 v);
 
-		// checks if the point b is convex in relation to the triangle a, b, c
-		static bool PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c);
-
 		static float Power(float num, int power);
 		static float Sqrt(float v);
 		static float Log(float v);
@@ -86,6 +83,11 @@ namespace AstralEngine
 		// B(t) = p1 + (1 - t)^2 * (p0 - p1) + t^2 (p2 - p1) for any 0 <= t <= 1 
 		static float BezierQuadratic(float p0, float p1, float p2, float t);
 
+		// checks if the point b is convex in relation to the triangle a, b, c
+		static bool PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c);
+
+		// checks if the line segment p1 p2 intersects with the line segment p3 p4
+		static bool LineSegmentsCollide(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4);
 	};
 
 	/* Basic rudementary Random class to get random ints and floats

@@ -279,6 +279,12 @@ namespace AstralEngine
 
 		void AddNodeLast(Node* newNode)
 		{
+			if (IsEmpty())
+			{
+				AddNode(newNode);
+				return;
+			}
+
 			Node* ptr = m_head;
 
 			while (ptr->next != m_dummy)

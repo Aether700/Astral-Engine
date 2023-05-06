@@ -21,6 +21,7 @@ namespace AstralEngine
 		// make sure the point is convex
 		if (!Math::PointIsConvex(earPoint1, earPoint2, earPoint3))
 		{
+			the convex check fails for current setup check why (might be winding order the hole is specified in)
 			return false;
 		}
 
@@ -246,14 +247,13 @@ namespace AstralEngine
 
 		MeshDataManipulator mesh;
 		ADoublyLinkedList<Vector2> finalPolygonRing;
-		if (copyPoints.GetCount() > 1)
+		finalPolygonRing = std::move(copyPoints[0]);
+		copyPoints.RemoveAt(0);
+
+		while (!copyPoints.IsEmpty())
 		{
-			// build finalPolygonRing here (for now only handles 2 ring case)
-			finalPolygonRing = BuildBridge(copyPoints[0], copyPoints[1]);
-		}
-		else
-		{
-			finalPolygonRing = std::move(copyPoints[0]);
+			finalPolygonRing = BuildBridge(finalPolygonRing, copyPoints[0]);
+			copyPoints.RemoveAt(0);
 		}
 
 		ClipEars(finalPolygonRing, mesh);
@@ -263,50 +263,13 @@ namespace AstralEngine
 
 	bool Tessellation::EdgeBlocksVisibility(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4)
 	{
-		// compute the distance from the point of intersection of the two lines equations of the edge
-		// then check if both are <= 1 but >= 0 then we have a collision
+		// ignore collisions at the very end of the line segments
+		if (p1 == p3 || p1 == p4 || p2 == p3 || p2 == p4)
+		{
+			return false;
+		}
 
-		// the exact formula is obtained as follows
-		// let a line L be perpendicular to the edge p3 and p4 going through p1. then, 
-		// let P be the point on L closest to the point of intersection (p-int) Similarly, 
-		// let Q be the point on L closest to p2. At this point the line P, p-int and Q, p2 
-		// are parallel and they are both perpendicular to L
-
-		// Now we have 2 similar triangles: p1, P, p-int and p1, Q, p2. the distance from p1 to P is 
-		// the projection of p1 to p-int on L and similarly p1, Q is the projection of p1 to p2 on L. 
-		// However, p1 to P is also the projection of p1 to p3 on L (assuming p3 is closer to L than p4 for simplicity)
-		// Therefore, we can use the following formulas:
-
-		// p1 to P = |(p2 - p1) * V | / Magnitude(V)
-		// p1 to Q = |(p3-p1) * V|/Magnitude(V) 
-		// where V is the vector p4-p3 and * is the dot product
-
-		// we can then take the ratio of the two lengths and drop the denominator and the absolute sign obtaining
-		// ( (p2 - p1) * V ) / ( (p3-p1) * V ) or
-		// ( (p2 - p1) * (p4 - p3) ) / ( (p3-p1) * (p4 - p3) )
-		
-		/*
-		// my code
-		Vector2 vA = p4 - p3;
-		Vector2 vB = p2 - p1;
-
-		float uA2 = Vector2::DotProduct(p2 - p1, vA) / Vector2::DotProduct(p3 - p1, vA);
-		float uB2 = Vector2::DotProduct(p4 - p3, vB) / Vector2::DotProduct(p1 - p3, vB);
-		*/
-
-		not finished going through and making sure it works/is understood
-
-		// from website
-		float uA = ((p4.x - p3.x)*(p1.y - p3.y) - (p4.y - p3.y)*(p1.x - p3.x)) 
-			/ ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
-
-		float uB = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) 
-			/ ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
-
-
-		// is both uA and uB are between 0 and 1 then we have a collision 
-		// between the two segments and the visibility is blocked
-		return uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1;
+		return Math::LineSegmentsCollide(p1, p2, p3, p4);
 	}
 
 	bool Tessellation::IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1, 
@@ -399,6 +362,7 @@ namespace AstralEngine
 		// build the following ring {x, ...in r1..., a, b, ...in r2..., b, a, ...in r1, x}
 		ADoublyLinkedList<Vector2> resultRing;
 		
+		// do first half of ring1
 		for (auto it = ring1.begin(); it != bridgePointA; it++)
 		{
 			resultRing.AddLast(*it);
@@ -417,6 +381,7 @@ namespace AstralEngine
 		}
 		resultRing.AddLast(*bridgePointB);
 
+		// wrap back around and do second half of ring1
 		for (auto it = bridgePointA; it != ring1.end(); it++)
 		{
 			resultRing.AddLast(*it);

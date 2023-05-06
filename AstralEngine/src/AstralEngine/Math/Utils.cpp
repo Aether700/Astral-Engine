@@ -94,25 +94,6 @@ namespace AstralEngine
 		return ArcTan2(v.y, v.x);
 	}
 
-	bool Math::PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c)
-	{
-		// the algorithm works by using a modified version of a formula to compute the area 
-		// of a triangle and then using the sign of the result to determine the handedness 
-		// of the points A and C in relation to B
-
-		// the original area formula is Area = |( a.x(b.y-c.y) + b.x(c.y-a.y) + c.x(a.y-b.y) ) / 2|
-		// the formula is obtained by drawing trapezoids below the triangle using the X axis 
-		// as a base for the trapezoids and computing the area using the trapezoids
-		// then using the fact that adding the length of two uneven sides of the trapeze 
-		// * the height of the trapeze / 2 is the area of the trapeze we can get a formula and 
-		// refactor it into the above formula
-
-		// we drop the absolute value and the divide by 2 since we only care about the sign
-
-		float modifiedAreaResult = a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
-		return modifiedAreaResult < 0;
-	}
-
 	float Math::Power(float num, int power)
 	{
 		if (power == 1)
@@ -274,6 +255,56 @@ namespace AstralEngine
 		float oneMinusT = 1 - t;
 		return p1 + oneMinusT * oneMinusT * (p0 - p1) + t * t * (p2 - p1);
 	}
+
+	bool Math::PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c)
+	{
+		// the algorithm works by using a modified version of a formula to compute the area 
+		// of a triangle and then using the sign of the result to determine the handedness 
+		// of the points A and C in relation to B
+
+		// the original area formula is Area = |( a.x(b.y-c.y) + b.x(c.y-a.y) + c.x(a.y-b.y) ) / 2|
+		// the formula is obtained by drawing trapezoids below the triangle using the X axis 
+		// as a base for the trapezoids and computing the area using the trapezoids
+		// then using the fact that adding the length of two uneven sides of the trapeze 
+		// * the height of the trapeze / 2 is the area of the trapeze we can get a formula and 
+		// refactor it into the above formula
+
+		// we drop the absolute value and the divide by 2 since we only care about the sign
+
+		float modifiedAreaResult = a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
+		return modifiedAreaResult < 0;
+	}
+
+	bool Math::LineSegmentsCollide(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4)
+	{
+		// compute the distance from the point of intersection of the two lines equations of the edge
+		// then check if both are <= 1 but >= 0 then we have a collision
+
+		// we compute the distance from the intersection point by using 
+		// the following parametric equations for both lines
+		// L = p1 + t(p2 - p1) => (x, y) = ( x1 + t(x2 - x1), y1 + t(y2 - y1) )
+		// the equation holds for 0 <= t <= 1 otherwise we get off of the segment
+
+		// using parameters s and t one per line, 
+		// the two lines intersect if they need to reach a common point (x0, y0) for parameters s0, t0 and 0 <= s0, t0 <= 1 
+		// s0 and t0 are obtained by solving the linear system below:
+
+		// s(x2 - x1) - t(x4 - x3) = x3 - x1
+		// s(y2 - y1) - t(y4 - y3) = y3 - y1
+
+		// the formula below is the result from solving such a linear system
+
+		float t0 = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x))
+			/ ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
+
+		float s0 = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x))
+			/ ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
+
+
+		// is both t0 and s0 are between 0 and 1 then we have a collision between the two segments
+		return t0 >= 0 && t0 <= 1 && s0 >= 0 && s0 <= 1;
+	}
+
 
 	// Random ////////////////////////////////////////
 
