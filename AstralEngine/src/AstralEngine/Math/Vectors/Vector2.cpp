@@ -74,7 +74,7 @@ namespace AstralEngine
 
 	float Vector2::Angle(const Vector2& v1, const Vector2& v2)
 	{
-		return Math::ArcCos( DotProduct(v1, v2) / (v1.Magnitude() * v2.Magnitude()) );
+		return Math::RadiansToDegree(Math::ArcCos( DotProduct(v1, v2) / Math::Sqrt(v1.SqrMagnitude() * v2.SqrMagnitude())));
 	}
 
 	float Vector2::Distance(const Vector2& v1, const Vector2& v2)

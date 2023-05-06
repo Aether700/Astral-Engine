@@ -94,6 +94,25 @@ namespace AstralEngine
 		return ArcTan2(v.y, v.x);
 	}
 
+	bool Math::PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c)
+	{
+		// the algorithm works by using a modified version of a formula to compute the area 
+		// of a triangle and then using the sign of the result to determine the handedness 
+		// of the points A and C in relation to B
+
+		// the original area formula is Area = |( a.x(b.y-c.y) + b.x(c.y-a.y) + c.x(a.y-b.y) ) / 2|
+		// the formula is obtained by drawing trapezoids below the triangle using the X axis 
+		// as a base for the trapezoids and computing the area using the trapezoids
+		// then using the fact that adding the length of two uneven sides of the trapeze 
+		// * the height of the trapeze / 2 is the area of the trapeze we can get a formula and 
+		// refactor it into the above formula
+
+		// we drop the absolute value and the divide by 2 since we only care about the sign
+
+		float modifiedAreaResult = a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
+		return modifiedAreaResult < 0;
+	}
+
 	float Math::Power(float num, int power)
 	{
 		if (power == 1)

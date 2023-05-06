@@ -44,6 +44,8 @@ namespace AstralEngine
 
 		//clamps the x and y values respectively using the x and y values of the min/max vectors
 		static Vector2 Clamp(const Vector2& v, const Vector2& min, const Vector2& max);
+
+		// returns the angle in degrees
 		static float Angle(const Vector2& v1, const Vector2& v2);
 		static float Distance(const Vector2& v1, const Vector2& v2);
 		static float SqrDistance(const Vector2& v1, const Vector2& v2);

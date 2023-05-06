@@ -12,12 +12,20 @@ namespace AstralEngine
 
 	bool IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear)
 	{
-		problem with current implementation, it flags the hole in the middle as an ear
+		// problem with current implementation, it flags the hole in the middle as an ear
 
 		const Vector2& earPoint1 = points[ear.x];
 		const Vector2& earPoint2 = points[ear.y];
 		const Vector2& earPoint3 = points[ear.z];
 
+		// make sure the point is convex
+		if (!Math::PointIsConvex(earPoint1, earPoint2, earPoint3))
+		{
+			return false;
+		}
+
+
+		// make sure none of the other points are in the triangle of the ear
 		MeshDataManipulator tempMesh;
 		tempMesh.AddTriangle(earPoint1, earPoint2, earPoint3);
 		for (const Vector2& currPoint : points)

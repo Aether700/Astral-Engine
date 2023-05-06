@@ -34,6 +34,9 @@ namespace AstralEngine
 		static float ArcTan2(float y, float x);
 		static float ArcTan2(Vector2 v);
 
+		// checks if the point b is convex in relation to the triangle a, b, c
+		static bool PointIsConvex(const Vector2& a, const Vector2& b, const Vector2& c);
+
 		static float Power(float num, int power);
 		static float Sqrt(float v);
 		static float Log(float v);
