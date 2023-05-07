@@ -112,4 +112,8 @@ namespace AstralEngine
 		return x == other.x && y == other.y && z == other.z; 
 	}
 
+	bool Vector3Int::operator!=(const Vector3Int& other) const
+	{
+		return !(*this == other);
+	}
 }

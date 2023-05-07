@@ -49,6 +49,7 @@ namespace AstralEngine
 		Vector3Int& operator=(const Vector3Int& v);
 
 		bool operator==(const Vector3Int& other) const;
+		bool operator!=(const Vector3Int& other) const;
 
 		union
 		{

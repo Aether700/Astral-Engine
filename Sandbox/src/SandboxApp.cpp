@@ -26,8 +26,8 @@ public:
 
 		ASinglyLinkedList<ADynArr<Vector2>> listOfPointRings;
 		listOfPointRings.AddLast(m_initialPoints);
-		//listOfPointRings.AddLast({ Vector2(-2.5f, -0.5f), Vector2(-1.5f, -0.5f), Vector2(-2.0f, 1.5f) });
-		listOfPointRings.AddLast({ Vector2(1.5f, 1.5f), Vector2(2.5f, 1.5f), Vector2(2.0f, -0.5f) });
+		listOfPointRings.AddLast({ Vector2(-2.5f, -0.5f), Vector2(-1.5f, -0.5f), Vector2(-2.0f, 1.5f) });
+		listOfPointRings.AddLast({ Vector2(2.5f, 1.5f), Vector2(1.5f, 1.5f), Vector2(2.0f, -0.5f) });
 		m_mesh = Tessellation::EarClipping(listOfPointRings);
 
 		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();

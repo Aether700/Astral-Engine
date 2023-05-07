@@ -21,7 +21,6 @@ namespace AstralEngine
 		// make sure the point is convex
 		if (!Math::PointIsConvex(earPoint1, earPoint2, earPoint3))
 		{
-			the convex check fails for current setup check why (might be winding order the hole is specified in)
 			return false;
 		}
 
@@ -397,6 +396,7 @@ namespace AstralEngine
 			return;
 		}
 		Vector3Int ear = FindEar(points);
+		AE_CORE_ASSERT(ear != Vector3Int::Zero(), "");
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip
 		ClipEars(points, currMesh);

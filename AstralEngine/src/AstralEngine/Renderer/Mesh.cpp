@@ -130,6 +130,10 @@ namespace AstralEngine
 		 Note that we don't need to include the origin in the computation
 		*/
 
+		current algorithm doesn't work, try using Barycentric coordinates with the following algorithm which seems better:
+		https://stackoverflow.com/questions/37545304/determine-if-point-is-inside-triangle-in-3d
+		https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+
 		Vector3 newTrianglePoint1 = GetCoords(GetTrianglePoint1ID(triangle)) - point;
 		Vector3 newTrianglePoint2 = GetCoords(GetTrianglePoint2ID(triangle)) - point;
 		Vector3 newTrianglePoint3 = GetCoords(GetTrianglePoint3ID(triangle)) - point;
