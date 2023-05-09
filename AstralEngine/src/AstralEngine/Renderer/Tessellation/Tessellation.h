@@ -24,13 +24,16 @@ namespace AstralEngine
 
 		// ear clipping helpers
 
+		static ADoublyLinkedListIterator<ADoublyLinkedList<Vector2>> 
+			FindInnerPolygonWithRightMostVertex(ADoublyLinkedList<ADoublyLinkedList<Vector2>>& innerPolygonList);
 		// checks if first two points' visibility is blocked by the edge of the last two points
 		static bool EdgeBlocksVisibility(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4);
 
 		// p1 is a point from ring1 and p2 is a point from ring2
 		static bool IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1,
 			ADoublyLinkedList<Vector2>::AIterator& p2, ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2);
-		static ADoublyLinkedList<Vector2> BuildBridge(ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2);
+		static ADoublyLinkedList<Vector2> BuildBridge(ADoublyLinkedList<Vector2>& innerPolygon, ADoublyLinkedList<Vector2>& outerPolygon);
 		static void ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh);
+		
 	};
 }

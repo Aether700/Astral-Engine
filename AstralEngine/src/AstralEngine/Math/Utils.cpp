@@ -305,6 +305,37 @@ namespace AstralEngine
 		return t0 >= 0 && t0 <= 1 && s0 >= 0 && s0 <= 1;
 	}
 
+	Vector3 Math::ComputeBarycentricCoords(const Vector3& p, const Vector3& t1, const Vector3& t2, const Vector3& t3)
+	{
+		// By definition Barycentric coords are defined by drawing an edge between the point P and 
+		// each of the vertices of the triangle. Then, each barycentric coordinates is defined as follows:
+
+		// X = TriangleArea(p, t2, t3) / TriangleArea(t1, t2, t3)
+		// Y = TriangleArea(p, t1, t3) / TriangleArea(t1, t2, t3)
+		// Z = TriangleArea(p, t1, t2) / TriangleArea(t1, t2, t3)
+
+		// to efficiently compute these coordinates we use a different method based on Cramer's rule 
+		// which provides us with a simple equation to solve a system of linear with as many equations 
+		// as unknowns. Given that our problem can be represented as such a system we can simply implement 
+		// this equation for an efficient way to compute the Barycentric coordinates of our point
+
+		Vector3 v0 = t2 - t1;
+		Vector3 v1 = t3 - t1;
+		Vector3 v2 = p - t1;
+
+		float d00 = Vector3::DotProduct(v0, v0);
+		float d01 = Vector3::DotProduct(v0, v1);
+		float d11 = Vector3::DotProduct(v1, v1);
+		float d20 = Vector3::DotProduct(v2, v0);
+		float d21 = Vector3::DotProduct(v2, v1);
+		float denom = d00 * d11 - d01 * d01;
+		
+		float coordX = (d11 * d20 - d01 * d21) / denom;
+		float coordY = (d00 * d21 - d01 * d20) / denom;
+		float coordZ = 1.0f - coordX - coordY;
+
+		return { coordX, coordY, coordZ };
+	}
 
 	// Random ////////////////////////////////////////
 

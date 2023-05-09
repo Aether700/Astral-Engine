@@ -88,6 +88,9 @@ namespace AstralEngine
 
 		// checks if the line segment p1 p2 intersects with the line segment p3 p4
 		static bool LineSegmentsCollide(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4);
+
+		// computes the Barycentric coords of the provided point p relative the the triangle made of the points t1, t2 and t3
+		static Vector3 ComputeBarycentricCoords(const Vector3& p, const Vector3& t1, const Vector3& t2, const Vector3& t3);
 	};
 
 	/* Basic rudementary Random class to get random ints and floats

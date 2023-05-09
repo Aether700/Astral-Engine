@@ -12,8 +12,6 @@ namespace AstralEngine
 
 	bool IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear)
 	{
-		// problem with current implementation, it flags the hole in the middle as an ear
-
 		const Vector2& earPoint1 = points[ear.x];
 		const Vector2& earPoint2 = points[ear.y];
 		const Vector2& earPoint3 = points[ear.z];
@@ -232,7 +230,6 @@ namespace AstralEngine
 
 	MeshHandle Tessellation::EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points)
 	{
-		// for now assume we have 2 rings one for the polygone one for the hole. The polygon ring is the first list
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
 		{
@@ -251,13 +248,52 @@ namespace AstralEngine
 
 		while (!copyPoints.IsEmpty())
 		{
-			finalPolygonRing = BuildBridge(finalPolygonRing, copyPoints[0]);
-			copyPoints.RemoveAt(0);
+			auto nextInnerPolygon = FindInnerPolygonWithRightMostVertex(copyPoints);
+			finalPolygonRing = BuildBridge(*nextInnerPolygon, finalPolygonRing);
+			copyPoints.Remove(nextInnerPolygon);
 		}
 
 		ClipEars(finalPolygonRing, mesh);
 		
 		return mesh.Generate2DMesh();
+	}
+
+	ADoublyLinkedListIterator<ADoublyLinkedList<Vector2>>
+		Tessellation::FindInnerPolygonWithRightMostVertex(ADoublyLinkedList<ADoublyLinkedList<Vector2>>& innerPolygonList)
+	{
+		AE_CORE_ASSERT(!innerPolygonList.IsEmpty(), "");
+
+		auto innerPolygonToReturn = innerPolygonList.begin();
+		if (innerPolygonList.GetCount() > 1)
+		{
+			float maxXCoord = (*(*innerPolygonToReturn).begin()).x;
+
+			// find maxXCoord for the current inner polygon
+			for (Vector2& point : *innerPolygonToReturn)
+			{
+				if (point.x > maxXCoord)
+				{
+					maxXCoord = point.x;
+				}
+			}
+
+			// check every inner polygon
+			auto it = innerPolygonList.begin();
+			it++;
+			for (; it != innerPolygonList.end(); it++)
+			{
+				for (Vector2& point : *it)
+				{
+					if (point.x > maxXCoord)
+					{
+						maxXCoord = point.x;
+						innerPolygonToReturn = it;
+					}
+				}
+			}
+		}
+
+		return innerPolygonToReturn;
 	}
 
 	bool Tessellation::EdgeBlocksVisibility(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4)
@@ -329,14 +365,14 @@ namespace AstralEngine
 		return true;
 	}
 
-	ADoublyLinkedList<Vector2> Tessellation::BuildBridge(ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2)
+	ADoublyLinkedList<Vector2> Tessellation::BuildBridge(ADoublyLinkedList<Vector2>& innerPolygon, ADoublyLinkedList<Vector2>& outerPolygon)
 	{
 		// find 2 vertices that form the bridge then combine them into a single ring that gets returned
-		AE_CORE_ASSERT(!ring1.IsEmpty() && !ring2.IsEmpty(), "");
+		AE_CORE_ASSERT(!innerPolygon.IsEmpty() && !outerPolygon.IsEmpty(), "");
 		
-		// first find point in r1 with greatest x component
-		ADoublyLinkedList<Vector2>::AIterator bridgePointA = ring1.begin();
-		for (auto it = ring1.begin(); it != ring1.end(); it++)
+		// first find point in the innerPolygon with greatest x component
+		ADoublyLinkedList<Vector2>::AIterator bridgePointA = innerPolygon.begin();
+		for (auto it = innerPolygon.begin(); it != innerPolygon.end(); it++)
 		{
 			if ((*it).x > (*bridgePointA).x) 
 			{
@@ -344,44 +380,45 @@ namespace AstralEngine
 			}
 		}
 
-		ADoublyLinkedList<Vector2>::AIterator bridgePointB = ring2.end();
-		// find a point on r2 which can form a bridge with previously found point
-		for (auto it = ring2.begin(); it != ring2.end(); it++) 
+		ADoublyLinkedList<Vector2>::AIterator bridgePointB = outerPolygon.end();
+		// find a point on outerPolygon which can form a bridge with previously found point
+		for (auto it = outerPolygon.begin(); it != outerPolygon.end(); it++)
 		{
-			if (IsValidBridgePair(bridgePointA, it, ring1, ring2)) 
+			if (IsValidBridgePair(bridgePointA, it, innerPolygon, outerPolygon))
 			{
 				bridgePointB = it;
 				break;
 			}
 		}
 
-		AE_CORE_ASSERT(bridgePointB != ring2.end(), "");
+		AE_CORE_ASSERT(bridgePointB != outerPolygon.end(), "");
 
-		// let a be the bridge vertex in r1 and b be bridge vertex in r2 and x be first vertex in r1
-		// build the following ring {x, ...in r1..., a, b, ...in r2..., b, a, ...in r1, x}
+		// let a be the bridge vertex in innerPolygon and b be bridge vertex in outerPolygon and 
+		// x be first vertex in innerPolygon build the following ring 
+		// {x, ...in innerPolygon..., a, b, ...in outerPolygon..., b, a, ...in innerPolygon, x}
 		ADoublyLinkedList<Vector2> resultRing;
 		
-		// do first half of ring1
-		for (auto it = ring1.begin(); it != bridgePointA; it++)
+		// do first half of innerPolygon
+		for (auto it = innerPolygon.begin(); it != bridgePointA; it++)
 		{
 			resultRing.AddLast(*it);
 		}
 		resultRing.AddLast(*bridgePointA);
 
-		// do second half of ring2
-		for (auto it = bridgePointB; it != ring2.end(); it++)
+		// do second half of outerPolygon
+		for (auto it = bridgePointB; it != outerPolygon.end(); it++)
 		{
 			resultRing.AddLast(*it);
 		}
-		// wrap back around and do first half of ring2
-		for (auto it = ring2.begin(); it != bridgePointB; it++)
+		// wrap back around and do first half of outerPolygon
+		for (auto it = outerPolygon.begin(); it != bridgePointB; it++)
 		{
 			resultRing.AddLast(*it);
 		}
 		resultRing.AddLast(*bridgePointB);
 
-		// wrap back around and do second half of ring1
-		for (auto it = bridgePointA; it != ring1.end(); it++)
+		// wrap back around and do second half of innerPolygon
+		for (auto it = bridgePointA; it != innerPolygon.end(); it++)
 		{
 			resultRing.AddLast(*it);
 		}
@@ -396,6 +433,15 @@ namespace AstralEngine
 			return;
 		}
 		Vector3Int ear = FindEar(points);
+		// temp
+		if (ear == Vector3Int::Zero())
+		{
+			for (auto& coords : points)
+			{
+				AE_CORE_INFO("%f, %f", coords.x, coords.y);
+			}
+		}
+		///
 		AE_CORE_ASSERT(ear != Vector3Int::Zero(), "");
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip

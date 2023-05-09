@@ -122,28 +122,18 @@ namespace AstralEngine
 
 	bool MeshDataManipulator::PointIsInsideTriangle(size_t triangle, const Vector3& point)
 	{
-		/*
-		 algorithm works by moving the triangle to the point being tested and the point to the origin 
-		 and creating 3 triangles between the points of the triangle and the origin. We then check the normals of the 
-		 newly created triangles and if they are pointing in the same direction then the point is inside the triangle
+		// using the properties of Barycentric coordinates we know that a point is inside a triangle if and 
+		// only if 0 <= a, b, c <= 1 for the point's Barycentric coordinates a, b and c
 
-		 Note that we don't need to include the origin in the computation
-		*/
+		Vector3 trianglePoint1 = GetCoords(GetTrianglePoint1ID(triangle));
+		Vector3 trianglePoint2 = GetCoords(GetTrianglePoint2ID(triangle));
+		Vector3 trianglePoint3 = GetCoords(GetTrianglePoint3ID(triangle));
 
-		current algorithm doesn't work, try using Barycentric coordinates with the following algorithm which seems better:
-		https://stackoverflow.com/questions/37545304/determine-if-point-is-inside-triangle-in-3d
-		https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+		Vector3 barycentricCoords = Math::ComputeBarycentricCoords(point, trianglePoint1, trianglePoint2, trianglePoint3);
 
-		Vector3 newTrianglePoint1 = GetCoords(GetTrianglePoint1ID(triangle)) - point;
-		Vector3 newTrianglePoint2 = GetCoords(GetTrianglePoint2ID(triangle)) - point;
-		Vector3 newTrianglePoint3 = GetCoords(GetTrianglePoint3ID(triangle)) - point;
-
-		Vector3 normal1 = Vector3::CrossProduct(newTrianglePoint2, newTrianglePoint3);
-		Vector3 normal2 = Vector3::CrossProduct(newTrianglePoint3, newTrianglePoint1);
-		Vector3 normal3 = Vector3::CrossProduct(newTrianglePoint1, newTrianglePoint2);
-
-		// check direction of normals (dot < 0 means that they are pointing in away from one another)
-		return !(Vector3::DotProduct(normal1, normal2) < 0.0f || Vector3::DotProduct(normal1, normal3) < 0.0f);
+		return barycentricCoords.x >= 0 && barycentricCoords.x <= 1
+			&& barycentricCoords.y >= 0 && barycentricCoords.y <= 1
+			&& barycentricCoords.z >= 0 && barycentricCoords.z <= 1;
 	}
 
 	bool MeshDataManipulator::TriangleIDIsValid(size_t id) const { return m_triangles.IDIsValid(id); }
