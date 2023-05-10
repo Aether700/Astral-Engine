@@ -18,7 +18,7 @@ namespace AstralEngine
 		to find bridge edge use algorithm in link above. For "raycasting" part see
 		https://www.jeffreythompson.org/collision-detection/line-line.php#:~:text=To%20check%20if%20two%20lines,x3)*(y2-y1))%3B
 		*/
-		static MeshHandle EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points);
+		static MeshHandle EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points);
 
 	private:
 

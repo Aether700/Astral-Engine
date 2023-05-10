@@ -717,12 +717,17 @@ namespace AstralEngine
 
 		MeshHandle GenerateMesh() const
 		{
-			ADynArr<Vector2> points = ADynArr<Vector2>(m_contours[0].GetCount());
-			for (const GlyphPoint& p : m_contours[0])
+			ADoublyLinkedList<ADynArr<Vector2>> points;
+			for (const Contour& contour : m_contours)
 			{
-				points.Add(p.coords);
+				ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
+				for (const GlyphPoint& p : contour)
+				{
+					currContour.AddLast(p.coords);
+				}
 			}
-			return Tessellation::BoyerWatson(points);
+
+			return Tessellation::EarClipping(points);
 		}
 
 		Glyph& operator=(Glyph&& other) noexcept
@@ -803,7 +808,7 @@ namespace AstralEngine
 			for (size_t i = 0; i < m_basePoints.GetCount(); i++)
 			{
 				currContour->Add(m_basePoints[i]);
-				if (m_endPointsOfContours->Contains((std::uint16_t)i))
+				if (m_endPointsOfContours->Contains((std::uint16_t)i) && m_contours.GetCount() < m_numContours)
 				{
 					currContour = &m_contours.EmplaceBack();
 				}

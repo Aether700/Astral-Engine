@@ -228,7 +228,7 @@ namespace AstralEngine
 		return Generate2DMesh(dataManipulator, triangulation);
 	}
 
-	MeshHandle Tessellation::EarClipping(const ASinglyLinkedList<ADynArr<Vector2>>& points)
+	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points)
 	{
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
@@ -442,6 +442,9 @@ namespace AstralEngine
 			}
 		}
 		///
+
+		algorithm fails with A character -> cannot find ear, check why
+
 		AE_CORE_ASSERT(ear != Vector3Int::Zero(), "");
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip

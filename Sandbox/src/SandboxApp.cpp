@@ -17,6 +17,7 @@ class TessellationTester : public NativeScript
 public:
 	void OnStart()
 	{
+		//write test to verify tesselation of glyphs
 		m_transform = Transform(Vector3::Zero(), Vector3::Zero(), { 1, 1, 1 });
 
 		m_initialPoints.AddLast(Vector2(-5, -2.5));
@@ -24,7 +25,7 @@ public:
 		m_initialPoints.AddLast(Vector2(5, 2.5));
 		m_initialPoints.AddLast(Vector2(5, -2.5));
 
-		ASinglyLinkedList<ADynArr<Vector2>> listOfPointRings;
+		ADoublyLinkedList<ADynArr<Vector2>> listOfPointRings;
 		listOfPointRings.AddLast(m_initialPoints);
 		listOfPointRings.AddLast({ Vector2(-2.5f, -0.5f), Vector2(-1.5f, -0.5f), Vector2(-2.0f, 1.5f) });
 		listOfPointRings.AddLast({ Vector2(2.5f, 1.5f), Vector2(1.5f, 1.5f), Vector2(2.0f, -0.5f) });
@@ -294,8 +295,8 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		//viewer.OnUpdate();
-		tesTester.OnUpdate();
+		viewer.OnUpdate();
+		//tesTester.OnUpdate();
 		Renderer::EndScene();
 
 		AstralEngine::Renderer::ResetStats();
