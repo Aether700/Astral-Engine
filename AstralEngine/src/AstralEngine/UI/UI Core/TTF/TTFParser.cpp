@@ -727,7 +727,12 @@ namespace AstralEngine
 				}
 			}
 
-			return Tessellation::EarClipping(points);
+			MeshHandle mesh = Tessellation::EarClipping(points, TessellationWindingOrder::ClockWise);
+			if (mesh == NullHandle)
+			{
+				mesh = Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
+			}
+			return mesh;
 		}
 
 		Glyph& operator=(Glyph&& other) noexcept

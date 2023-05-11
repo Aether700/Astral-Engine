@@ -3,58 +3,6 @@
 
 namespace AstralEngine
 {
-	Vector3Int GetEarIndices(size_t listSize, size_t tipIndex)
-	{
-		size_t prevIndex = tipIndex == 0 ? listSize - 1 : tipIndex - 1;
-		size_t nextIndex = tipIndex == listSize - 1 ? 0 : tipIndex + 1;
-		return Vector3Int((int)prevIndex, (int)tipIndex, (int)nextIndex);
-	}
-
-	bool IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear)
-	{
-		const Vector2& earPoint1 = points[ear.x];
-		const Vector2& earPoint2 = points[ear.y];
-		const Vector2& earPoint3 = points[ear.z];
-
-		// make sure the point is convex
-		if (!Math::PointIsConvex(earPoint1, earPoint2, earPoint3))
-		{
-			return false;
-		}
-
-
-		// make sure none of the other points are in the triangle of the ear
-		MeshDataManipulator tempMesh;
-		tempMesh.AddTriangle(earPoint1, earPoint2, earPoint3);
-		for (const Vector2& currPoint : points)
-		{
-			if (currPoint != earPoint1 && currPoint != earPoint2 && currPoint != earPoint3)
-			{
-				if (tempMesh.PointIsInsideTriangle(0, currPoint))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	// returns the indices of the points forming the ear stored in a Vector3Int with the tip of the 
-	// ear being stored in the y component of the vector. returns Vector3Int::Zero if no ear is found
-	Vector3Int FindEar(const ADoublyLinkedList<Vector2>& points)
-	{
-		for (size_t i = 0; i < points.GetCount(); i++)
-		{
-			Vector3Int potentialEar = GetEarIndices(points.GetCount(), i);
-			if (IsAnEar(points, potentialEar))
-			{
-				return potentialEar;
-			}
-		}
-
-		return Vector3Int::Zero();
-	}
-
 	size_t ComputeSuperTriangle(MeshDataManipulator& dataManipulator, const ADynArr<Vector2>& points)
 	{
 		Vector2 rectangleMin = points[0];
@@ -228,7 +176,8 @@ namespace AstralEngine
 		return Generate2DMesh(dataManipulator, triangulation);
 	}
 
-	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points)
+	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points,
+		TessellationWindingOrder windingOrder)
 	{
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
@@ -253,9 +202,70 @@ namespace AstralEngine
 			copyPoints.Remove(nextInnerPolygon);
 		}
 
-		ClipEars(finalPolygonRing, mesh);
-		
+		if (!ClipEars(finalPolygonRing, mesh, windingOrder))
+		{
+			return NullHandle;
+		}
+
 		return mesh.Generate2DMesh();
+	}
+
+	Vector3Int Tessellation::GetEarIndices(size_t listSize, size_t tipIndex, TessellationWindingOrder windingOrder)
+	{
+		size_t prevIndex = tipIndex == 0 ? listSize - 1 : tipIndex - 1;
+		size_t nextIndex = tipIndex == listSize - 1 ? 0 : tipIndex + 1;
+
+		// adjust the winding order by changing the order of the indices around the tip of the ear
+		if (windingOrder == TessellationWindingOrder::ClockWise)
+		{
+			return Vector3Int((int)prevIndex, (int)tipIndex, (int)nextIndex);
+		}
+		return Vector3Int((int)nextIndex, (int)tipIndex, (int)prevIndex);
+	}
+
+	bool Tessellation::IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear)
+	{
+		const Vector2& earPoint1 = points[ear.x];
+		const Vector2& earPoint2 = points[ear.y];
+		const Vector2& earPoint3 = points[ear.z];
+
+		// make sure the point is convex
+		if (!Math::PointIsConvex(earPoint1, earPoint2, earPoint3))
+		{
+			return false;
+		}
+
+
+		// make sure none of the other points are in the triangle of the ear
+		MeshDataManipulator tempMesh;
+		tempMesh.AddTriangle(earPoint1, earPoint2, earPoint3);
+		for (const Vector2& currPoint : points)
+		{
+			if (currPoint != earPoint1 && currPoint != earPoint2 && currPoint != earPoint3)
+			{
+				if (tempMesh.PointIsInsideTriangle(0, currPoint))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	// returns the indices of the points forming the ear stored in a Vector3Int with the tip of the 
+	// ear being stored in the y component of the vector. returns Vector3Int::Zero if no ear is found
+	Vector3Int Tessellation::FindEar(const ADoublyLinkedList<Vector2>& points, TessellationWindingOrder windingOrder)
+	{
+		for (size_t i = 0; i < points.GetCount(); i++)
+		{
+			Vector3Int potentialEar = GetEarIndices(points.GetCount(), i, windingOrder);
+			if (IsAnEar(points, potentialEar))
+			{
+				return potentialEar;
+			}
+		}
+
+		return Vector3Int::Zero();
 	}
 
 	ADoublyLinkedListIterator<ADoublyLinkedList<Vector2>>
@@ -365,7 +375,8 @@ namespace AstralEngine
 		return true;
 	}
 
-	ADoublyLinkedList<Vector2> Tessellation::BuildBridge(ADoublyLinkedList<Vector2>& innerPolygon, ADoublyLinkedList<Vector2>& outerPolygon)
+	ADoublyLinkedList<Vector2> Tessellation::BuildBridge(ADoublyLinkedList<Vector2>& innerPolygon, 
+		ADoublyLinkedList<Vector2>& outerPolygon)
 	{
 		// find 2 vertices that form the bridge then combine them into a single ring that gets returned
 		AE_CORE_ASSERT(!innerPolygon.IsEmpty() && !outerPolygon.IsEmpty(), "");
@@ -379,6 +390,8 @@ namespace AstralEngine
 				bridgePointA = it;
 			}
 		}
+
+		the B character cannot find a bridge check why
 
 		ADoublyLinkedList<Vector2>::AIterator bridgePointB = outerPolygon.end();
 		// find a point on outerPolygon which can form a bridge with previously found point
@@ -426,28 +439,41 @@ namespace AstralEngine
 		return resultRing;
 	}
 
-	void Tessellation::ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh)
+	bool Tessellation::ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh, 
+		TessellationWindingOrder windingOrder)
 	{
 		if (points.GetCount() < 3)
 		{
-			return;
+			return true;
 		}
-		Vector3Int ear = FindEar(points);
+		Vector3Int ear = FindEar(points, windingOrder);
 		// temp
 		if (ear == Vector3Int::Zero())
 		{
+			AE_CORE_WARN("Could not find next ear:");
 			for (auto& coords : points)
 			{
 				AE_CORE_INFO("%f, %f", coords.x, coords.y);
 			}
 		}
+		else
+		{
+			AE_CORE_WARN("Ear found:");
+			AE_CORE_INFO("%f, %f", points[ear.x].x, points[ear.x].y);
+			AE_CORE_INFO("%f, %f", points[ear.y].x, points[ear.y].y);
+			AE_CORE_INFO("%f, %f", points[ear.z].x, points[ear.z].y);
+		}
 		///
 
-		algorithm fails with A character -> cannot find ear, check why
+		//algorithm fails with A character->cannot find ear, check why
 
-		AE_CORE_ASSERT(ear != Vector3Int::Zero(), "");
+		if (ear == Vector3Int::Zero())
+		{
+			return false;
+		}
+
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip
-		ClipEars(points, currMesh);
+		return ClipEars(points, currMesh, windingOrder);
 	}
 }

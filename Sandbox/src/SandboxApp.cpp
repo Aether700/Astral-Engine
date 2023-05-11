@@ -30,7 +30,7 @@ public:
 		listOfPointRings.AddLast({ Vector2(-2.5f, -0.5f), Vector2(-1.5f, -0.5f), Vector2(-2.0f, 1.5f) });
 		listOfPointRings.AddLast({ Vector2(2.5f, 1.5f), Vector2(1.5f, 1.5f), Vector2(2.0f, -0.5f) });
 		listOfPointRings.AddLast({ Vector2(0.5f, 0.0f), Vector2(-0.5f, 0.5f), Vector2(-0.5f, -0.5f) });
-		m_mesh = Tessellation::EarClipping(listOfPointRings);
+		m_mesh = Tessellation::EarClipping(listOfPointRings, TessellationWindingOrder::ClockWise);
 
 		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();
 	}
@@ -143,7 +143,7 @@ private:
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'A';
+	char c = 'B';//'A';
 	int index = 0;
 	bool isShifted = true;
 	int resolution = 0;
