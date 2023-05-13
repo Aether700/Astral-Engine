@@ -182,10 +182,12 @@ namespace AstralEngine
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
 		{
+			AE_CORE_WARN("New Contour");//temp
 			ADoublyLinkedList<Vector2> currRing;
 			for (auto& point : pointRing)
 			{
 				currRing.AddLast(point);
+				AE_CORE_INFO("%f, %f", point.x, point.y);//temp
 			}
 			copyPoints.AddLast(currRing);
 		}
@@ -317,7 +319,7 @@ namespace AstralEngine
 		return Math::LineSegmentsCollide(p1, p2, p3, p4);
 	}
 
-	bool Tessellation::IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1, 
+	bool Tessellation::IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1,
 		ADoublyLinkedList<Vector2>::AIterator& p2, ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2)
 	{
 		// check for edges blocking visibility in ring 1
@@ -331,21 +333,24 @@ namespace AstralEngine
 
 		for (; it != ring1.end(); it++)
 		{
-			if (it != p1)
+			if (it != p1 && lastPoint != *p1)
 			{
 				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
 				{
 					return false;
 				}
-				lastPoint = *it;
+			}
+			lastPoint = *it;
+		}
+
+		if (ring1.begin() != p1 && lastPoint != *p1)
+		{
+			if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring1.begin()))
+			{
+				return false;
 			}
 		}
 		
-		if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring1.begin()))
-		{
-			return false;
-		}
-
 		// check for edges blocking visibility in ring 2
 		it = ring2.begin();
 		if (it == p2)
@@ -357,7 +362,7 @@ namespace AstralEngine
 
 		for (; it != ring2.end(); it++)
 		{
-			if (it != p2)
+			if (it != p2 && lastPoint != *p2)
 			{
 				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
 				{
@@ -367,9 +372,12 @@ namespace AstralEngine
 			}
 		}
 
-		if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring2.begin()))
+		if (ring2.begin() != p2 && lastPoint != *p2)
 		{
-			return false;
+			if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring2.begin()))
+			{
+				return false;
+			}
 		}
 
 		return true;
@@ -391,9 +399,8 @@ namespace AstralEngine
 			}
 		}
 
-		the B character cannot find a bridge check why
-
 		ADoublyLinkedList<Vector2>::AIterator bridgePointB = outerPolygon.end();
+
 		// find a point on outerPolygon which can form a bridge with previously found point
 		for (auto it = outerPolygon.begin(); it != outerPolygon.end(); it++)
 		{
@@ -403,6 +410,8 @@ namespace AstralEngine
 				break;
 			}
 		}
+		
+		trying to fix brige building for B broke tesselation of the rectangle with 3 triangle holes check why
 
 		AE_CORE_ASSERT(bridgePointB != outerPolygon.end(), "");
 

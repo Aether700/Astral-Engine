@@ -31,7 +31,7 @@ public:
 		listOfPointRings.AddLast({ Vector2(2.5f, 1.5f), Vector2(1.5f, 1.5f), Vector2(2.0f, -0.5f) });
 		listOfPointRings.AddLast({ Vector2(0.5f, 0.0f), Vector2(-0.5f, 0.5f), Vector2(-0.5f, -0.5f) });
 		m_mesh = Tessellation::EarClipping(listOfPointRings, TessellationWindingOrder::ClockWise);
-
+		AE_CORE_ASSERT(m_mesh != NullHandle, "Mesh Generation for glyph Failed");
 		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();
 	}
 
@@ -75,6 +75,11 @@ class FontViewer : public NativeScript
 public:
 	void OnUpdate() override
 	{
+		if (m_font == nullptr)
+		{
+			AE_CORE_ERROR("Did not set font check in TestLayer::OnAttached");
+		}
+
 		if (m_mesh != NullHandle)
 		{
 			Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
@@ -274,8 +279,8 @@ public:
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		
-		viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
-		viewer.OnStart();
+		//viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
+
 		// temp
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
 		e.EmplaceComponent<SpriteRenderer>(Vector4(0, 1, 0, 1));
@@ -295,8 +300,8 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		viewer.OnUpdate();
-		//tesTester.OnUpdate();
+		//viewer.OnUpdate();
+		tesTester.OnUpdate();
 		Renderer::EndScene();
 
 		AstralEngine::Renderer::ResetStats();
