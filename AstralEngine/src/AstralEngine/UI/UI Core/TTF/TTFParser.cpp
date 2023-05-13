@@ -639,12 +639,17 @@ namespace AstralEngine
 				}
 				ResetContours();
 			}
+			else // compound glyphs
+			{
+				// not supported yet
+			}
 
 		}
 
-		Glyph(Glyph&& other) : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)), 
+		Glyph(Glyph&& other) noexcept : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)), 
 			m_endPointsOfContours(other.m_endPointsOfContours), m_outlineMin(other.m_outlineMin), 
-			m_outlineMax(other.m_outlineMax), m_basePoints(std::move(other.m_basePoints))
+			m_outlineMax(other.m_outlineMax), m_basePoints(std::move(other.m_basePoints)), 
+			m_numContours(other.m_numContours)
 		{
 			other.m_endPointsOfContours = nullptr;
 		}
@@ -717,28 +722,36 @@ namespace AstralEngine
 
 		MeshHandle GenerateMesh() const
 		{
-			ADoublyLinkedList<ADynArr<Vector2>> points;
-			for (const Contour& contour : m_contours)
+			if (IsSimpleGlyph())
 			{
-				ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
-				for (const GlyphPoint& p : contour)
+				ADoublyLinkedList<ADynArr<Vector2>> points;
+				for (const Contour& contour : m_contours)
 				{
-					currContour.AddLast(p.coords);
+					ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
+					for (const GlyphPoint& p : contour)
+					{
+						currContour.AddLast(p.coords);
+					}
 				}
-			}
 
-			MeshHandle mesh = Tessellation::EarClipping(points, TessellationWindingOrder::ClockWise);
-			if (mesh == NullHandle)
-			{
-				mesh = Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
+				"i" and "j" cannot be drawn because of the "." on top, sort contours in a list of 
+					contours to tesselate individually?
+
+				return Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
 			}
-			return mesh;
+			else // compound glyph
+			{
+				// not supported yet
+				AE_CORE_ERROR("Compound glyphs are not supported yet");
+				return NullHandle;
+			}
 		}
 
 		Glyph& operator=(Glyph&& other) noexcept
 		{
 			delete[] m_endPointsOfContours;
 
+			m_numContours = other.m_numContours;
 			m_endPointsOfContours = other.m_endPointsOfContours;
 			m_basicContours = other.m_basicContours;
 			m_contours = std::move(other.m_contours);

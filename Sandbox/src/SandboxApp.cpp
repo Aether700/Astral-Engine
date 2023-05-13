@@ -144,11 +144,11 @@ private:
 		AE_INFO("Resolution reset to 0");
 	}
 
-	static constexpr int shiftOffset = 97 - 65;
+	static constexpr int shiftOffset = 'a' - 'A';
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'B';//'A';
+	char c = 'A';
 	int index = 0;
 	bool isShifted = true;
 	int resolution = 0;
@@ -279,7 +279,7 @@ public:
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		
-		//viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
+		viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
 
 		// temp
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
@@ -300,8 +300,8 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		//viewer.OnUpdate();
-		tesTester.OnUpdate();
+		viewer.OnUpdate();
+		//tesTester.OnUpdate();
 		Renderer::EndScene();
 
 		AstralEngine::Renderer::ResetStats();

@@ -22,12 +22,16 @@ namespace AstralEngine
 		// uses the Boyer-Watson algorithm to generate a triangulation of the provided list of points.
 		static MeshHandle BoyerWatson(const ADynArr<Vector2>& points);
 
-		/*
-		https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
-		needs to compute bridge edge between hole contour and shape contour
-		to find bridge edge use algorithm in link above. For "raycasting" part see
-		https://www.jeffreythompson.org/collision-detection/line-line.php#:~:text=To%20check%20if%20two%20lines,x3)*(y2-y1))%3B
-		*/
+		/* Tessellates a simple hierarchy of polygons. If more than one polygon is provided 
+		   it is assumed that there is one bigger polygon which contains all the other polygons
+		
+		Points: a list of polygon countours. The first contour of the list is assumed
+		windingOrder: the winding order of the polygon contours
+
+		returns: the MeshHandle to the newly created mesh or NullHandle if the mesh could not be generated. 
+			If the mesh generation fails make sure that the windingOrder provided is correct and that 
+			the polygon hierarchy is not too complex
+		*/ 
 		static MeshHandle EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points, 
 			TessellationWindingOrder windingOrder = TessellationWindingOrder::CounterClockWise);
 
@@ -37,6 +41,7 @@ namespace AstralEngine
 
 		static Vector3Int GetEarIndices(size_t listSize, size_t tipIndex, TessellationWindingOrder windingOrder);
 		static bool IsAnEar(const ADoublyLinkedList<Vector2>& points, const Vector3Int& ear);
+
 		// returns the indices of the points forming the ear stored in a Vector3Int with the tip of the 
 		// ear being stored in the y component of the vector. returns Vector3Int::Zero if no ear is found
 		static Vector3Int FindEar(const ADoublyLinkedList<Vector2>& points, TessellationWindingOrder windingOrder);
@@ -48,6 +53,8 @@ namespace AstralEngine
 		// p1 is a point from ring1 and p2 is a point from ring2
 		static bool IsValidBridgePair(ADoublyLinkedList<Vector2>::AIterator& p1,
 			ADoublyLinkedList<Vector2>::AIterator& p2, ADoublyLinkedList<Vector2>& ring1, ADoublyLinkedList<Vector2>& ring2);
+
+		// returns an empty list if no valid bridge could be built
 		static ADoublyLinkedList<Vector2> BuildBridge(ADoublyLinkedList<Vector2>& innerPolygon, ADoublyLinkedList<Vector2>& outerPolygon);
 		static bool ClipEars(ADoublyLinkedList<Vector2>& points, MeshDataManipulator& currMesh, 
 			TessellationWindingOrder windingOrder);

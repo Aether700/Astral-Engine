@@ -179,19 +179,19 @@ namespace AstralEngine
 	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points,
 		TessellationWindingOrder windingOrder)
 	{
+		// copy the points so we can freely manipulate the list of points
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
 		{
-			AE_CORE_WARN("New Contour");//temp
 			ADoublyLinkedList<Vector2> currRing;
 			for (auto& point : pointRing)
 			{
 				currRing.AddLast(point);
-				AE_CORE_INFO("%f, %f", point.x, point.y);//temp
 			}
 			copyPoints.AddLast(currRing);
 		}
 
+		// build bridges between the inner and outer polygons
 		MeshDataManipulator mesh;
 		ADoublyLinkedList<Vector2> finalPolygonRing;
 		finalPolygonRing = std::move(copyPoints[0]);
@@ -201,9 +201,16 @@ namespace AstralEngine
 		{
 			auto nextInnerPolygon = FindInnerPolygonWithRightMostVertex(copyPoints);
 			finalPolygonRing = BuildBridge(*nextInnerPolygon, finalPolygonRing);
+
+			// if no bridges could be built we return NullHandle
+			if (finalPolygonRing.IsEmpty())
+			{
+				return NullHandle;
+			}
 			copyPoints.Remove(nextInnerPolygon);
 		}
 
+		// if ClipEars failed to generate the entire mesh we return NullHandle
 		if (!ClipEars(finalPolygonRing, mesh, windingOrder))
 		{
 			return NullHandle;
@@ -237,7 +244,6 @@ namespace AstralEngine
 			return false;
 		}
 
-
 		// make sure none of the other points are in the triangle of the ear
 		MeshDataManipulator tempMesh;
 		tempMesh.AddTriangle(earPoint1, earPoint2, earPoint3);
@@ -254,8 +260,6 @@ namespace AstralEngine
 		return true;
 	}
 
-	// returns the indices of the points forming the ear stored in a Vector3Int with the tip of the 
-	// ear being stored in the y component of the vector. returns Vector3Int::Zero if no ear is found
 	Vector3Int Tessellation::FindEar(const ADoublyLinkedList<Vector2>& points, TessellationWindingOrder windingOrder)
 	{
 		for (size_t i = 0; i < points.GetCount(); i++)
@@ -289,7 +293,7 @@ namespace AstralEngine
 				}
 			}
 
-			// check every inner polygon
+			// check all the other inner polygons
 			auto it = innerPolygonList.begin();
 			it++;
 			for (; it != innerPolygonList.end(); it++)
@@ -324,60 +328,44 @@ namespace AstralEngine
 	{
 		// check for edges blocking visibility in ring 1
 		auto it = ring1.begin();
-		if (it == p1)
-		{
-			it++;
-		}
 		Vector2 lastPoint = *it;
 		it++;
 
+		// check for the entire ring
 		for (; it != ring1.end(); it++)
 		{
-			if (it != p1 && lastPoint != *p1)
+			if (EdgeBlocksVisibility(*p1, *p2, *it, lastPoint))
 			{
-				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
-				{
-					return false;
-				}
+				return false;
 			}
 			lastPoint = *it;
 		}
 
-		if (ring1.begin() != p1 && lastPoint != *p1)
+		// close the ring by checking edge between first and last points
+		if (EdgeBlocksVisibility(*p1, *p2, *it, *ring1.begin()))
 		{
-			if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring1.begin()))
-			{
-				return false;
-			}
+			return false;
 		}
-		
+
 		// check for edges blocking visibility in ring 2
 		it = ring2.begin();
-		if (it == p2)
-		{
-			it++;
-		}
 		lastPoint = *it;
 		it++;
 
+
 		for (; it != ring2.end(); it++)
 		{
-			if (it != p2 && lastPoint != *p2)
-			{
-				if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *it))
-				{
-					return false;
-				}
-				lastPoint = *it;
-			}
-		}
-
-		if (ring2.begin() != p2 && lastPoint != *p2)
-		{
-			if (EdgeBlocksVisibility(*p1, *p2, lastPoint, *ring2.begin()))
+			if (EdgeBlocksVisibility(*p1, *p2, *it, lastPoint))
 			{
 				return false;
 			}
+			lastPoint = *it;
+		}
+
+		// close the ring by checking edge between first and last points
+		if (EdgeBlocksVisibility(*p1, *p2, *it, *ring2.begin()))
+		{
+			return false;
 		}
 
 		return true;
@@ -411,9 +399,10 @@ namespace AstralEngine
 			}
 		}
 		
-		trying to fix brige building for B broke tesselation of the rectangle with 3 triangle holes check why
-
-		AE_CORE_ASSERT(bridgePointB != outerPolygon.end(), "");
+		if (bridgePointB == outerPolygon.end())
+		{
+			return ADoublyLinkedList<Vector2>(); // return empty list since no valid bridge could be found
+		}
 
 		// let a be the bridge vertex in innerPolygon and b be bridge vertex in outerPolygon and 
 		// x be first vertex in innerPolygon build the following ring 
@@ -456,26 +445,7 @@ namespace AstralEngine
 			return true;
 		}
 		Vector3Int ear = FindEar(points, windingOrder);
-		// temp
-		if (ear == Vector3Int::Zero())
-		{
-			AE_CORE_WARN("Could not find next ear:");
-			for (auto& coords : points)
-			{
-				AE_CORE_INFO("%f, %f", coords.x, coords.y);
-			}
-		}
-		else
-		{
-			AE_CORE_WARN("Ear found:");
-			AE_CORE_INFO("%f, %f", points[ear.x].x, points[ear.x].y);
-			AE_CORE_INFO("%f, %f", points[ear.y].x, points[ear.y].y);
-			AE_CORE_INFO("%f, %f", points[ear.z].x, points[ear.z].y);
-		}
-		///
-
-		//algorithm fails with A character->cannot find ear, check why
-
+		
 		if (ear == Vector3Int::Zero())
 		{
 			return false;
