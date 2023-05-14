@@ -179,6 +179,7 @@ namespace AstralEngine
 	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points,
 		TessellationWindingOrder windingOrder)
 	{
+		/*
 		// copy the points so we can freely manipulate the list of points
 		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
 		for (auto& pointRing : points)
@@ -190,9 +191,117 @@ namespace AstralEngine
 			}
 			copyPoints.AddLast(currRing);
 		}
+		*/
 
-		// build bridges between the inner and outer polygons
+		// assemble submeshes
+		ASinglyLinkedList<ADoublyLinkedList<ADoublyLinkedList<Vector2>>> submeshes;
+		
+		{
+			ADoublyLinkedList<ADoublyLinkedList<Vector2>>& currSubmesh = submeshes.Emplace();
+			bool isInsideCurrentContour = false;
+
+			Vector2 min;
+			Vector2 max;
+			bool hasExtraEmptyList = false;
+			
+			the submesh assembling is not working as expected and there are empty lists being 
+			passed when there shouldn't be. Check why
+			for (auto& pointRing : points)
+			{
+				// if we are starting a new submesh update min and max points
+				if (currSubmesh.IsEmpty())
+				{
+					min = pointRing[0];
+					max = min;
+				}
+
+				ADoublyLinkedList<Vector2> currRing;
+				for (auto& point : pointRing)
+				{
+					// if we are starting a new submesh update the bounding box of that submesh
+					if (currSubmesh.IsEmpty())
+					{
+						if (point.x < min.x)
+						{
+							min.x = point.x;
+						}
+						else if (point.x > max.x)
+						{
+							max.x = point.x;
+						}
+
+						if (point.y < min.y)
+						{
+							min.y = point.y;
+						}
+						else if (point.y > max.y)
+						{
+							max.y = point.y;
+						}
+					}
+					else
+					{
+						// if we already have an outer contour of the submesh check if the current point is inside of it
+						isInsideCurrentContour = isInsideCurrentContour
+							|| (point.x <= max.x && point.x >= min.x && point.y <= max.y && point.y >= min.y);
+					}
+
+					currRing.AddLast(point);
+				}
+
+				if (currSubmesh.IsEmpty() || isInsideCurrentContour)
+				{
+					currSubmesh.AddLast(currRing);
+					hasExtraEmptyList = false;
+				}
+				else
+				{
+					submeshes.Add(currSubmesh);
+					currSubmesh = submeshes.Emplace();
+					hasExtraEmptyList = true;
+				}
+				isInsideCurrentContour = false;
+			}
+
+			if (hasExtraEmptyList)
+			{
+				submeshes.RemoveAt(0);
+			}
+		}
+
 		MeshDataManipulator mesh;
+		
+		// build and add every submesh to the final mesh
+		for (ADoublyLinkedList<ADoublyLinkedList<Vector2>>& currSubmesh : submeshes)
+		{
+			ADoublyLinkedList<Vector2> submeshPolygon = std::move(currSubmesh[0]);
+			currSubmesh.RemoveAt(0);
+
+			// build bridges between the inner and outer polygons 
+			while (!currSubmesh.IsEmpty())
+			{
+				auto nextInnerPolygon = FindInnerPolygonWithRightMostVertex(currSubmesh);
+				submeshPolygon = BuildBridge(*nextInnerPolygon, submeshPolygon);
+
+				// if no bridges could be built we return NullHandle
+				if (submeshPolygon.IsEmpty())
+				{
+					return NullHandle;
+				}
+				currSubmesh.Remove(nextInnerPolygon);
+			}
+
+			// generate and add submesh to the final mesh
+			// if ClipEars failed to generate the entire mesh we return NullHandle
+			if (!ClipEars(submeshPolygon, mesh, windingOrder))
+			{
+				return NullHandle;
+			}
+		}
+
+		return mesh.Generate2DMesh();
+
+		/*
 		ADoublyLinkedList<Vector2> finalPolygonRing;
 		finalPolygonRing = std::move(copyPoints[0]);
 		copyPoints.RemoveAt(0);
@@ -217,6 +326,7 @@ namespace AstralEngine
 		}
 
 		return mesh.Generate2DMesh();
+		*/
 	}
 
 	Vector3Int Tessellation::GetEarIndices(size_t listSize, size_t tipIndex, TessellationWindingOrder windingOrder)

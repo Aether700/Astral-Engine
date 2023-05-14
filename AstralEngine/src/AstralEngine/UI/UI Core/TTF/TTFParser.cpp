@@ -734,9 +734,6 @@ namespace AstralEngine
 					}
 				}
 
-				"i" and "j" cannot be drawn because of the "." on top, sort contours in a list of 
-					contours to tesselate individually?
-
 				return Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
 			}
 			else // compound glyph

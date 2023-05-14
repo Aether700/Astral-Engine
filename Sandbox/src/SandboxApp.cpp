@@ -148,7 +148,7 @@ private:
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'A';
+	char c = 'i';//'A';
 	int index = 0;
 	bool isShifted = true;
 	int resolution = 0;

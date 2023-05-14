@@ -22,10 +22,10 @@ namespace AstralEngine
 		// uses the Boyer-Watson algorithm to generate a triangulation of the provided list of points.
 		static MeshHandle BoyerWatson(const ADynArr<Vector2>& points);
 
-		/* Tessellates a simple hierarchy of polygons. If more than one polygon is provided 
-		   it is assumed that there is one bigger polygon which contains all the other polygons
+		/* Tessellates a simple hierarchy of polygons. It is assumed that the polygons are listed from bigest to smallest. 
+		   Multiple distinct polygons are supported
 		
-		Points: a list of polygon countours. The first contour of the list is assumed
+		Points: a list of polygon countours. 
 		windingOrder: the winding order of the polygon contours
 
 		returns: the MeshHandle to the newly created mesh or NullHandle if the mesh could not be generated. 

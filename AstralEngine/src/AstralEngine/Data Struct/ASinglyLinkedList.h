@@ -62,11 +62,12 @@ namespace AstralEngine
 		}
 
 		template<typename... Args>
-		void Emplace(Args... args)
+		T& Emplace(Args... args)
 		{
 			Node* newNode = new Node();
 			newNode->element = T(std::forward<Args>(args)...);
 			AddNode(newNode);
+			return newNode->element;
 		}
 
 		void AddFirst(T&& element)
