@@ -179,46 +179,31 @@ namespace AstralEngine
 	MeshHandle Tessellation::EarClipping(const ADoublyLinkedList<ADynArr<Vector2>>& points,
 		TessellationWindingOrder windingOrder)
 	{
-		/*
-		// copy the points so we can freely manipulate the list of points
-		ADoublyLinkedList<ADoublyLinkedList<Vector2>> copyPoints;
-		for (auto& pointRing : points)
+		if (points.IsEmpty()) 
 		{
-			ADoublyLinkedList<Vector2> currRing;
-			for (auto& point : pointRing)
-			{
-				currRing.AddLast(point);
-			}
-			copyPoints.AddLast(currRing);
+			return NullHandle;
 		}
-		*/
 
 		// assemble submeshes
 		ASinglyLinkedList<ADoublyLinkedList<ADoublyLinkedList<Vector2>>> submeshes;
 		
 		{
-			ADoublyLinkedList<ADoublyLinkedList<Vector2>>& currSubmesh = submeshes.Emplace();
+			ADoublyLinkedList<ADoublyLinkedList<Vector2>> currSubmesh;
 			bool isInsideCurrentContour = false;
 
-			Vector2 min;
-			Vector2 max;
-			bool hasExtraEmptyList = false;
+			Vector2 min = points[0][0];
+			Vector2 max = min;
 			
-			the submesh assembling is not working as expected and there are empty lists being 
-			passed when there shouldn't be. Check why
 			for (auto& pointRing : points)
 			{
-				// if we are starting a new submesh update min and max points
-				if (currSubmesh.IsEmpty())
-				{
-					min = pointRing[0];
-					max = min;
-				}
+				// min/max for current ring
+				Vector2 currMin = pointRing[0];
+				Vector2 currMax = currMin;
 
 				ADoublyLinkedList<Vector2> currRing;
 				for (auto& point : pointRing)
 				{
-					// if we are starting a new submesh update the bounding box of that submesh
+					// setup bounding box of initial ring (used only through first iteration of the loop)
 					if (currSubmesh.IsEmpty())
 					{
 						if (point.x < min.x)
@@ -242,8 +227,28 @@ namespace AstralEngine
 					else
 					{
 						// if we already have an outer contour of the submesh check if the current point is inside of it
+						// we loop through the whole thing to transfer data from an ADynArr to ADoublyLinkedList
 						isInsideCurrentContour = isInsideCurrentContour
-							|| (point.x <= max.x && point.x >= min.x && point.y <= max.y && point.y >= min.y);
+							|| (point.x <= max.x && point.x >= min.x && point.y <= max.y && point.y >= min.y);						
+
+						// update currMin/currMax
+						if (point.x < currMin.x)
+						{
+							currMin.x = point.x;
+						}
+						else if (point.x > currMax.x)
+						{
+							currMax.x = point.x;
+						}
+
+						if (point.y < currMin.y)
+						{
+							currMin.y = point.y;
+						}
+						else if (point.y > currMax.y)
+						{
+							currMax.y = point.y;
+						}
 					}
 
 					currRing.AddLast(point);
@@ -251,23 +256,27 @@ namespace AstralEngine
 
 				if (currSubmesh.IsEmpty() || isInsideCurrentContour)
 				{
+					// add point ring to previous sub mesh
 					currSubmesh.AddLast(currRing);
-					hasExtraEmptyList = false;
 				}
 				else
 				{
-					submeshes.Add(currSubmesh);
-					currSubmesh = submeshes.Emplace();
-					hasExtraEmptyList = true;
+					// store previous sub mesh which is now completed and create a 
+					// new sub mesh out of the current point ring
+					submeshes.Add(std::move(currSubmesh));
+					currSubmesh = ADoublyLinkedList<ADoublyLinkedList<Vector2>>();
+					currSubmesh.AddLast(currRing);
+					min = currMin;
+					max = currMax;
 				}
 				isInsideCurrentContour = false;
 			}
 
-			if (hasExtraEmptyList)
-			{
-				submeshes.RemoveAt(0);
-			}
+			// add final sub mesh to submesh list
+			submeshes.Add(std::move(currSubmesh));
 		}
+
+
 
 		MeshDataManipulator mesh;
 		
@@ -300,33 +309,6 @@ namespace AstralEngine
 		}
 
 		return mesh.Generate2DMesh();
-
-		/*
-		ADoublyLinkedList<Vector2> finalPolygonRing;
-		finalPolygonRing = std::move(copyPoints[0]);
-		copyPoints.RemoveAt(0);
-
-		while (!copyPoints.IsEmpty())
-		{
-			auto nextInnerPolygon = FindInnerPolygonWithRightMostVertex(copyPoints);
-			finalPolygonRing = BuildBridge(*nextInnerPolygon, finalPolygonRing);
-
-			// if no bridges could be built we return NullHandle
-			if (finalPolygonRing.IsEmpty())
-			{
-				return NullHandle;
-			}
-			copyPoints.Remove(nextInnerPolygon);
-		}
-
-		// if ClipEars failed to generate the entire mesh we return NullHandle
-		if (!ClipEars(finalPolygonRing, mesh, windingOrder))
-		{
-			return NullHandle;
-		}
-
-		return mesh.Generate2DMesh();
-		*/
 	}
 
 	Vector3Int Tessellation::GetEarIndices(size_t listSize, size_t tipIndex, TessellationWindingOrder windingOrder)
