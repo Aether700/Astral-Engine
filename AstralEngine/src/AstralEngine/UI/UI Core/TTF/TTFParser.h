@@ -119,6 +119,8 @@ namespace AstralEngine
 		void DebugDrawPointsOfChar(char c, size_t resolution);
 		/////////////////////////////////////
 
+		add way to modify glyph resolution (can be temporary for debugging purposes)
+
 	private:
 		TTFFont();
 

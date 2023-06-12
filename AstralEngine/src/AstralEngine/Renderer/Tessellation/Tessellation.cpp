@@ -276,8 +276,6 @@ namespace AstralEngine
 			submeshes.Add(std::move(currSubmesh));
 		}
 
-
-
 		MeshDataManipulator mesh;
 		
 		// build and add every submesh to the final mesh
