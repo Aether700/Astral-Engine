@@ -536,6 +536,8 @@ namespace AstralEngine
 		}
 		Vector3Int ear = FindEar(points, windingOrder);
 		
+		when using resolution > 0 cannot find ear check why
+
 		if (ear == Vector3Int::Zero())
 		{
 			return false;

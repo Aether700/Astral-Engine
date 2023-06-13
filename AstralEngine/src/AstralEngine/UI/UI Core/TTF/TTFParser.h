@@ -118,14 +118,14 @@ namespace AstralEngine
 		// temp /////////////////////////////
 		void DebugDrawPointsOfChar(char c, size_t resolution);
 		/////////////////////////////////////
-
-		add way to modify glyph resolution (can be temporary for debugging purposes)
+		
+		void SetResolution(size_t resolution);
 
 	private:
 		TTFFont();
 
 		Cmap m_cmap;
 		ADynArr<Glyph> m_glyphs;
-
+		size_t m_glyphResolution;
 	};
 }

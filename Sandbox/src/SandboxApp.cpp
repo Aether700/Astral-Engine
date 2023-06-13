@@ -90,6 +90,7 @@ public:
 	void SetFont(AReference<TTFFont> f)
 	{
 		m_font = f;
+		m_font->SetResolution(resolution);
 		m_mesh = m_font->GetCharMesh(c);
 	}
 
@@ -126,6 +127,7 @@ private:
 		if (Input::GetKeyDown(KeyCode::I))
 		{
 			resolution = Math::Clamp(resolution + 1, 0, maxResolution);
+			m_font->SetResolution(resolution);
 			m_mesh = m_font->GetCharMesh(c);
 			AE_INFO("resolution: %d", resolution);
 		}
@@ -133,6 +135,7 @@ private:
 		if (Input::GetKeyDown(KeyCode::K))
 		{
 			resolution = Math::Clamp(resolution - 1, 0, maxResolution);
+			m_font->SetResolution(resolution);
 			m_mesh = m_font->GetCharMesh(c);
 			AE_INFO("resolution: %d", resolution);
 		}

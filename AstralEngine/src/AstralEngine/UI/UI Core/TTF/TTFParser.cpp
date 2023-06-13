@@ -667,54 +667,57 @@ namespace AstralEngine
 			}
 
 			ResetContours();
-			m_basicContours = false;
-
-			// generate midpoints
-			for (Contour& c : m_contours)
+			if (glyphResolution > 0.0f)
 			{
-				for (size_t i = 1; i < c.GetCount(); i++)
-				{
-					GlyphPoint& firstPoint = c[i - 1];
-					GlyphPoint& secondPoint = c[i];
+				m_basicContours = false;
 
-					if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
-					{
-						GlyphPoint midpoint = GlyphPoint(
-							Vector2Int((int)((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f), 
-								(int)((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
-						c.Insert(midpoint, i);
-						i++;
-					}
-				}
-			}
-
-			// add midpoints to smooth the glyph's contours
-			for (Contour& c : m_contours)
-			{
-				Contour contourCopy = Contour(c);
-				c.Clear();
-				c.Add(contourCopy[0]);
-				for (size_t i = 1; i < contourCopy.GetCount(); i++)
+				// generate midpoints
+				for (Contour& c : m_contours)
 				{
-					if (!contourCopy[i].isOnCurve && !contourCopy[i].isMidpoint)
+					for (size_t i = 1; i < c.GetCount(); i++)
 					{
-						GlyphPoint firstPoint = i == 0 ? contourCopy[0] : contourCopy[i - 1];
-						GlyphPoint secondPoint = contourCopy[i];
-						GlyphPoint thirdPoint = i + 1 < contourCopy.GetCount() ? contourCopy[i + 1] : contourCopy[0];
-						
-						for (int j = 0; j <= glyphResolution; j++)
+						GlyphPoint& firstPoint = c[i - 1];
+						GlyphPoint& secondPoint = c[i];
+
+						if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
 						{
-							float t = (float)j / glyphResolution;
-							c.EmplaceBack(Vector2Int(
-								Math::BezierQuadratic(firstPoint.coords.x, 
-									secondPoint.coords.x, thirdPoint.coords.x, t),
-								Math::BezierQuadratic(firstPoint.coords.y, 
-									secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
+							GlyphPoint midpoint = GlyphPoint(
+								Vector2Int((int)((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f),
+									(int)((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
+							c.Insert(midpoint, i);
+							i++;
 						}
 					}
-					else
+				}
+
+				// add midpoints to smooth the glyph's contours
+				for (Contour& c : m_contours)
+				{
+					Contour contourCopy = Contour(c);
+					c.Clear();
+					c.Add(contourCopy[0]);
+					for (size_t i = 1; i < contourCopy.GetCount(); i++)
 					{
-						c.Add(contourCopy[i]);
+						if (!contourCopy[i].isOnCurve && !contourCopy[i].isMidpoint)
+						{
+							GlyphPoint firstPoint = i == 0 ? contourCopy[0] : contourCopy[i - 1];
+							GlyphPoint secondPoint = contourCopy[i];
+							GlyphPoint thirdPoint = i + 1 < contourCopy.GetCount() ? contourCopy[i + 1] : contourCopy[0];
+
+							for (int j = 0; j <= glyphResolution; j++)
+							{
+								float t = (float)j / glyphResolution;
+								c.EmplaceBack(Vector2Int(
+									Math::BezierQuadratic(firstPoint.coords.x,
+										secondPoint.coords.x, thirdPoint.coords.x, t),
+									Math::BezierQuadratic(firstPoint.coords.y,
+										secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
+							}
+						}
+						else
+						{
+							c.Add(contourCopy[i]);
+						}
 					}
 				}
 			}
@@ -1531,7 +1534,9 @@ namespace AstralEngine
 	{
 		// temporary implementation, need to cache the mesh to optimize speed
 		std::uint16_t id = m_cmap.GetGlyphID(c);
-		return m_glyphs[id].GenerateMesh();
+		Glyph& g = const_cast<Glyph&>(m_glyphs[id]);
+		g.SetResolution(m_glyphResolution);
+		return g.GenerateMesh();
 	}
 
 	void TTFFont::DebugDrawPointsOfChar(char c, size_t resolution)
@@ -1548,6 +1553,11 @@ namespace AstralEngine
 		}
 
 		m_glyphs[id].DrawPoints();
+	}
+
+	void TTFFont::SetResolution(size_t resolution) 
+	{
+		m_glyphResolution = resolution;
 	}
 
 	TTFFont::TTFFont() { }
