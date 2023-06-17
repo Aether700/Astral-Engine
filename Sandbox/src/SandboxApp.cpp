@@ -80,10 +80,7 @@ public:
 			AE_CORE_ERROR("Did not set font check in TestLayer::OnAttached");
 		}
 
-		if (m_mesh != NullHandle)
-		{
-			Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
-		}
+		RenderGlyph();
 		CheckUserInputForCharacter();
 	}
 
@@ -97,6 +94,11 @@ public:
 private:
 	void CheckUserInputForCharacter()
 	{
+		if (Input::GetKeyDown(KeyCode::L)) 
+		{
+			m_pointView = !m_pointView;
+		}
+
 		if (Input::GetKeyDown(KeyCode::P))
 		{
 			if (isShifted)
@@ -141,6 +143,21 @@ private:
 		}
 	}
 
+	void RenderGlyph() 
+	{
+		if (m_pointView) 
+		{
+			m_font->DebugDrawPointsOfChar(c, resolution);
+		}
+		else 
+		{
+			if (m_mesh != NullHandle)
+			{
+				Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
+			}
+		}
+	}
+
 	void ResetResolution()
 	{
 		resolution = 0;
@@ -156,6 +173,7 @@ private:
 	bool isShifted = true;
 	int resolution = 0;
 	MeshHandle m_mesh;
+	bool m_pointView = false;
 };
 
 class InputTest : public AstralEngine::NativeScript

@@ -707,17 +707,24 @@ namespace AstralEngine
 							for (int j = 0; j <= glyphResolution; j++)
 							{
 								float t = (float)j / glyphResolution;
-								c.EmplaceBack(Vector2Int(
+								GlyphPoint point = GlyphPoint(Vector2Int(
 									Math::BezierQuadratic(firstPoint.coords.x,
 										secondPoint.coords.x, thirdPoint.coords.x, t),
 									Math::BezierQuadratic(firstPoint.coords.y,
 										secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
+
+								if (!c.Contains(point)) 
+								{
+									c.AddLast(point);
+								}
 							}
 						}
 						else
 						{
-							c.Add(contourCopy[i]);
-						}
+							if (!c.Contains(contourCopy[i]))
+							{
+								c.AddLast(contourCopy[i]);
+						}}
 					}
 				}
 			}
