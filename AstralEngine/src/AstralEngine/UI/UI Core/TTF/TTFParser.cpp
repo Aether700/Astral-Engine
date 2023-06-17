@@ -661,7 +661,7 @@ namespace AstralEngine
 		void SetResolution(float glyphResolution)
 		{
 			AE_PROFILE_FUNCTION();
-			if (m_endPointsOfContours == nullptr)
+			if (m_endPointsOfContours == nullptr || glyphResolution < 0.0f)
 			{
 				return;
 			}
@@ -670,6 +670,8 @@ namespace AstralEngine
 			if (glyphResolution > 0.0f)
 			{
 				m_basicContours = false;
+
+				step through resolution changing to check if it's working properly
 
 				// generate midpoints
 				for (Contour& c : m_contours)
@@ -724,7 +726,8 @@ namespace AstralEngine
 							if (!c.Contains(contourCopy[i]))
 							{
 								c.AddLast(contourCopy[i]);
-						}}
+							}
+						}
 					}
 				}
 			}
