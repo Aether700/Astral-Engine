@@ -671,8 +671,6 @@ namespace AstralEngine
 			{
 				m_basicContours = false;
 
-				step through resolution changing to check if it's working properly
-
 				// generate midpoints
 				for (Contour& c : m_contours)
 				{
@@ -715,7 +713,7 @@ namespace AstralEngine
 									Math::BezierQuadratic(firstPoint.coords.y,
 										secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
 
-								if (!c.Contains(point)) 
+								if (!ContainsCoords(c, point)) 
 								{
 									c.AddLast(point);
 								}
@@ -723,7 +721,7 @@ namespace AstralEngine
 						}
 						else
 						{
-							if (!c.Contains(contourCopy[i]))
+							if (!ContainsCoords(c, contourCopy[i]))
 							{
 								c.AddLast(contourCopy[i]);
 							}
@@ -843,6 +841,20 @@ namespace AstralEngine
 			}
 
 			m_basicContours = true;
+		}
+
+		// returns true if the contour contains the provided points. Only checks the coordinates of the 
+		// contour not isOnCurve and isMidpoint
+		bool ContainsCoords(const Contour& c, const GlyphPoint& point) const 
+		{
+			for (const GlyphPoint& curr : c) 
+			{
+				if (curr.coords == point.coords) 
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		std::int16_t m_numContours;

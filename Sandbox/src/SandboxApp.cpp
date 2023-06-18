@@ -164,11 +164,18 @@ private:
 		AE_INFO("Resolution reset to 0");
 	}
 
+	the glyphs below don't render/don't render properly check why
+
+	/*
+	glyphs that don't render properly so far (some only don't render at high resolution):
+	J, O, S, a, s, t, 
+	*/
+
 	static constexpr int shiftOffset = 'a' - 'A';
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'B'; // 'A';
+	char c = 'J';//'A';
 	int index = 0;
 	bool isShifted = true;
 	int resolution = 0;
