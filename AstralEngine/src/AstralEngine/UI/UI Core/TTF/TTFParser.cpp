@@ -682,8 +682,8 @@ namespace AstralEngine
 						if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
 						{
 							GlyphPoint midpoint = GlyphPoint(
-								Vector2Int((int)((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f),
-									(int)((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
+								Vector2(((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f),
+									((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
 							c.Insert(midpoint, i);
 							i++;
 						}
@@ -707,7 +707,7 @@ namespace AstralEngine
 							for (int j = 0; j <= glyphResolution; j++)
 							{
 								float t = (float)j / glyphResolution;
-								GlyphPoint point = GlyphPoint(Vector2Int(
+								GlyphPoint point = GlyphPoint(Vector2(
 									Math::BezierQuadratic(firstPoint.coords.x,
 										secondPoint.coords.x, thirdPoint.coords.x, t),
 									Math::BezierQuadratic(firstPoint.coords.y,
@@ -803,12 +803,12 @@ namespace AstralEngine
 	private:
 		struct GlyphPoint
 		{
-			Vector2Int coords;
+			Vector2 coords;
 			bool isOnCurve;
 			bool isMidpoint; // might want to remove?
 
 			GlyphPoint() : isOnCurve(false), isMidpoint(false) { }
-			GlyphPoint(const Vector2Int& c, bool onCurve = false, bool midpoint = false) : coords(c), isOnCurve(onCurve), 
+			GlyphPoint(const Vector2& c, bool onCurve = false, bool midpoint = false) : coords(c), isOnCurve(onCurve), 
 				isMidpoint(midpoint) { }
 
 			bool operator==(const GlyphPoint& other) const
