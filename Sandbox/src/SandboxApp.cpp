@@ -12,6 +12,71 @@ using namespace AstralEngine;
 
 
 //Scripts////////////////////////////////////////////////////////////////////////
+class ASCIIFontTester : public NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		HandleInput();
+		RenderGlyph();
+	}
+
+	void SetFont(AReference<TTFFont> font) 
+	{
+		m_font = font;
+		m_font->SetResolution(s_resolution);
+		UpdateRenderData();
+	}
+
+private:
+	void HandleInput() 
+	{
+		if (Input::GetKeyDown(KeyCode::I)) 
+		{
+			m_currChar = m_currChar + 1;
+			if (m_currChar > s_max)
+			{
+				m_currChar = s_min;
+			}
+			UpdateRenderData();
+		}
+
+		if (Input::GetKeyDown(KeyCode::K))
+		{
+			m_currChar = m_currChar - 1;
+			if (m_currChar < s_min)
+			{
+				m_currChar = s_max;
+			}
+			UpdateRenderData();
+		}
+	}
+
+	void UpdateRenderData() 
+	{
+		m_charMesh = m_font->GetCharMesh(m_currChar);
+		if (m_charMesh == NullHandle)
+		{
+			AE_ERROR("null mesh returned for char %c", m_currChar);
+		}
+	}
+
+	// cannot render %
+
+	void RenderGlyph()
+	{
+		Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_charMesh);
+	}
+
+	static constexpr int s_min = 33;
+	static constexpr int s_max = 126;
+	static constexpr size_t s_resolution = 15;
+	char m_currChar = '%';
+	AReference<TTFFont> m_font;
+	MeshHandle m_charMesh;
+	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
+};
+
 class TessellationTester : public NativeScript
 {
 public:
@@ -165,16 +230,16 @@ private:
 	}
 
 	
-	the "a" char doesn't render properly when resolution is set to 14 specifically check why
+	//the "a" char doesn't render properly when resolution is set to 14 specifically check why
 
 	static constexpr int shiftOffset = 'a' - 'A';
 	static constexpr int maxResolution = 100;
 	AReference<TTFFont> m_font;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'a';//'A';
+	char c = 'A';
 	int index = 0;
 	bool isShifted = true;
-	int resolution = 0;
+	int resolution = 20;
 	MeshHandle m_mesh;
 	bool m_pointView = false;
 };
@@ -303,7 +368,9 @@ public:
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		
+		tesTester.OnStart();
 		viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
+		asciiTester.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
 
 		// temp
 		AstralEngine::AEntity e = m_scene->CreateAEntity();
@@ -311,7 +378,6 @@ public:
 		Camera::GetMainCamera().GetComponent<Camera>().GetCamera().
 			SetProjectionType(SceneCamera::ProjectionType::Perspective);
 
-		tesTester.OnStart();
 	}
 
 	void OnUpdate() override
@@ -324,7 +390,8 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		viewer.OnUpdate();
+		//viewer.OnUpdate();
+		asciiTester.OnUpdate();
 		//tesTester.OnUpdate();
 		Renderer::EndScene();
 
@@ -356,6 +423,7 @@ private:
 	AstralEngine::AEntity m_entity;
 
 	FontViewer viewer;
+	ASCIIFontTester asciiTester;
 	TessellationTester tesTester;
 };
 

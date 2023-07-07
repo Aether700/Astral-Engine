@@ -184,10 +184,12 @@ namespace AstralEngine
 			return NullHandle;
 		}
 
+
 		// assemble submeshes
 		ASinglyLinkedList<ADoublyLinkedList<ADoublyLinkedList<Vector2>>> submeshes;
 		
 		{
+			std::ofstream tempOut = std::ofstream("glyphPoints.txt");
 			ADoublyLinkedList<ADoublyLinkedList<Vector2>> currSubmesh;
 			bool isInsideCurrentContour = false;
 
@@ -203,6 +205,7 @@ namespace AstralEngine
 				ADoublyLinkedList<Vector2> currRing;
 				for (auto& point : pointRing)
 				{
+					tempOut << point.x << "\t" << point.y << "\n";
 					// setup bounding box of initial ring (used only through first iteration of the loop)
 					if (currSubmesh.IsEmpty())
 					{
@@ -271,6 +274,8 @@ namespace AstralEngine
 				}
 				isInsideCurrentContour = false;
 			}
+
+			tempOut.flush();
 
 			// add final sub mesh to submesh list
 			submeshes.Add(std::move(currSubmesh));
@@ -352,6 +357,11 @@ namespace AstralEngine
 
 	Vector3Int Tessellation::FindEar(const ADoublyLinkedList<Vector2>& points, TessellationWindingOrder windingOrder)
 	{
+		if (points.GetCount() == 3) 
+		{
+			return Vector3Int(0, 1, 2);
+		}
+
 		for (size_t i = 0; i < points.GetCount(); i++)
 		{
 			Vector3Int potentialEar = GetEarIndices(points.GetCount(), i, windingOrder);
@@ -534,6 +544,27 @@ namespace AstralEngine
 		{
 			return true;
 		}
+
+		while (points.GetCount() > 3)
+		{
+			Vector3Int ear = FindEar(points, windingOrder);
+
+			if (ear == Vector3Int::Zero())
+			{
+				return false;
+			}
+
+			currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
+			points.RemoveAt(ear.y); // remove tip
+		}
+		currMesh.AddTriangle(points[0], points[1], points[2]); // add last ear
+		return true;
+
+		/*
+		if (points.GetCount() < 3)
+		{
+			return true;
+		}
 		Vector3Int ear = FindEar(points, windingOrder);
 		
 		if (ear == Vector3Int::Zero())
@@ -544,5 +575,6 @@ namespace AstralEngine
 		currMesh.AddTriangle(points[ear.x], points[ear.y], points[ear.z]);
 		points.RemoveAt(ear.y); // remove tip
 		return ClipEars(points, currMesh, windingOrder);
+		*/
 	}
 }
