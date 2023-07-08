@@ -191,11 +191,62 @@ namespace AstralEngine
 		{
 			std::ofstream tempOut = std::ofstream("glyphPoints.txt");
 			ADoublyLinkedList<ADoublyLinkedList<Vector2>> currSubmesh;
-			bool isInsideCurrentContour = false;
+			//bool isInsideCurrentContour = false;
 
-			Vector2 min = points[0][0];
-			Vector2 max = min;
+			//Vector2 min = points[0][0];
+			//Vector2 max = min;
 			
+			auto it = points.begin();
+			const ADynArr<Vector2>* currOuterRing = &(*it);
+
+			needs to be reworked the % character does not have the contours of a single circles one 
+			after another so we need to check if the point is in any of the existing submeshes
+			
+			// add first ring to submesh
+			{
+				ADoublyLinkedList<Vector2> currRing;
+				for (const Vector2& point : *currOuterRing)
+				{
+					currRing.AddLast(point);
+				}
+				currSubmesh.AddLast(std::move(currRing));
+			}
+			
+			// skip first ring since it is the outer ring
+			it++;
+
+			for (; it != points.end(); it++)
+			{
+				bool isInsideOutterRing = false;
+				ADoublyLinkedList<Vector2> currRing;
+				for (const Vector2& point : *it)
+				{
+					collision detection code is taken from http://jeffreythompson.org/collision-detection/poly-point.php
+
+					tempOut << point.x << "\t" << point.y << "\n";
+					if (!isInsideOutterRing && Math::IsPointInShape(*currOuterRing, point))
+					{
+						isInsideOutterRing = true;
+					}
+					currRing.AddLast(point);
+				}
+				tempOut << "\n\n";
+
+				if (isInsideOutterRing)
+				{
+					currSubmesh.AddLast(std::move(currRing));
+				}
+				else
+				{
+					submeshes.Add(std::move(currSubmesh));
+					currSubmesh = ADoublyLinkedList<ADoublyLinkedList<Vector2>>();
+					currSubmesh.AddLast(std::move(currRing));
+				}
+			}
+			
+
+
+			/*
 			for (auto& pointRing : points)
 			{
 				// min/max for current ring
@@ -274,6 +325,7 @@ namespace AstralEngine
 				}
 				isInsideCurrentContour = false;
 			}
+			*/
 
 			tempOut.flush();
 

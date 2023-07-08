@@ -71,7 +71,7 @@ private:
 	static constexpr int s_min = 33;
 	static constexpr int s_max = 126;
 	static constexpr size_t s_resolution = 15;
-	char m_currChar = '%';
+	char m_currChar = '%';//s_min;
 	AReference<TTFFont> m_font;
 	MeshHandle m_charMesh;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
