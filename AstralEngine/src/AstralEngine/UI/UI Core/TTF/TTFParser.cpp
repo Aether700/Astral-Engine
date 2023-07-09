@@ -1376,58 +1376,6 @@ namespace AstralEngine
 
 	// TTFParser //////////////////////////////////////////////////////////
 
-	//temp debug functions//////////////////
-	void PrintTableTag(TableDirectory& dir)
-	{
-		char tableID[5];
-		tableID[4] = '\0';
-		std::cout << tableID << "\n";
-	}
-
-	void LoopGlyphDescription(ADynArr<GlyphDescription>& glyf)
-	{
-		for (GlyphDescription& g : glyf)
-		{
-			if (g.data == nullptr)
-			{
-				int x = 0;
-			}
-			else if (g.numberOfContours > 0)
-			{
-				SimpleGlyphData* simple = (SimpleGlyphData*)g.data;
-				int x = 0;
-			}
-			else
-			{
-				CompoundGlyphData* compound = (CompoundGlyphData*)g.data;
-				int x = 0;
-			}
-		}
-	}
-
-	void PrintLoca(IndexToLocationTable& loca)
-	{
-		for (size_t i = 0; i < loca.arrLen; i++)
-		{
-			std::cout << i << ": " << loca.GetGlyphOffset(i) << "\n";
-		}
-	}
-
-	void PrintContourData(SimpleGlyphData* data)
-	{
-		for (size_t i = 0; i < data->GetNumPoints(); i++)
-		{
-			Vector2Int coords = data->GetCoords(i);
-			AE_CORE_INFO("%d, %d", coords.x, coords.y);
-		}
-	}
-
-	///////////////////////////////////////
-
-
-	// temp font object used for debugging
-
-	///////////////////////////////////////
 	AReference<Font> TTFFont::LoadFont(const std::string& filepath)
 	{
 		std::ifstream file = std::ifstream(filepath, std::ios_base::binary);
@@ -1532,12 +1480,6 @@ namespace AstralEngine
 				break;
 			}
 			AE_CORE_ASSERT(file.good(), "");
-
-			/*
-			look into drawing glyphs from the glyf data:
-			https://docs.microsoft.com/en-us/typography/opentype/spec/ttch01
-			*/
-
 		}
 
 		// temp

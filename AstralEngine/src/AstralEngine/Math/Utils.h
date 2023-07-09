@@ -1,6 +1,6 @@
 #pragma once
 #include "Vectors/Vector2.h"
-#include "AstralEngine/Data Struct/ADynArr.h"
+#include "AstralEngine/Data Struct/ADoublyLinkedList.h"
 
 namespace AstralEngine
 {
@@ -91,7 +91,7 @@ namespace AstralEngine
 		static bool LineSegmentsCollide(const Vector2& p1, const Vector2& p2, const Vector2& p3, const Vector2& p4);
 		
 		// checks if the provided point is inside the provided shape
-		static bool IsPointInShape(const ADynArr<Vector2>& shapeContour, const Vector2& point);
+		static bool IsPointInShape(const ADoublyLinkedList<Vector2>& shapeContour, const Vector2& point);
 
 		// computes the Barycentric coords of the provided point p relative the the triangle made of the points t1, t2 and t3
 		static Vector3 ComputeBarycentricCoords(const Vector3& p, const Vector3& t1, const Vector3& t2, const Vector3& t3);

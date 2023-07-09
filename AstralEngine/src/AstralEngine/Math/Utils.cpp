@@ -305,7 +305,7 @@ namespace AstralEngine
 		return t0 >= 0 && t0 <= 1 && s0 >= 0 && s0 <= 1;
 	}
 
-	bool Math::IsPointInShape(const ADynArr<Vector2>& shapeContour, const Vector2& point)
+	bool Math::IsPointInShape(const ADoublyLinkedList<Vector2>& shapeContour, const Vector2& point)
 	{
 		// for every edge in the shape we do two checks which effectively scan the shape horizontally
 		// one check to verify if the point's y "height" is in between the two points of the edge
@@ -313,6 +313,35 @@ namespace AstralEngine
 		// the value of "near enough" is computed in relation to the length of the edge and 
 		// it's distance with the point
 
+		bool isInside = false;
+		auto it = shapeContour.begin();
+		for (; it != shapeContour.end(); it++)
+		{
+			const Vector2& curr = *it;
+			auto oldIt = it;
+			it++;
+			if (it == shapeContour.end())
+			{
+				it = shapeContour.begin();
+			}
+			const Vector2& next = *it;
+			it = oldIt;
+
+			// first check -> make sure the point is in between the two ends of the current edge
+			if ((curr.y > point.y) != (next.y > point.y))
+			{
+
+				// second check, look if the edge is "near enough" to the point on the x axis
+				if (point.x < (((next.x - curr.x) * (point.y - curr.y) / (next.y - curr.y)) + curr.x))
+				{
+					// if both checks have passed toggle isInside since we are doing horizontal scans of the shape
+					isInside = !isInside;
+				}
+			}
+		}
+		return isInside;
+
+		/*
 		bool isInside = false;
 		for (size_t i = 0; i < shapeContour.GetCount(); i++)
 		{
@@ -337,6 +366,7 @@ namespace AstralEngine
 			}
 		}
 		return isInside;
+		*/
 	}
 
 	Vector3 Math::ComputeBarycentricCoords(const Vector3& p, const Vector3& t1, const Vector3& t2, const Vector3& t3)

@@ -21,6 +21,8 @@ public:
 		RenderGlyph();
 	}
 
+	check to test compound glyphs
+
 	void SetFont(AReference<TTFFont> font) 
 	{
 		m_font = font;
@@ -55,13 +57,7 @@ private:
 	void UpdateRenderData() 
 	{
 		m_charMesh = m_font->GetCharMesh(m_currChar);
-		if (m_charMesh == NullHandle)
-		{
-			AE_ERROR("null mesh returned for char %c", m_currChar);
-		}
 	}
-
-	// cannot render %
 
 	void RenderGlyph()
 	{
@@ -71,7 +67,7 @@ private:
 	static constexpr int s_min = 33;
 	static constexpr int s_max = 126;
 	static constexpr size_t s_resolution = 15;
-	char m_currChar = '%';//s_min;
+	char m_currChar = s_min;
 	AReference<TTFFont> m_font;
 	MeshHandle m_charMesh;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));

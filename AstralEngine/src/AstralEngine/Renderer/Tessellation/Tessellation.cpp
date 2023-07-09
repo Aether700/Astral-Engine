@@ -189,148 +189,65 @@ namespace AstralEngine
 		ASinglyLinkedList<ADoublyLinkedList<ADoublyLinkedList<Vector2>>> submeshes;
 		
 		{
-			std::ofstream tempOut = std::ofstream("glyphPoints.txt");
-			ADoublyLinkedList<ADoublyLinkedList<Vector2>> currSubmesh;
-			//bool isInsideCurrentContour = false;
-
-			//Vector2 min = points[0][0];
-			//Vector2 max = min;
-			
-			auto it = points.begin();
-			const ADynArr<Vector2>* currOuterRing = &(*it);
-
-			needs to be reworked the % character does not have the contours of a single circles one 
-			after another so we need to check if the point is in any of the existing submeshes
-			
-			// add first ring to submesh
+			for (const ADynArr<Vector2>& pointRing : points)
 			{
-				ADoublyLinkedList<Vector2> currRing;
-				for (const Vector2& point : *currOuterRing)
-				{
-					currRing.AddLast(point);
-				}
-				currSubmesh.AddLast(std::move(currRing));
-			}
-			
-			// skip first ring since it is the outer ring
-			it++;
-
-			for (; it != points.end(); it++)
-			{
+				ADoublyLinkedList<ADoublyLinkedList<Vector2>>* submeshToAddTo = nullptr;
 				bool isInsideOutterRing = false;
 				ADoublyLinkedList<Vector2> currRing;
-				for (const Vector2& point : *it)
-				{
-					collision detection code is taken from http://jeffreythompson.org/collision-detection/poly-point.php
-
-					tempOut << point.x << "\t" << point.y << "\n";
-					if (!isInsideOutterRing && Math::IsPointInShape(*currOuterRing, point))
+				for (const Vector2& point : pointRing)
+				{					
+					// find a submesh to add the current ring to
+					if (submeshToAddTo == nullptr)
 					{
-						isInsideOutterRing = true;
+						for (auto& submesh : submeshes)
+						{
+							for (auto& contour : submesh)
+							{
+								if (Math::IsPointInShape(contour, point))
+								{
+									submeshToAddTo = &submesh;
+									break;
+								}
+							}
+
+							if (submeshToAddTo != nullptr)
+							{
+								break;
+							}
+						}
 					}
+					
 					currRing.AddLast(point);
 				}
-				tempOut << "\n\n";
 
-				if (isInsideOutterRing)
+				if (submeshToAddTo != nullptr)
 				{
-					currSubmesh.AddLast(std::move(currRing));
+					submeshToAddTo->AddLast(std::move(currRing));
 				}
 				else
 				{
-					submeshes.Add(std::move(currSubmesh));
-					currSubmesh = ADoublyLinkedList<ADoublyLinkedList<Vector2>>();
-					currSubmesh.AddLast(std::move(currRing));
+					ADoublyLinkedList<ADoublyLinkedList<Vector2>>& newSubmesh = submeshes.Emplace();
+					newSubmesh.Add(std::move(currRing));
 				}
-			}
-			
+			}			
 
+			// for debug only //////////////////////////////////////////////
+			std::ofstream tempOut = std::ofstream("glyphPoints.txt");
 
-			/*
-			for (auto& pointRing : points)
+			for (auto& submesh : submeshes)
 			{
-				// min/max for current ring
-				Vector2 currMin = pointRing[0];
-				Vector2 currMax = currMin;
-
-				ADoublyLinkedList<Vector2> currRing;
-				for (auto& point : pointRing)
+				for (auto& ring : submesh)
 				{
-					tempOut << point.x << "\t" << point.y << "\n";
-					// setup bounding box of initial ring (used only through first iteration of the loop)
-					if (currSubmesh.IsEmpty())
+					for (auto& point : ring)
 					{
-						if (point.x < min.x)
-						{
-							min.x = point.x;
-						}
-						else if (point.x > max.x)
-						{
-							max.x = point.x;
-						}
-
-						if (point.y < min.y)
-						{
-							min.y = point.y;
-						}
-						else if (point.y > max.y)
-						{
-							max.y = point.y;
-						}
+						tempOut << point.x << "\t" << point.y << "\n";
 					}
-					else
-					{
-						// if we already have an outer contour of the submesh check if the current point is inside of it
-						// we loop through the whole thing to transfer data from an ADynArr to ADoublyLinkedList
-						isInsideCurrentContour = isInsideCurrentContour
-							|| (point.x <= max.x && point.x >= min.x && point.y <= max.y && point.y >= min.y);						
-
-						// update currMin/currMax
-						if (point.x < currMin.x)
-						{
-							currMin.x = point.x;
-						}
-						else if (point.x > currMax.x)
-						{
-							currMax.x = point.x;
-						}
-
-						if (point.y < currMin.y)
-						{
-							currMin.y = point.y;
-						}
-						else if (point.y > currMax.y)
-						{
-							currMax.y = point.y;
-						}
-					}
-
-					currRing.AddLast(point);
 				}
-
-				if (currSubmesh.IsEmpty() || isInsideCurrentContour)
-				{
-					// add point ring to previous sub mesh
-					currSubmesh.AddLast(currRing);
-				}
-				else
-				{
-					// store previous sub mesh which is now completed and create a 
-					// new sub mesh out of the current point ring
-					submeshes.Add(std::move(currSubmesh));
-					currSubmesh = ADoublyLinkedList<ADoublyLinkedList<Vector2>>();
-					currSubmesh.AddLast(currRing);
-					min = currMin;
-					max = currMax;
-				}
-				isInsideCurrentContour = false;
+				tempOut << "\n\n\n";
 			}
-			*/
 
 			tempOut.flush();
-
-			// add final sub mesh to submesh list
-			submeshes.Add(std::move(currSubmesh));
+			/////////////////////////////////////////////////////////////
 		}
 
 		MeshDataManipulator mesh;
