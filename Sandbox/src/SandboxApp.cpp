@@ -21,7 +21,7 @@ public:
 		RenderGlyph();
 	}
 
-	check to test compound glyphs
+	//check to test compound glyphs
 
 	void SetFont(AReference<TTFFont> font) 
 	{
@@ -67,7 +67,7 @@ private:
 	static constexpr int s_min = 33;
 	static constexpr int s_max = 126;
 	static constexpr size_t s_resolution = 15;
-	char m_currChar = s_min;
+	char m_currChar = 1038;//s_min;
 	AReference<TTFFont> m_font;
 	MeshHandle m_charMesh;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));

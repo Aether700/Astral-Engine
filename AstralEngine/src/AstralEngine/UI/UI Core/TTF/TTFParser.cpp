@@ -1497,7 +1497,7 @@ namespace AstralEngine
 	MeshHandle TTFFont::GetCharMesh(wchar_t c) const
 	{
 		// temporary implementation, need to cache the mesh to optimize speed
-		std::uint16_t id = m_cmap.GetGlyphID(c);
+		std::uint16_t id = 1042;//m_cmap.GetGlyphID(c);
 		Glyph& g = const_cast<Glyph&>(m_glyphs[id]);
 		g.SetResolution(m_glyphResolution);
 		return g.GenerateMesh();
