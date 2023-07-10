@@ -2,8 +2,13 @@
 #include "TTFParser.h"
 #include "AstralEngine/Renderer/Tessellation/Tessellation.h"
 
+#include <utility>
+
 namespace AstralEngine
 {
+	class SimpleTTFGlyph;
+	class CompoundTTFGlyph;
+
 	// ttf variable types
 	typedef std::int16_t shortFrac;
 	typedef std::int16_t Fixed;
@@ -601,52 +606,57 @@ namespace AstralEngine
 
 	// Internal Font Objects //////////////////////////////////////////////
 
-	// for now only supports simple glyph
-	class Glyph
+	class TTFGlyph
+	{
+	public:
+		virtual void SetResolution(float glyphResolution) = 0;
+		virtual MeshHandle GenerateMesh() const = 0;
+
+		static AReference<TTFGlyph> Create(GlyphDescription&& description, AReference<TTFFont>& owningFont)
+		{
+			if (description.numberOfContours > 0)
+			{
+				return AReference<SimpleTTFGlyph>::Create(std::forward<GlyphDescription>(description));
+			}
+			
+			return AReference<CompoundTTFGlyph>::Create(std::forward<GlyphDescription>(description), owningFont.Get());
+		}
+	};
+
+	class SimpleTTFGlyph : public TTFGlyph
 	{
 		struct GlyphPoint;
 		using Contour = ADoublyLinkedList<GlyphPoint>;
+
 	public:
-		Glyph() : m_endPointsOfContours(nullptr) { }
-
-		Glyph(const GlyphDescription& description) : m_endPointsOfContours(nullptr), m_basicContours(false)
+		SimpleTTFGlyph(GlyphDescription&& description)
+			: m_endPointsOfContours(nullptr), m_basicContours(false)
 		{
-			// temp ///////////////////////////
-			//AE_CORE_ASSERT(description.numberOfContours > 0, "Glyph class only supports simple glyphs for now"); 
-			///////////////////////////////////
-
+			AE_CORE_ASSERT(description.numberOfContours > 0, "Initializing Simple glyph with data from a compound glyph");
 			m_numContours = description.numberOfContours;
 			m_outlineMin = Vector2Short(description.xMin, description.yMin);
 			m_outlineMax = Vector2Short(description.xMax, description.yMax);
 
-			if (IsSimpleGlyph())
+			SimpleGlyphData* data = (SimpleGlyphData*)description.data;
+			size_t numPoints = (size_t)data->GetNumPoints();
+			m_endPointsOfContours = new ADynArr<std::uint16_t>(data->numOfContours);
+			m_basePoints.Reserve(numPoints);
+			m_contours.Reserve(data->numOfContours);
+			
+			for (size_t i = 0; i < numPoints; i++)
 			{
-				SimpleGlyphData* data = (SimpleGlyphData*)description.data;
-				size_t numPoints = (size_t)data->GetNumPoints();
-				m_endPointsOfContours = new ADynArr<std::uint16_t>(data->numOfContours);
-				m_basePoints.Reserve(numPoints);
-				m_contours.Reserve(data->numOfContours);
-				
-				for (size_t i = 0; i < numPoints; i++)
-				{
-					TTFOutlineFlags flags = data->GetFlags(i);
-					m_basePoints.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
-				}
-
-				for (size_t i = 0; i < data->numOfContours; i++)
-				{
-					m_endPointsOfContours->Add(data->endPtsOfContours[i]);
-				}
-				ResetContours();
-			}
-			else // compound glyphs
-			{
-				// not supported yet
+				TTFOutlineFlags flags = data->GetFlags(i);
+				m_basePoints.EmplaceBack(data->GetCoords(i), (flags & TTFOutlineFlagsOnCurve), false);
 			}
 
+			for (size_t i = 0; i < data->numOfContours; i++)
+			{
+				m_endPointsOfContours->Add(data->endPtsOfContours[i]);
+			}
+			ResetContours();
 		}
 
-		Glyph(Glyph&& other) noexcept : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)), 
+		SimpleTTFGlyph(SimpleTTFGlyph&& other) noexcept : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)),
 			m_endPointsOfContours(other.m_endPointsOfContours), m_outlineMin(other.m_outlineMin), 
 			m_outlineMax(other.m_outlineMax), m_basePoints(std::move(other.m_basePoints)), 
 			m_numContours(other.m_numContours)
@@ -654,11 +664,9 @@ namespace AstralEngine
 			other.m_endPointsOfContours = nullptr;
 		}
 
-		~Glyph() { delete m_endPointsOfContours; }
+		~SimpleTTFGlyph() { delete m_endPointsOfContours; }
 
-		bool IsSimpleGlyph() const { return m_numContours > 0; }
-
-		void SetResolution(float glyphResolution)
+		virtual void SetResolution(float glyphResolution) override
 		{
 			AE_PROFILE_FUNCTION();
 			if (m_endPointsOfContours == nullptr || glyphResolution < 0.0f)
@@ -667,95 +675,88 @@ namespace AstralEngine
 			}
 
 			ResetContours();
-			if (glyphResolution > 0.0f)
+			if (glyphResolution == 0.0f)
 			{
-				m_basicContours = false;
+				return;
+			}
 
-				// generate midpoints
-				for (Contour& c : m_contours)
+			m_basicContours = false;
+
+			// generate midpoints
+			for (Contour& c : m_contours)
+			{
+				for (size_t i = 1; i < c.GetCount(); i++)
 				{
-					for (size_t i = 1; i < c.GetCount(); i++)
-					{
-						GlyphPoint& firstPoint = c[i - 1];
-						GlyphPoint& secondPoint = c[i];
+					GlyphPoint& firstPoint = c[i - 1];
+					GlyphPoint& secondPoint = c[i];
 
-						if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
-						{
-							GlyphPoint midpoint = GlyphPoint(
-								Vector2(((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f),
-									((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
-							c.Insert(midpoint, i);
-							i++;
-						}
+					if (!firstPoint.isOnCurve && !secondPoint.isOnCurve)
+					{
+						GlyphPoint midpoint = GlyphPoint(
+							Vector2(((float)(firstPoint.coords.x + secondPoint.coords.x) / 2.0f),
+								((float)(firstPoint.coords.y + secondPoint.coords.y) / 2.0f)), false, true);
+						c.Insert(midpoint, i);
+						i++;
 					}
 				}
+			}
 
-				// add midpoints to smooth the glyph's contours
-				for (Contour& c : m_contours)
+			// add midpoints to smooth the glyph's contours
+			for (Contour& c : m_contours)
+			{
+				Contour contourCopy = Contour(c);
+				c.Clear();
+				c.Add(contourCopy[0]);
+				for (size_t i = 1; i < contourCopy.GetCount(); i++)
 				{
-					Contour contourCopy = Contour(c);
-					c.Clear();
-					c.Add(contourCopy[0]);
-					for (size_t i = 1; i < contourCopy.GetCount(); i++)
+					if (!contourCopy[i].isOnCurve && !contourCopy[i].isMidpoint)
 					{
-						if (!contourCopy[i].isOnCurve && !contourCopy[i].isMidpoint)
+						GlyphPoint firstPoint = i == 0 ? contourCopy[0] : contourCopy[i - 1];
+						GlyphPoint secondPoint = contourCopy[i];
+						GlyphPoint thirdPoint = i + 1 < contourCopy.GetCount() ? contourCopy[i + 1] : contourCopy[0];
+
+						for (int j = 0; j <= glyphResolution; j++)
 						{
-							GlyphPoint firstPoint = i == 0 ? contourCopy[0] : contourCopy[i - 1];
-							GlyphPoint secondPoint = contourCopy[i];
-							GlyphPoint thirdPoint = i + 1 < contourCopy.GetCount() ? contourCopy[i + 1] : contourCopy[0];
+							float t = (float)j / glyphResolution;
+							GlyphPoint point = GlyphPoint(Vector2(
+								Math::BezierQuadratic(firstPoint.coords.x,
+									secondPoint.coords.x, thirdPoint.coords.x, t),
+								Math::BezierQuadratic(firstPoint.coords.y,
+									secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
 
-							for (int j = 0; j <= glyphResolution; j++)
+							if (!ContainsCoords(c, point)) 
 							{
-								float t = (float)j / glyphResolution;
-								GlyphPoint point = GlyphPoint(Vector2(
-									Math::BezierQuadratic(firstPoint.coords.x,
-										secondPoint.coords.x, thirdPoint.coords.x, t),
-									Math::BezierQuadratic(firstPoint.coords.y,
-										secondPoint.coords.y, thirdPoint.coords.y, t)), true, false);
-
-								if (!ContainsCoords(c, point)) 
-								{
-									c.AddLast(point);
-								}
+								c.AddLast(point);
 							}
 						}
-						else
+					}
+					else
+					{
+						if (!ContainsCoords(c, contourCopy[i]))
 						{
-							if (!ContainsCoords(c, contourCopy[i]))
-							{
-								c.AddLast(contourCopy[i]);
-							}
+							c.AddLast(contourCopy[i]);
 						}
 					}
 				}
 			}
 		}
 
-		MeshHandle GenerateMesh() const
+		virtual MeshHandle GenerateMesh() const override
 		{
-			if (IsSimpleGlyph())
+			ADoublyLinkedList<ADynArr<Vector2>> points;
+			for (const Contour& contour : m_contours)
 			{
-				ADoublyLinkedList<ADynArr<Vector2>> points;
-				for (const Contour& contour : m_contours)
+				ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
+				for (const GlyphPoint& p : contour)
 				{
-					ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
-					for (const GlyphPoint& p : contour)
-					{
-						currContour.AddLast(p.coords);
-					}
+					currContour.AddLast(p.coords);
 				}
+			}
 
-				return Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
-			}
-			else // compound glyph
-			{
-				// not supported yet
-				AE_CORE_ERROR("Compound glyphs are not supported yet");
-				return NullHandle;
-			}
+			return Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
 		}
 
-		Glyph& operator=(Glyph&& other) noexcept
+		SimpleTTFGlyph& operator=(SimpleTTFGlyph&& other) noexcept
 		{
 			delete[] m_endPointsOfContours;
 
@@ -771,34 +772,6 @@ namespace AstralEngine
 
 			return *this;
 		}
-
-		// temp for debug
-		void DrawPoints()
-		{
-			// see for more details: https://learn.microsoft.com/en-us/typography/opentype/spec/ttch01
-			Vector2 scale = Vector2(0.01f, 0.01f);
-			for (auto& contour : m_contours)
-			{
-				for (auto& point : contour)
-				{
-					if (point.isOnCurve)
-					{
-						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale);
-					}
-					else if (point.isMidpoint)
-					{
-						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale, {0, 1, 0, 1});
-					}
-					else
-					{
-						Renderer::DrawQuad(Vector3(point.coords.x, point.coords.y, 0) * 0.0001f, 0.0f, scale, {1, 0, 0, 1});
-					}
-				}
-			}
-			/*
-			*/
-		}
-		////////////////////
 
 	private:
 		struct GlyphPoint
@@ -873,6 +846,30 @@ namespace AstralEngine
 		bool m_basicContours; 
 	};
 
+	class CompoundTTFGlyph : public TTFGlyph
+	{
+	public:
+		CompoundTTFGlyph(GlyphDescription&& description, TTFFont* owningFont) 
+			: m_owningFont(owningFont), m_description(std::move(description))
+		{
+			AE_CORE_ASSERT(owningFont != nullptr && m_description.numberOfContours <= 0, "");
+		}
+
+		virtual void SetResolution(float glyphResolution) override
+		{
+			// don't do anything the font object will set the resolution of the simple glyphs of the component glyphs
+		}
+
+		virtual MeshHandle GenerateMesh() const override
+		{
+			AE_CORE_ERROR("Not Implemented yet");
+			return NullHandle;
+		}
+
+	private:
+		TTFFont* m_owningFont;
+		GlyphDescription m_description;
+	};
 
 	// Read functions /////////////////////////////////////////////////////
 
@@ -1390,7 +1387,7 @@ namespace AstralEngine
 		HeaderTable head;
 		HorizontalHeader hhea;
 		ADynArr<LongHorizontalMetric> hmtx;
-		ADynArr<Glyph> glyf;
+		ADynArr<AReference<TTFGlyph>> glyf;
 		MaximumProfileTable maxp;
 		Cmap cmap;
 		IndexToLocationTable loca;
@@ -1447,6 +1444,7 @@ namespace AstralEngine
 			file.seekg(oldPos);
 		}
 
+		AReference<TTFFont> loadedFont = AReference<TTFFont>::Create();
 
 		for (TableDirectory& dir : tableDirectories)
 		{
@@ -1475,18 +1473,16 @@ namespace AstralEngine
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					glyf.EmplaceBack(ReadGlyphDescription(file));
+					glyf.Add(TTFGlyph::Create(std::forward<GlyphDescription>(ReadGlyphDescription(file)), loadedFont));
 				}
 				break;
 			}
 			AE_CORE_ASSERT(file.good(), "");
 		}
 
-		// temp
-		AReference<TTFFont> tempFont = AReference<TTFFont>::Create();
-		tempFont->m_glyphs = std::move(glyf);
-		tempFont->m_cmap = std::move(cmap);
-		return tempFont;
+		loadedFont->m_glyphs = std::move(glyf);
+		loadedFont->m_cmap = std::move(cmap);
+		return loadedFont;
 	}
 
 	MeshHandle TTFFont::GetCharMesh(char c) const
@@ -1496,34 +1492,37 @@ namespace AstralEngine
 	
 	MeshHandle TTFFont::GetCharMesh(wchar_t c) const
 	{
-		// temporary implementation, need to cache the mesh to optimize speed
-		std::uint16_t id = 1042;//m_cmap.GetGlyphID(c);
-		Glyph& g = const_cast<Glyph&>(m_glyphs[id]);
-		g.SetResolution(m_glyphResolution);
-		return g.GenerateMesh();
-	}
-
-	void TTFFont::DebugDrawPointsOfChar(char c, size_t resolution)
-	{
-		static size_t lastResolution = 0;
-		static char lastChar = '\0';
-
-		std::uint16_t id = m_cmap.GetGlyphID(c);
-		if (lastResolution != resolution || lastChar != c)
+		if (!m_cachedGlyphs.ContainsKey(c))
 		{
-			m_glyphs[id].SetResolution(resolution);
-			lastResolution = resolution;
-			lastChar = c;
+			std::uint16_t id = 1042;//m_cmap.GetGlyphID(c);
+			AReference<TTFGlyph>& g = const_cast<AReference<TTFGlyph>&>(m_glyphs[id]);
+			g->SetResolution(m_glyphResolution);
+			MeshHandle glyphMesh = g->GenerateMesh();
+			m_cachedGlyphs[c] = glyphMesh;
+			return glyphMesh;
 		}
 
-		m_glyphs[id].DrawPoints();
+		return m_cachedGlyphs[c];
 	}
 
-	void TTFFont::SetResolution(size_t resolution) 
+	void TTFFont::SetResolution(size_t resolution)
 	{
-		m_glyphResolution = resolution;
+		if (m_glyphResolution != resolution)
+		{
+			m_glyphResolution = resolution;
+			ClearGlyphs();
+		}
 	}
 
 	TTFFont::TTFFont() { }
+
+	void TTFFont::ClearGlyphs()
+	{
+		for (auto& pair : m_cachedGlyphs)
+		{
+			ResourceHandler::DeleteMesh(pair.GetElement());
+		}
+		m_cachedGlyphs.Clear();
+	}
 
 }

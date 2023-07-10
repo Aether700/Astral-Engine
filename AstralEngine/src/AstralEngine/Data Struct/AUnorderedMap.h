@@ -271,6 +271,8 @@ namespace AstralEngine
 			{
 				m_bucketArr[i].Clear();
 			}
+			m_count = 0;
+
 		}
 
 		T& operator[](const K& key)

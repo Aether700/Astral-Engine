@@ -52,6 +52,14 @@ private:
 			}
 			UpdateRenderData();
 		}
+
+		if (Input::GetKeyDown(KeyCode::L))
+		{
+			static size_t resolution = s_resolution;
+			resolution++;
+			m_font->SetResolution(resolution);
+			UpdateRenderData();
+		}
 	}
 
 	void UpdateRenderData() 
@@ -67,7 +75,7 @@ private:
 	static constexpr int s_min = 33;
 	static constexpr int s_max = 126;
 	static constexpr size_t s_resolution = 15;
-	char m_currChar = 1038;//s_min;
+	char m_currChar = s_min;
 	AReference<TTFFont> m_font;
 	MeshHandle m_charMesh;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
@@ -208,7 +216,7 @@ private:
 	{
 		if (m_pointView) 
 		{
-			m_font->DebugDrawPointsOfChar(c, resolution);
+			//m_font->DebugDrawPointsOfChar(c, resolution);
 		}
 		else 
 		{

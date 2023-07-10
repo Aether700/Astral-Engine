@@ -4,7 +4,7 @@
 
 namespace AstralEngine
 {
-	class Glyph;
+	class TTFGlyph;
 
 	struct CmapSubtable;
 	struct CmapFormat;
@@ -109,23 +109,22 @@ namespace AstralEngine
 	class TTFFont
 	{
 		friend class AReference<TTFFont>;
+		friend class CompoundTTFGlyph;
 	public:
 		static AReference<Font> LoadFont(const std::string& filepath);
 
 		MeshHandle GetCharMesh(char c) const;
 		MeshHandle GetCharMesh(wchar_t c) const;
-
-		// temp /////////////////////////////
-		void DebugDrawPointsOfChar(char c, size_t resolution);
-		/////////////////////////////////////
 		
 		void SetResolution(size_t resolution);
 
 	private:
 		TTFFont();
+		void ClearGlyphs();
 
 		Cmap m_cmap;
-		ADynArr<Glyph> m_glyphs;
+		mutable AUnorderedMap<wchar_t, MeshHandle> m_cachedGlyphs;
+		ADynArr<AReference<TTFGlyph>> m_glyphs;
 		size_t m_glyphResolution;
 	};
 }
