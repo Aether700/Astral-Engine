@@ -862,11 +862,25 @@ namespace AstralEngine
 
 		virtual MeshHandle GenerateMesh() const override
 		{
+			ASinglyLinkedList<MeshHandle> componentGlyphMeshes;
+			CompoundGlyphData* curr = GetData();
+
+			// start rendering here
+			do
+			{
+				componentGlyphMeshes.Add(m_owningFont->GetMeshFromCharIndex(curr->glyphIndex));
+				curr = curr->nextGlyph;
+			} 
+			while (curr->nextGlyph != nullptr);
+			// end rendering here
+
 			AE_CORE_ERROR("Not Implemented yet");
 			return NullHandle;
 		}
 
 	private:
+		CompoundGlyphData* GetData() const { return (CompoundGlyphData*)m_description.data; }
+
 		TTFFont* m_owningFont;
 		GlyphDescription m_description;
 	};
@@ -1492,17 +1506,8 @@ namespace AstralEngine
 	
 	MeshHandle TTFFont::GetCharMesh(wchar_t c) const
 	{
-		if (!m_cachedGlyphs.ContainsKey(c))
-		{
-			std::uint16_t id = 1042;//m_cmap.GetGlyphID(c);
-			AReference<TTFGlyph>& g = const_cast<AReference<TTFGlyph>&>(m_glyphs[id]);
-			g->SetResolution(m_glyphResolution);
-			MeshHandle glyphMesh = g->GenerateMesh();
-			m_cachedGlyphs[c] = glyphMesh;
-			return glyphMesh;
-		}
-
-		return m_cachedGlyphs[c];
+		std::uint16_t index = 1042;//m_cmap.GetGlyphID(c);
+		return GetMeshFromCharIndex(index);
 	}
 
 	void TTFFont::SetResolution(size_t resolution)
@@ -1523,6 +1528,20 @@ namespace AstralEngine
 			ResourceHandler::DeleteMesh(pair.GetElement());
 		}
 		m_cachedGlyphs.Clear();
+	}
+
+	MeshHandle TTFFont::GetMeshFromCharIndex(std::uint16_t index) const
+	{
+		if (!m_cachedGlyphs.ContainsKey(index))
+		{
+			AReference<TTFGlyph>& g = const_cast<AReference<TTFGlyph>&>(m_glyphs[index]);
+			g->SetResolution(m_glyphResolution);
+			MeshHandle glyphMesh = g->GenerateMesh();
+			m_cachedGlyphs[index] = glyphMesh;
+			return glyphMesh;
+		}
+
+		return m_cachedGlyphs[index];
 	}
 
 }

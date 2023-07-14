@@ -122,8 +122,11 @@ namespace AstralEngine
 		TTFFont();
 		void ClearGlyphs();
 
+		MeshHandle GetMeshFromCharIndex(std::uint16_t index) const;
+
 		Cmap m_cmap;
-		mutable AUnorderedMap<wchar_t, MeshHandle> m_cachedGlyphs;
+		// maps the char index to the mesh
+		mutable AUnorderedMap<std::uint16_t, MeshHandle> m_cachedGlyphs;
 		ADynArr<AReference<TTFGlyph>> m_glyphs;
 		size_t m_glyphResolution;
 	};
