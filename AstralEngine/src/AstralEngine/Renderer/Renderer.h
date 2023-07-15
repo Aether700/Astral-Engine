@@ -268,6 +268,7 @@ namespace AstralEngine
 		static void SendLightUniformsToShader(AReference<Shader>& shader);
 
 		//use to start renderering and stop rendering
+		static void BeginScene(const Mat4& viewProj);
 		static void BeginScene(const OrthographicCamera& cam);
 		static void BeginScene(const RuntimeCamera& cam);
 		static void BeginScene(const Camera& camera, const Transform& transform);

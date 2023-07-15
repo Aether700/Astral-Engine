@@ -733,6 +733,15 @@ namespace AstralEngine
 		s_lightHandler.SendLightUniformsToShader(shader); 
 	}
 
+	void Renderer::BeginScene(const Mat4& viewProj)
+	{
+		s_frameStartTime = Time::GetTime();
+		s_viewProjMatrix = viewProj;
+		s_camPos = Vector3::Zero();
+		s_forwardQueue->Clear();
+		s_deferredQueue->Clear();
+	}
+
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
 		s_frameStartTime = Time::GetTime();

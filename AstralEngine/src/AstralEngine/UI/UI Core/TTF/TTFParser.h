@@ -106,6 +106,8 @@ namespace AstralEngine
 		}
 	};
 
+
+	// Do not cache meshes since they can get deleted as the font is manipulated. Always retrieve the mesh from the font
 	class TTFFont
 	{
 		friend class AReference<TTFFont>;
@@ -113,21 +115,28 @@ namespace AstralEngine
 	public:
 		static AReference<Font> LoadFont(const std::string& filepath);
 
-		MeshHandle GetCharMesh(char c) const;
-		MeshHandle GetCharMesh(wchar_t c) const;
+		size_t GetGlyphTextureWidth() const;
+		size_t GetGlyphTextureHeight() const;
+
+		MeshHandle GetCharTexture(char c) const;
+		MeshHandle GetCharTexture(wchar_t c) const;
 		
 		void SetResolution(size_t resolution);
+		void SetGlyphTextureSize(size_t width, size_t height);
 
+		static Mat4 TextureGenerationViewProjMatrix();
 	private:
 		TTFFont();
 		void ClearGlyphs();
 
-		MeshHandle GetMeshFromCharIndex(std::uint16_t index) const;
+		Texture2DHandle GetTextureFromCharIndex(std::uint16_t index) const;
 
 		Cmap m_cmap;
-		// maps the char index to the mesh
-		mutable AUnorderedMap<std::uint16_t, MeshHandle> m_cachedGlyphs;
+		// maps the char index to the texture
+		mutable AUnorderedMap<std::uint16_t, Texture2DHandle> m_cachedGlyphs;
 		ADynArr<AReference<TTFGlyph>> m_glyphs;
 		size_t m_glyphResolution;
+		size_t m_glyphTextureWidth;
+		size_t m_glyphTextureHeight;
 	};
 }

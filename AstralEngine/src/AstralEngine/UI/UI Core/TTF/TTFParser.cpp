@@ -1,6 +1,8 @@
 #include "aepch.h"
 #include "TTFParser.h"
 #include "AstralEngine/Renderer/Tessellation/Tessellation.h"
+#include "AstralEngine/Renderer/Framebuffer.h"
+#include "AstralEngine/ECS/Components.h"
 
 #include <utility>
 
@@ -610,13 +612,13 @@ namespace AstralEngine
 	{
 	public:
 		virtual void SetResolution(float glyphResolution) = 0;
-		virtual MeshHandle GenerateMesh() const = 0;
+		virtual Texture2DHandle GenerateTexture() const = 0;
 
 		static AReference<TTFGlyph> Create(GlyphDescription&& description, AReference<TTFFont>& owningFont)
 		{
 			if (description.numberOfContours > 0)
 			{
-				return AReference<SimpleTTFGlyph>::Create(std::forward<GlyphDescription>(description));
+				return AReference<SimpleTTFGlyph>::Create(std::forward<GlyphDescription>(description), owningFont.Get());
 			}
 			
 			return AReference<CompoundTTFGlyph>::Create(std::forward<GlyphDescription>(description), owningFont.Get());
@@ -629,8 +631,8 @@ namespace AstralEngine
 		using Contour = ADoublyLinkedList<GlyphPoint>;
 
 	public:
-		SimpleTTFGlyph(GlyphDescription&& description)
-			: m_endPointsOfContours(nullptr), m_basicContours(false)
+		SimpleTTFGlyph(GlyphDescription&& description, TTFFont* owningFont)
+			: m_endPointsOfContours(nullptr), m_basicContours(false), m_owningFont(owningFont)
 		{
 			AE_CORE_ASSERT(description.numberOfContours > 0, "Initializing Simple glyph with data from a compound glyph");
 			m_numContours = description.numberOfContours;
@@ -659,9 +661,10 @@ namespace AstralEngine
 		SimpleTTFGlyph(SimpleTTFGlyph&& other) noexcept : m_basicContours(other.m_basicContours), m_contours(std::move(other.m_contours)),
 			m_endPointsOfContours(other.m_endPointsOfContours), m_outlineMin(other.m_outlineMin), 
 			m_outlineMax(other.m_outlineMax), m_basePoints(std::move(other.m_basePoints)), 
-			m_numContours(other.m_numContours)
+			m_numContours(other.m_numContours), m_owningFont(other.m_owningFont)
 		{
 			other.m_endPointsOfContours = nullptr;
+			other.m_owningFont = nullptr;
 		}
 
 		~SimpleTTFGlyph() { delete m_endPointsOfContours; }
@@ -741,7 +744,7 @@ namespace AstralEngine
 			}
 		}
 
-		virtual MeshHandle GenerateMesh() const override
+		virtual Texture2DHandle GenerateTexture() const override
 		{
 			ADoublyLinkedList<ADynArr<Vector2>> points;
 			for (const Contour& contour : m_contours)
@@ -753,13 +756,49 @@ namespace AstralEngine
 				}
 			}
 
-			return Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
+			MeshHandle mesh = Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
+			if (mesh == NullHandle)
+			{
+				AE_CORE_ERROR("Unable to generate mesh for glyph");
+				return NullHandle;
+			}
+
+			AReference<Framebuffer> framebuffer = Framebuffer::Create(m_owningFont->GetGlyphTextureWidth(), 
+				m_owningFont->GetGlyphTextureHeight());
+			framebuffer->Bind();
+			
+			// temp
+			Vector4 color = RenderCommand::GetClearColor();
+			RenderCommand::SetClearColor(1, 0, 0, 1);
+			RenderCommand::Clear();
+			//////////
+
+			cannot get anything to be displayed, check why (might be viewProj matrix vs transform position)
+			Renderer::BeginScene(Mat4::Identity());//TTFFont::TextureGenerationViewProjMatrix());
+			
+			Transform t = Transform({0, 0, 5}, Quaternion::Identity(), {1, 1, 1});
+			//Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
+			
+			// temp
+			Renderer::DrawQuad(t.GetTransformMatrix(), {0, 1, 0, 1});
+			/////////////////////
+
+			Renderer::EndScene();
+			
+			// temp 
+			RenderCommand::SetClearColor(color);
+			RenderCommand::Clear();
+			///////////
+
+			framebuffer->Unbind();
+			return framebuffer->GetColorAttachment();
 		}
 
 		SimpleTTFGlyph& operator=(SimpleTTFGlyph&& other) noexcept
 		{
 			delete[] m_endPointsOfContours;
 
+			m_owningFont = other.m_owningFont;
 			m_numContours = other.m_numContours;
 			m_endPointsOfContours = other.m_endPointsOfContours;
 			m_basicContours = other.m_basicContours;
@@ -769,6 +808,7 @@ namespace AstralEngine
 			m_basePoints = std::move(other.m_basePoints);
 
 			other.m_endPointsOfContours = nullptr;
+			other.m_owningFont = nullptr;
 
 			return *this;
 		}
@@ -830,6 +870,8 @@ namespace AstralEngine
 			return false;
 		}
 
+
+		TTFFont* m_owningFont;
 		std::int16_t m_numContours;
 		Vector2Short m_outlineMin;
 		Vector2Short m_outlineMax;
@@ -857,24 +899,30 @@ namespace AstralEngine
 
 		virtual void SetResolution(float glyphResolution) override
 		{
-			// don't do anything the font object will set the resolution of the simple glyphs of the component glyphs
+			// don't do anything the font object will set the resolution of the component glyphs
 		}
 
-		virtual MeshHandle GenerateMesh() const override
+		virtual Texture2DHandle GenerateTexture() const override
 		{
-			ASinglyLinkedList<MeshHandle> componentGlyphMeshes;
 			CompoundGlyphData* curr = GetData();
 
+			AReference<Framebuffer> framebuffer = Framebuffer::Create(m_owningFont->GetGlyphTextureWidth(), 
+				m_owningFont->GetGlyphTextureHeight());
+
+			framebuffer->Bind();
 			// start rendering here
 			do
 			{
-				componentGlyphMeshes.Add(m_owningFont->GetMeshFromCharIndex(curr->glyphIndex));
+				MeshHandle componentMesh = m_owningFont->GetTextureFromCharIndex(curr->glyphIndex);
 				curr = curr->nextGlyph;
 			} 
 			while (curr->nextGlyph != nullptr);
 			// end rendering here
 
-			AE_CORE_ERROR("Not Implemented yet");
+			framebuffer->Unbind();
+			Texture2DHandle texture = framebuffer->GetColorAttachment();
+
+			AE_CORE_ERROR("Not Implemented yet"); // not finished
 			return NullHandle;
 		}
 
@@ -1499,15 +1547,19 @@ namespace AstralEngine
 		return loadedFont;
 	}
 
-	MeshHandle TTFFont::GetCharMesh(char c) const
+	size_t TTFFont::GetGlyphTextureWidth() const { return m_glyphTextureWidth; }
+	size_t TTFFont::GetGlyphTextureHeight() const { return m_glyphTextureHeight; }
+
+	Texture2DHandle TTFFont::GetCharTexture(char c) const
 	{
-		return GetCharMesh((wchar_t)c);
+		return GetCharTexture((wchar_t)c);
 	}
 	
-	MeshHandle TTFFont::GetCharMesh(wchar_t c) const
+	Texture2DHandle TTFFont::GetCharTexture(wchar_t c) const
 	{
-		std::uint16_t index = 1042;//m_cmap.GetGlyphID(c);
-		return GetMeshFromCharIndex(index);
+		//std::uint16_t index = 1042;//m_cmap.GetGlyphID(c);
+		std::uint16_t index = m_cmap.GetGlyphID(c);
+		return GetTextureFromCharIndex(index);
 	}
 
 	void TTFFont::SetResolution(size_t resolution)
@@ -1519,7 +1571,19 @@ namespace AstralEngine
 		}
 	}
 
-	TTFFont::TTFFont() { }
+	void TTFFont::SetGlyphTextureSize(size_t width, size_t height)
+	{
+		m_glyphTextureWidth = width;
+		m_glyphTextureHeight = height;
+		ClearGlyphs();
+	}
+
+	Mat4 TTFFont::TextureGenerationViewProjMatrix()
+	{
+		return Mat4::Ortho(0.0f, 600.0f, -5.0f, 600.0f);
+	}
+
+	TTFFont::TTFFont() : m_glyphTextureWidth(256), m_glyphTextureHeight(256) { }
 
 	void TTFFont::ClearGlyphs()
 	{
@@ -1530,15 +1594,15 @@ namespace AstralEngine
 		m_cachedGlyphs.Clear();
 	}
 
-	MeshHandle TTFFont::GetMeshFromCharIndex(std::uint16_t index) const
+	Texture2DHandle TTFFont::GetTextureFromCharIndex(std::uint16_t index) const
 	{
 		if (!m_cachedGlyphs.ContainsKey(index))
 		{
 			AReference<TTFGlyph>& g = const_cast<AReference<TTFGlyph>&>(m_glyphs[index]);
 			g->SetResolution(m_glyphResolution);
-			MeshHandle glyphMesh = g->GenerateMesh();
-			m_cachedGlyphs[index] = glyphMesh;
-			return glyphMesh;
+			Texture2DHandle glyphTexture = g->GenerateTexture();
+			m_cachedGlyphs[index] = glyphTexture;
+			return glyphTexture;
 		}
 
 		return m_cachedGlyphs[index];

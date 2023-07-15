@@ -15,10 +15,17 @@ using namespace AstralEngine;
 class ASCIIFontTester : public NativeScript
 {
 public:
+	void OnStart() override
+	{
+		if (!HasComponent<SpriteRenderer>())
+		{
+			EmplaceComponent<SpriteRenderer>();
+		}
+	}
+
 	void OnUpdate() override
 	{
 		HandleInput();
-		RenderGlyph();
 	}
 
 	//check to test compound glyphs
@@ -62,14 +69,14 @@ private:
 		}
 	}
 
-	void UpdateRenderData() 
+	void UpdateRenderData()
 	{
-		m_charMesh = m_font->GetCharMesh(m_currChar);
-	}
-
-	void RenderGlyph()
-	{
-		Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_charMesh);
+		m_charTexture = m_font->GetCharTexture(m_currChar);
+		if (HasComponent<SpriteRenderer>())
+		{
+			GetComponent<SpriteRenderer>().SetSprite(m_charTexture);
+			//GetComponent<SpriteRenderer>().SetSprite(Texture2D::WhiteTexture());
+		}
 	}
 
 	static constexpr int s_min = 33;
@@ -77,209 +84,8 @@ private:
 	static constexpr size_t s_resolution = 15;
 	char m_currChar = s_min;
 	AReference<TTFFont> m_font;
-	MeshHandle m_charMesh;
+	Texture2DHandle m_charTexture;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-};
-
-class TessellationTester : public NativeScript
-{
-public:
-	void OnStart()
-	{
-		//write test to verify tesselation of glyphs
-		m_transform = Transform(Vector3::Zero(), Vector3::Zero(), { 1, 1, 1 });
-
-		m_initialPoints.AddLast(Vector2(-5, -2.5));
-		m_initialPoints.AddLast(Vector2(-5, 2.5));
-		m_initialPoints.AddLast(Vector2(5, 2.5));
-		m_initialPoints.AddLast(Vector2(5, -2.5));
-
-		ADoublyLinkedList<ADynArr<Vector2>> listOfPointRings;
-		listOfPointRings.AddLast(m_initialPoints);
-		listOfPointRings.AddLast({ Vector2(-2.5f, -0.5f), Vector2(-1.5f, -0.5f), Vector2(-2.0f, 1.5f) });
-		listOfPointRings.AddLast({ Vector2(2.5f, 1.5f), Vector2(1.5f, 1.5f), Vector2(2.0f, -0.5f) });
-		listOfPointRings.AddLast({ Vector2(0.5f, 0.0f), Vector2(-0.5f, 0.5f), Vector2(-0.5f, -0.5f) });
-		m_mesh = Tessellation::EarClipping(listOfPointRings, TessellationWindingOrder::ClockWise);
-		AE_CORE_ASSERT(m_mesh != NullHandle, "Mesh Generation for glyph Failed");
-		m_tessellationPoints = ResourceHandler::GetMesh(m_mesh)->GetPositions();
-	}
-
-	void OnUpdate()
-	{
-		if (Input::GetKeyDown(KeyCode::L))
-		{
-			m_pointView = !m_pointView;
-		}
-
-		if (m_pointView)
-		{
-			Vector3 scale = { 0.5f, 0.5f, 0.5f };
-
-			for (Vector2& point : m_initialPoints)
-			{
-				Renderer::DrawQuad(Vector3(point.x, point.y, 1.0f), scale, { 1, 0, 0, 1 });
-			}
-
-			for (Vector3& point : m_tessellationPoints)
-			{
-				Renderer::DrawQuad(point, scale, { 0, 1, 0, 1 });
-			}
-		}
-		else
-		{
-			Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
-		}
-	}
-
-private:
-	ADynArr<Vector2> m_initialPoints;
-	ADynArr<Vector3> m_tessellationPoints;
-	MeshHandle m_mesh;
-	Transform m_transform;
-	bool m_pointView = false;
-};
-
-class FontViewer : public NativeScript
-{
-public:
-	void OnUpdate() override
-	{
-		if (m_font == nullptr)
-		{
-			AE_CORE_ERROR("Did not set font check in TestLayer::OnAttached");
-		}
-
-		RenderGlyph();
-		CheckUserInputForCharacter();
-	}
-
-	void SetFont(AReference<TTFFont> f)
-	{
-		m_font = f;
-		m_font->SetResolution(resolution);
-		m_mesh = m_font->GetCharMesh(c);
-	}
-
-private:
-	void CheckUserInputForCharacter()
-	{
-		if (Input::GetKeyDown(KeyCode::L)) 
-		{
-			m_pointView = !m_pointView;
-		}
-
-		if (Input::GetKeyDown(KeyCode::P))
-		{
-			if (isShifted)
-			{
-				c += shiftOffset;
-			}
-			else
-			{
-				c -= shiftOffset;
-			}
-			isShifted = !isShifted;
-			ResetResolution();
-			m_mesh = m_font->GetCharMesh(c);
-		}
-
-		if (Input::GetKeyDown(KeyCode::Tab))
-		{
-			index = (index + 1) % 26;
-			c = index + 65;
-			if (!isShifted)
-			{
-				c += shiftOffset;
-			}
-			ResetResolution();
-			m_mesh = m_font->GetCharMesh(c);
-		}
-
-		if (Input::GetKeyDown(KeyCode::I))
-		{
-			resolution = Math::Clamp(resolution + 1, 0, maxResolution);
-			m_font->SetResolution(resolution);
-			m_mesh = m_font->GetCharMesh(c);
-			AE_INFO("resolution: %d", resolution);
-		}
-
-		if (Input::GetKeyDown(KeyCode::K))
-		{
-			resolution = Math::Clamp(resolution - 1, 0, maxResolution);
-			m_font->SetResolution(resolution);
-			m_mesh = m_font->GetCharMesh(c);
-			AE_INFO("resolution: %d", resolution);
-		}
-	}
-
-	void RenderGlyph() 
-	{
-		if (m_pointView) 
-		{
-			//m_font->DebugDrawPointsOfChar(c, resolution);
-		}
-		else 
-		{
-			if (m_mesh != NullHandle)
-			{
-				Renderer::DrawMesh(m_transform, Material::GlyphMat(), m_mesh);
-			}
-		}
-	}
-
-	void ResetResolution()
-	{
-		resolution = 0;
-		AE_INFO("Resolution reset to 0");
-	}
-
-	
-	//the "a" char doesn't render properly when resolution is set to 14 specifically check why
-
-	static constexpr int shiftOffset = 'a' - 'A';
-	static constexpr int maxResolution = 100;
-	AReference<TTFFont> m_font;
-	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
-	char c = 'A';
-	int index = 0;
-	bool isShifted = true;
-	int resolution = 20;
-	MeshHandle m_mesh;
-	bool m_pointView = false;
-};
-
-class InputTest : public AstralEngine::NativeScript
-{
-public:
-	void OnUpdate()
-	{
-		if (AstralEngine::Input::GetMouseButton(AstralEngine::MouseButtonCode::Right))
-		{
-			if (m_currTimerVal >= m_timer)
-			{
-				DestroyAEntity(GetAEntity());
-			}
-			else
-			{
-				m_currTimerVal += AstralEngine::Time::GetDeltaTime();
-				return;
-			}
-		}
-		else if (AstralEngine::Input::GetMouseButtonDown(AstralEngine::MouseButtonCode::Left))
-		{
-			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 0, 0, 1);
-			m_currTimerVal = 0.0f;
-		}
-		else
-		{
-			GetComponent<AstralEngine::SpriteRenderer>().SetColor(1, 1, 1, 1);
-			m_currTimerVal = 0.0f;
-		}
-	}
-
-private:
-	float m_timer = 1.0f;
-	float m_currTimerVal = 0.0f;
 };
 
 void OnButtonClicked()
@@ -371,22 +177,15 @@ public:
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
-		
-		tesTester.OnStart();
-		viewer.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
+		m_entity = m_scene->CreateAEntity();
+		ASCIIFontTester& asciiTester = m_entity.EmplaceComponent<ASCIIFontTester>();
+		asciiTester.OnStart();
 		asciiTester.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
-
-		// temp
-		AstralEngine::AEntity e = m_scene->CreateAEntity();
-		e.EmplaceComponent<SpriteRenderer>(Vector4(0, 1, 0, 1));
-		Camera::GetMainCamera().GetComponent<Camera>().GetCamera().
-			SetProjectionType(SceneCamera::ProjectionType::Perspective);
-
 	}
 
 	void OnUpdate() override
 	{
-		m_scene->OnUpdate();
+		//m_scene->OnUpdate();
 		AWindow* window = Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
@@ -394,9 +193,7 @@ public:
 		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
 		RenderCommand::Clear();
 		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		//viewer.OnUpdate();
-		asciiTester.OnUpdate();
-		//tesTester.OnUpdate();
+		m_scene->OnUpdate();
 		Renderer::EndScene();
 
 		AstralEngine::Renderer::ResetStats();
@@ -425,10 +222,6 @@ private:
 	AstralEngine::AReference<AstralEngine::Framebuffer> m_framebuffer;
 	AstralEngine::AReference<AstralEngine::Scene> m_scene;
 	AstralEngine::AEntity m_entity;
-
-	FontViewer viewer;
-	ASCIIFontTester asciiTester;
-	TessellationTester tesTester;
 };
 
 
