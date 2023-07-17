@@ -746,13 +746,44 @@ namespace AstralEngine
 
 		virtual Texture2DHandle GenerateTexture() const override
 		{
+
+			//temp
+			bool initialized = false;
+			Vector2 min;
+			Vector2 max;
+			//////
+
 			ADoublyLinkedList<ADynArr<Vector2>> points;
 			for (const Contour& contour : m_contours)
 			{
+				if (!initialized)
+				{
+					initialized = true;
+					min = (*contour.begin()).coords;
+					max = min;
+				}
+
 				ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
 				for (const GlyphPoint& p : contour)
 				{
 					currContour.AddLast(p.coords);
+					if (min.x > p.coords.x)
+					{
+						min.x = p.coords.x;
+					}
+					if (max.x < p.coords.x)
+					{
+						max.x = p.coords.x;
+					}
+
+					if (min.y > p.coords.y)
+					{
+						min.y = p.coords.y;
+					}
+					if (max.y < p.coords.y)
+					{
+						max.y = p.coords.y;
+					}
 				}
 			}
 
@@ -769,28 +800,28 @@ namespace AstralEngine
 			
 			// temp
 			Vector4 color = RenderCommand::GetClearColor();
-			RenderCommand::SetClearColor(1, 0, 0, 1);
+			RenderCommand::SetClearColor(0.3, 0, 0, 1);
 			RenderCommand::Clear();
 			//////////
 
-			cannot get anything to be displayed, check why (might be viewProj matrix vs transform position)
-			Renderer::BeginScene(Mat4::Identity());//TTFFont::TextureGenerationViewProjMatrix());
+			trying to get the mesh into view of the framebuffer viewProj matrix
+			Renderer::BeginScene(m_owningFont->ComputeTextureGenerationViewProjMatrix());
 			
-			Transform t = Transform({0, 0, 5}, Quaternion::Identity(), {1, 1, 1});
+			Transform t = Transform({-50, 0, 5}, Quaternion::Identity(), {100000000, 1000000000, 1});
 			//Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
 			
 			// temp
-			Renderer::DrawQuad(t.GetTransformMatrix(), {0, 1, 0, 1});
+			Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
 			/////////////////////
 
 			Renderer::EndScene();
+			framebuffer->Unbind();
 			
 			// temp 
 			RenderCommand::SetClearColor(color);
 			RenderCommand::Clear();
 			///////////
 
-			framebuffer->Unbind();
 			return framebuffer->GetColorAttachment();
 		}
 
@@ -1578,9 +1609,14 @@ namespace AstralEngine
 		ClearGlyphs();
 	}
 
-	Mat4 TTFFont::TextureGenerationViewProjMatrix()
+	Mat4 TTFFont::ComputeTextureGenerationViewProjMatrix()
 	{
-		return Mat4::Ortho(0.0f, 600.0f, -5.0f, 600.0f);
+		float halfWidth = ((float)m_glyphTextureWidth) / 2.0f;
+		float halfHeight = ((float)m_glyphTextureHeight) / 2.0f;
+		//return Mat4::Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.001f, 10000.0f);
+		return Mat4::Ortho(-100, 100, -100, 100, -0.001f, 10000.0f);
+		//return Mat4::Ortho(0, m_glyphTextureWidth, 0, m_glyphTextureHeight, 
+		//	0.001f, 10000.0f);
 	}
 
 	TTFFont::TTFFont() : m_glyphTextureWidth(256), m_glyphTextureHeight(256) { }

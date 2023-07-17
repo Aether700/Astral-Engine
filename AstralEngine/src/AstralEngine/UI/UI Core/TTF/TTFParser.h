@@ -124,7 +124,7 @@ namespace AstralEngine
 		void SetResolution(size_t resolution);
 		void SetGlyphTextureSize(size_t width, size_t height);
 
-		static Mat4 TextureGenerationViewProjMatrix();
+		Mat4 ComputeTextureGenerationViewProjMatrix();
 	private:
 		TTFFont();
 		void ClearGlyphs();

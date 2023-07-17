@@ -21,6 +21,21 @@ public:
 		{
 			EmplaceComponent<SpriteRenderer>();
 		}
+
+		GetTransform().SetScale({ 5, 5, 1 });
+		/*
+		AEntity child = CreateAEntity();
+		child.GetTransform().SetLocalPosition({3, 0, 0});
+		child.GetTransform().SetParent(GetAEntity());
+		SpriteRenderer& renderer = child.EmplaceComponent<SpriteRenderer>();
+		renderer.SetSprite(Texture2D::WhiteTexture());
+
+		child = CreateAEntity();
+		child.GetTransform().SetLocalPosition({ -3, 0, 0 });
+		child.GetTransform().SetParent(GetAEntity());
+		SpriteRenderer& renderer2 = child.EmplaceComponent<SpriteRenderer>();
+		renderer2.SetSprite(Texture2D::WhiteTexture());
+		*/
 	}
 
 	void OnUpdate() override
