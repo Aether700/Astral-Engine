@@ -31,12 +31,12 @@ namespace AstralEngine
 		AKeyElementPair(const K& k, Args... args, std::function<bool(const K&, const K&)> equals)
 			: m_equalsFunc(equals), m_key(k), m_element(std::forward<Args>(args)...) { }
 
-		bool operator==(const AKeyElementPair<K, T>& other)
+		bool operator==(const AKeyElementPair<K, T>& other) const
 		{
 			return m_equalsFunc(m_key, other.m_key);
 		}
 
-		bool operator!=(const AKeyElementPair<K, T>& other)
+		bool operator!=(const AKeyElementPair<K, T>& other) const
 		{
 			return !(*this == other);
 		}
