@@ -209,7 +209,7 @@ namespace AstralEngine
 			AE_DATASTRUCT_ASSERT(!ContainsKey(key), "Key Already contained");
 			size_t bucketIndex = GetBucketIndex(key);
 
-			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, element);
+			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, element, m_equalsFunc);
 			m_bucketArr[bucketIndex].Add(pair);
 			m_count++;
 			CheckLoadFactor();
@@ -290,7 +290,7 @@ namespace AstralEngine
 			}
 
 			//if no existing key was created found create one and add it to the AUnorderedMap
-			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key);
+			AKeyElementPair<K, T> pair = AKeyElementPair<K, T>(key, m_equalsFunc);
 			m_bucketArr[bucketIndex].Add(pair);
 			m_count++;
 

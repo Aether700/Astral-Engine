@@ -26,7 +26,7 @@ namespace AstralEngine
 		template<typename... Args>
 		Component& Emplace(const Entity& e, Args&&... args)
 		{
-			AE_ECS_ASSERT(!Contains(e), "Entity already contains the provided component type");
+			AE_ECS_ASSERT(!ASparseSet<Entity>::Contains(e), "Entity already contains the provided component type");
 
 			ASparseSet<Entity>::Add(e);
 			m_components[ASparseSet<Entity>::GetIndex(e)] = Component(std::forward<Args>(args)...);
@@ -36,7 +36,7 @@ namespace AstralEngine
 	
 		void Remove(const Entity& e)
 		{
-			AE_ECS_ASSERT(Contains(e), "Storage does not contain provided Entity");
+			AE_ECS_ASSERT(ASparseSet<Entity>::Contains(e), "Storage does not contain provided Entity");
 			//take last component and move it to the index to remove then remove the last element to be more efficient
 			Component last = std::move(m_components[m_components.GetCount() - 1]);
 			m_components[ASparseSet<Entity>::GetIndex(e)] = std::move(last);
@@ -46,8 +46,7 @@ namespace AstralEngine
 	
 		Component& Get(const Entity& e)
 		{
-			
-			AE_ECS_ASSERT(Contains(e), "Storage does not contain provided Entity");
+			AE_ECS_ASSERT(ASparseSet<Entity>::Contains(e), "Storage does not contain provided Entity");
 			return m_components[ASparseSet<Entity>::GetIndex(e)];
 		}
 	
