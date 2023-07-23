@@ -9,7 +9,7 @@ namespace AstralEngine
 {
 	// Keyboard ///////////////////////////////////////////////////
 
-	Keyboard::Keyboard() : m_anyJustPressed(false), m_numKeysDown(0) { }
+	Keyboard::Keyboard() : m_anyJustReleased(false), m_anyJustPressed(false), m_numKeysDown(0) { }
 
 	bool Keyboard::GetKey(KeyCode key) const
 	{
@@ -43,6 +43,21 @@ namespace AstralEngine
 	bool Keyboard::GetAnyKey() const { return m_numKeysDown > 0; }
 	bool Keyboard::GetAnyKeyUp() const { return m_anyJustReleased; }
 	bool Keyboard::GetAnyKeyDown() const { return m_anyJustPressed; }
+
+	ASinglyLinkedList<KeyCode> Keyboard::GetKeysPressedThisFrame() const
+	{
+		ASinglyLinkedList<KeyCode> keysPressed;
+
+		for (KeyCode key : m_toUpdate)
+		{
+			if (GetKeyDown(key))
+			{
+				keysPressed.Add(key);
+			}
+		}
+
+		return keysPressed;
+	}
 
 	void Keyboard::OnUpdate()
 	{
