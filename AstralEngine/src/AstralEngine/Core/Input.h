@@ -19,6 +19,7 @@ namespace AstralEngine
 		bool GetAnyKeyUp() const;
 		bool GetAnyKeyDown() const;
 
+		// re-do this function to that it returns a list of wchar_t and uses the proper char event from windows
 		ASinglyLinkedList<KeyCode> GetKeysPressedThisFrame() const;
 
 		void OnUpdate();
