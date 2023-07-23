@@ -19,6 +19,8 @@ namespace AstralEngine
 		bool GetAnyKeyUp() const;
 		bool GetAnyKeyDown() const;
 
+		ASinglyLinkedList<KeyCode> GetKeysPressedThisFrame() const;
+
 		void OnUpdate();
 		void OnEvent(AEvent& e);
 
