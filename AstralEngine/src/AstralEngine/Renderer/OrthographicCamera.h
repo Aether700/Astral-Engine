@@ -6,10 +6,12 @@ namespace AstralEngine
 	class OrthographicCamera
 	{
 	public:
-		OrthographicCamera(float left, float right, float bottom, float top);
+		OrthographicCamera(float left, float right, float bottom, float top, 
+			float nearClip = 0.001f, float farClip = 1.0f);
 		~OrthographicCamera();
 
-		void SetProjection(float left, float right, float bottom, float top);
+		void SetProjection(float left, float right, float bottom, float top, 
+			float nearClip = 0.001f, float farClip = 1.0f);
 
 		const Vector3& GetPosition() const;
 		void SetPosition(const Vector3& pos);
@@ -22,12 +24,21 @@ namespace AstralEngine
 		const Mat4& GetViewProjectionMatrix() const;
 
 	private:
-		void RecalculateViewProjectionMatrix();
+		void RecalculateViewProjectionMatrix() const;
 
 		Vector3 m_position;
 		float m_rotationOnZ;
-		Mat4 m_projMatrix;
-		Mat4 m_viewMatrix;
-		Mat4 m_viewProjMatrix;
+		
+		float m_left;
+		float m_right;
+		float m_bottom;
+		float m_top;
+		float m_nearClip;
+		float m_farClip;
+
+		mutable bool m_isDirty;
+		mutable Mat4 m_viewMatrix;
+		mutable Mat4 m_projMatrix;
+		mutable Mat4 m_viewProjMatrix;
 	};
 }

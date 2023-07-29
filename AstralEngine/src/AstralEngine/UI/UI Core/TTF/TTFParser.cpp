@@ -804,15 +804,27 @@ namespace AstralEngine
 			RenderCommand::Clear();
 			//////////
 
-			trying to get the mesh into view of the framebuffer viewProj matrix
-			Renderer::BeginScene(m_owningFont->ComputeTextureGenerationViewProjMatrix());
+			//Renderer::BeginScene(m_owningFont->ComputeTextureGenerationViewProjMatrix());
+			float halfWidth = (max.x - min.x) / 2.0f;
+			float halfHeight = (max.y - min.y) / 2.0f;
+			float xPos = (max.x - min.x) / 2.0f;
+			float yPos = (max.y - min.y) / 2.0f;
+			float margin = 10;
+			float aspectRatio = (float)m_owningFont->GetGlyphTextureWidth() / (float)m_owningFont->GetGlyphTextureHeight();
+
+			OrthographicCamera tempCam = OrthographicCamera((-halfWidth * aspectRatio) - margin, 
+				(halfWidth * aspectRatio) + margin, -halfHeight - margin, halfHeight + margin, 0.0001f, 100.0f);
+			tempCam.SetPosition({ xPos, yPos, -8.0f });
+			Renderer::BeginScene(tempCam);
+			//Renderer::BeginScene(Mat4::Ortho(-halfWidth - margin + xPos, halfWidth + margin + xPos, 
+			//	-halfHeight - margin + yPos, halfHeight + margin + yPos, 0.00001f, 100000.0f));
+			//Renderer::BeginScene(Mat4::Ortho(min.x - 10.0f, max.x + 10.0f, min.y - 10.0f, 
+			//	max.y + 10.0f, 0.0001f, 10000.0f));
 			
-			Transform t = Transform({-50, 0, 5}, Quaternion::Identity(), {100000000, 1000000000, 1});
-			//Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
-			
-			// temp
+			can now see the glyph but it is not always centered in the middle of the texture check to fix
+			Transform t = Transform({0, 0, 0}, Quaternion::Identity(), {0.8f, 1, 1});
 			Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
-			/////////////////////
+			
 
 			Renderer::EndScene();
 			framebuffer->Unbind();
@@ -1614,12 +1626,12 @@ namespace AstralEngine
 		float halfWidth = ((float)m_glyphTextureWidth) / 2.0f;
 		float halfHeight = ((float)m_glyphTextureHeight) / 2.0f;
 		//return Mat4::Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.001f, 10000.0f);
-		return Mat4::Ortho(-100, 100, -100, 100, -0.001f, 10000.0f);
+		return Mat4::Ortho(-10000, 10000, -10000, 10000, -0.001f, 10000.0f);
 		//return Mat4::Ortho(0, m_glyphTextureWidth, 0, m_glyphTextureHeight, 
 		//	0.001f, 10000.0f);
 	}
 
-	TTFFont::TTFFont() : m_glyphTextureWidth(256), m_glyphTextureHeight(256) { }
+	TTFFont::TTFFont() : m_glyphTextureWidth(1024), m_glyphTextureHeight(768) { }
 
 	void TTFFont::ClearGlyphs()
 	{
