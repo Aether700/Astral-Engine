@@ -7,7 +7,7 @@ namespace AstralEngine
 	{
 	public:
 		OrthographicCamera(float left, float right, float bottom, float top, 
-			float nearClip = 0.001f, float farClip = 1.0f);
+			float nearClip = 0.001f, float farClip = 50.0f);
 		~OrthographicCamera();
 
 		void SetProjection(float left, float right, float bottom, float top, 
