@@ -618,10 +618,10 @@ namespace AstralEngine
 		{
 			if (description.numberOfContours > 0)
 			{
-				return AReference<SimpleTTFGlyph>::Create(std::forward<GlyphDescription>(description), owningFont.Get());
+				return AReference<SimpleTTFGlyph>::Create(std::forward<GlyphDescription>(description), longHor, owningFont.Get());
 			}
 			
-			return AReference<CompoundTTFGlyph>::Create(std::forward<GlyphDescription>(description), owningFont.Get());
+			return AReference<CompoundTTFGlyph>::Create(std::forward<GlyphDescription>(description), longHor, owningFont.Get());
 		}
 	};
 
@@ -769,6 +769,7 @@ namespace AstralEngine
 				for (const GlyphPoint& p : contour)
 				{
 					currContour.AddLast(p.coords);
+					/*
 					if (min.x > p.coords.x)
 					{
 						min.x = p.coords.x;
@@ -786,6 +787,7 @@ namespace AstralEngine
 					{
 						max.y = p.coords.y;
 					}
+					*/
 				}
 			}
 
@@ -796,12 +798,17 @@ namespace AstralEngine
 				return NullHandle;
 			}
 
+			/*
 			min.x = m_horizontalMetric.leftSideBearing;
-			max.x = m_horizontalMetric.advanceWidth - (m_horizontalMetric.leftSideBearing 
-				+ m_outlineMax.x - m_outlineMin.x);
+			max.x = m_horizontalMetric.advanceWidth - m_horizontalMetric.leftSideBearing 
+				- (m_outlineMax.x - m_outlineMin.x);
 
 			min.y = m_outlineMin.y;
 			max.y = m_outlineMax.y;
+			*/
+
+			min = (Vector2)m_outlineMin;
+			max = (Vector2)m_outlineMax;
 
 			AReference<Framebuffer> framebuffer = Framebuffer::Create(m_owningFont->GetGlyphTextureWidth(), 
 				m_owningFont->GetGlyphTextureHeight());
@@ -816,14 +823,17 @@ namespace AstralEngine
 			//Renderer::BeginScene(m_owningFont->ComputeTextureGenerationViewProjMatrix());
 			float halfWidth = (max.x - min.x) / 2.0f;
 			float halfHeight = (max.y - min.y) / 2.0f;
-			float xPos = (max.x - min.x) / 2.0f;
-			float yPos = (max.y - min.y) / 2.0f;
-			float margin = 10;
-			float aspectRatio = (float)m_owningFont->GetGlyphTextureWidth() / (float)m_owningFont->GetGlyphTextureHeight();
+			float margin = 100;
+			float xPos = halfWidth + min.x;
+			float yPos = halfHeight + min.y;
+			float aspectRatio = (float)m_owningFont->GetGlyphTextureWidth() 
+				/ (float)m_owningFont->GetGlyphTextureHeight();
+
+			camera position seems good now but the issue is the camera's perspective/view
 
 			OrthographicCamera tempCam = OrthographicCamera((-halfWidth * aspectRatio) - margin, 
 				(halfWidth * aspectRatio) + margin, -halfHeight - margin, halfHeight + margin, 0.0001f, 100.0f);
-			tempCam.SetPosition({ xPos + margin + m_horizontalMetric.advanceWidth, yPos + margin, -8.0f });
+			tempCam.SetPosition({ xPos, yPos, -8.0f });
 			Renderer::BeginScene(tempCam);
 			//Renderer::BeginScene(Mat4::Ortho(-halfWidth - margin + xPos, halfWidth + margin + xPos, 
 			//	-halfHeight - margin + yPos, halfHeight + margin + yPos, 0.00001f, 100000.0f));
@@ -831,7 +841,7 @@ namespace AstralEngine
 			//	max.y + 10.0f, 0.0001f, 10000.0f)); 
 			
 			//can now see the glyph but it is not always centered in the middle of the texture check to fix
-			Transform t = Transform({0, 0, 0}, Quaternion::Identity(), {0.85f, 0.85f, 1});
+			Transform t = Transform({0, 0, 0}, Quaternion::Identity(), {1.0f, 1.0f, 1});
 			Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
 			
 
@@ -944,8 +954,8 @@ namespace AstralEngine
 	class CompoundTTFGlyph : public TTFGlyph
 	{
 	public:
-		CompoundTTFGlyph(GlyphDescription&& description, TTFFont* owningFont) 
-			: m_owningFont(owningFont), m_description(std::move(description))
+		CompoundTTFGlyph(GlyphDescription&& description, const LongHorizontalMetric& horMetric, TTFFont* owningFont) 
+			: m_owningFont(owningFont), m_description(std::move(description)), m_horizontalMetric(horMetric)
 		{
 			AE_CORE_ASSERT(owningFont != nullptr && m_description.numberOfContours <= 0, "");
 		}
@@ -984,6 +994,7 @@ namespace AstralEngine
 
 		TTFFont* m_owningFont;
 		GlyphDescription m_description;
+		LongHorizontalMetric m_horizontalMetric;
 	};
 
 	// Read functions /////////////////////////////////////////////////////
@@ -1585,20 +1596,21 @@ namespace AstralEngine
 				cmap = std::move(ReadCmap(file));
 				break;
 				
+				/*
 			case s_glyfTag:
 				glyf.Reserve(maxp.numGlyphs);
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					glyf.Add(TTFGlyph::Create(std::forward<GlyphDescription>(ReadGlyphDescription(file)), loadedFont));
+					glyf.Add(TTFGlyph::Create(std::forward<GlyphDescription>(ReadGlyphDescription(file)), hmtx[i], loadedFont));
 				}
 				break;
+				*/
 			}
 			AE_CORE_ASSERT(file.good(), "");
 		}
 
 
-		trying to give the Glyph objects their LongHorizontalMetric object to compute the rendering to a texture
 		for (TableDirectory& dir : tableDirectories)
 		{
 			if (FindTable(dependencyTables, dir.tag) != nullptr)
@@ -1614,7 +1626,8 @@ namespace AstralEngine
 				for (size_t i = 0; i < maxp.numGlyphs; i++)
 				{
 					file.seekg(loca.GetGlyphOffset(i) + dir.offset);
-					glyf.Add(TTFGlyph::Create(std::forward<GlyphDescription>(ReadGlyphDescription(file)), hmtx[i], loadedFont));
+					glyf.Add(TTFGlyph::Create(std::forward<GlyphDescription>(ReadGlyphDescription(file)), 
+						hmtx[i], loadedFont));
 				}
 				break;
 			}
