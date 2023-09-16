@@ -745,8 +745,8 @@ namespace AstralEngine
 	void Renderer::BeginScene(const OrthographicCamera& cam)
 	{
 		s_frameStartTime = Time::GetTime();
-		s_viewProjMatrix = cam.GetProjectionMatrix() * cam.GetViewMatrix();
-		s_camPos = Vector3::Zero();
+		s_viewProjMatrix = cam.GetViewProjectionMatrix();
+		s_camPos = cam.GetPosition();
 		s_forwardQueue->Clear();
 		s_deferredQueue->Clear();
 	}

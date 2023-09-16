@@ -16,6 +16,11 @@
 		{
 			return new WindowsWindow(title, width, height);
 		}
+
+		float AWindow::GetAspectRatio() const
+		{
+			return (float)GetWidth() / (float)GetHeight();
+		}
 	
 		// WindowProceedure /////////////////////////////////////////////////////////
 	

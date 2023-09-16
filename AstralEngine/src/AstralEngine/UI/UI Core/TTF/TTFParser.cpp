@@ -614,6 +614,7 @@ namespace AstralEngine
 		virtual void SetResolution(float glyphResolution) = 0;
 		virtual Texture2DHandle GenerateTexture() const = 0;
 
+
 		static AReference<TTFGlyph> Create(GlyphDescription&& description, LongHorizontalMetric& longHor, AReference<TTFFont>& owningFont)
 		{
 			if (description.numberOfContours > 0)
@@ -623,6 +624,7 @@ namespace AstralEngine
 			
 			return AReference<CompoundTTFGlyph>::Create(std::forward<GlyphDescription>(description), longHor, owningFont.Get());
 		}
+		
 	};
 
 	class SimpleTTFGlyph : public TTFGlyph
@@ -823,16 +825,22 @@ namespace AstralEngine
 			//Renderer::BeginScene(m_owningFont->ComputeTextureGenerationViewProjMatrix());
 			float halfWidth = (max.x - min.x) / 2.0f;
 			float halfHeight = (max.y - min.y) / 2.0f;
-			float margin = 100;
+			float margin = 200;//100;
+			float halfSize = Math::Max(halfWidth, halfHeight) + margin;
 			float xPos = halfWidth + min.x;
 			float yPos = halfHeight + min.y;
 			float aspectRatio = (float)m_owningFont->GetGlyphTextureWidth() 
 				/ (float)m_owningFont->GetGlyphTextureHeight();
 
-			camera position seems good now but the issue is the camera's perspective/view
 
-			OrthographicCamera tempCam = OrthographicCamera((-halfWidth * aspectRatio) - margin, 
+			/*
+			OrthographicCamera tempCam = OrthographicCamera((-halfWidth * aspectRatio) - margin,
 				(halfWidth * aspectRatio) + margin, -halfHeight - margin, halfHeight + margin, 0.0001f, 100.0f);
+			*/
+
+			OrthographicCamera tempCam = OrthographicCamera((-halfSize * aspectRatio),
+				(halfSize * aspectRatio), -halfSize, halfSize, 0.0001f, 100.0f);
+
 			tempCam.SetPosition({ xPos, yPos, -8.0f });
 			Renderer::BeginScene(tempCam);
 			//Renderer::BeginScene(Mat4::Ortho(-halfWidth - margin + xPos, halfWidth + margin + xPos, 
@@ -840,9 +848,12 @@ namespace AstralEngine
 			//Renderer::BeginScene(Mat4::Ortho(min.x - 10.0f, max.x + 10.0f, min.y - 10.0f, 
 			//	max.y + 10.0f, 0.0001f, 10000.0f)); 
 			
-			//can now see the glyph but it is not always centered in the middle of the texture check to fix
+			//camera position IS GOOD (verified using seperate test in sandbox) now 
+			//but the issue is the camera's perspective/view
+			
 			Transform t = Transform({0, 0, 0}, Quaternion::Identity(), {1.0f, 1.0f, 1});
 			Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
+			//Renderer::DrawQuad({ xPos, yPos, 0 }, Quaternion::Identity(), { 100, 100, 1 });
 			
 
 			Renderer::EndScene();
@@ -874,6 +885,66 @@ namespace AstralEngine
 
 			return *this;
 		}
+
+
+		// temp for debugging
+
+		void RenderGlyphToTextureSimulation() 
+		{
+			static MeshHandle mesh = NullHandle;
+			
+			if (mesh == NullHandle)
+			{
+				ADoublyLinkedList<ADynArr<Vector2>> points;
+				for (const Contour& contour : m_contours)
+				{
+					ADynArr<Vector2>& currContour = points.EmplaceBack(contour.GetCount());
+					for (const GlyphPoint& p : contour)
+					{
+						currContour.AddLast(p.coords);
+					}
+				}
+				mesh = Tessellation::EarClipping(points, TessellationWindingOrder::CounterClockWise);
+
+				if (mesh == NullHandle)
+				{
+					AE_CORE_ERROR("Unable to generate mesh for glyph");
+				}
+
+				Camera::GetMainCamera().GetTransform().SetLocalPosition({(float)m_outlineMin.x, (float)m_outlineMin.y, -10.0f});
+			}
+
+			Vector2 min = (Vector2)m_outlineMin;
+			Vector2 max = (Vector2)m_outlineMax;
+
+			//RenderCommand::SetClearColor(0.3, 0, 0, 1);
+			//RenderCommand::Clear();
+
+			float halfWidth = (max.x - min.x) / 2.0f;
+			float halfHeight = (max.y - min.y) / 2.0f;
+			float halfSize = Math::Max(halfWidth, halfHeight);
+			float margin = 100;
+			float xPos = halfWidth + min.x;
+			float yPos = halfHeight + min.y;
+			float aspectRatio = 1;// Application::GetWindow()->GetAspectRatio();
+
+			OrthographicCamera tempCam = OrthographicCamera((-halfSize * aspectRatio) - margin,
+				(halfSize * aspectRatio) + margin, -halfSize - margin, halfSize + margin, 0.0001f, 100.0f);
+			tempCam.SetPosition({ xPos, yPos, -8.0f });
+			Transform camTransform = Transform({ xPos, yPos, -8 }, Quaternion::Identity(), { 100, 100, 100 });
+			Renderer::DrawMesh(camTransform, Material::DefaultMat(), Mesh::QuadMesh());
+			//Renderer::BeginScene(tempCam);
+
+			Transform t = Transform({ 0, 0, 0 }, Quaternion::Identity(), { 1.0f, 1.0f, 1 });
+			Renderer::DrawMesh(t, Material::GlyphMat(), mesh);
+			//Renderer::DrawQuad({ xPos, yPos, 0 }, Quaternion::Identity(), { 100, 100, 1 });
+
+
+			//Renderer::EndScene();
+		}
+
+		//////////////////////
+
 
 	private:
 		struct GlyphPoint
@@ -1680,7 +1751,8 @@ namespace AstralEngine
 		//	0.001f, 10000.0f);
 	}
 
-	TTFFont::TTFFont() : m_glyphTextureWidth(1024), m_glyphTextureHeight(768) { }
+	TTFFont::TTFFont() : //m_glyphTextureWidth(1024), m_glyphTextureHeight(768) { }
+		m_glyphTextureWidth(1024), m_glyphTextureHeight(1024) { }
 
 	void TTFFont::ClearGlyphs()
 	{
@@ -1705,4 +1777,12 @@ namespace AstralEngine
 		return m_cachedGlyphs[index];
 	}
 
+
+	AReference<TTFGlyph> TTFFont::GetGlyph(char c)
+	{
+		std::uint16_t index = m_cmap.GetGlyphID(c);
+		AReference<TTFGlyph>& g = const_cast<AReference<TTFGlyph>&>(m_glyphs[index]);
+		g->SetResolution(m_glyphResolution);
+		return g;
+	}
 }

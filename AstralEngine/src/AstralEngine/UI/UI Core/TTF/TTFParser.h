@@ -125,6 +125,11 @@ namespace AstralEngine
 		void SetGlyphTextureSize(size_t width, size_t height);
 
 		Mat4 ComputeTextureGenerationViewProjMatrix();
+
+
+		// temp for debugging only
+		AReference<TTFGlyph> GetGlyph(char c);
+		///////////////////////////
 	private:
 		TTFFont();
 		void ClearGlyphs();

@@ -13,6 +13,7 @@ namespace AstralEngine
 		virtual void* GetNativeWindow() = 0;
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
+		float GetAspectRatio() const;
 		virtual std::string GetTitle() const = 0;
 		virtual std::wstring GetTitleWStr() const = 0;
 		virtual void SetTitle(const std::string& title) = 0;

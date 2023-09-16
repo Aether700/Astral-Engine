@@ -6,13 +6,52 @@
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/UI/UIText.h"
 #include "AstralEngine/UI/UI Core/TTF/TTFParser.h"
+
+
+#include "AstralEngine/UI/UI Core/TTF/TTFParser.cpp"
 ////////
 
 using namespace AstralEngine;
 
 
 //Scripts////////////////////////////////////////////////////////////////////////
-class ASCIIFontTester : public NativeScript
+class FontTester : public NativeScript
+{
+public:
+	void SetFont(AReference<TTFFont> font)
+	{
+		m_font = font;
+		OnFontChanged();
+	}
+
+
+
+protected:
+	virtual void OnFontChanged() { }
+
+	AReference<TTFFont> m_font;
+};
+
+
+class FontTextureGenerator : public FontTester 
+{
+public:
+	void OnUpdate() override 
+	{
+		((SimpleTTFGlyph*)m_currGlyph.Get())->RenderGlyphToTextureSimulation();
+	}
+
+protected:
+	void OnFontChanged() override
+	{
+		m_currGlyph = m_font->GetGlyph('!');
+	}
+
+private:
+	AReference<TTFGlyph> m_currGlyph;
+};
+
+class ASCIIFontTester : public FontTester
 {
 public:
 	void OnStart() override
@@ -45,9 +84,8 @@ public:
 
 	//check to test compound glyphs
 
-	void SetFont(AReference<TTFFont> font) 
+	void OnFontChanged() override 
 	{
-		m_font = font;
 		m_font->SetResolution(s_resolution);
 		UpdateRenderData();
 	}
@@ -98,7 +136,6 @@ private:
 	static constexpr int s_max = 126;
 	static constexpr size_t s_resolution = 15;
 	char m_currChar = s_min;
-	AReference<TTFFont> m_font;
 	Texture2DHandle m_charTexture;
 	Transform m_transform = Transform(Vector3::Zero(), Quaternion::Identity(), Vector3(0.0001f, 0.0001f, 1));
 };
@@ -192,24 +229,30 @@ public:
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
+		Camera::GetMainCamera().GetComponent<Camera>().GetCamera().SetProjectionType(SceneCamera::ProjectionType::Perspective);
 		m_entity = m_scene->CreateAEntity();
+		m_entity.EmplaceComponent<MeshRenderer>(Mesh::QuadMesh(), Material::DefaultMat());
+
+		m_entity = m_scene->CreateAEntity();
+		
+		/*
 		ASCIIFontTester& asciiTester = m_entity.EmplaceComponent<ASCIIFontTester>();
+		asciiTester.OnStart();
+		asciiTester.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
+		*/
+
+		FontTextureGenerator& asciiTester = m_entity.EmplaceComponent<FontTextureGenerator>();
 		asciiTester.OnStart();
 		asciiTester.SetFont(AstralEngine::TTFFont::LoadFont("assets/fonts/arial.ttf"));
 	}
 
 	void OnUpdate() override
 	{
-		//m_scene->OnUpdate();
+		m_scene->OnUpdate();
 		AWindow* window = Application::GetWindow();
 		m_scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
-
-		RenderCommand::SetClearColor(0.1, 0.1, 0.1, 1);
-		RenderCommand::Clear();
-		Renderer::BeginScene(Camera::GetMainCamera().GetComponent<Camera>(), Camera::GetMainCamera().GetTransform());
-		m_scene->OnUpdate();
-		Renderer::EndScene();
+		//m_entity.GetComponent<FontTextureGenerator>().OnUpdate();
 
 		AstralEngine::Renderer::ResetStats();
 	}
