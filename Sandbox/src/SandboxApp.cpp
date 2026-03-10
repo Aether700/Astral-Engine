@@ -6,6 +6,8 @@
 #include "AstralEngine/UI/UICore.h"
 #include "AstralEngine/Physics/Physics2D/Rigidbody2D.h"
 #include "AstralEngine/Physics/Physics2D/Collider2D.h"
+#include "AstralEngine/Physics/Physics2D/CollisionHelper.h"
+
 ////////
 
 //Scripts////////////////////////////////////////////////////////////////////////
@@ -21,12 +23,12 @@ public:
 			rb.AddForce(AstralEngine::Vector2(0.0f, verticalForce));
 		}
 
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::LeftArrow))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::L))
 		{
 			rb.AddTorque(rotationSpeed);
 		}
 
-		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::RightArrow))
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::J))
 		{
 			rb.AddTorque(-rotationSpeed);
 		}
@@ -89,6 +91,69 @@ private:
 	float rotationSpeed = 0.5f;
 };
 
+class BasicMoveScript : public AstralEngine::NativeScript
+{
+public:
+	void OnUpdate() override
+	{
+		AstralEngine::Transform& t = GetTransform();
+		AstralEngine::Vector2 pos = t.GetLocalPosition();
+		AstralEngine::Quaternion rotation = t.GetRotation();
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::J))
+		{
+			pos.x -= m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::L))
+		{
+			pos.x += m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::I))
+		{
+			pos.y += m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::K))
+		{
+			pos.y -= m_speed * AstralEngine::Time::GetDeltaTime();
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::U))
+		{
+			rotation = AstralEngine::Quaternion::EulerToQuaternion(0, 0, m_rotationSpeed * AstralEngine::Time::GetDeltaTime()) * rotation;
+		}
+
+		if (AstralEngine::Input::GetKey(AstralEngine::KeyCode::O))
+		{
+			rotation = AstralEngine::Quaternion::EulerToQuaternion(0, 0, -m_rotationSpeed * AstralEngine::Time::GetDeltaTime()) * rotation;
+		}
+
+		t.SetLocalPosition(pos);
+		t.SetRotation(rotation);
+
+		AstralEngine::SpriteRenderer& renderer = GetComponent<AstralEngine::SpriteRenderer>();
+		if (AstralEngine::CollisionHelper::BoxToBoxCollision(
+			m_other.GetComponent<AstralEngine::BoxCollider2D>(), 
+			GetComponent<AstralEngine::BoxCollider2D>()))
+		{
+			renderer.SetColor(0, 1, 0, 1);
+		}
+		else
+		{
+			renderer.SetColor(1, 0, 0, 1);
+		}
+	}
+
+	void SetSecondEntity(AstralEngine::AEntity other) { m_other = other; }
+
+private:
+	float m_speed = 5.0f;
+	float m_rotationSpeed = 20.0f;
+	AstralEngine::AEntity m_other;
+};
+
 void OnButtonClicked()
 {
 	static int count = 0;
@@ -141,12 +206,20 @@ public:
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
 		m_entity = m_scene->CreateAEntity();
 		
-		rendering of the quad doesn't work see why
+		AstralEngine::Camera& cam = AstralEngine::Camera::GetMainCamera().GetComponent<AstralEngine::Camera>();
+		cam.GetCamera().SetOrthographicFarClip(20.0f);
 
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-		m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
+		//m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
 		m_entity.EmplaceComponent<AstralEngine::BoxCollider2D>();
-		m_entity.EmplaceComponent<PhysicObj>();
+		BasicMoveScript& script = m_entity.EmplaceComponent<BasicMoveScript>();
+		m_entity.GetTransform().SetLocalPosition(3, 0, 0);
+
+		AstralEngine::AEntity e = m_scene->CreateAEntity();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 0, 1, 1);
+		e.EmplaceComponent<AstralEngine::BoxCollider2D>();
+
+		script.SetSecondEntity(e);
 	}
 
 	void OnUpdate() override

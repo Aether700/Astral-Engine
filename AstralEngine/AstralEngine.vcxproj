@@ -187,8 +187,7 @@
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector4.h" />
     <ClInclude Include="src\AstralEngine\Math\Vectors\Vector4Int.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collider2D.h" />
-    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore\Physics2DCore.h" />
-    <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\PhysicsCore.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\CollisionHelper.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.h" />
@@ -243,7 +242,7 @@
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector4.cpp" />
     <ClCompile Include="src\AstralEngine\Math\Vectors\Vector4Int.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collider2D.cpp" />
-    <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsCore\Physics2DCore\Physics2DCore.cpp" />
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\CollisionHelper.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.cpp" />
     <ClCompile Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.cpp" />
