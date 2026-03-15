@@ -6,6 +6,7 @@
 namespace AstralEngine
 {
 	// Collider2D /////////////////////////////////////////////	
+
 	void Collider2D::OnDestroy()
 	{
 		if (HasComponent<Rigidbody2D>())

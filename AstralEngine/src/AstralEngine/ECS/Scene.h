@@ -8,6 +8,8 @@ namespace AstralEngine
 	class Scene
 	{
 		friend class AEntity;
+		friend class ComponentModifiedHelper;
+		friend class AEntityLinkedComponent;
 	public:
 		Scene(bool rotation = true);
 

@@ -9,8 +9,7 @@ namespace AstralEngine
 	{
 	public:
 		virtual ~Collider2D() { }
-
-		void OnDestroy() override;
+		virtual void OnDestroy() override;
 
 		Vector2& GetOffset() { return m_offset; }
 		const Vector2& GetOffset() const { return m_offset; }

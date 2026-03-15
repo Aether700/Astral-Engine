@@ -1,13 +1,18 @@
 #pragma once
+#include "AstralEngine/Math/AMath.h"
 #include "ECS Core/ECSUtils.h"
 #include "ECS Core/Registry.h"
 #include "Scene.h"
 #include "CoreComponents.h"
+#include "ComponentModifiedHelper.h"
 
 namespace AstralEngine
 {
 	class Transform;
 	class AEntityLinkedComponent;
+	class CallbackList;
+	class ColliderList;
+	class Collider2D;
 
 	class AEntity
 	{
@@ -28,20 +33,9 @@ namespace AstralEngine
 				comp.m_entity = *this;
 			}
 
-			if constexpr(std::is_base_of_v<CallbackComponent, Component>)
-			{
-				if (HasComponent<CallbackList>())
-				{
-					GetComponent<CallbackList>().AddCallback(new ComponentAEntityPair<Component>(*this));
-				}
-				else
-				{
-					CallbackList& list = EmplaceComponent<CallbackList>();
-					list.AddCallback(new ComponentAEntityPair<Component>(*this));
-				}
-				comp.OnCreate();
-			}
-			else if constexpr (std::is_base_of_v<Renderable, Component>)
+			ComponentModifiedHelper::OnComponentAdded<Component>(m_id, m_scene);
+
+			if constexpr (std::is_base_of_v<Renderable, Component>)
 			{
 				AE_CORE_ASSERT(!HasComponent<RenderData>(), 
 					"Engine does not support having multiple renderable components on the same entity");
@@ -55,55 +49,26 @@ namespace AstralEngine
 		void AddComponent(const Component& c)
 		{
 			m_scene->m_registry.EmplaceComponent<Component>(*this, c);
-			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-			{
-				if (HasComponent<CallbackList>())
-				{
-					GetComponent<CallbackList>().AddCallback(&c);
-				}
-				else
-				{
-					CallbackList& list = EmplaceComponent<CallbackList>();
-					list.AddCallback(&c);
-				}
-			}
+			ComponentModifiedHelper::OnComponentAdded<Component>(m_id, m_scene);
 		}
 
 		template<typename Component>
 		void RemoveComponent()
 		{
-			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-			{
-				AE_CORE_ASSERT(HasComponent<CallbackList>(),
-					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackList* list;
-				list = &GetComponent<CallbackList>();
-				list->RemoveCallback<Component>();
-
-				if (list->IsEmpty()) 
-				{
-					RemoveComponent<CallbackList>();
-				}
-			}
+			ComponentModifiedHelper::OnComponentRemoved<Component>(m_id, m_scene);
 			m_scene->m_registry.RemoveComponent<Component>(*this);
+
+			if constexpr (std::is_base_of_v<Renderable, Component>)
+			{
+				AE_CORE_ASSERT(HasComponent<RenderData>(),"");
+				RemoveComponent<RenderData>();
+			}
 		}
 
 		template<typename Component>
 		void RemoveComponent(const Component& comp)
 		{
-			if constexpr (std::is_base_of_v<CallbackComponent, Component>)
-			{
-				AE_CORE_ASSERT(HasComponent<CallbackList>(),
-					"CallbackListComponent was not added to entity with a CallbackComponent");
-				CallbackList* list;
-				list = GetComponent<CallbackList>();
-				list->RemoveCallback(&comp);
-
-				if (list->IsEmpty())
-				{
-					RemoveComponent<CallbackList>();
-				}
-			}
+			ComponentModifiedHelper::OnComponentRemoved<Component>(m_id, m_scene);
 			m_scene->m_registry.RemoveComponent<Component>(*this, comp);
 		}
 

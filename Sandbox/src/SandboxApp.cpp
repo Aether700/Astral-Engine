@@ -133,16 +133,24 @@ public:
 		t.SetLocalPosition(pos);
 		t.SetRotation(rotation);
 
-		AstralEngine::SpriteRenderer& renderer = GetComponent<AstralEngine::SpriteRenderer>();
+		//AstralEngine::SpriteRenderer& renderer = GetComponent<AstralEngine::SpriteRenderer>();
 		if (AstralEngine::CollisionHelper::BoxToBoxCollision(
 			m_other.GetComponent<AstralEngine::BoxCollider2D>(), 
 			GetComponent<AstralEngine::BoxCollider2D>()))
 		{
-			renderer.SetColor(0, 1, 0, 1);
+			if (HasComponent<AstralEngine::SpriteRenderer>())
+			{
+				RemoveComponent<AstralEngine::SpriteRenderer>();
+			}
+			//renderer.SetColor(0, 1, 0, 1);
 		}
 		else
 		{
-			renderer.SetColor(1, 0, 0, 1);
+			if (!HasComponent<AstralEngine::SpriteRenderer>())
+			{
+				EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
+			}
+			//renderer.SetColor(1, 0, 0, 1);
 		}
 	}
 

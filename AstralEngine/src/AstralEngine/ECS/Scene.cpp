@@ -8,7 +8,7 @@
 #include "Scene.h"
 #include "AEntity.h"
 #include "Components.h"
-
+ 
 namespace AstralEngine
 {
 	class EditorCameraController : public NativeScript

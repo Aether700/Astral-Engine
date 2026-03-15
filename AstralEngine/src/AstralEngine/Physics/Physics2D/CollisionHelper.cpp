@@ -1,6 +1,7 @@
 #include "aepch.h"
 #include "CollisionHelper.h"
 #include "AstralEngine/Data Struct/ADynArr.h"
+#include "AstralEngine/ECS/Components.h"
 
 namespace AstralEngine
 {
@@ -46,7 +47,8 @@ namespace AstralEngine
 	// returns true if a seperating axis was found, false otherwise.
 	// Needs to be called twice to check from both polygon's perspective 
 	// to make sure if there is a seperating axis or not
-	bool HasSeperatingAxis(const ADynArr<Vector2>& v1, const ADynArr<Vector2>& v2)
+	bool HasSeperatingAxis(const ADynArr<Vector2>& v1, const ADynArr<Vector2>& v2, 
+		Vector2& outNormal, float& outDepth)
 	{
 		for (int i = 0; i < v1.GetCount(); i++)
 		{
@@ -55,14 +57,12 @@ namespace AstralEngine
 
 			Vector2 edge = p2 - p1;
 			Vector2 normal = Vector2(edge.y, -edge.x);
+			normal.Normalize();
 
 			float v1Min;
 			float v1Max;
 			float v2Min;
 			float v2Max;
-
-			is slightly off in some cases but might be due to the 
-				precision double check and try to fix if possible
 
 			ProjectOnAxis(v1, normal, v1Min, v1Max);
 			ProjectOnAxis(v2, normal, v2Min, v2Max);
@@ -71,22 +71,33 @@ namespace AstralEngine
 			{
 				return true;
 			}
+
+			float currDepth = v1Min - v2Max;
+			if (outDepth > currDepth)
+			{
+				outDepth = currDepth;
+				outNormal = normal;
+			}
 		}
 
 		return false;
 	}
 
-	bool PolygonToPolygonCollision(const ADynArr<Vector2>& verticesP1, const ADynArr<Vector2>& verticesP2)
+	bool PolygonToPolygonCollision(const ADynArr<Vector2>& verticesP1, const ADynArr<Vector2>& verticesP2, 
+		Vector2& outNormal, float& outDepth)
 	{
-		if (HasSeperatingAxis(verticesP1, verticesP2))
+		outDepth = FLT_MAX;
+
+		if (HasSeperatingAxis(verticesP1, verticesP2, outNormal, outDepth))
 		{
 			return false;
 		}
 
-		return !HasSeperatingAxis(verticesP2, verticesP1);
+		return !HasSeperatingAxis(verticesP2, verticesP1, outNormal, outDepth);
 	}
 
-	bool CollisionHelper::BoxToBoxCollision(const BoxCollider2D& b1, const BoxCollider2D& b2)
+	bool CollisionHelper::BoxToBoxCollision(const BoxCollider2D& b1, const BoxCollider2D& b2, 
+		AReference<Collision2DInfo>& outCollisionInfo)
 	{
 		ADynArr<Vector2> b1Vertices = ADynArr<Vector2>(4);
 		ADynArr<Vector2> b2Vertices = ADynArr<Vector2>(4);
@@ -94,8 +105,24 @@ namespace AstralEngine
 		RetrieveVertices(b1, b1Vertices);
 		RetrieveVertices(b2, b2Vertices);
 
+		Vector2 normal;
+		float depth;
+
 		// might be able to optimize for boxes
 		// Can definitively optimize for Axis Aligned Bounding Boxes (if rotation is 0)
-		return PolygonToPolygonCollision(b1Vertices, b2Vertices);
+		if (!PolygonToPolygonCollision(b1Vertices, b2Vertices, normal, depth))
+		{
+			outCollisionInfo = nullptr;
+			return false;
+		}
+		
+		outCollisionInfo = AReference<Collision2DInfo>::Create(normal, depth);
+		return true;
+	}
+
+	bool CollisionHelper::BoxToBoxCollision(const BoxCollider2D& b1, const BoxCollider2D& b2)
+	{
+		AReference<Collision2DInfo> collision;
+		return BoxToBoxCollision(b1, b2, collision);
 	}
 }

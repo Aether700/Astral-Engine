@@ -46,8 +46,8 @@ namespace AstralEngine
 		DEF_AEVENT_CATEGORY((AEventCategory)(AEventCategory::AEventCategoryInput | AEventCategory::AEventCategoryMouse));
 		DEF_AEVENT_TYPE(MouseScrolled);
 	private:
-		float m_offsetX;
-		float m_offsetY;
+		int m_offsetX;
+		int m_offsetY;
 	};
 
 	class MouseButtonEvent : public AEvent

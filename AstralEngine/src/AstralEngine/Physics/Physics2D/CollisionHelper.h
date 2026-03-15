@@ -1,5 +1,6 @@
 #pragma once
 #include "Collider2D.h"
+#include "Collision2DInfo.h"
 
 namespace AstralEngine 
 {
@@ -8,6 +9,9 @@ namespace AstralEngine
 	class CollisionHelper
 	{
 	public:
+		static bool BoxToBoxCollision(const BoxCollider2D& b1, const BoxCollider2D& b2,
+			AReference<Collision2DInfo>& outCollisionInfo);
+
 		static bool BoxToBoxCollision(const BoxCollider2D& b1, const BoxCollider2D& b2);
 	};
 }

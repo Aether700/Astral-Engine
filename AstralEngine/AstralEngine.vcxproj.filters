@@ -330,6 +330,11 @@
     <ClInclude Include="src\AstralEngine\Renderer\RendererInternals.h" />
     <ClInclude Include="src\AstralEngine\Core\Resource.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\CollisionHelper.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collision2DInfo.h" />
+    <ClInclude Include="src\AstralEngine\ECS\ComponentModifiedHelper.h" />
+    <ClInclude Include="src\AstralEngine\ECS\ComponentInheritanceLists.h" />
+    <ClInclude Include="src\AstralEngine\ECS\CallbackComponentList.h" />
+    <ClInclude Include="src\AstralEngine\ECS\ColliderList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
@@ -350,7 +355,7 @@
     <ClCompile Include="src\AstralEngine\ECS\AEntity.cpp">
       <Filter>src\AstralEngine\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\AstralEngine\ECS\Component.cpp">
+    <ClCompile Include="src\AstralEngine\ECS\Components.cpp">
       <Filter>src\AstralEngine\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\AstralEngine\ECS\Scene.cpp">
@@ -484,5 +489,9 @@
     <ClCompile Include="src\AstralEngine\Renderer\Mesh.cpp" />
     <ClCompile Include="src\AstralEngine\ECS\CoreComponents.cpp" />
     <ClCompile Include="src\AstralEngine\Physics\Physics2D\CollisionHelper.cpp" />
+    <ClCompile Include="src\AstralEngine\Physics\Physics2D\Collision2DInfo.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\ComponentInheritanceList.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\CallbackComponentList.cpp" />
+    <ClCompile Include="src\AstralEngine\ECS\ColliderList.cpp" />
   </ItemGroup>
 </Project>
