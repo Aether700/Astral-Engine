@@ -5,15 +5,9 @@
 
 namespace AstralEngine
 {
-	Rigidbody2D::Rigidbody2D()
-	{
-		Application::GetPhysicsEngine2D()->m_rigidbodies.Add(this);
-	}
+	Rigidbody2D::Rigidbody2D() { }
 
-	Rigidbody2D::~Rigidbody2D()
-	{
-		Application::GetPhysicsEngine2D()->m_rigidbodies.Remove(this);
-	}
+	Rigidbody2D::~Rigidbody2D() { }
 
 	void Rigidbody2D::OnUpdate()
 	{

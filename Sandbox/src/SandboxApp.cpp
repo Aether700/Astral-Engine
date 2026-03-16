@@ -7,6 +7,7 @@
 #include "AstralEngine/Physics/Physics2D/Rigidbody2D.h"
 #include "AstralEngine/Physics/Physics2D/Collider2D.h"
 #include "AstralEngine/Physics/Physics2D/CollisionHelper.h"
+#include "AstralEngine/Physics/Physics2D/PhysicsEngine2D.h"
 
 ////////
 
@@ -212,22 +213,16 @@ public:
 		//m_framebuffer = AstralEngine::Framebuffer::Create(width, height);
 
 		m_scene = AstralEngine::AReference<AstralEngine::Scene>::Create();
+		AstralEngine::Application::GetPhysicsEngine2D()->SetScene(m_scene.Get());
 		m_entity = m_scene->CreateAEntity();
 		
 		AstralEngine::Camera& cam = AstralEngine::Camera::GetMainCamera().GetComponent<AstralEngine::Camera>();
 		cam.GetCamera().SetOrthographicFarClip(20.0f);
 
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-		//m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
+		m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
 		m_entity.EmplaceComponent<AstralEngine::BoxCollider2D>();
-		BasicMoveScript& script = m_entity.EmplaceComponent<BasicMoveScript>();
-		m_entity.GetTransform().SetLocalPosition(3, 0, 0);
-
-		AstralEngine::AEntity e = m_scene->CreateAEntity();
-		e.EmplaceComponent<AstralEngine::SpriteRenderer>(0, 0, 1, 1);
-		e.EmplaceComponent<AstralEngine::BoxCollider2D>();
-
-		script.SetSecondEntity(e);
+		m_entity.EmplaceComponent<PhysicObj>();
 	}
 
 	void OnUpdate() override

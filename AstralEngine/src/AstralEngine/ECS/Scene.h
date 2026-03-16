@@ -7,6 +7,7 @@ namespace AstralEngine
 
 	class Scene
 	{
+		friend class PhysicsEngine2D;
 		friend class AEntity;
 		friend class ComponentModifiedHelper;
 		friend class AEntityLinkedComponent;
