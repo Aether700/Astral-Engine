@@ -12,7 +12,7 @@ namespace AstralEngine
 		// check for collision here 
 	}
 
-	refactoring done now to actually add the collision step to the engine
+	collision and contact points computed for squares now time to apply forces and torque in a realistic manner
 
 	void PhysicsEngine2D::ApplyForcesAndTorque()
 	{

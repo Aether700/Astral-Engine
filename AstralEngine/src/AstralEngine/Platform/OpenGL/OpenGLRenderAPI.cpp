@@ -18,6 +18,8 @@ namespace AstralEngine
 		{
 		case RenderingPrimitive::Triangles:
 			return GL_TRIANGLES;
+		case RenderingPrimitive::Lines:
+			return GL_LINES;
 		}
 
 		AE_CORE_ERROR("Unknown Rendering primitive provided");

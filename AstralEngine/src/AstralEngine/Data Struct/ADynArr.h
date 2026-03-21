@@ -178,10 +178,9 @@ namespace AstralEngine
 			}
 		}
 
-		ADynArr(ADynArr<T>&& other) : m_count(other.m_count), m_maxCount(other.m_maxCount)
+		ADynArr(ADynArr<T>&& other) : m_count(other.m_count), 
+			m_maxCount(other.m_maxCount), m_arr(other.m_arr)
 		{
-			m_arr = other.m_arr;
-
 			other.m_arr = nullptr;
 			other.m_count = 0;
 		}
@@ -269,7 +268,6 @@ namespace AstralEngine
 		template<typename... Args>
 		T& EmplaceAt(size_t index, Args&&... args)
 		{
-			
 			CheckSize();
 
 			if (m_count == 0)
@@ -289,7 +287,6 @@ namespace AstralEngine
 		
 		size_t Find(const T& element) const
 		{
-			
 			for (size_t i = 0; i < m_count; i++)
 			{
 				if (m_arr[i] == element)
@@ -312,7 +309,6 @@ namespace AstralEngine
 
 		void Insert(T&& element, size_t index)
 		{
-			
 			CheckSize();
 
 			if (m_count == 0)
@@ -332,7 +328,6 @@ namespace AstralEngine
 
 		void Insert(const T& element, size_t index)
 		{
-			
 			CheckSize();
 			
 			if (m_count == 0)
@@ -362,7 +357,6 @@ namespace AstralEngine
 
 		void Remove(const T& element)
 		{
-			
 			size_t index = Find(element);
 			if (index != -1)
 			{
@@ -372,8 +366,6 @@ namespace AstralEngine
 
 		void RemoveAt(size_t index)
 		{
-			
-			
 			if (index == m_count - 1)
 			{
 				m_count--;
@@ -409,7 +401,6 @@ namespace AstralEngine
 
 		void Reserve(size_t count)
 		{
-			
 			size_t currentCount = m_maxCount - m_count;
 			if (currentCount < count)
 			{
@@ -508,7 +499,6 @@ namespace AstralEngine
 
 		bool operator==(const ADynArr<T>& other) const
 		{
-			
 			if (GetCount() != other.GetCount())
 			{
 				return false;
@@ -566,7 +556,6 @@ namespace AstralEngine
 		
 		void CheckSize()
 		{
-			
 			if (m_count >= m_maxCount)
 			{
 				Resize();
@@ -575,7 +564,6 @@ namespace AstralEngine
 
 		void Resize()
 		{
-			
 			size_t newMax = (size_t)((float)m_maxCount * 1.5f) + (size_t)1;
 			T* temp = new T[newMax];
 

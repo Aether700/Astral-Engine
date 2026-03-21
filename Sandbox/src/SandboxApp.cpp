@@ -134,24 +134,24 @@ public:
 		t.SetLocalPosition(pos);
 		t.SetRotation(rotation);
 
-		//AstralEngine::SpriteRenderer& renderer = GetComponent<AstralEngine::SpriteRenderer>();
+		AstralEngine::SpriteRenderer& renderer = GetComponent<AstralEngine::SpriteRenderer>();
+		AstralEngine::AReference<AstralEngine::Collision2DInfo> collision;
 		if (AstralEngine::CollisionHelper::BoxToBoxCollision(
 			m_other.GetComponent<AstralEngine::BoxCollider2D>(), 
-			GetComponent<AstralEngine::BoxCollider2D>()))
+			GetComponent<AstralEngine::BoxCollider2D>(), collision))
 		{
-			if (HasComponent<AstralEngine::SpriteRenderer>())
+			if (collision->GetCollisionPoints().GetCount() == 1)
 			{
-				RemoveComponent<AstralEngine::SpriteRenderer>();
+				renderer.SetColor(0, 1, 0, 1);
 			}
-			//renderer.SetColor(0, 1, 0, 1);
+			else if (collision->GetCollisionPoints().GetCount() == 2)
+			{
+				renderer.SetColor(1, 1, 1, 1);
+			}
 		}
 		else
 		{
-			if (!HasComponent<AstralEngine::SpriteRenderer>())
-			{
-				EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-			}
-			//renderer.SetColor(1, 0, 0, 1);
+			renderer.SetColor(1, 0, 0, 1);
 		}
 	}
 
@@ -219,10 +219,13 @@ public:
 		AstralEngine::Camera& cam = AstralEngine::Camera::GetMainCamera().GetComponent<AstralEngine::Camera>();
 		cam.GetCamera().SetOrthographicFarClip(20.0f);
 
+		auto e = m_scene->CreateAEntity();
+		e.EmplaceComponent<AstralEngine::BoxCollider2D>();
+		e.EmplaceComponent<AstralEngine::SpriteRenderer>(0.3, 0.3, 1, 1);
+
 		m_entity.EmplaceComponent<AstralEngine::SpriteRenderer>(1, 0, 0, 1);
-		m_entity.EmplaceComponent<AstralEngine::Rigidbody2D>();
 		m_entity.EmplaceComponent<AstralEngine::BoxCollider2D>();
-		m_entity.EmplaceComponent<PhysicObj>();
+		m_entity.EmplaceComponent<BasicMoveScript>().SetSecondEntity(e);
 	}
 
 	void OnUpdate() override

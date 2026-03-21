@@ -42,18 +42,86 @@ namespace AstralEngine
 		}
 	}
 
+	/// <summary>
+	/// Finds the point closest on the line drawn by v1 and v2 from the provided point
+	/// </summary>
+	/// <param name="point">The point to which the positions on the lines are compared</param>
+	/// <param name="v1">The start of the line</param>
+	/// <param name="v2">The end of the line</param>
+	/// <returns>The closest point to the point provided that is on the line</returns>
+	Vector2 ClosestPointOnLine(const Vector2& point, const Vector2& v1, const Vector2& v2)
+	{
+		Vector2 line = v2 - v1;
+		Vector2 v1ToPoint = point - v1;
+
+		// divide by magnitude square because we divide once by magnitude of the line to 
+		// remove the scaling of the line in the dot product itself and then once more to 
+		// get the unit vector in the direction of the line
+		//
+		// this is because the dot product can be defined as a * b = |a| |b| cos(theta) which 
+		// scales the value of the vector by both a and b but we only care about the length of a
+		// so we need to remove the extra |b| and then another time for the normal unit vector computation
+		float proj = Vector2::DotProduct(line, v1ToPoint) / line.SqrMagnitude();
+
+		if (proj <= 0.0f)
+		{
+			return v1;
+		}
+		else if (proj >= 1.0f)
+		{
+			return v2;
+		}
+		return v1 + (proj * line);
+	}
+
+	void CheckCollisionPointsFromPolygon(const ADynArr<Vector2>& verticesPolygon1,
+		const ADynArr<Vector2>& verticesPolygon2, ADynArr<Vector2>& outCollisionPoints, float& closestDistance) 
+	{
+		const float epsilon = 0.000001f;
+
+		for (size_t i = 0; i < verticesPolygon1.GetCount(); i++)
+		{
+			const Vector2& a = verticesPolygon1[i];
+			const Vector2& b = verticesPolygon1[(i + 1) % verticesPolygon1.GetCount()];
+
+			for (const Vector2& point : verticesPolygon2)
+			{
+				Vector2 closestPoint = ClosestPointOnLine(point, a, b);
+				float currDistance = Vector2::SqrDistance(closestPoint, point);
+				if (Math::Abs(currDistance - closestDistance) < epsilon)
+				{
+					outCollisionPoints.Add(point);
+				}
+				else if (currDistance < closestDistance)
+				{
+					closestDistance = currDistance;
+					outCollisionPoints.Clear();
+					outCollisionPoints.Add(point);
+				}
+			}
+		}
+	}
+
+	void FindCollisionPoints(const ADynArr<Vector2>& verticesPolygon1, 
+		const ADynArr<Vector2>& verticesPolygon2, ADynArr<Vector2>& outCollisionPoints)
+	{
+		float closestDistance = FLT_MAX;
+		CheckCollisionPointsFromPolygon(verticesPolygon1, verticesPolygon2, outCollisionPoints, closestDistance);
+		CheckCollisionPointsFromPolygon(verticesPolygon2, verticesPolygon1, outCollisionPoints, closestDistance);
+	}
+
 	// applies the separating axis theorem to the normals of the first polygon and tries to 
 	// find an axis that seperates both shapes
 	// returns true if a seperating axis was found, false otherwise.
 	// Needs to be called twice to check from both polygon's perspective 
 	// to make sure if there is a seperating axis or not
-	bool HasSeperatingAxis(const ADynArr<Vector2>& v1, const ADynArr<Vector2>& v2, 
+	bool HasSeperatingAxis(const ADynArr<Vector2>& verticesPolygon1, const ADynArr<Vector2>& verticesPolygon2, 
 		Vector2& outNormal, float& outDepth)
 	{
-		for (int i = 0; i < v1.GetCount(); i++)
+		for (int i = 0; i < verticesPolygon1.GetCount(); i++)
 		{
-			const Vector2& p1 = v1[i];
-			const Vector2& p2 = v1[(i + 1) % v1.GetCount()];
+			const Vector2& p1 = verticesPolygon1[i];
+			const Vector2& p2 = verticesPolygon1[(i + 1) % verticesPolygon1.GetCount()];
 
 			Vector2 edge = p2 - p1;
 			Vector2 normal = Vector2(edge.y, -edge.x);
@@ -64,8 +132,8 @@ namespace AstralEngine
 			float v2Min;
 			float v2Max;
 
-			ProjectOnAxis(v1, normal, v1Min, v1Max);
-			ProjectOnAxis(v2, normal, v2Min, v2Max);
+			ProjectOnAxis(verticesPolygon1, normal, v1Min, v1Max);
+			ProjectOnAxis(verticesPolygon2, normal, v2Min, v2Max);
 
 			if (v1Min >= v2Max|| v2Min >= v1Max)
 			{
@@ -116,7 +184,10 @@ namespace AstralEngine
 			return false;
 		}
 		
-		outCollisionInfo = AReference<Collision2DInfo>::Create(normal, depth);
+		ADynArr<Vector2> collisionPoints;
+		FindCollisionPoints(b1Vertices, b2Vertices, collisionPoints);
+
+		outCollisionInfo = AReference<Collision2DInfo>::Create(normal, depth, std::move(collisionPoints));
 		return true;
 	}
 

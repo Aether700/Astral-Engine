@@ -6,7 +6,8 @@ namespace AstralEngine
 {
 	enum class RenderingPrimitive
 	{
-		Triangles
+		Triangles,
+		Lines
 	};
 
 	class RenderAPI
