@@ -163,6 +163,7 @@
     <ClInclude Include="src\AstralEngine\Data Struct\AUniqueRef.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AUnorderedMap.h" />
     <ClInclude Include="src\AstralEngine\Data Struct\AWeakRef.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\QuadTree.h" />
     <ClInclude Include="src\AstralEngine\Debug\Instrumentor.h" />
     <ClInclude Include="src\AstralEngine\ECS\AEntity.h" />
     <ClInclude Include="src\AstralEngine\ECS\CallbackComponentList.h" />
@@ -194,6 +195,7 @@
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Collision2DInfo.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\CollisionHelper.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\PhysicsEngine2D.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\QuadTree.h" />
     <ClInclude Include="src\AstralEngine\Physics\Physics2D\Rigidbody2D.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLFramebuffer.h" />
     <ClInclude Include="src\AstralEngine\Platform\OpenGL\OpenGLGraphicsContext.h" />

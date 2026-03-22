@@ -335,6 +335,8 @@
     <ClInclude Include="src\AstralEngine\ECS\ComponentInheritanceLists.h" />
     <ClInclude Include="src\AstralEngine\ECS\CallbackComponentList.h" />
     <ClInclude Include="src\AstralEngine\ECS\ColliderList.h" />
+    <ClInclude Include="src\AstralEngine\Physics\Physics2D\QuadTree.h" />
+    <ClInclude Include="src\AstralEngine\Data Struct\QuadTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AstralEngine\Core\Application.cpp">
