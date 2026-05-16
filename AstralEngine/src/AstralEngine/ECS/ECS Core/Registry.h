@@ -268,18 +268,18 @@ namespace AstralEngine
 				//links the MaybeValidIf & DiscardIf so that a group is re-evaluated and updated when different 
 				//component types are being created and destroyed
 				(OnCreate<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Owned>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Owned> > >(handler)), ...);
 				(OnCreate<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Get>>>(handler)), ...);
+					.BindFunction<&HandlerType::template MaybeValidIf<std::decay_t<Get> > >(handler)), ...);
 				(OnDestroy<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
 
 				(OnDestroy<std::decay_t<Owned>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
 				(OnDestroy<std::decay_t<Get>>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
 				(OnCreate<Exclude>().AddDelegate(ADelegate<void(Registry<Entity>&, const Entity)>()
-					.BindFunction<&HandlerType::template DiscardIf>(handler)), ...);
+					.BindFunction<&HandlerType::DiscardIf>(handler)), ...);
 
 				if constexpr(sizeof...(Owned) == 0)
 				{
