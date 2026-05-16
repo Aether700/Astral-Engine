@@ -200,8 +200,8 @@ namespace AstralEngine
 			
 
 			Node* indexNode = it.m_currNode;
-			newNode->element = element;
 			Node* newNode = new Node();
+			newNode->element = element;
 
 			InsertNode(newNode, indexNode);
 		}
@@ -405,7 +405,7 @@ namespace AstralEngine
 			m_count++;
 		}
 
-		void InsertNode(Node* newNode, size_t)
+		void InsertNode(Node* newNode, size_t index)
 		{
 			Node* indexNode = GetNode(index);
 			if (indexNode == m_head)

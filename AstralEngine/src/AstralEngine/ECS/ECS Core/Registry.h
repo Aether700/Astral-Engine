@@ -137,7 +137,7 @@ namespace AstralEngine
 			{
 				auto lambda = [this](auto&& pool)
 					{
-						pool.Remove(*this, pool.SparseSet<Entity>::begin(), pool.SparseSet<Entity>::end());
+						pool.Remove(*this, pool.ASparseSet<Entity>::begin(), pool.ASparseSet<Entity>::end());
 					};
 				(lambda(Assure<Component>()), ...);
 			}
