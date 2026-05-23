@@ -61,6 +61,7 @@ namespace AstralEngine
 		Vector2& operator=(const Vector2& v);
 
 		bool operator==(const Vector2& other) const;
+		bool operator!=(const Vector2& other) const;
 
 		float x, y;
 

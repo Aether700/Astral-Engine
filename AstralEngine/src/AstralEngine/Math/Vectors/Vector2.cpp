@@ -150,4 +150,9 @@ namespace AstralEngine
 	{
 		return x == other.x && y == other.y;
 	}
+
+	bool Vector2::operator!=(const Vector2& other) const
+	{
+		return !(*this == other);
+	}
 }
