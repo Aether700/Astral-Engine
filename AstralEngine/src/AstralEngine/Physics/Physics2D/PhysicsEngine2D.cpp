@@ -8,11 +8,13 @@ namespace AstralEngine
 	{
 		ApplyForcesAndTorque();
 		UpdatePositions();
-		double check logic of statement below
+		double check logic of statement in comment below
 		// check for collision here 
 	}
 
 	collision and contact points computed for squares now time to apply forces and torque in a realistic manner
+		good reference but might not explain rotation of bodies depending on contact point https://www.toptal.com/developers/game/video-game-physics-part-iii-constrained-rigid-body-simulation
+	lecture referenced by Jolt physics engine: https://box2d.org/files/ErinCatto_ModelingAndSolvingConstraints_GDC2009.pdf
 
 	void PhysicsEngine2D::ApplyForcesAndTorque()
 	{
